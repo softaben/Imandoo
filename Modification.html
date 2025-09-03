@@ -1,0 +1,1659 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>نظام إدارة قائمة Imandou Food</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <style>
+    :root{
+      --bg: #0f172a;
+      --card: #0b1220;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --accent: #fbbf24;
+      --radius-lg: 14px;
+      --radius-md: 8px;
+    }
+    html,body{height:100%}
+    body{
+      font-family: 'Inter', system-ui, -apple-system, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      overflow-x: hidden;
+      position: relative;
+      font-weight: 400;
+      line-height: 1.6;
+    }
+
+    /* Food background overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url('https://images.unsplash.com/photo-1563245372-f21724e3856d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2064&q=80');
+      background-size: cover;
+      background-position: center;
+      opacity: 0.08;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    /* mobile-first container */
+    .app {
+      max-width: 480px;
+      margin: 0 auto;
+      min-height:100vh;
+      display:flex;
+      flex-direction:column;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* cards */
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.03));
+      border-radius: var(--radius-lg);
+      padding: 12px;
+      box-shadow: 0 6px 18px rgba(2,6,23,0.6);
+      border: 1px solid rgba(255,255,255,0.03);
+      backdrop-filter: blur(10px);
+    }
+
+    /* small pill buttons */
+    .pill {
+      background: rgba(255,255,255,0.02);
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-weight:500;
+      color:var(--text);
+      display:inline-flex;
+      gap:8px;
+      align-items:center;
+      border: 1px solid rgba(255,255,255,0.03);
+      transition: all 0.2s ease;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.875rem;
+    }
+
+    .pill:hover {
+      background: rgba(255,255,255,0.05);
+    }
+
+    /* animation helpers */
+    .transition-fast { transition: all .2s ease-out; }
+    .fab { 
+      position: fixed; 
+      right: 20px; 
+      bottom: 18px; 
+      z-index: 60; 
+      transition: transform 0.3s ease;
+    }
+    .fab:hover {
+      transform: scale(1.05);
+    }
+    [dir="rtl"] .fab { right: auto; left: 20px; }
+
+    /* small responsive tweaks */
+    @media(min-width:768px){
+      .app{max-width:720px}
+    }
+
+    /* visually-hidden for accessibility */
+    .sr-only { position: absolute; width:1px; height:1px; padding:0;margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+
+    /* Line clamp utility */
+    .line-clamp-1 {
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 1;
+    }
+
+    /* Custom scrollbar for cart */
+    #cartItems::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    #cartItems::-webkit-scrollbar-track {
+      background: rgba(255,255,255,0.05);
+      border-radius: 10px;
+    }
+    
+    #cartItems::-webkit-scrollbar-thumb {
+      background: rgba(255,255,255,0.1);
+      border-radius: 10px;
+    }
+    
+    #cartItems::-webkit-scrollbar-thumb:hover {
+      background: rgba(255,255,255,0.2);
+    }
+
+    /* Cart drawer overlay */
+    .cart-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 40;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+    
+    .cart-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    /* Improved Typography */
+    h1, h2, h3, h4, h5, h6 {
+      font-family: 'Playfair Display', serif;
+      font-weight: 600;
+      letter-spacing: -0.025em;
+    }
+
+    #appTitle {
+      font-family: 'Playfair Display', serif;
+      font-weight: 700;
+      font-size: 1.5rem;
+    }
+
+    #heroTitle {
+      font-family: 'Playfair Display', serif;
+      font-weight: 700;
+      font-size: 2rem;
+      letter-spacing: -0.03em;
+    }
+
+    .dish-name {
+      font-family: 'Inter', sans-serif;
+      font-weight: 500;
+      font-size: 1.1rem;
+    }
+
+    .price {
+      font-family: 'Inter', sans-serif;
+      font-weight: 600;
+    }
+
+    input, button, .pill {
+      font-family: 'Inter', sans-serif;
+    }
+
+    /* Arabic font styling */
+    [lang="ar"] body,
+    [dir="rtl"] body {
+      font-family: 'Cairo', 'Inter', sans-serif;
+    }
+
+    [lang="ar"] h1,
+    [lang="ar"] h2,
+    [lang="ar"] h3,
+    [dir="rtl"] h1,
+    [dir="rtl"] h2,
+    [dir="rtl"] h3 {
+      font-family: 'Cairo', 'Playfair Display', serif;
+    }
+
+    /* Form styles */
+    .form-input {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: var(--radius-md);
+      padding: 10px 12px;
+      color: var(--text);
+      width: 100%;
+      margin-bottom: 12px;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    /* Modal styles */
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 20px;
+      backdrop-filter: blur(5px);
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: var(--card);
+      border-radius: var(--radius-lg);
+      width: 100%;
+      max-width: 500px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .modal-header {
+      padding: 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin: 0;
+    }
+
+    .close {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var(--text);
+    }
+
+    .modal-body {
+      padding: 20px;
+    }
+
+    .modal-footer {
+      padding: 20px;
+      border-top: 1px solid rgba(255,255,255,0.05);
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    /* Alert styles */
+    .alert {
+      padding: 12px 16px;
+      border-radius: var(--radius-md);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .alert-success {
+      background: rgba(76, 175, 80, 0.15);
+      color: #4CAF50;
+      border-left: 4px solid #4CAF50;
+    }
+
+    .alert-danger {
+      background: rgba(244, 67, 54, 0.15);
+      color: #F44336;
+      border-left: 4px solid #F44336;
+    }
+
+    .alert-warning {
+      background: rgba(255, 152, 0, 0.15);
+      color: #FF9800;
+      border-left: 4px solid #FF9800;
+    }
+
+    /* Toggle switch */
+    .toggle-container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 50px;
+      height: 24px;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      transition: .4s;
+      border-radius: 34px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 16px;
+      width: 16px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider {
+      background-color: var(--accent);
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(26px);
+    }
+
+    .toggle-label {
+      font-weight: 500;
+    }
+
+    /* Image preview */
+    .image-preview {
+      width: 100%;
+      height: 150px;
+      border-radius: var(--radius-md);
+      border: 1px solid rgba(255,255,255,0.05);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      margin-bottom: 12px;
+      background: rgba(255,255,255,0.02);
+    }
+
+    .image-preview img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: cover;
+    }
+
+    /* Table styles */
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+    }
+
+    .table th,
+    .table td {
+      padding: 12px;
+      text-align: right;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .table th {
+      background: rgba(255,255,255,0.03);
+      font-weight: 600;
+    }
+
+    .table tr:hover {
+      background: rgba(255,255,255,0.02);
+    }
+
+    /* Badge styles */
+    .badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .badge-success {
+      background: rgba(76, 175, 80, 0.15);
+      color: #4CAF50;
+    }
+
+    .badge-danger {
+      background: rgba(244, 67, 54, 0.15);
+      color: #F44336;
+    }
+
+    .badge-warning {
+      background: rgba(255, 152, 0, 0.15);
+      color: #FF9800;
+    }
+  </style>
+</head>
+<body>
+  <!-- نافذة تسجيل الدخول -->
+  <div class="modal" id="loginModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">تسجيل الدخول</h3>
+        <button class="close" id="closeLoginModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="email" class="block mb-2 text-sm font-medium">البريد الإلكتروني</label>
+          <input type="email" class="form-input" id="email" required>
+        </div>
+        <div class="form-group">
+          <label for="password" class="block mb-2 text-sm font-medium">كلمة المرور</label>
+          <input type="password" class="form-input" id="password" required>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="pill bg-[var(--accent)] text-black font-semibold" id="loginBtn">
+          <i class="fas fa-sign-in-alt"></i> تسجيل الدخول
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- المحتوى الرئيسي (يظهر بعد تسجيل الدخول) -->
+  <div class="app p-4" id="mainContent" style="display: none;">
+    <!-- Header -->
+    <header class="flex items-center justify-between mb-3">
+      <div class="flex items-center gap-3">
+        <button id="backBtn" class="p-2 rounded-md transition-fast hover:bg-[rgba(255,255,255,0.05)]" aria-label="Back">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+        <h1 id="appTitle" class="text-xl font-semibold">Imandou Food - الإدارة</h1>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <button class="pill" onclick="window.open('index.html', '_self')">
+          <i class="fas fa-eye"></i> عرض القائمة
+        </button>
+        <button id="logoutBtn" class="pill bg-red-500/20 text-red-300">
+          <i class="fas fa-sign-out-alt"></i> تسجيل الخروج
+        </button>
+      </div>
+    </header>
+
+    <!-- Hero -->
+    <section class="card mb-4 relative overflow-hidden">
+      <div class="flex items-center gap-3">
+        <img src="https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=800&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder" alt="hero" class="w-28 h-28 object-cover rounded-lg shadow-md">
+        <div>
+          <div id="heroTitle" class="text-2xl font-bold">نظام إدارة القائمة</div>
+          <div id="heroSub" class="text-sm text-[var(--muted)]">تحكم كامل في قائمة المطعم</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Language Selector -->
+    <div class="flex gap-2 mb-4">
+      <button class="pill lang-btn active" data-lang="ar">
+        <i class="fas fa-language"></i> العربية
+      </button>
+      <button class="pill lang-btn" data-lang="en">
+        <i class="fas fa-language"></i> English
+      </button>
+      <button class="pill lang-btn" data-lang="fr">
+        <i class="fas fa-language"></i> Français
+      </button>
+    </div>
+
+    <div id="alertContainer"></div>
+
+    <!-- Tabs -->
+    <div class="flex gap-2 mb-4 overflow-x-auto">
+      <button class="pill tab-btn active" data-tab="items">
+        <i class="fas fa-utensils"></i> إدارة الأصناف
+      </button>
+      <button class="pill tab-btn" data-tab="categories">
+        <i class="fas fa-layer-group"></i> إدارة الأقسام
+      </button>
+      <button class="pill tab-btn" data-tab="settings">
+        <i class="fas fa-cog"></i> الإعدادات
+      </button>
+    </div>
+
+    <!-- Tab Content: Items -->
+    <div class="tab-content active" id="items-tab">
+      <div class="card mb-4">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-semibold">الأصناف</h2>
+          <button class="pill bg-[var(--accent)] text-black" id="addItemBtn">
+            <i class="fas fa-plus"></i> إضافة صنف جديد
+          </button>
+        </div>
+
+        <div class="flex gap-2 mb-4">
+          <input type="text" id="searchItems" placeholder="بحث في الأصناف..." class="form-input flex-1">
+          <select id="filterCategory" class="form-input flex-1">
+            <option value="">جميع الأقسام</option>
+          </select>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>الصورة</th>
+                <th>الاسم</th>
+                <th>القسم</th>
+                <th>السعر</th>
+                <th>الحالة</th>
+                <th>الإجراءات</th>
+              </tr>
+            </thead>
+            <tbody id="itemsList">
+              <!-- سيتم تعبئتها ديناميكياً -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab Content: Categories -->
+    <div class="tab-content" id="categories-tab">
+      <div class="card mb-4">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-semibold">الأقسام</h2>
+          <button class="pill bg-[var(--accent)] text-black" id="addCategoryBtn">
+            <i class="fas fa-plus"></i> إضافة قسم جديد
+          </button>
+        </div>
+
+        <table class="table">
+          <thead>
+            <tr>
+              <th>اسم القسم</th>
+              <th>عدد الأصناف</th>
+              <th>الحالة</th>
+              <th>الإجراءات</th>
+            </tr>
+          </thead>
+          <tbody id="categoriesList">
+            <!-- سيتم تعبئتها ديناميكياً -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Tab Content: Settings -->
+    <div class="tab-content" id="settings-tab">
+      <div class="card mb-4">
+        <h2 class="text-lg font-semibold mb-4">الإعدادات العامة</h2>
+        
+        <div class="form-group">
+          <label class="block mb-2 text-sm font-medium">اسم المطعم</label>
+          <input type="text" class="form-input" id="restaurantName" value="Imandou Food">
+        </div>
+        
+        <div class="form-group">
+          <label class="block mb-2 text-sm font-medium">وصف المطعم</label>
+          <textarea class="form-input" id="restaurantDescription" rows="3">مطعم يقدم أطباق شرقية أصلية</textarea>
+        </div>
+        
+        <div class="form-group">
+          <label class="block mb-2 text-sm font-medium">صورة الخلفية</label>
+          <input type="text" class="form-input" id="backgroundImage" placeholder="أدخل رابط الصورة">
+          <div class="image-preview" id="backgroundPreview">
+            <span>معاينة الصورة</span>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label class="block mb-2 text-sm font-medium">لون التمييز</label>
+          <input type="color" class="form-input p-1 h-10" id="accentColor" value="#fbbf24">
+        </div>
+        
+        <button class="pill bg-[var(--accent)] text-black" id="saveSettingsBtn">
+          <i class="fas fa-save"></i> حفظ الإعدادات
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- مودال إضافة/تعديل صنف -->
+  <div class="modal" id="itemModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="itemModalTitle">إضافة صنف جديد</h3>
+        <button class="close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="itemId">
+        
+        <div class="form-group">
+          <label class="block mb-2 text-sm font-medium">اسم الصنف (العربية)</label>
+          <input type="text" class="form-input" id="itemNameAr" required>
+        </div>
+        
+        <div class="form-group">
+          <label class="block mb-2 text-sm font-medium">اسم الصنف (الإنجليزية)</label>
+          <input type="text" class="form-input" id="itemNameEn" required>
+        </div>
+        
+        <div class="form-group">
+          <label class="block mb-2 text-sm font-medium">اسم الصنف (الفرنسية)</label>
+          <input type="text" class="form-input" id="itemNameFr">
+        </div>
+        
+        <div class="form-group">
+          <label class="block mb-2 text-sm font-medium">القسم</label>
+          <select class="form-input" id="itemCategory" required>
+            <option value="">اختر القسم</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label class="block mb-2 text-sm font-medium">السعر (درهم)</label>
+          <input type="number" class="form-input" id="itemPrice" min="0" step="0.01" required>
+        </div>
+        
+        <div class="form-group">
+          <label class="block mb-2 text-sm font-medium">الوصف (العربية)</label>
+          <textarea class="form-input" id="itemDescAr" rows="2"></textarea>
+        </div>
+        
+        <div class="form-group">
+          <label class="block mb-2 text-sm font-medium">الوصف (الإنجليزية)</label>
+          <textarea class="form-input" id="itemDescEn" rows="2"></textarea>
+        </div>
+        
+        <div class="form-group">
+          <label class="block mb-2 text-sm font-medium">الوصف (الفرنسية)</label>
+          <textarea class="form-input" id="itemDescFr" rows="2"></textarea>
+        </div>
+        
+        <div class="form-group">
+          <label class="block mb-2 text-sm font-medium">رابط الصورة</label>
+          <input type="text" class="form-input" id="itemImage" placeholder="أدخل رابط الصورة">
+          <div class="image-preview" id="itemImagePreview">
+            <span>معاينة الصورة</span>
+          </div>
+        </div>
+        
+        <div class="toggle-container">
+          <label class="switch">
+            <input type="checkbox" id="itemSpicy">
+            <span class="slider"></span>
+          </label>
+          <span class="toggle-label">حار</span>
+        </div>
+        
+        <div class="toggle-container">
+          <label class="switch">
+            <input type="checkbox" id="itemPopular" checked>
+            <span class="slider"></span>
+          </label>
+          <span class="toggle-label">شائع</span>
+        </div>
+        
+        <div class="toggle-container">
+          <label class="switch">
+            <input type="checkbox" id="itemStatus" checked>
+            <span class="slider"></span>
+          </label>
+          <span class="toggle-label">مفعل</span>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="pill bg-[var(--accent)] text-black" id="saveItemBtn">حفظ</button>
+        <button class="pill" id="cancelItemBtn">إلغاء</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- مودال إضافة/تعديل قسم -->
+  <div class="modal" id="categoryModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="categoryModalTitle">إضافة قسم جديد</h3>
+        <button class="close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="categoryId">
+        
+        <div class="form-group">
+          <label class="block mb-2 text-sm font-medium">اسم القسم (العربية)</label>
+          <input type="text" class="form-input" id="categoryNameAr" required>
+        </div>
+        
+        <div class="form-group">
+          <label class="block mb-2 text-sm font-medium">اسم القسم (الإنجليزية)</label>
+          <input type="text" class="form-input" id="categoryNameEn" required>
+        </div>
+        
+        <div class="form-group">
+          <label class="block mb-2 text-sm font-medium">اسم القسم (الفرنسية)</label>
+          <input type="text" class="form-input" id="categoryNameFr">
+        </div>
+        
+        <div class="toggle-container">
+          <label class="switch">
+            <input type="checkbox" id="categoryStatus" checked>
+            <span class="slider"></span>
+          </label>
+          <span class="toggle-label">مفعل</span>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="pill bg-[var(--accent)] text-black" id="saveCategoryBtn">حفظ</button>
+        <button class="pill" id="cancelCategoryBtn">إلغاء</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // بيانات القائمة الحالية
+    const menu = [
+      {
+        "id": 1,
+        "name_en": "Spicy Shrimp Noodles",
+        "name_ar": "نودلز الروبيان الحار",
+        "name_fr": "Nouilles aux Crevettes Épicées",
+        "category": "Noodle Dishes",
+        "price": 45,
+        "currency": "MAD",
+        "image": "https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=400&h=300&fit=crop",
+        "desc_en": "Stir-fried noodles with spicy shrimp and veggies",
+        "desc_ar": "نودلز مقلاة مع روبيان حار وخضار",
+        "desc_fr": "Nouilles sautées avec crevettes épicées et légumes",
+        "spicy": true,
+        "popular": true
+      },
+      {
+        "id": 2,
+        "name_en": "Veggie Noodles",
+        "name_ar": "نودلز بالخضار",
+        "name_fr": "Nouilles aux Légumes",
+        "category": "Noodle Dishes",
+        "price": 29,
+        "currency": "MAD",
+        "image": "https://images.unsplash.com/photo-1546549032-9571cd6b27df?w=400&h=300&fit=crop",
+        "desc_en": "Fresh noodles with mixed vegetables",
+        "desc_ar": "نودلز طازجة مع خضار مشكلة",
+        "desc_fr": "Nouilles fraîches avec légumes assortis",
+        "spicy": false,
+        "popular": false
+      },
+      {
+        "id": 3,
+        "name_en": "Crispy Chicken",
+        "name_ar": "دجاج مقرمش",
+        "name_fr": "Poulet Croquant",
+        "category": "Main Courses",
+        "price": 55,
+        "currency": "MAD",
+        "image": "https://images.unsplash.com/photo-1626645738196-c2a7c87a8f58?w=400&h=300&fit=crop",
+        "desc_en": "Fried chicken bites with oriental spices",
+        "desc_ar": "قطع دجاج مقلية بتوابل شرقية",
+        "desc_fr": "Morceaux de poulet frits aux épices orientales",
+        "spicy": false,
+        "popular": true
+      },
+      {
+        "id": 4,
+        "name_en": "Spicy Chicken",
+        "name_ar": "دجاج حار",
+        "name_fr": "Poulet Épicé",
+        "category": "Main Courses",
+        "price": 49,
+        "currency": "MAD",
+        "image": "https://images.unsplash.com/photo-1562967914-608f82629710?w=400&h=300&fit=crop",
+        "desc_en": "Marinated chicken with chili",
+        "desc_ar": "دجاج متبل بالفلفل الحار",
+        "desc_fr": "Poulet mariné au piment",
+        "spicy": true,
+        "popular": false
+      },
+      {
+        "id": 5,
+        "name_en": "Shrimp Appetizer",
+        "name_ar": "مقبلات روبيان",
+        "name_fr": "Apéritif aux Crevettes",
+        "category": "Appetizers",
+        "price": 35,
+        "currency": "MAD",
+        "image": "https://images.unsplash.com/photo-1616683693504-3ea0e0e8a71e?w=400&h=300&fit=crop",
+        "desc_en": "Lightly spiced shrimp appetizer",
+        "desc_ar": "مقبلات روبيان متبلة خفيفة",
+        "desc_fr": "Apéritif de crevettes légèrement épicé",
+        "spicy": false,
+        "popular": true
+      },
+      {
+        "id": 6,
+        "name_en": "Spring Rolls",
+        "name_ar": "لفائف الربيع",
+        "name_fr": "Rouleaux de Printemps",
+        "category": "Appetizers",
+        "price": 22,
+        "currency": "MAD",
+        "image": "https://images.unsplash.com/photo-1616683693504-3ea0e0e8a71e?w=400&h=300&fit=crop",
+        "desc_en": "Vegetable spring rolls",
+        "desc_ar": "لفائف بالخضار",
+        "desc_fr": "Rouleaux de printemps aux légumes",
+        "spicy": false,
+        "popular": false
+      },
+      {
+        "id": 7,
+        "name_en": "Beef Tagine",
+        "name_ar": "طاجن لحم البقر",
+        "name_fr": "Tajine de Bœuf",
+        "category": "Main Courses",
+        "price": 65,
+        "currency": "MAD",
+        "image": "https://images.unsplash.com/photo-1512058564366-18510be2db19?w=400&h=300&fit=crop",
+        "desc_en": "Traditional Moroccan beef tagine with prunes",
+        "desc_ar": "طاجن لحم البقر المغربي التقليدي مع الخوخ",
+        "desc_fr": "Tajine marocain traditionnel de bœuf aux pruneaux",
+        "spicy": false,
+        "popular": true
+      },
+      {
+        "id": 8,
+        "name_en": "Chicken Couscous",
+        "name_ar": "كسكس الدجاج",
+        "name_fr": "Couscous au Poulet",
+        "category": "Main Courses",
+        "price": 48,
+        "currency": "MAD",
+        "image": "https://images.unsplash.com/photo-1530554764238-0b5d0b3d4e94?w=400&h=300&fit=crop",
+        "desc_en": "Steamed semolina with chicken and vegetables",
+        "desc_ar": "سميد مطبوخ على البخار مع الدجاج والخضار",
+        "desc_fr": "Semoule cuite à la vapeur avec poulet et légumes",
+        "spicy": false,
+        "popular": true
+      },
+      {
+        "id": 9,
+        "name_en": "Lamb Mechoui",
+        "name_ar": "لحم الضأن المشوي",
+        "name_fr": "Méchoui d'Agneau",
+        "category": "Main Courses",
+        "price": 75,
+        "currency": "MAD",
+        "image": "https://images.unsplash.com/photo-1546964124-0cce460f38ef?w=400&h=300&fit=crop",
+        "desc_en": "Slow-roasted lamb with traditional spices",
+        "desc_ar": "لحم ضأن مطبوخ ببطء مع توابل تقليدية",
+        "desc_fr": "Agneau rôti lentement avec des épices traditionnelles",
+        "spicy": false,
+        "popular": true
+      },
+      {
+        "id": 10,
+        "name_en": "Vegetable Tagine",
+        "name_ar": "طاجن الخضار",
+        "name_fr": "Tajine de Légumes",
+        "category": "Main Courses",
+        "price": 38,
+        "currency": "MAD",
+        "image": "https://images.unsplash.com/photo-1512058564366-18510be2db19?w=400&h=300&fit=crop",
+        "desc_en": "Seasonal vegetables cooked in traditional tagine",
+        "desc_ar": "خضروات موسمية مطبوخة في طاجن تقليدي",
+        "desc_fr": "Légumes de saison cuits dans un tajine traditionnel",
+        "spicy": false,
+        "popular": false
+      },
+      {
+        "id": 11,
+        "name_en": "Harira Soup",
+        "name_ar": "حريرة",
+        "name_fr": "Soupe Harira",
+        "category": "Appetizers",
+        "price": 18,
+        "currency": "MAD",
+        "image": "https://images.unsplash.com/photo-1547592166-23ac45744acd?w=400&h=300&fit=crop",
+        "desc_en": "Traditional Moroccan soup with lentils and chickpeas",
+        "desc_ar": "شورى مغربية تقليدية مع العدس والحمص",
+        "desc_fr": "Soupe marocaine traditionnelle aux lentilles et pois chiches",
+        "spicy": false,
+        "popular": true
+      },
+      {
+        "id": 12,
+        "name_en": "Briouats",
+        "name_ar": "بريوات",
+        "name_fr": "Briouates",
+        "category": "Appetizers",
+        "price": 25,
+        "currency": "MAD",
+        "image": "https://images.unsplash.com/photo-1616683693504-3ea0e0e8a71e?w=400&h=300&fit=crop",
+        "desc_en": "Crispy pastry filled with meat or cheese",
+        "desc_ar": "معجنات مقرمشة محشوة باللحم أو الجبن",
+        "desc_fr": "Pâtisserie croustillante farcie à la viande ou au fromage",
+        "spicy": false,
+        "popular": true
+      },
+      {
+        "id": 13,
+        "name_en": "Baklava",
+        "name_ar": "بقلاوة",
+        "name_fr": "Baklava",
+        "category": "Desserts",
+        "price": 28,
+        "currency": "MAD",
+        "image": "https://images.unsplash.com/photo-1581368135153-a506cf13531c?w=400&h=300&fit=crop",
+        "desc_en": "Sweet pastry made of layers of filo filled with nuts",
+        "desc_ar": "حلويات مصنوعة من طبقات من العجين محشوة بالمكسرات",
+        "desc_fr": "Pâtisserie sucrée faite de couches de filo farcies aux noix",
+        "spicy": false,
+        "popular": true
+      },
+      {
+        "id": 14,
+        "name_en": "Mint Tea",
+        "name_ar": "شاي بالنعناع",
+        "name_fr": "Thé à la Menthe",
+        "category": "Drinks",
+        "price": 12,
+        "currency": "MAD",
+        "image": "https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=400&h=300&fit=crop",
+        "desc_en": "Traditional Moroccan mint tea",
+        "desc_ar": "شاي مغربي تقليدي بالنعناع",
+        "desc_fr": "Thé à la menthe marocain traditionnel",
+        "spicy": false,
+        "popular": true
+      },
+      {
+        "id": 15,
+        "name_en": "Orange Juice",
+        "name_ar": "عصير برتقال",
+        "name_fr": "Jus d'Orange",
+        "category": "Drinks",
+        "price": 15,
+        "currency": "MAD",
+        "image": "https://images.unsplash.com/photo-1613478223719-2ab802602423?w=400&h=300&fit=crop",
+        "desc_en": "Freshly squeezed orange juice",
+        "desc_ar": "عصير برتقال طازج",
+        "desc_fr": "Jus d'orange fraîchement pressé",
+        "spicy": false,
+        "popular": false
+      }
+    ];
+
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyCyPOzsEzdrRd9o7iHASzFoLyJQhpTW83E",
+      authDomain: "imandou-food.firebaseapp.com",
+      databaseURL: "https://imandou-food-default-rtdb.firebaseio.com",
+      projectId: "imandou-food",
+      storageBucket: "imandou-food.firebasestorage.app",
+      messagingSenderId: "839302179988",
+      appId: "1:839302179988:web:92636c32e1b00b587ad881",
+      measurementId: "G-7LE4J4XL9T"
+    };
+
+    // Initialize Firebase
+    const app = firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+    const auth = firebase.auth();
+
+    // مراجع Firebase
+    const menuRef = database.ref('menu');
+    const settingsRef = database.ref('settings');
+
+    // عناصر DOM
+    const mainContent = document.getElementById('mainContent');
+    const loginModal = document.getElementById('loginModal');
+    const loginBtn = document.getElementById('loginBtn');
+    const closeLoginModal = document.getElementById('closeLoginModal');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const alertContainer = document.getElementById('alertContainer');
+    const langButtons = document.querySelectorAll('.lang-btn');
+    const tabButtons = document.querySelectorAll('.tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
+    
+    // عناصر إدارة الأصناف
+    const itemsList = document.getElementById('itemsList');
+    const searchItemsInput = document.getElementById('searchItems');
+    const filterCategorySelect = document.getElementById('filterCategory');
+    const addItemBtn = document.getElementById('addItemBtn');
+    const itemModal = document.getElementById('itemModal');
+    const itemModalTitle = document.getElementById('itemModalTitle');
+    const itemIdInput = document.getElementById('itemId');
+    const itemNameArInput = document.getElementById('itemNameAr');
+    const itemNameEnInput = document.getElementById('itemNameEn');
+    const itemNameFrInput = document.getElementById('itemNameFr');
+    const itemCategorySelect = document.getElementById('itemCategory');
+    const itemPriceInput = document.getElementById('itemPrice');
+    const itemDescArInput = document.getElementById('itemDescAr');
+    const itemDescEnInput = document.getElementById('itemDescEn');
+    const itemDescFrInput = document.getElementById('itemDescFr');
+    const itemImageInput = document.getElementById('itemImage');
+    const itemImagePreview = document.getElementById('itemImagePreview');
+    const itemSpicyInput = document.getElementById('itemSpicy');
+    const itemPopularInput = document.getElementById('itemPopular');
+    const itemStatusInput = document.getElementById('itemStatus');
+    const saveItemBtn = document.getElementById('saveItemBtn');
+    const cancelItemBtn = document.getElementById('cancelItemBtn');
+    
+    // عناصر إدارة الأقسام
+    const categoriesList = document.getElementById('categoriesList');
+    const addCategoryBtn = document.getElementById('addCategoryBtn');
+    const categoryModal = document.getElementById('categoryModal');
+    const categoryModalTitle = document.getElementById('categoryModalTitle');
+    const categoryIdInput = document.getElementById('categoryId');
+    const categoryNameArInput = document.getElementById('categoryNameAr');
+    const categoryNameEnInput = document.getElementById('categoryNameEn');
+    const categoryNameFrInput = document.getElementById('categoryNameFr');
+    const categoryStatusInput = document.getElementById('categoryStatus');
+    const saveCategoryBtn = document.getElementById('saveCategoryBtn');
+    const cancelCategoryBtn = document.getElementById('cancelCategoryBtn');
+    
+    // عناصر الإعدادات العامة
+    const restaurantNameInput = document.getElementById('restaurantName');
+    const restaurantDescriptionInput = document.getElementById('restaurantDescription');
+    const backgroundImageInput = document.getElementById('backgroundImage');
+    const backgroundPreview = document.getElementById('backgroundPreview');
+    const accentColorInput = document.getElementById('accentColor');
+    const saveSettingsBtn = document.getElementById('saveSettingsBtn');
+    
+    // متغيرات التطبيق
+    let menuData = [];
+    let settingsData = {};
+    let categoriesData = [];
+    let isEditing = false;
+    let currentItemId = null;
+    let currentCategoryId = null;
+    let currentLang = 'ar';
+
+    // تهيئة التطبيق
+    function init() {
+      setupEventListeners();
+      
+      // مراقبة حالة المصادقة
+      auth.onAuthStateChanged((user) => {
+        if (user) {
+          // المستخدم مسجل الدخول
+          mainContent.style.display = 'block';
+          loginModal.classList.remove('active');
+          loadMenuData();
+          loadSettings();
+        } else {
+          // لا يوجد مستخدم مسجل الدخول
+          mainContent.style.display = 'none';
+          loginModal.classList.add('active');
+        }
+      });
+    }
+
+    // إعداد مستمعي الأحداث
+    function setupEventListeners() {
+      // أحداث تسجيل الدخول والخروج
+      loginBtn.addEventListener('click', loginUser);
+      closeLoginModal.addEventListener('click', () => loginModal.classList.remove('active'));
+      logoutBtn.addEventListener('click', logoutUser);
+      
+      // أحداث تغيير اللغة
+      langButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          langButtons.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          currentLang = btn.dataset.lang;
+          updateUIForLanguage();
+        });
+      });
+      
+      // أحداث التبويبات
+      tabButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const tabId = btn.dataset.tab;
+          switchTab(tabId);
+        });
+      });
+      
+      // أحداث إدارة الأصناف
+      addItemBtn.addEventListener('click', openItemModal);
+      searchItemsInput.addEventListener('input', filterItems);
+      filterCategorySelect.addEventListener('change', filterItems);
+      itemImageInput.addEventListener('input', updateItemImagePreview);
+      saveItemBtn.addEventListener('click', saveItem);
+      cancelItemBtn.addEventListener('click', closeItemModal);
+      document.querySelector('#itemModal .close').addEventListener('click', closeItemModal);
+      
+      // أحداث إدارة الأقسام
+      addCategoryBtn.addEventListener('click', openCategoryModal);
+      saveCategoryBtn.addEventListener('click', saveCategory);
+      cancelCategoryBtn.addEventListener('click', closeCategoryModal);
+      document.querySelector('#categoryModal .close').addEventListener('click', closeCategoryModal);
+      
+      // أحداث الإعدادات العامة
+      backgroundImageInput.addEventListener('input', updateBackgroundPreview);
+      saveSettingsBtn.addEventListener('click', saveSettings);
+      
+      // زر العودة
+      document.getElementById('backBtn').addEventListener('click', () => {
+        window.history.back();
+      });
+    }
+
+    // تسجيل الدخول
+    function loginUser(e) {
+      e.preventDefault();
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+
+      auth.signInWithEmailAndPassword(email, password)
+        .then((userCredential) => {
+          showAlert('تم تسجيل الدخول بنجاح!', 'success');
+        })
+        .catch((error) => {
+          showAlert('خطأ في تسجيل الدخول: ' + error.message, 'danger');
+        });
+    }
+
+    // تسجيل الخروج
+    function logoutUser() {
+      auth.signOut()
+        .then(() => {
+          showAlert('تم تسجيل الخروج بنجاح', 'success');
+        })
+        .catch((error) => {
+          showAlert('خطأ في تسجيل الخروج: ' + error.message, 'danger');
+        });
+    }
+
+    // تحميل بيانات القائمة من Firebase
+    function loadMenuData() {
+      menuRef.on('value', (snapshot) => {
+        const firebaseData = snapshot.val();
+        
+        if (firebaseData && firebaseData.length > 0) {
+          menuData = firebaseData;
+        } else {
+          // إذا لم توجد بيانات في Firebase، نستخدم البيانات المحلية
+          menuData = menu;
+          menuRef.set(menuData)
+            .then(() => {
+              showAlert('تم رفع القائمة إلى Firebase بنجاح', 'success');
+            })
+            .catch(error => {
+              showAlert('حدث خطأ أثناء رفع القائمة: ' + error.message, 'danger');
+            });
+        }
+        
+        extractCategories();
+        renderItems();
+        updateCategoryDropdown();
+      });
+    }
+
+    // استخراج الأقسام من البيانات
+    function extractCategories() {
+      const categoriesSet = new Set();
+      menuData.forEach(item => {
+        categoriesSet.add(item.category);
+      });
+      categoriesData = Array.from(categoriesSet);
+      
+      // تحديث قائمة التصفية
+      filterCategorySelect.innerHTML = '<option value="">جميع الأقسام</option>';
+      categoriesData.forEach(category => {
+        const option = document.createElement('option');
+        option.value = category;
+        option.textContent = category;
+        filterCategorySelect.appendChild(option);
+      });
+    }
+
+    // تحميل الإعدادات من Firebase
+    function loadSettings() {
+      settingsRef.on('value', (snapshot) => {
+        settingsData = snapshot.val() || {};
+        applySettings();
+      });
+    }
+
+    // تطبيق الإعدادات على الواجهة
+    function applySettings() {
+      if (settingsData.restaurantName) {
+        restaurantNameInput.value = settingsData.restaurantName;
+        document.getElementById('appTitle').textContent = settingsData.restaurantName + ' - الإدارة';
+        document.getElementById('heroTitle').textContent = settingsData.restaurantName;
+      }
+      
+      if (settingsData.restaurantDescription) {
+        restaurantDescriptionInput.value = settingsData.restaurantDescription;
+      }
+      
+      if (settingsData.backgroundImage) {
+        backgroundImageInput.value = settingsData.backgroundImage;
+        updateBackgroundPreview();
+      }
+      
+      if (settingsData.accentColor) {
+        accentColorInput.value = settingsData.accentColor;
+        document.documentElement.style.setProperty('--accent', settingsData.accentColor);
+      }
+    }
+
+    // حفظ الإعدادات
+    function saveSettings() {
+      const settings = {
+        restaurantName: restaurantNameInput.value,
+        restaurantDescription: restaurantDescriptionInput.value,
+        backgroundImage: backgroundImageInput.value,
+        accentColor: accentColorInput.value
+      };
+      
+      settingsRef.set(settings)
+        .then(() => {
+          showAlert('تم حفظ الإعدادات بنجاح', 'success');
+          applySettings();
+        })
+        .catch(error => {
+          showAlert('حدث خطأ أثناء حفظ الإعدادات: ' + error.message, 'danger');
+        });
+    }
+
+    // تحديث معاينة صورة الخلفية
+    function updateBackgroundPreview() {
+      const url = backgroundImageInput.value;
+      if (url) {
+        backgroundPreview.innerHTML = `<img src="${url}" alt="معاينة الخلفية">`;
+      } else {
+        backgroundPreview.innerHTML = '<span>معاينة الصورة</span>';
+      }
+    }
+
+    // تحديث معاينة صورة الصنف
+    function updateItemImagePreview() {
+      const url = itemImageInput.value;
+      if (url) {
+        itemImagePreview.innerHTML = `<img src="${url}" alt="معاينة الصورة">`;
+      } else {
+        itemImagePreview.innerHTML = '<span>معاينة الصورة</span>';
+      }
+    }
+
+    // عرض الأصناف في الجدول
+    function renderItems() {
+      itemsList.innerHTML = '';
+      
+      if (!menuData || menuData.length === 0) {
+        itemsList.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-[var(--muted)]">لا توجد أصناف</td></tr>`;
+        return;
+      }
+      
+      menuData.forEach((item, index) => {
+        const isHidden = item.hidden === true;
+        
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><img src="${item.image}" alt="${item.name_ar}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 5px;"></td>
+          <td>${currentLang === 'ar' ? item.name_ar : currentLang === 'fr' ? item.name_fr : item.name_en}</td>
+          <td>${item.category}</td>
+          <td>${item.price} درهم</td>
+          <td>
+            <span class="badge ${isHidden ? 'badge-warning' : 'badge-success'}">
+              ${isHidden ? 'مخفي' : 'مفعل'}
+            </span>
+          </td>
+          <td>
+            <button class="pill btn-edit-item" data-index="${index}">
+              <i class="fas fa-edit"></i> تعديل
+            </button>
+            <button class="pill bg-red-500/20 text-red-300 btn-delete-item" data-index="${index}">
+              <i class="fas fa-trash"></i> حذف
+            </button>
+          </td>
+        `;
+        itemsList.appendChild(tr);
+        
+        // إضافة أحداث النقر للأزرار
+        tr.querySelector('.btn-edit-item').addEventListener('click', (e) => {
+          e.stopPropagation();
+          editItem(index);
+        });
+        
+        tr.querySelector('.btn-delete-item').addEventListener('click', (e) => {
+          e.stopPropagation();
+          deleteItem(index);
+        });
+      });
+    }
+
+    // تصفية الأصناف
+    function filterItems() {
+      const searchText = searchItemsInput.value.toLowerCase();
+      const category = filterCategorySelect.value;
+      
+      const filtered = menuData.filter(item => {
+        const name = currentLang === 'ar' ? item.name_ar : currentLang === 'fr' ? item.name_fr : item.name_en;
+        const matchSearch = !searchText || name.toLowerCase().includes(searchText);
+        const matchCategory = !category || item.category === category;
+        return matchSearch && matchCategory;
+      });
+      
+      itemsList.innerHTML = '';
+      
+      if (filtered.length === 0) {
+        itemsList.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-[var(--muted)]">لا توجد أصناف تطابق البحث</td></tr>`;
+        return;
+      }
+      
+      filtered.forEach((item, index) => {
+        const isHidden = item.hidden === true;
+        const originalIndex = menuData.findIndex(i => i.id === item.id);
+        
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><img src="${item.image}" alt="${item.name_ar}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 5px;"></td>
+          <td>${currentLang === 'ar' ? item.name_ar : currentLang === 'fr' ? item.name_fr : item.name_en}</td>
+          <td>${item.category}</td>
+          <td>${item.price} درهم</td>
+          <td>
+            <span class="badge ${isHidden ? 'badge-warning' : 'badge-success'}">
+              ${isHidden ? 'مخفي' : 'مفعل'}
+            </span>
+          </td>
+          <td>
+            <button class="pill btn-edit-item" data-index="${originalIndex}">
+              <i class="fas fa-edit"></i> تعديل
+            </button>
+            <button class="pill bg-red-500/20 text-red-300 btn-delete-item" data-index="${originalIndex}">
+              <i class="fas fa-trash"></i> حذف
+            </button>
+          </td>
+        `;
+        itemsList.appendChild(tr);
+        
+        // إضافة أحداث النقر للأزرار
+        tr.querySelector('.btn-edit-item').addEventListener('click', (e) => {
+          e.stopPropagation();
+          editItem(originalIndex);
+        });
+        
+        tr.querySelector('.btn-delete-item').addEventListener('click', (e) => {
+          e.stopPropagation();
+          deleteItem(originalIndex);
+        });
+      });
+    }
+
+    // تحديث قائمة الأقسام في مودال الصنف
+    function updateCategoryDropdown() {
+      itemCategorySelect.innerHTML = '<option value="">اختر القسم</option>';
+      
+      categoriesData.forEach(category => {
+        const option = document.createElement('option');
+        option.value = category;
+        option.textContent = category;
+        itemCategorySelect.appendChild(option);
+      });
+    }
+
+    // فتح مودال إضافة صنف
+    function openItemModal() {
+      isEditing = false;
+      currentItemId = null;
+      itemModalTitle.textContent = 'إضافة صنف جديد';
+      itemModal.classList.add('active');
+      
+      // تفريغ الحقول
+      itemIdInput.value = '';
+      itemNameArInput.value = '';
+      itemNameEnInput.value = '';
+      itemNameFrInput.value = '';
+      itemCategorySelect.value = '';
+      itemPriceInput.value = '';
+      itemDescArInput.value = '';
+      itemDescEnInput.value = '';
+      itemDescFrInput.value = '';
+      itemImageInput.value = '';
+      itemImagePreview.innerHTML = '<span>معاينة الصورة</span>';
+      itemSpicyInput.checked = false;
+      itemPopularInput.checked = true;
+      itemStatusInput.checked = true;
+    }
+
+    // فتح مودال تعديل صنف
+    function editItem(index) {
+      const item = menuData[index];
+      if (!item) return;
+      
+      isEditing = true;
+      currentItemId = index;
+      itemModalTitle.textContent = 'تعديل الصنف';
+      itemModal.classList.add('active');
+      
+      // تعبئة الحقول
+      itemIdInput.value = item.id;
+      itemNameArInput.value = item.name_ar;
+      itemNameEnInput.value = item.name_en;
+      itemNameFrInput.value = item.name_fr || '';
+      itemCategorySelect.value = item.category;
+      itemPriceInput.value = item.price;
+      itemDescArInput.value = item.desc_ar;
+      itemDescEnInput.value = item.desc_en;
+      itemDescFrInput.value = item.desc_fr || '';
+      itemImageInput.value = item.image;
+      updateItemImagePreview();
+      itemSpicyInput.checked = item.spicy || false;
+      itemPopularInput.checked = item.popular || false;
+      itemStatusInput.checked = !item.hidden;
+    }
+
+    // حفظ الصنف
+    function saveItem() {
+      const name_ar = itemNameArInput.value.trim();
+      const name_en = itemNameEnInput.value.trim();
+      const name_fr = itemNameFrInput.value.trim();
+      const category = itemCategorySelect.value;
+      const price = parseFloat(itemPriceInput.value);
+      const desc_ar = itemDescArInput.value.trim();
+      const desc_en = itemDescEnInput.value.trim();
+      const desc_fr = itemDescFrInput.value.trim();
+      const image = itemImageInput.value.trim();
+      const spicy = itemSpicyInput.checked;
+      const popular = itemPopularInput.checked;
+      const hidden = !itemStatusInput.checked;
+      
+      if (!name_ar || !name_en || !category || isNaN(price)) {
+        showAlert('الرجاء ملء جميع الحقول المطلوبة', 'danger');
+        return;
+      }
+      
+      const itemData = {
+        id: isEditing ? menuData[currentItemId].id : Math.max(...menuData.map(i => i.id), 0) + 1,
+        name_ar,
+        name_en,
+        name_fr: name_fr || name_en,
+        category,
+        price,
+        currency: "MAD",
+        image: image || 'https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=800&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder',
+        desc_ar,
+        desc_en,
+        desc_fr: desc_fr || desc_en,
+        spicy,
+        popular,
+        hidden
+      };
+      
+      if (isEditing) {
+        // تحديث الصنف الموجود
+        menuData[currentItemId] = itemData;
+      } else {
+        // إضافة صنف جديد
+        menuData.push(itemData);
+      }
+      
+      // حفظ التغييرات في Firebase
+      menuRef.set(menuData)
+        .then(() => {
+          showAlert(isEditing ? 'تم تحديث الصنف بنجاح' : 'تم إضافة الصنف بنجاح', 'success');
+          closeItemModal();
+          extractCategories();
+          renderItems();
+        })
+        .catch(error => {
+          showAlert('حدث خطأ أثناء حفظ الصنف: ' + error.message, 'danger');
+        });
+    }
+
+    // حذف صنف
+    function deleteItem(index) {
+      if (!confirm('هل أنت متأكد من حذف هذا الصنف؟')) {
+        return;
+      }
+      
+      // حذف الصنف من البيانات المحلية
+      menuData.splice(index, 1);
+      
+      // حفظ التغييرات في Firebase
+      menuRef.set(menuData)
+        .then(() => {
+          showAlert('تم حذف الصنف بنجاح', 'success');
+          extractCategories();
+          renderItems();
+        })
+        .catch(error => {
+          showAlert('حدث خطأ أثناء حذف الصنف: ' + error.message, 'danger');
+        });
+    }
+
+    // إغلاق مودال الصنف
+    function closeItemModal() {
+      itemModal.classList.remove('active');
+    }
+
+    // فتح مودال إضافة قسم
+    function openCategoryModal() {
+      isEditing = false;
+      currentCategoryId = null;
+      categoryModalTitle.textContent = 'إضافة قسم جديد';
+      categoryModal.classList.add('active');
+      
+      // تفريغ الحقول
+      categoryIdInput.value = '';
+      categoryNameArInput.value = '';
+      categoryNameEnInput.value = '';
+      categoryNameFrInput.value = '';
+      categoryStatusInput.checked = true;
+    }
+
+    // حفظ القسم
+    function saveCategory() {
+      const name_ar = categoryNameArInput.value.trim();
+      const name_en = categoryNameEnInput.value.trim();
+      const name_fr = categoryNameFrInput.value.trim();
+      const hidden = !categoryStatusInput.checked;
+      
+      if (!name_ar || !name_en) {
+        showAlert('الرجاء إدخال اسم القسم', 'danger');
+        return;
+      }
+      
+      // في هذا الإصدار البسيط، نقوم فقط بتعديل الأصناف الحالية
+      // يمكن تطوير النظام ليدعم إدارة الأقسام بشكل منفصل في المستقبل
+      showAlert('يتم دمج إدارة الأقسام مع إدارة الأصناف في هذا الإصدار', 'warning');
+      closeCategoryModal();
+    }
+
+    // إغلاق مودال القسم
+    function closeCategoryModal() {
+      categoryModal.classList.remove('active');
+    }
+
+    // تبديل التبويبات
+    function switchTab(tabId) {
+      tabButtons.forEach(btn => {
+        if (btn.dataset.tab === tabId) {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+        }
+      });
+      
+      tabContents.forEach(content => {
+        if (content.id === tabId + '-tab') {
+          content.classList.add('active');
+        } else {
+          content.classList.remove('active');
+        }
+      });
+    }
+
+    // تحديث واجهة المستخدم للغة المحددة
+    function updateUIForLanguage() {
+      document.documentElement.lang = currentLang;
+      document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
+      
+      // تحديث النصوص الثابتة
+      document.getElementById('appTitle').textContent = mapText('Imandou Food - الإدارة');
+      document.getElementById('heroTitle').textContent = mapText('نظام إدارة القائمة');
+      document.getElementById('heroSub').textContent = mapText('تحكم كامل في قائمة المطعم');
+      
+      // إعادة عرض الأصناف
+      renderItems();
+    }
+
+    // عرض رسالة تنبيه
+    function showAlert(message, type) {
+      const alert = document.createElement('div');
+      alert.className = `alert alert-${type}`;
+      alert.innerHTML = `
+        <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
+        ${message}
+      `;
+      alertContainer.appendChild(alert);
+      
+      // إزالة التنبيه بعد 5 ثواني
+      setTimeout(() => {
+        alert.remove();
+      }, 5000);
+    }
+
+    // مساعد: تخطيط النص للتدويل
+    function mapText(text) {
+      const dict = {
+        'Imandou Food - الإدارة': {
+          'ar': 'Imandou Food - الإدارة',
+          'en': 'Imandou Food - Admin',
+          'fr': 'Imandou Food - Administration'
+        },
+        'نظام إدارة القائمة': {
+          'ar': 'نظام إدارة القائمة',
+          'en': 'Menu Management System',
+          'fr': 'Système de Gestion de Menu'
+        },
+        'تحكم كامل في قائمة المطعم': {
+          'ar': 'تحكم كامل في قائمة المطعم',
+          'en': 'Full control over restaurant menu',
+          'fr': 'Contrôle complet du menu du restaurant'
+        }
+      };
+      
+      if (dict[text]) return dict[text][currentLang] || text;
+      return text;
+    }
+
+    // بدء التطبيق
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>
