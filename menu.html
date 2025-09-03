@@ -1,0 +1,766 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Imandou Food — Demo</title>
+
+  <!-- Tailwind via CDN (for prototype). For production, build Tailwind. -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* Basic design tokens matching spec */
+    :root{
+      --bg: #0f172a;
+      --card: #0b1220;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --accent: #fbbf24;
+      --radius-lg: 14px;
+      --radius-md: 8px;
+    }
+    html,body{height:100%}
+    body{
+      font-family: 'Inter', system-ui, -apple-system, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      overflow-x: hidden;
+      position: relative;
+      font-weight: 400;
+      line-height: 1.6;
+    }
+
+    /* Food background overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url('https://images.unsplash.com/photo-1563245372-f21724e3856d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2064&q=80');
+      background-size: cover;
+      background-position: center;
+      opacity: 0.08;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    /* mobile-first container */
+    .app {
+      max-width: 480px;
+      margin: 0 auto;
+      min-height:100vh;
+      display:flex;
+      flex-direction:column;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* cards */
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.03));
+      border-radius: var(--radius-lg);
+      padding: 12px;
+      box-shadow: 0 6px 18px rgba(2,6,23,0.6);
+      border: 1px solid rgba(255,255,255,0.03);
+      backdrop-filter: blur(10px);
+    }
+
+    /* small pill buttons */
+    .pill {
+      background: rgba(255,255,255,0.02);
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-weight:500;
+      color:var(--text);
+      display:inline-flex;
+      gap:8px;
+      align-items:center;
+      border: 1px solid rgba(255,255,255,0.03);
+      transition: all 0.2s ease;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.875rem;
+    }
+
+    .pill:hover {
+      background: rgba(255,255,255,0.05);
+    }
+
+    /* animation helpers */
+    .transition-fast { transition: all .2s ease-out; }
+    .fab { 
+      position: fixed; 
+      right: 20px; 
+      bottom: 18px; 
+      z-index: 60; 
+      transition: transform 0.3s ease;
+    }
+    .fab:hover {
+      transform: scale(1.05);
+    }
+    [dir="rtl"] .fab { right: auto; left: 20px; }
+
+    /* small responsive tweaks */
+    @media(min-width:768px){
+      .app{max-width:720px}
+    }
+
+    /* visually-hidden for accessibility */
+    .sr-only { position: absolute; width:1px; height:1px; padding:0;margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+
+    /* Line clamp utility */
+    .line-clamp-1 {
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 1;
+    }
+
+    /* Custom scrollbar for cart */
+    #cartItems::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    #cartItems::-webkit-scrollbar-track {
+      background: rgba(255,255,255,0.05);
+      border-radius: 10px;
+    }
+    
+    #cartItems::-webkit-scrollbar-thumb {
+      background: rgba(255,255,255,0.1);
+      border-radius: 10px;
+    }
+    
+    #cartItems::-webkit-scrollbar-thumb:hover {
+      background: rgba(255,255,255,0.2);
+    }
+
+    /* Cart drawer overlay */
+    .cart-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 40;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+    
+    .cart-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    /* Improved Typography */
+    h1, h2, h3, h4, h5, h6 {
+      font-family: 'Playfair Display', serif;
+      font-weight: 600;
+      letter-spacing: -0.025em;
+    }
+
+    #appTitle {
+      font-family: 'Playfair Display', serif;
+      font-weight: 700;
+      font-size: 1.5rem;
+    }
+
+    #heroTitle {
+      font-family: 'Playfair Display', serif;
+      font-weight: 700;
+      font-size: 2rem;
+      letter-spacing: -0.03em;
+    }
+
+    .dish-name {
+      font-family: 'Inter', sans-serif;
+      font-weight: 500;
+      font-size: 1.1rem;
+    }
+
+    .price {
+      font-family: 'Inter', sans-serif;
+      font-weight: 600;
+    }
+
+    input, button, .pill {
+      font-family: 'Inter', sans-serif;
+    }
+
+    /* Arabic font styling */
+    [lang="ar"] body,
+    [dir="rtl"] body {
+      font-family: 'Cairo', 'Inter', sans-serif;
+    }
+
+    [lang="ar"] h1,
+    [lang="ar"] h2,
+    [lang="ar"] h3,
+    [dir="rtl"] h1,
+    [dir="rtl"] h2,
+    [dir="rtl"] h3 {
+      font-family: 'Cairo', 'Playfair Display', serif;
+    }
+  </style>
+</head>
+<body>
+  <div class="app p-4" id="app">
+    <!-- Header -->
+    <header class="flex items-center justify-between mb-3">
+      <div class="flex items-center gap-3">
+        <button id="backBtn" class="p-2 rounded-md transition-fast hover:bg-[rgba(255,255,255,0.05)]" aria-label="Back">
+          <!-- back icon -->
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+        <h1 id="appTitle" class="text-xl font-semibold">Imandou Food</h1>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <button id="langToggle" class="pill" aria-label="Switch language">AR</button>
+
+        <button id="cartIcon" class="relative p-2 rounded-md transition-fast hover:bg-[rgba(255,255,255,0.05)]" aria-label="Open cart">
+          <!-- cart icon -->
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4" />
+            <circle cx="10" cy="20" r="1" /><circle cx="18" cy="20" r="1" />
+          </svg>
+          <span id="cartCount" class="absolute -top-1 -right-1 bg-[var(--accent)] text-black rounded-full text-xs w-5 h-5 flex items-center justify-center font-semibold">0</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Hero -->
+    <section class="card mb-4 relative overflow-hidden">
+      <div class="flex items-center gap-3">
+        <img src="https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=800&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder" alt="hero" class="w-28 h-28 object-cover rounded-lg shadow-md">
+        <div>
+          <div id="heroTitle" class="text-2xl font-bold">Imandou Food</div>
+          <div id="heroSub" class="text-sm text-[var(--muted)]">Authentic oriental cuisine</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Search + Filters -->
+    <div class="mb-3">
+      <div class="flex gap-2 items-center mb-3">
+        <input id="searchInput" type="search" placeholder="Search dishes..." class="w-full bg-[rgba(255,255,255,0.03)] border border-transparent focus:border-[rgba(255,255,255,0.06)] rounded-lg p-3 outline-none transition-fast placeholder:text-[var(--muted)]" aria-label="Search">
+        <button id="clearSearch" class="p-3 pill" title="Clear search">✕</button>
+      </div>
+
+      <div id="categories" class="flex gap-3 overflow-x-auto py-1 scrollbar-hide">
+        <!-- categories inserted here -->
+      </div>
+    </div>
+
+    <!-- List -->
+    <main id="list" class="flex flex-col gap-3 mb-24" aria-live="polite">
+      <!-- dish cards appended here -->
+    </main>
+
+    <!-- Floating Cart Button -->
+    <div class="fab">
+      <button id="cartFab" class="bg-[var(--accent)] w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-fast hover:shadow-xl" aria-label="Open cart">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4" />
+        </svg>
+        <span id="fabCount" class="sr-only">0 items</span>
+      </button>
+    </div>
+
+    <!-- Cart Overlay -->
+    <div id="cartOverlay" class="cart-overlay" aria-hidden="true"></div>
+
+    <!-- Cart Drawer (hidden by default) -->
+    <aside id="cartDrawer" class="fixed top-0 right-0 h-full w-0 bg-gradient-to-b from-[var(--card)] to-[var(--bg)] overflow-hidden z-50 transition-[width] duration-300" role="dialog" aria-label="Cart" aria-hidden="true" aria-modal="true">
+      <div class="h-full flex flex-col">
+        <div class="flex items-center justify-between p-4 border-b border-[rgba(255,255,255,0.03)]">
+          <h2 class="text-lg font-semibold">Your Order</h2>
+          <div class="flex items-center gap-2">
+            <button id="clearCart" class="pill">Clear</button>
+            <button id="closeCart" class="p-2 rounded-md transition-fast hover:bg-[rgba(255,255,255,0.05)]" aria-label="Close cart">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div id="cartItems" class="p-4 flex-1 overflow-auto space-y-3">
+          <!-- cart items -->
+        </div>
+
+        <div class="p-4 border-t border-[rgba(255,255,255,0.03)]">
+          <div class="flex justify-between mb-2">
+            <div class="text-[var(--muted)]">Subtotal</div>
+            <div id="subtotal" class="font-semibold">0 MAD</div>
+          </div>
+          <div class="flex justify-between mb-4">
+            <div class="text-[var(--muted)]">Tax (10%)</div>
+            <div id="tax" class="font-semibold">0 MAD</div>
+          </div>
+          <div class="flex justify-between mb-4">
+            <div class="text-[var(--muted)]">Delivery</div>
+            <div id="delivery" class="font-semibold">0 MAD</div>
+          </div>
+          <div class="flex justify-between mb-4 text-lg font-bold border-t border-[rgba(255,255,255,0.05)] pt-2">
+            <div>Total</div>
+            <div id="total" class="text-[var(--accent)]">0 MAD</div>
+          </div>
+
+          <button id="checkoutBtn" class="w-full py-3 rounded-md font-semibold transition-fast hover:brightness-110" style="background:var(--accent);color:black">Confirm Order</button>
+        </div>
+      </div>
+    </aside>
+
+  </div>
+
+  <script>
+    /******************************************************************
+     * Single-file app script
+     * - Mobile-first UI
+     * - Menu data embedded
+     * - Search, category filter, add-to-cart with localStorage
+     * - Language switch AR/EN with RTL handling
+     ******************************************************************/
+
+    // ----------------------
+    // Sample menu data (15 items, 5 categories)
+    // Each item has both English and Arabic fields
+    // For real app: load from menu.json or API
+    // ----------------------
+    const menu = [
+      {"id":1,"name_en":"Spicy Shrimp Noodles","name_ar":"نودلز الروبيان الحار","category":"Noodle Dishes","price":45,"currency":"MAD","image":"https://images.unsplash.com/photo-1604908177075-3d4f9e2d9f9b?q=80&w=800&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder","desc_en":"Stir-fried noodles with spicy shrimp and veggies","desc_ar":"نودلز مقلاة مع روبيان حار وخضار","spicy":true,"popular":true},
+      {"id":2,"name_en":"Veggie Noodles","name_ar":"نودلز بالخضار","category":"Noodle Dishes","price":29,"currency":"MAD","image":"https://images.unsplash.com/photo-1604908177075-3d4f9e2d9f9b?q=80&w=800&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder","desc_en":"Fresh noodles with mixed vegetables","desc_ar":"نودلز طازجة مع خضار مشكلة","spicy":false,"popular":false},
+      {"id":3,"name_en":"Crispy Chicken","name_ar":"دجاج مقرمش","category":"Main Courses","price":55,"currency":"MAD","image":"https://images.unsplash.com/photo-1604908177075-3d4f9e2d9f9b?q=80&w=800&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder","desc_en":"Fried chicken bites with oriental spices","desc_ar":"قطع دجاج مقلية بتوابل شرقية","spicy":false,"popular":true},
+      {"id":4,"name_en":"Spicy Chicken","name_ar":"دجاج حار","category":"Main Courses","price":49,"currency":"MAD","image":"https://images.unsplash.com/photo-1604908177075-3d4f9e2d9f9b?q=80&w=800&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder","desc_en":"Marinated chicken with chili","desc_ar":"دجاج متبل بالفلفل الحار","spicy":true,"popular":false},
+      {"id":5,"name_en":"Shrimp Appetizer","name_ar":"مقبلات روبيان","category":"Appetizers","price":35,"currency":"MAD","image":"https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=800&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder","desc_en":"Lightly spiced shrimp appetizer","desc_ar":"مقبلات روبيان متبلة خفيفة","spicy":false,"popular":true},
+      {"id":6,"name_en":"Spring Rolls","name_ar":"لفائف الربيع","category":"Appetizers","price":22,"currency":"MAD","image":"https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=800&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder","desc_en":"Vegetable spring rolls","desc_ar":"لفائف بالخضار","spicy":false,"popular":false},
+      {"id":7,"name_en":"Nom Dishes","name_ar":"أطباق نوم","category":"Main Courses","price":48,"currency":"MAD","image":"https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=800&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder","desc_en":"Chef special","desc_ar":"وصفة الشيف الخاصة","spicy":false,"popular":true},
+      {"id":8,"name_en":"Ruly Pame Rice","name_ar":"أرز رولي بامي","category":"Rice Dishes","price":39,"currency":"MAD","image":"https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=800&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder","desc_en":"Seasoned rice with veggies","desc_ar":"أرز متبل مع خضار","spicy":false,"popular":false},
+      {"id":9,"name_en":"Fried Rice Special","name_ar":"أرز مقلي خاص","category":"Rice Dishes","price":42,"currency":"MAD","image":"https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=800&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder","desc_en":"Fried rice with egg and chicken","desc_ar":"أرز مقلي مع بيض ودجاج","spicy":false,"popular":true},
+      {"id":10,"name_en":"Uriet Dame Dessert","name_ar":"حلوى يوريت دام","category":"Desserts","price":25,"currency":"MAD","image":"https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=800&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder","desc_en":"Sweet balls with syrup","desc_ar":"كرات حلوة مع شراب","spicy":false,"popular":true},
+      {"id":11,"name_en":"Nuat Dame","name_ar":"نواة دام","category":"Noodle Dishes","price":33,"currency":"MAD","image":"https://images.unsplash.com/photo-1604908177075-3d4f9e2d9f9b?q=80&w=800&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder","desc_en":"Noodles with special sauce","desc_ar":"نودلز بصلصة خاصة","spicy":false,"popular":false},
+      {"id":12,"name_en":"Scim Dame Salad","name_ar":"سلطة سكم دام","category":"Appetizers","price":28,"currency":"MAD","image":"https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=800&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder","desc_en":"Fresh salad with citrus","desc_ar":"سلطة طازجة مع حمضيات","spicy":false,"popular":false},
+      {"id":13,"name_en":"Ruly Pame Noodle","name_ar":"نودلز رالي بامي","category":"Noodle Dishes","price":41,"currency":"MAD","image":"https://images.unsplash.com/photo-1604908177075-3d4f9e2d9f9b?q=80&w=800&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder","desc_en":"Stirred noodles with special mix","desc_ar":"نودلز مع خليط خاص","spicy":true,"popular":false},
+      {"id":14,"name_en":"Mobis","name_ar":"موبيس","category":"Appetizers","price":29,"currency":"MAD","image":"https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=800&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder","desc_en":"Chef appetizer","desc_ar":"مقبلات الشيف","spicy":false,"popular":false},
+      {"id":15,"name_en":"Scim Dame Rice","name_ar":"أرز سكم دام","category":"Rice Dishes","price":37,"currency":"MAD","image":"https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=800&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder","desc_en":"Rice with greens","desc_ar":"أرز مع خضار","spicy":false,"popular":false}
+    ];
+
+    // ----------------------
+    // App state & helpers
+    // ----------------------
+    const categoriesList = ["All","Appetizers","Noodle Dishes","Main Courses","Rice Dishes","Desserts"];
+    let state = {
+      lang: localStorage.getItem('app_lang') || 'en', // 'en' | 'ar'
+      query: '',
+      category: 'All',
+      cart: JSON.parse(localStorage.getItem('restaurant_cart_v1') || '[]') // [{id, qty}]
+    };
+
+    // helper: format price
+    function fmtPrice(p){ return p + ' MAD'; }
+
+    // ----------------------
+    // DOM refs
+    // ----------------------
+    const listEl = document.getElementById('list');
+    const categoriesEl = document.getElementById('categories');
+    const searchInput = document.getElementById('searchInput');
+    const clearSearchBtn = document.getElementById('clearSearch');
+    const cartCount = document.getElementById('cartCount');
+    const fabCount = document.getElementById('fabCount');
+    const cartDrawer = document.getElementById('cartDrawer');
+    const cartOverlay = document.getElementById('cartOverlay');
+    const cartItemsEl = document.getElementById('cartItems');
+    const subtotalEl = document.getElementById('subtotal');
+    const taxEl = document.getElementById('tax');
+    const deliveryEl = document.getElementById('delivery');
+    const totalEl = document.getElementById('total');
+    const checkoutBtn = document.getElementById('checkoutBtn');
+    const cartIconBtn = document.getElementById('cartIcon');
+    const cartFabBtn = document.getElementById('cartFab');
+    const closeCartBtn = document.getElementById('closeCart');
+    const clearCartBtn = document.getElementById('clearCart');
+    const langToggle = document.getElementById('langToggle');
+    const appTitle = document.getElementById('appTitle');
+    const heroTitle = document.getElementById('heroTitle');
+    const heroSub = document.getElementById('heroSub');
+
+    // ----------------------
+    // Initialize UI
+    // ----------------------
+    function init(){
+      renderCategories();
+      renderList();
+      updateCartUI();
+      applyLanguage();
+      attachEvents();
+    }
+
+    // ----------------------
+    // Render categories
+    // ----------------------
+    function renderCategories(){
+      categoriesEl.innerHTML = '';
+      categoriesList.forEach(cat => {
+        const btn = document.createElement('button');
+        btn.className = 'pill transition-fast whitespace-nowrap';
+        btn.textContent = mapText(cat);
+        if (cat === state.category) {
+          btn.style.background = 'rgba(251, 191, 36, 0.15)';
+          btn.style.borderColor = 'var(--accent)';
+        }
+        btn.addEventListener('click', ()=>{
+          state.category = cat;
+          renderCategories();
+          renderList();
+        });
+        categoriesEl.appendChild(btn);
+      });
+    }
+
+    // ----------------------
+    // Render main list based on state.query and state.category
+    // ----------------------
+    function renderList(){
+      const q = state.query.trim().toLowerCase();
+      const filtered = menu.filter(item=>{
+        const name = (state.lang === 'ar' ? item.name_ar : item.name_en).toLowerCase();
+        const desc = (state.lang === 'ar' ? item.desc_ar : item.desc_en).toLowerCase();
+        const matchQuery = !q || name.includes(q) || desc.includes(q);
+        const matchCat = state.category === 'All' || item.category === state.category;
+        return matchQuery && matchCat;
+      });
+
+      listEl.innerHTML = '';
+      if (filtered.length === 0){
+        const empty = document.createElement('div');
+        empty.className = 'text-[var(--muted)] p-4 card text-center';
+        empty.textContent = mapText('No items found');
+        listEl.appendChild(empty);
+        return;
+      }
+
+      filtered.forEach(item => {
+        const el = document.createElement('article');
+        el.className = 'card flex items-center gap-3 transition-fast hover:bg-[rgba(255,255,255,0.04)]';
+        el.innerHTML = `
+          <img loading="lazy" src="${item.image}" alt="${escapeHtml(item.name_en)}" class="w-16 h-16 rounded-lg object-cover flex-shrink-0">
+          <div class="flex-1">
+            <div class="flex items-start justify-between gap-2">
+              <div>
+                <div class="dish-name">${escapeHtml(state.lang==='ar'?item.name_ar:item.name_en)}</div>
+                <div class="text-[var(--muted)] text-sm mt-1 line-clamp-1">${escapeHtml(state.lang==='ar'?item.desc_ar:item.desc_en)}</div>
+              </div>
+              <div class="text-right flex-shrink-0">
+                <div class="price">${fmtPrice(item.price)}</div>
+                <button class="mt-2 px-3 py-1 rounded-full font-medium addBtn" data-id="${item.id}" aria-label="Add to cart">${mapText('Add to Cart')}</button>
+              </div>
+            </div>
+          </div>
+        `;
+        // css for add button
+        const addBtn = el.querySelector('.addBtn');
+        addBtn.style.background = 'var(--accent)';
+        addBtn.style.color = 'black';
+        addBtn.style.border = 'none';
+        addBtn.style.transition = 'all 0.2s ease';
+        addBtn.addEventListener('mouseenter', () => {
+          addBtn.style.transform = 'scale(1.05)';
+        });
+        addBtn.addEventListener('mouseleave', () => {
+          addBtn.style.transform = 'scale(1)';
+        });
+        addBtn.addEventListener('click', ()=> addToCart(item.id));
+
+        listEl.appendChild(el);
+      });
+    }
+
+    // ----------------------
+    // Cart logic
+    // ----------------------
+    function addToCart(id){
+      const existing = state.cart.find(i=>i.id===id);
+      if (existing) existing.qty++;
+      else state.cart.push({id, qty:1});
+      persistCart();
+      updateCartUI();
+      animateAdd(); // small feedback
+    }
+
+    function removeFromCart(id){
+      state.cart = state.cart.filter(i=>i.id!==id);
+      persistCart(); updateCartUI();
+    }
+
+    function changeQty(id, delta){
+      const item = state.cart.find(i=>i.id===id);
+      if (!item) return;
+      item.qty = Math.max(1, item.qty + delta);
+      persistCart(); updateCartUI();
+    }
+
+    function persistCart(){
+      localStorage.setItem('restaurant_cart_v1', JSON.stringify(state.cart));
+    }
+
+    function calculateTotals(){
+      let subtotal = 0;
+      state.cart.forEach(ci=>{
+        const prod = menu.find(m=>m.id===ci.id);
+        if (prod) subtotal += prod.price * ci.qty;
+      });
+      const tax = Math.round(subtotal * 0.10); // configurable
+      const delivery = subtotal > 0 ? 10 : 0;
+      const total = subtotal + tax + delivery;
+      return {subtotal, tax, delivery, total};
+    }
+
+    // ----------------------
+    // Render cart drawer
+    // ----------------------
+    function updateCartUI(){
+      const count = state.cart.reduce((s,i)=>s+i.qty,0);
+      cartCount.textContent = count;
+      fabCount.textContent = count + ' items';
+      document.getElementById('fabCount').textContent = count + ' items';
+
+      // Show/hide FAB based on cart items
+      if (count > 0) {
+        cartFabBtn.style.display = 'flex';
+      } else {
+        cartFabBtn.style.display = 'none';
+      }
+
+      // Render cart items list
+      cartItemsEl.innerHTML = '';
+      if (state.cart.length === 0){
+        cartItemsEl.innerHTML = `<div class="text-[var(--muted)] text-center py-8">${mapText('Cart is empty')}</div>`;
+      } else {
+        state.cart.forEach(ci=>{
+          const prod = menu.find(m=>m.id===ci.id);
+          if (!prod) return;
+          const node = document.createElement('div');
+          node.className = 'flex items-center gap-3 p-2 rounded-md bg-[rgba(255,255,255,0.02)]';
+          node.innerHTML = `
+            <img src="${prod.image}" alt="" class="w-12 h-12 rounded-md object-cover flex-shrink-0">
+            <div class="flex-1 min-w-0">
+              <div class="font-medium truncate">${escapeHtml(state.lang==='ar'?prod.name_ar:prod.name_en)}</div>
+              <div class="text-[var(--muted)] text-sm">${fmtPrice(prod.price)}</div>
+            </div>
+            <div class="flex items-center gap-2 flex-shrink-0">
+              <button class="px-2 py-1 pill dec" data-id="${prod.id}" aria-label="Decrease quantity">-</button>
+              <div class="px-2 font-medium">${ci.qty}</div>
+              <button class="px-2 py-1 pill inc" data-id="${prod.id}" aria-label="Increase quantity">+</button>
+              <button class="px-2 py-1 pill rm" data-id="${prod.id}" aria-label="Remove item">✕</button>
+            </div>
+          `;
+          cartItemsEl.appendChild(node);
+        });
+
+        // attach events
+        cartItemsEl.querySelectorAll('.inc').forEach(b=>b.addEventListener('click',()=>changeQty(parseInt(b.dataset.id),1)));
+        cartItemsEl.querySelectorAll('.dec').forEach(b=>b.addEventListener('click',()=>changeQty(parseInt(b.dataset.id),-1)));
+        cartItemsEl.querySelectorAll('.rm').forEach(b=>b.addEventListener('click',()=>removeFromCart(parseInt(b.dataset.id))));
+      }
+
+      // totals
+      const totals = calculateTotals();
+      subtotalEl.textContent = fmtPrice(totals.subtotal);
+      taxEl.textContent = fmtPrice(totals.tax);
+      deliveryEl.textContent = fmtPrice(totals.delivery);
+      totalEl.textContent = fmtPrice(totals.total);
+    }
+
+    // ----------------------
+    // Drawer open/close
+    // ----------------------
+    function openCart(){
+      const width = window.innerWidth < 700 ? '85%' : '480px';
+      cartDrawer.style.width = width;
+      cartDrawer.setAttribute('aria-hidden','false');
+      cartOverlay.classList.add('active');
+      document.body.style.overflow = 'hidden';
+      updateCartUI();
+    }
+    
+    function closeCart(){
+      cartDrawer.style.width = '0';
+      cartDrawer.setAttribute('aria-hidden','true');
+      cartOverlay.classList.remove('active');
+      document.body.style.overflow = '';
+    }
+
+    // ----------------------
+    // Language handling
+    // ----------------------
+    function applyLanguage(){
+      document.documentElement.lang = state.lang === 'ar' ? 'ar' : 'en';
+      document.documentElement.dir = state.lang === 'ar' ? 'rtl' : 'ltr';
+      // swap font family for Arabic
+      if (state.lang === 'ar') {
+        document.body.style.fontFamily = 'Cairo, Inter, sans-serif';
+        langToggle.textContent = 'EN';
+      } else {
+        document.body.style.fontFamily = 'Inter, Cairo, sans-serif';
+        langToggle.textContent = 'AR';
+      }
+
+      // map static texts
+      appTitle.textContent = mapText('Imandou Food');
+      heroTitle.textContent = mapText('Imandou Food');
+      heroSub.textContent = mapText('Authentic oriental cuisine');
+      searchInput.placeholder = mapText('Search dishes...');
+      clearSearchBtn.title = mapText('Clear search');
+      checkoutBtn.textContent = mapText('Confirm Order');
+      closeCartBtn.title = mapText('Close cart');
+
+      renderCategories();
+      renderList();
+      updateCartUI();
+      localStorage.setItem('app_lang', state.lang);
+    }
+
+    // ----------------------
+    // Events
+    // ----------------------
+    function attachEvents(){
+      // search with debounce
+      let debounce;
+      searchInput.addEventListener('input', (e)=>{
+        clearTimeout(debounce);
+        debounce = setTimeout(()=>{
+          state.query = e.target.value;
+          renderList();
+        }, 220);
+      });
+      clearSearchBtn.addEventListener('click', ()=>{
+        searchInput.value = '';
+        state.query = '';
+        renderList();
+      });
+
+      cartIconBtn.addEventListener('click', openCart);
+      cartFabBtn.addEventListener('click', openCart);
+      closeCartBtn.addEventListener('click', closeCart);
+      cartOverlay.addEventListener('click', closeCart);
+      clearCartBtn.addEventListener('click', ()=>{
+        if (state.cart.length === 0) return;
+        if (confirm(mapText('Are you sure you want to clear your cart?'))) {
+          state.cart = [];
+          persistCart(); 
+          updateCartUI();
+        }
+      });
+
+      checkoutBtn.addEventListener('click', ()=>{
+        const totals = calculateTotals();
+        if (totals.total === 0) { 
+          alert(mapText('Cart is empty')); 
+          return; 
+        }
+        // For prototype: just show summary and clear cart
+        alert(mapText('Order confirmed! Total:') + ' ' + fmtPrice(totals.total));
+        state.cart = [];
+        persistCart(); 
+        updateCartUI(); 
+        closeCart();
+      });
+
+      langToggle.addEventListener('click', ()=>{
+        state.lang = state.lang === 'en' ? 'ar' : 'en';
+        applyLanguage();
+      });
+
+      // back button functionality
+      document.getElementById('backBtn').addEventListener('click', () => {
+        // For demo purposes, just go back in history
+        if (window.history.length > 1) {
+          window.history.back();
+        } else {
+          // If no history, just refresh to home state
+          state.query = '';
+          state.category = 'All';
+          renderCategories();
+          renderList();
+        }
+      });
+
+      // keyboard accessibility: Esc to close cart
+      window.addEventListener('keydown', (e)=>{
+        if (e.key === 'Escape') closeCart();
+      });
+    }
+
+    // ----------------------
+    // Utility: map text for localization
+    // ----------------------
+    function mapText(text){
+      const dict = {
+        'Imandou Food': {'ar':'طعام إيماندو','en':'Imandou Food'},
+        'Authentic oriental cuisine': {'ar':'مطبخ شرقي أصيل','en':'Authentic oriental cuisine'},
+        'Search dishes...': {'ar':'ابحث عن طبق...','en':'Search dishes...'},
+        'Clear search': {'ar':'إمسح البحث','en':'Clear search'},
+        'Add to Cart': {'ar':'أضف إلى السلة','en':'Add to Cart'},
+        'Confirm Order': {'ar':'تأكيد الطلب','en':'Confirm Order'},
+        'Close cart': {'ar':'إغلاق السلة','en':'Close cart'},
+        'No items found': {'ar':'لا توجد عناصر','en':'No items found'},
+        'Cart is empty': {'ar':'السلة فارغة','en':'Cart is empty'},
+        'Order confirmed! Total:': {'ar':'تم تأكيد الطلب! المجموع:','en':'Order confirmed! Total:'},
+        'Are you sure you want to clear your cart?': {'ar':'هل أنت متأكد أنك تريد إفراغ السلة؟','en':'Are you sure you want to clear your cart?'},
+        'All': {'ar':'الكل','en':'All'},
+        'Appetizers': {'ar':'المقبلات','en':'Appetizers'},
+        'Noodle Dishes': {'ar':'أطباق النودلز','en':'Noodle Dishes'},
+        'Main Courses': {'ar':'الأطباق الرئيسية','en':'Main Courses'},
+        'Rice Dishes': {'ar':'أطباق الأرز','en':'Rice Dishes'},
+        'Desserts': {'ar':'الحلويات','en':'Desserts'}
+      };
+      if (dict[text]) return dict[text][state.lang];
+      return text;
+    }
+
+    // ----------------------
+    // Escape helper for safety
+    // ----------------------
+    function escapeHtml(str){
+      if (!str) return '';
+      return String(str).replace(/[&<>"'`=\/]/g, function(s) {
+          return ({ '&': '&amp;','<': '&lt;','>': '&gt;','"': '&quot;',"'": '&#39;', '/':'&#x2F;','`':'&#x60;','=':'&#x3D;' })[s];
+      });
+    }
+
+    // ----------------------
+    // Small add-to-cart animation feedback
+    // ----------------------
+    function animateAdd(){
+      // simple pulse on fab
+      const fab = document.getElementById('cartFab');
+      fab.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.08)' }, { transform: 'scale(1)'}], { duration: 220 });
+    }
+
+    // Initialize
+    init();
+
+    // ----------------------
+    // PWA hint: register service worker if exists
+    // (To fully enable PWA, create manifest.json and /sw.js, and serve over https)
+    // ----------------------
+    if ('serviceWorker' in navigator) {
+      // navigator.serviceWorker.register('/sw.js').catch(()=>{/* ignore in prototype */});
+    }
+
+  </script>
+</body>
+</html>
