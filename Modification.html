@@ -4,17 +4,16 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>نظام إدارة قائمة Imandou Food</title>
-  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
-  <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-  <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
   <style>
+    /*==============================================*/
+    /*=============== Root & Globals ===============*/
+    /*==============================================*/
     :root{
       --bg: #0f172a;
       --card: #0b1220;
@@ -28,7 +27,7 @@
       --warning: #f59e0b;
     }
     
-    html,body{height:100%}
+    html,body{ height:100% }
     body{
       font-family: 'Inter', system-ui, -apple-system, "Segoe UI", sans-serif;
       background: var(--bg);
@@ -41,7 +40,6 @@
       line-height: 1.6;
     }
 
-    /* Food background overlay */
     body::before {
       content: '';
       position: fixed;
@@ -57,1971 +55,874 @@
       pointer-events: none;
     }
 
-    /* mobile-first container */
-    .app {
-      max-width: 480px;
-      margin: 0 auto;
-      min-height:100vh;
-      display:flex;
-      flex-direction:column;
-      position: relative;
-      z-index: 1;
-    }
-
-    /* cards */
-    .card{
-      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.03));
-      border-radius: var(--radius-lg);
-      padding: 12px;
-      box-shadow: 0 6px 18px rgba(2,6,23,0.6);
-      border: 1px solid rgba(255,255,255,0.03);
-      backdrop-filter: blur(10px);
-    }
-
-    /* small pill buttons */
-    .pill {
-      background: rgba(255,255,255,0.02);
-      border-radius: 999px;
-      padding: 8px 12px;
-      font-weight:500;
-      color:var(--text);
-      display:inline-flex;
-      gap:8px;
-      align-items:center;
-      border: 1px solid rgba(255,255,255,0.03);
-      transition: all 0.2s ease;
-      cursor: pointer;
-      font-family: 'Inter', sans-serif;
-      font-size: 0.875rem;
-    }
-
-    .pill:hover {
-      background: rgba(255,255,255,0.05);
-    }
-
-    /* animation helpers */
-    .transition-fast { transition: all .2s ease-out; }
-    .fab { 
-      position: fixed; 
-      right: 20px; 
-      bottom: 18px; 
-      z-index: 60; 
-      transition: transform 0.3s ease;
-    }
-    .fab:hover {
-      transform: scale(1.05);
-    }
-    [dir="rtl"] .fab { right: auto; left: 20px; }
-
-    /* small responsive tweaks */
-    @media(min-width:768px){
-      .app{max-width:720px}
-    }
-
-    /* visually-hidden for accessibility */
-    .sr-only { position: absolute; width:1px; height:1px; padding:0;margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
-
-    /* Line clamp utility */
-    .line-clamp-1 {
-      overflow: hidden;
-      display: -webkit-box;
-      -webkit-box-orient: vertical;
-      -webkit-line-clamp: 1;
-    }
-
-    /* Custom scrollbar for cart */
-    #cartItems::-webkit-scrollbar {
-      width: 6px;
-    }
-    
-    #cartItems::-webkit-scrollbar-track {
-      background: rgba(255,255,255,0.05);
-      border-radius: 10px;
-    }
-    
-    #cartItems::-webkit-scrollbar-thumb {
-      background: rgba(255,255,255,0.1);
-      border-radius: 10px;
-    }
-    
-    #cartItems::-webkit-scrollbar-thumb:hover {
-      background: rgba(255,255,255,0.2);
-    }
-
-    /* Improved Typography */
+    /*==============================================*/
+    /*================ Typography ==================*/
+    /*==============================================*/
     h1, h2, h3, h4, h5, h6 {
       font-family: 'Playfair Display', serif;
       font-weight: 600;
       letter-spacing: -0.025em;
     }
 
-    #appTitle {
-      font-family: 'Playfair Display', serif;
-      font-weight: 700;
-      font-size: 1.5rem;
-    }
+    #appTitle { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 1.5rem; }
+    #heroTitle { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 2rem; letter-spacing: -0.03em; }
+    .dish-name { font-family: 'Inter', sans-serif; font-weight: 500; font-size: 1.1rem; }
+    .price { font-family: 'Inter', sans-serif; font-weight: 600; }
+    input, button, .pill { font-family: 'Inter', sans-serif; }
 
-    #heroTitle {
-      font-family: 'Playfair Display', serif;
-      font-weight: 700;
-      font-size: 2rem;
-      letter-spacing: -0.03em;
-    }
+    [lang="ar"] body, [dir="rtl"] body { font-family: 'Cairo', 'Inter', sans-serif; }
+    [lang="ar"] h1, [lang="ar"] h2, [lang="ar"] h3, [dir="rtl"] h1, [dir="rtl"] h2, [dir="rtl"] h3 { font-family: 'Cairo', 'Playfair Display', serif; }
 
-    .dish-name {
-      font-family: 'Inter', sans-serif;
-      font-weight: 500;
-      font-size: 1.1rem;
-    }
+    /*==============================================*/
+    /*================= Components =================*/
+    /*==============================================*/
+    .app { max-width: 480px; margin: 0 auto; min-height:100vh; display:flex; flex-direction:column; position: relative; z-index: 1; }
+    .card{ background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.03)); border-radius: var(--radius-lg); padding: 12px; box-shadow: 0 6px 18px rgba(2,6,23,0.6); border: 1px solid rgba(255,255,255,0.03); backdrop-filter: blur(10px); }
+    .pill { background: rgba(255,255,255,0.02); border-radius: 999px; padding: 8px 12px; font-weight:500; color:var(--text); display:inline-flex; gap:8px; align-items:center; border: 1px solid rgba(255,255,255,0.03); transition: all 0.2s ease; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 0.875rem; }
+    .pill:hover { background: rgba(255,255,255,0.05); }
 
-    .price {
-      font-family: 'Inter', sans-serif;
-      font-weight: 600;
-    }
+    .form-input { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: var(--radius-md); padding: 10px 12px; color: var(--text); width: 100%; margin-bottom: 12px; }
+    .form-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.1); }
+    .form-input.is-invalid { border-color: var(--danger); }
 
-    input, button, .pill {
-      font-family: 'Inter', sans-serif;
-    }
-
-    /* Arabic font styling */
-    [lang="ar"] body,
-    [dir="rtl"] body {
-      font-family: 'Cairo', 'Inter', sans-serif;
-    }
-
-    [lang="ar"] h1,
-    [lang="ar"] h2,
-    [lang="ar"] h3,
-    [dir="rtl"] h1,
-    [dir="rtl"] h2,
-    [dir="rtl"] h3 {
-      font-family: 'Cairo', 'Playfair Display', serif;
-    }
-
-    /* Form styles */
-    .form-input {
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      border-radius: var(--radius-md);
-      padding: 10px 12px;
-      color: var(--text);
-      width: 100%;
-      margin-bottom: 12px;
-    }
-
-    .form-input:focus {
-      outline: none;
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.1);
-    }
+    .image-preview { margin-top: 10px; width: 100%; height: 150px; background-color: rgba(255, 255, 255, 0.03); border: 1px dashed rgba(255, 255, 255, 0.1); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; overflow: hidden; color: var(--muted); }
+    .image-preview img { width: 100%; height: 100%; object-fit: cover; }
 
     /* Modal styles */
-    .modal {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.7);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-      padding: 20px;
-      backdrop-filter: blur(5px);
-    }
-
-    .modal.active {
-      display: flex;
-    }
-
-    .modal-content {
-      background: var(--card);
-      border-radius: var(--radius-lg);
-      width: 100%;
-      max-width: 500px;
-      max-height: 90vh;
-      overflow-y: auto;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
-      border: 1px solid rgba(255,255,255,0.05);
-    }
-
-    .modal-header {
-      padding: 20px;
-      border-bottom: 1px solid rgba(255,255,255,0.05);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .modal-title {
-      font-size: 1.5rem;
-      font-weight: 700;
-      margin: 0;
-    }
-
-    .close {
-      background: none;
-      border: none;
-      font-size: 1.5rem;
-      cursor: pointer;
-      color: var(--text);
-    }
-
-    .modal-body {
-      padding: 20px;
-    }
-
-    .modal-footer {
-      padding: 20px;
-      border-top: 1px solid rgba(255,255,255,0.05);
-      display: flex;
-      justify-content: flex-end;
-      gap: 10px;
-    }
-
-    /* Alert styles */
-    .alert {
-      padding: 12px 16px;
-      border-radius: var(--radius-md);
-      margin-bottom: 16px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .alert-success {
-      background: rgba(16, 185, 129, 0.15);
-      color: var(--success);
-      border-left: 4px solid var(--success);
-    }
-
-    .alert-danger {
-      background: rgba(239, 68, 68, 0.15);
-      color: var(--danger);
-      border-left: 4px solid var(--danger);
-    }
-
-    .alert-warning {
-      background: rgba(245, 158, 11, 0.15);
-      color: var(--warning);
-      border-left: 4px solid var(--warning);
-    }
-
-    /* Toggle switch */
-    .toggle-container {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 16px;
-    }
-
-    .switch {
-      position: relative;
-      display: inline-block;
-      width: 50px;
-      height: 24px;
-    }
-
-    .switch input {
-      opacity: 0;
-      width: 0;
-      height: 0;
-    }
-
-    .slider {
-      position: absolute;
-      cursor: pointer;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-color: #ccc;
-      transition: .4s;
-      border-radius: 34px;
-    }
-
-    .slider:before {
-      position: absolute;
-      content: "";
-      height: 16px;
-      width: 16px;
-      left: 4px;
-      bottom: 4px;
-      background-color: white;
-      transition: .4s;
-      border-radius: 50%;
-    }
-
-    input:checked + .slider {
-      background-color: var(--accent);
-    }
-
-    input:checked + .slider:before {
-      transform: translateX(26px);
-    }
-
-    .toggle-label {
-      font-weight: 500;
-    }
+    .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 20px; backdrop-filter: blur(5px); }
+    .modal.active { display: flex; }
+    .modal-content { background: var(--card); border-radius: var(--radius-lg); width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5); border: 1px solid rgba(255,255,255,0.05); }
+    .modal-header { padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; align-items: center; }
+    .modal-title { font-size: 1.5rem; font-weight: 700; margin: 0; }
+    .close { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text); }
+    .modal-body { padding: 20px; }
+    .modal-footer { padding: 20px; border-top: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: flex-end; gap: 10px; }
 
     /* Table styles */
-    .table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 16px;
-    }
-
-    .table th,
-    .table td {
-      padding: 12px;
-      text-align: right;
-      border-bottom: 1px solid rgba(255,255,255,0.05);
-    }
-
-    .table th {
-      background: rgba(255,255,255,0.03);
-      font-weight: 600;
-    }
-
-    .table tr:hover {
-      background: rgba(255,255,255,0.02);
-    }
+    .table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+    .table th, .table td { padding: 12px; text-align: right; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .table th { background: rgba(255,255,255,0.03); font-weight: 600; }
+    .table tr:hover { background: rgba(255,255,255,0.02); }
 
     /* Badge styles */
-    .badge {
-      display: inline-block;
-      padding: 4px 8px;
-      border-radius: 12px;
-      font-size: 0.75rem;
-      font-weight: 600;
-    }
+    .badge { display: inline-block; padding: 4px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; }
+    .badge-success { background: rgba(16, 185, 129, 0.15); color: var(--success); }
+    .badge-danger { background: rgba(239, 68, 68, 0.15); color: var(--danger); }
+    .badge-warning { background: rgba(245, 158, 11, 0.15); color: var(--warning); }
 
-    .badge-success {
-      background: rgba(16, 185, 129, 0.15);
-      color: var(--success);
-    }
+    /* Toggle switch */
+    .toggle-container { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+    .switch { position: relative; display: inline-block; width: 50px; height: 24px; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(255,255,255,0.1); transition: .4s; border-radius: 34px; }
+    .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
+    input:checked + .slider { background-color: var(--accent); }
+    input:checked + .slider:before { transform: translateX(26px); }
 
-    .badge-danger {
-      background: rgba(239, 68, 68, 0.15);
-      color: var(--danger);
-    }
-
-    .badge-warning {
-      background: rgba(245, 158, 11, 0.15);
-      color: var(--warning);
-    }
+    /*==============================================*/
+    /*================== Utilities =================*/
+    /*==============================================*/
+    .fab { position: fixed; right: 20px; bottom: 18px; z-index: 60; transition: transform 0.3s ease; }
+    .fab:hover { transform: scale(1.05); }
+    [dir="rtl"] .fab { right: auto; left: 20px; }
+    @media(min-width:768px){ .app{max-width:720px} }
 
     /* Toast notification */
-    .toast-container {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      z-index: 1000;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .toast {
-      padding: 12px 16px;
-      border-radius: var(--radius-md);
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-      animation: slideIn 0.3s ease;
-    }
-
-    .toast-success {
-      background: var(--success);
-      color: white;
-    }
-
-    .toast-error {
-      background: var(--danger);
-      color: white;
-    }
-
-    .toast-warning {
-      background: var(--warning);
-      color: white;
-    }
-
-    @keyframes slideIn {
-      from { transform: translateX(100%); opacity: 0; }
-      to { transform: translateX(0); opacity: 1; }
-    }
-
-    @keyframes slideOut {
-      from { transform: translateX(0); opacity: 1; }
-      to { transform: translateX(100%); opacity: 0; }
-    }
+    .toast-container { position: fixed; top: 20px; right: 20px; z-index: 1000; display: flex; flex-direction: column; gap: 10px; }
+    .toast { padding: 12px 16px; border-radius: var(--radius-md); display: flex; align-items: center; gap: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); animation: slideIn 0.3s ease; }
+    .toast-success { background: var(--success); color: white; }
+    .toast-error { background: var(--danger); color: white; }
+    @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    @keyframes slideOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }
 
     /* Loading spinner */
-    .spinner {
-      border: 3px solid rgba(255,255,255,0.1);
-      border-radius: 50%;
-      border-top: 3px solid var(--accent);
-      width: 24px;
-      height: 24px;
-      animation: spin 1s linear infinite;
-      margin: 0 auto;
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
+    .spinner { border: 3px solid rgba(255,255,255,0.1); border-radius: 50%; border-top: 3px solid var(--accent); width: 24px; height: 24px; animation: spin 1s linear infinite; }
+    button .spinner { width: 20px; height: 20px; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
   </style>
 </head>
 <body>
-  <!-- Toast notifications container -->
+
   <div class="toast-container" id="toastContainer"></div>
 
-  <!-- نافذة تسجيل الدخول -->
-  <div class="modal" id="loginModal">
+  <div class="modal active" id="loginModal">
     <div class="modal-content">
       <div class="modal-header">
         <h3 class="modal-title">تسجيل الدخول</h3>
-        <button class="close" id="closeLoginModal">&times;</button>
+        <button type="button" class="close" data-modal-close="loginModal">&times;</button>
       </div>
-      <div class="modal-body">
-        <div class="form-group">
-          <label for="email" class="block mb-2 text-sm font-medium">البريد الإلكتروني</label>
-          <input type="email" class="form-input" id="email" required>
+      <form id="loginForm">
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="email" class="block mb-2 text-sm font-medium">البريد الإلكتروني</label>
+            <input type="email" class="form-input" id="email" required>
+          </div>
+          <div class="form-group">
+            <label for="password" class="block mb-2 text-sm font-medium">كلمة المرور</label>
+            <input type="password" class="form-input" id="password" required>
+          </div>
         </div>
-        <div class="form-group">
-          <label for="password" class="block mb-2 text-sm font-medium">كلمة المرور</label>
-          <input type="password" class="form-input" id="password" required>
+        <div class="modal-footer">
+          <button type="submit" class="pill bg-[var(--accent)] text-black font-semibold" id="loginBtn">
+            <i class="fas fa-sign-in-alt"></i> تسجيل الدخول
+          </button>
         </div>
-      </div>
-      <div class="modal-footer">
-        <button class="pill bg-[var(--accent)] text-black font-semibold" id="loginBtn">
-          <i class="fas fa-sign-in-alt"></i> تسجيل الدخول
-        </button>
-      </div>
+      </form>
     </div>
   </div>
 
-  <!-- المحتوى الرئيسي (يظهر بعد تسجيل الدخول) -->
-  <div class="app p-4" id="mainContent" style="display: none;">
-    <!-- Header -->
+  <main class="app p-4" id="mainContent" style="display: none;">
     <header class="flex items-center justify-between mb-3">
       <div class="flex items-center gap-3">
-        <button id="backBtn" class="p-2 rounded-md transition-fast hover:bg-[rgba(255,255,255,0.05)]" aria-label="Back">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-          </svg>
-        </button>
         <h1 id="appTitle" class="text-xl font-semibold">Imandou Food - الإدارة</h1>
       </div>
-
       <div class="flex items-center gap-3">
-        <button class="pill" onclick="window.open('index.html', '_self')">
+        <a href="index.html" class="pill">
           <i class="fas fa-eye"></i> عرض القائمة
-        </button>
-        <button id="logoutBtn" class="pill bg-red-500/20 text-red-300">
+        </a>
+        <button type="button" id="logoutBtn" class="pill bg-red-500/20 text-red-300">
           <i class="fas fa-sign-out-alt"></i> تسجيل الخروج
         </button>
       </div>
     </header>
 
-    <!-- Hero -->
     <section class="card mb-4 relative overflow-hidden">
-      <div class="flex items-center gap-3">
-        <img src="https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=800&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder" alt="hero" class="w-28 h-28 object-cover rounded-lg shadow-md">
-        <div>
-          <div id="heroTitle" class="text-2xl font-bold">نظام إدارة القائمة</div>
-          <div id="heroSub" class="text-sm text-[var(--muted)]">تحكم كامل في قائمة المطعم</div>
+        <div class="flex items-center gap-3">
+          <img src="https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=400&auto=format&fit=crop" alt="hero" class="w-28 h-28 object-cover rounded-lg shadow-md">
+          <div>
+            <div id="heroTitle" class="text-2xl font-bold">نظام إدارة القائمة</div>
+            <div id="heroSub" class="text-sm text-[var(--muted)]">تحكم كامل في قائمة المطعم</div>
+          </div>
         </div>
-      </div>
     </section>
 
-    <!-- Language Selector -->
-    <div class="flex gap-2 mb-4">
-      <button class="pill lang-btn active" data-lang="ar">
-        <i class="fas fa-language"></i> العربية
-      </button>
-      <button class="pill lang-btn" data-lang="en">
-        <i class="fas fa-language"></i> English
-      </button>
-      <button class="pill lang-btn" data-lang="fr">
-        <i class="fas fa-language"></i> Français
-      </button>
-    </div>
-
-    <div id="alertContainer"></div>
-
-    <!-- Tabs -->
-    <div class="flex gap-2 mb-4 overflow-x-auto">
-      <button class="pill tab-btn active" data-tab="items">
-        <i class="fas fa-utensils"></i> إدارة الأصناف
-      </button>
-      <button class="pill tab-btn" data-tab="categories">
-        <i class="fas fa-layer-group"></i> إدارة الأقسام
-      </button>
-      <button class="pill tab-btn" data-tab="settings">
-        <i class="fas fa-cog"></i> الإعدادات
-      </button>
-    </div>
-
-    <!-- Tab Content: Items -->
+    <nav class="flex justify-between items-center mb-4">
+      <div class="flex gap-2" id="langContainer">
+        <button type="button" class="pill lang-btn active" data-lang="ar">العربية</button>
+        <button type="button" class="pill lang-btn" data-lang="en">English</button>
+        <button type="button" class="pill lang-btn" data-lang="fr">Français</button>
+      </div>
+      <div class="flex gap-2" id="tabsContainer">
+        <button type="button" class="pill tab-btn active" data-tab="items"><i class="fas fa-utensils"></i> الأصناف</button>
+        <button type="button" class="pill tab-btn" data-tab="categories"><i class="fas fa-layer-group"></i> الأقسام</button>
+        <button type="button" class="pill tab-btn" data-tab="settings"><i class="fas fa-cog"></i> الإعدادات</button>
+      </div>
+    </nav>
+    
     <div class="tab-content active" id="items-tab">
       <div class="card mb-4">
         <div class="flex items-center justify-between mb-4">
           <h2 class="text-lg font-semibold">الأصناف</h2>
-          <button class="pill bg-[var(--accent)] text-black" id="addItemBtn">
-            <i class="fas fa-plus"></i> إضافة صنف جديد
+          <button type="button" class="pill bg-[var(--accent)] text-black" id="addItemBtn">
+            <i class="fas fa-plus"></i> إضافة صنف
           </button>
         </div>
-
         <div class="flex gap-2 mb-4">
           <input type="text" id="searchItems" placeholder="بحث في الأصناف..." class="form-input flex-1">
           <select id="filterCategory" class="form-input flex-1">
             <option value="">جميع الأقسام</option>
           </select>
         </div>
-
         <div class="overflow-x-auto">
           <table class="table">
-            <thead>
-              <tr>
-                <th>الصورة</th>
-                <th>الاسم</th>
-                <th>القسم</th>
-                <th>السعر</th>
-                <th>الحالة</th>
-                <th>الإجراءات</th>
-              </tr>
-            </thead>
-            <tbody id="itemsList">
-              <!-- سيتم تعبئتها ديناميكياً -->
-            </tbody>
+            <thead><tr><th>الصورة</th><th>الاسم</th><th>القسم</th><th>السعر</th><th>الحالة</th><th>الإجراءات</th></tr></thead>
+            <tbody id="itemsList"></tbody>
           </table>
         </div>
-        <div id="itemsLoading" class="p-4">
-          <div class="spinner"></div>
-        </div>
+        <div id="itemsLoading" class="p-4" style="display:none;"><div class="spinner mx-auto"></div></div>
       </div>
     </div>
 
-    <!-- Tab Content: Categories -->
-    <div class="tab-content" id="categories-tab">
+    <div class="tab-content" id="categories-tab" style="display:none;">
       <div class="card mb-4">
         <div class="flex items-center justify-between mb-4">
           <h2 class="text-lg font-semibold">الأقسام</h2>
-          <button class="pill bg-[var(--accent)] text-black" id="addCategoryBtn">
-            <i class="fas fa-plus"></i> إضافة قسم جديد
+          <button type="button" class="pill bg-[var(--accent)] text-black" id="addCategoryBtn">
+            <i class="fas fa-plus"></i> إضافة قسم
           </button>
         </div>
-
         <table class="table">
-          <thead>
-            <tr>
-              <th>اسم القسم</th>
-              <th>عدد الأصناف</th>
-              <th>الحالة</th>
-              <th>الإجراءات</th>
-            </tr>
-          </thead>
-          <tbody id="categoriesList">
-            <!-- سيتم تعبئتها ديناميكياً -->
-          </tbody>
+          <thead><tr><th>اسم القسم</th><th>عدد الأصناف</th><th>الحالة</th><th>الإجراءات</th></tr></thead>
+          <tbody id="categoriesList"></tbody>
         </table>
       </div>
     </div>
 
-    <!-- Tab Content: Settings -->
-    <div class="tab-content" id="settings-tab">
+    <div class="tab-content" id="settings-tab" style="display:none;">
       <div class="card mb-4">
         <h2 class="text-lg font-semibold mb-4">الإعدادات العامة</h2>
-        
-        <div class="form-group">
-          <label class="block mb-2 text-sm font-medium">اسم المطعم</label>
-          <input type="text" class="form-input" id="restaurantName" value="Imandou Food">
-        </div>
-        
-        <div class="form-group">
-          <label class="block mb-2 text-sm font-medium">وصف المطعم</label>
-          <textarea class="form-input" id="restaurantDescription" rows="3">مطعم يقدم أطباق شرقية أصلية</textarea>
-        </div>
-        
-        <div class="form-group">
-          <label class="block mb-2 text-sm font-medium">صورة الخلفية</label>
-          <input type="text" class="form-input" id="backgroundImage" placeholder="أدخل رابط الصورة">
-          <div class="image-preview" id="backgroundPreview">
-            <span>معاينة الصورة</span>
-          </div>
-        </div>
-        
-        <div class="form-group">
-          <label class="block mb-2 text-sm font-medium">لون التمييز</label>
-          <input type="color" class="form-input p-1 h-10" id="accentColor" value="#fbbf24">
-        </div>
-        
-        <button class="pill bg-[var(--accent)] text-black" id="saveSettingsBtn">
-          <i class="fas fa-save"></i> حفظ الإعدادات
-        </button>
+        <form id="settingsForm">
+          <label for="restaurantName" class="block mb-2 text-sm font-medium">اسم المطعم</label>
+          <input type="text" id="restaurantName" class="form-input" value="Imandou Food">
+          <label for="restaurantDescription" class="block mb-2 text-sm font-medium">وصف المطعم</label>
+          <textarea id="restaurantDescription" class="form-input" rows="3">مطعم يقدم أطباق شرقية أصلية</textarea>
+          <label for="backgroundImage" class="block mb-2 text-sm font-medium">صورة الخلفية</label>
+          <input type="text" id="backgroundImage" class="form-input" placeholder="أدخل رابط الصورة">
+          <div class="image-preview" id="backgroundPreview"><span>معاينة الصورة</span></div>
+          <label for="accentColor" class="block mt-4 mb-2 text-sm font-medium">لون التمييز</label>
+          <input type="color" id="accentColor" class="form-input p-1 h-10" value="#fbbf24">
+          <button type="submit" class="pill bg-[var(--accent)] text-black mt-4" id="saveSettingsBtn">
+            <i class="fas fa-save"></i> حفظ الإعدادات
+          </button>
+        </form>
       </div>
     </div>
-  </div>
+  </main>
 
-  <!-- مودال إضافة/تعديل صنف -->
   <div class="modal" id="itemModal">
     <div class="modal-content">
       <div class="modal-header">
-        <h3 class="modal-title" id="itemModalTitle">إضافة صنف جديد</h3>
-        <button class="close">&times;</button>
+        <h3 class="modal-title" id="itemModalTitle"></h3>
+        <button type="button" class="close" data-modal-close="itemModal">&times;</button>
       </div>
-      <div class="modal-body">
-        <input type="hidden" id="itemId">
-        
-        <div class="form-group">
-          <label class="block mb-2 text-sm font-medium">اسم الصنف (العربية)</label>
-          <input type="text" class="form-input" id="itemNameAr" required>
+      <form id="itemForm">
+        <div class="modal-body">
+            <input type="hidden" id="itemId">
+            <label for="itemNameAr">اسم الصنف (العربية)</label><input type="text" id="itemNameAr" class="form-input" required>
+            <label for="itemNameEn">اسم الصنف (الإنجليزية)</label><input type="text" id="itemNameEn" class="form-input" required>
+            <label for="itemNameFr">اسم الصنف (الفرنسية)</label><input type="text" id="itemNameFr" class="form-input">
+            <div class="grid grid-cols-2 gap-4">
+              <div><label for="itemCategory">القسم</label><select id="itemCategory" class="form-input" required><option value="">اختر القسم</option></select></div>
+              <div><label for="itemPrice">السعر (درهم)</label><input type="number" id="itemPrice" class="form-input" min="0" step="0.01" required></div>
+            </div>
+            <label for="itemDescAr">الوصف (العربية)</label><textarea id="itemDescAr" class="form-input" rows="2"></textarea>
+            <label for="itemDescEn">الوصف (الإنجليزية)</label><textarea id="itemDescEn" class="form-input" rows="2"></textarea>
+            <label for="itemDescFr">الوصف (الفرنسية)</label><textarea id="itemDescFr" class="form-input" rows="2"></textarea>
+            <label for="itemImage">رابط الصورة</label><input type="text" id="itemImage" class="form-input" placeholder="أدخل رابط الصورة">
+            <div class="image-preview" id="itemImagePreview"><span>معاينة الصورة</span></div>
+            <div class="flex justify-around mt-4">
+                <div class="toggle-container"><label class="switch"><input type="checkbox" id="itemSpicy"><span class="slider"></span></label><span>حار</span></div>
+                <div class="toggle-container"><label class="switch"><input type="checkbox" id="itemPopular" checked><span class="slider"></span></label><span>شائع</span></div>
+                <div class="toggle-container"><label class="switch"><input type="checkbox" id="itemStatus" checked><span class="slider"></span></label><span>مفعل</span></div>
+            </div>
         </div>
-        
-        <div class="form-group">
-          <label class="block mb-2 text-sm font-medium">اسم الصنف (الإنجليزية)</label>
-          <input type="text" class="form-input" id="itemNameEn" required>
+        <div class="modal-footer">
+            <button type="button" class="pill" data-modal-close="itemModal">إلغاء</button>
+            <button type="submit" class="pill bg-[var(--accent)] text-black" id="saveItemBtn">حفظ</button>
         </div>
-        
-        <div class="form-group">
-          <label class="block mb-2 text-sm font-medium">اسم الصنف (الفرنسية)</label>
-          <input type="text" class="form-input" id="itemNameFr">
-        </div>
-        
-        <div class="form-group">
-          <label class="block mb-2 text-sm font-medium">القسم</label>
-          <select class="form-input" id="itemCategory" required>
-            <option value="">اختر القسم</option>
-          </select>
-        </div>
-        
-        <div class="form-group">
-          <label class="block mb-2 text-sm font-medium">السعر (درهم)</label>
-          <input type="number" class="form-input" id="itemPrice" min="0" step="0.01" required>
-        </div>
-        
-        <div class="form-group">
-          <label class="block mb-2 text-sm font-medium">الوصف (العربية)</label>
-          <textarea class="form-input" id="itemDescAr" rows="2"></textarea>
-        </div>
-        
-        <div class="form-group">
-          <label class="block mb-2 text-sm font-medium">الوصف (الإنجليزية)</label>
-          <textarea class="form-input" id="itemDescEn" rows="2"></textarea>
-        </div>
-        
-        <div class="form-group">
-          <label class="block mb-2 text-sm font-medium">الوصف (الفرنسية)</label>
-          <textarea class="form-input" id="itemDescFr" rows="2"></textarea>
-        </div>
-        
-        <div class="form-group">
-          <label class="block mb-2 text-sm font-medium">رابط الصورة</label>
-          <input type="text" class="form-input" id="itemImage" placeholder="أدخل رابط الصورة">
-          <div class="image-preview" id="itemImagePreview">
-            <span>معاينة الصورة</span>
-          </div>
-        </div>
-        
-        <div class="toggle-container">
-          <label class="switch">
-            <input type="checkbox" id="itemSpicy">
-            <span class="slider"></span>
-          </label>
-          <span class="toggle-label">حار</span>
-        </div>
-        
-        <div class="toggle-container">
-          <label class="switch">
-            <input type="checkbox" id="itemPopular" checked>
-            <span class="slider"></span>
-          </label>
-          <span class="toggle-label">شائع</span>
-        </div>
-        
-        <div class="toggle-container">
-          <label class="switch">
-            <input type="checkbox" id="itemStatus" checked>
-            <span class="slider"></span>
-          </label>
-          <span class="toggle-label">مفعل</span>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="pill bg-[var(--accent)] text-black" id="saveItemBtn">حفظ</button>
-        <button class="pill" id="cancelItemBtn">إلغاء</button>
-      </div>
+      </form>
     </div>
   </div>
 
-  <!-- مودال إضافة/تعديل قسم -->
   <div class="modal" id="categoryModal">
     <div class="modal-content">
       <div class="modal-header">
-        <h3 class="modal-title" id="categoryModalTitle">إضافة قسم جديد</h3>
-        <button class="close">&times;</button>
+        <h3 class="modal-title" id="categoryModalTitle"></h3>
+        <button type="button" class="close" data-modal-close="categoryModal">&times;</button>
       </div>
-      <div class="modal-body">
-        <input type="hidden" id="categoryId">
-        
-        <div class="form-group">
-          <label class="block mb-2 text-sm font-medium">اسم القسم (العربية)</label>
-          <input type="text" class="form-input" id="categoryNameAr" required>
+      <form id="categoryForm">
+        <div class="modal-body">
+            <input type="hidden" id="categoryId">
+            <label for="categoryNameAr">اسم القسم (العربية)</label><input type="text" id="categoryNameAr" class="form-input" required>
+            <label for="categoryNameEn">اسم القسم (الإنجليزية)</label><input type="text" id="categoryNameEn" class="form-input" required>
+            <label for="categoryNameFr">اسم القسم (الفرنسية)</label><input type="text" id="categoryNameFr" class="form-input">
+            <div class="toggle-container mt-4"><label class="switch"><input type="checkbox" id="categoryStatus" checked><span class="slider"></span></label><span>مفعل</span></div>
         </div>
-        
-        <div class="form-group">
-          <label class="block mb-2 text-sm font-medium">اسم القسم (الإنجليزية)</label>
-          <input type="text" class="form-input" id="categoryNameEn" required>
+        <div class="modal-footer">
+            <button type="button" class="pill" data-modal-close="categoryModal">إلغاء</button>
+            <button type="submit" class="pill bg-[var(--accent)] text-black" id="saveCategoryBtn">حفظ</button>
         </div>
-        
-        <div class="form-group">
-          <label class="block mb-2 text-sm font-medium">اسم القسم (الفرنسية)</label>
-          <input type="text" class="form-input" id="categoryNameFr">
-        </div>
-        
-        <div class="toggle-container">
-          <label class="switch">
-            <input type="checkbox" id="categoryStatus" checked>
-            <span class="slider"></span>
-          </label>
-          <span class="toggle-label">مفعل</span>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="pill bg-[var(--accent)] text-black" id="saveCategoryBtn">حفظ</button>
-        <button class="pill" id="cancelCategoryBtn">إلغاء</button>
-      </div>
+      </form>
     </div>
   </div>
 
-  <!-- مودال تأكيد الحذف -->
   <div class="modal" id="confirmModal">
     <div class="modal-content">
-      <div class="modal-header">
-        <h3 class="modal-title" id="confirmModalTitle">تأكيد الحذف</h3>
-        <button class="close">&times;</button>
-      </div>
-      <div class="modal-body">
-        <p id="confirmMessage">هل أنت متأكد من أنك تريد الحذف؟</p>
-      </div>
+      <div class="modal-header"><h3 class="modal-title" id="confirmModalTitle"></h3><button type="button" class="close" data-modal-close="confirmModal">&times;</button></div>
+      <div class="modal-body"><p id="confirmMessage"></p></div>
       <div class="modal-footer">
-        <button class="pill bg-[var(--danger)] text-white" id="confirmDeleteBtn">
-          <i class="fas fa-trash"></i> نعم، احذف
-        </button>
-        <button class="pill" id="cancelDeleteBtn">
-          <i class="fas fa-times"></i> إلغاء
-        </button>
+          <button type="button" class="pill" data-modal-close="confirmModal"><i class="fas fa-times"></i> إلغاء</button>
+          <button type="button" class="pill bg-[var(--danger)] text-white" id="confirmDeleteBtn"><i class="fas fa-trash"></i> نعم، احذف</button>
       </div>
     </div>
   </div>
 
   <script>
-    // بيانات القائمة الحالية
-    const menu = [
-      {
-        "id": 1,
-        "name_en": "Spicy Shrimp Noodles",
-        "name_ar": "نودلز الروبيان الحار",
-        "name_fr": "Nouilles aux Crevettes Épicées",
-        "category": "Noodle Dishes",
-        "price": 45,
-        "currency": "MAD",
-        "image": "https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=400&h=300&fit=crop",
-        "desc_en": "Stir-fried noodles with spicy shrimp and veggies",
-        "desc_ar": "نودلز مقلاة مع روبيان حار وخضار",
-        "desc_fr": "Nouilles sautées avec crevettes épicées et légumes",
-        "spicy": true,
-        "popular": true,
-        "hidden": false
-      },
-      {
-        "id": 2,
-        "name_en": "Veggie Noodles",
-        "name_ar": "نودلز بالخضار",
-        "name_fr": "Nouilles aux Légumes",
-        "category": "Noodle Dishes",
-        "price": 29,
-        "currency": "MAD",
-        "image": "https://images.unsplash.com/photo-1546549032-9571cd6b27df?w=400&h=300&fit=crop",
-        "desc_en": "Fresh noodles with mixed vegetables",
-        "desc_ar": "نودلز طازجة مع خضار مشكلة",
-        "desc_fr": "Nouilles fraîches avec légumes assortis",
-        "spicy": false,
-        "popular": false,
-        "hidden": false
-      },
-      {
-        "id": 3,
-        "name_en": "Crispy Chicken",
-        "name_ar": "دجاج مقرمش",
-        "name_fr": "Poulet Croquant",
-        "category": "Main Courses",
-        "price": 55,
-        "currency": "MAD",
-        "image": "https://images.unsplash.com/photo-1626645738196-c2a7c87a8f58?w=400&h=300&fit=crop",
-        "desc_en": "Fried chicken bites with oriental spices",
-        "desc_ar": "قطع دجاج مقلية بتوابل شرقية",
-        "desc_fr": "Morceaux de poulet frits aux épices orientales",
-        "spicy": false,
-        "popular": true,
-        "hidden": false
-      },
-      {
-        "id": 4,
-        "name_en": "Spicy Chicken",
-        "name_ar": "دجاج حار",
-        "name_fr": "Poulet Épicé",
-        "category": "Main Courses",
-        "price": 49,
-        "currency": "MAD",
-        "image": "https://images.unsplash.com/photo-1562967914-608f82629710?w=400&h=300&fit=crop",
-        "desc_en": "Marinated chicken with chili",
-        "desc_ar": "دجاج متبل بالفلفل الحار",
-        "desc_fr": "Poulet mariné au piment",
-        "spicy": true,
-        "popular": false,
-        "hidden": false
-      },
-      {
-        "id": 5,
-        "name_en": "Shrimp Appetizer",
-        "name_ar": "مقبلات روبيان",
-        "name_fr": "Apéritif aux Crevettes",
-        "category": "Appetizers",
-        "price": 35,
-        "currency": "MAD",
-        "image": "https://images.unsplash.com/photo-1616683693504-3ea0e0e8a71e?w=400&h=300&fit=crop",
-        "desc_en": "Lightly spiced shrimp appetizer",
-        "desc_ar": "مقبلات روبيان متبلة خفيفة",
-        "desc_fr": "Apéritif de crevettes légèremente épicé",
-        "spicy": false,
-        "popular": true,
-        "hidden": false
-      },
-      {
-        "id": 6,
-        "name_en": "Spring Rolls",
-        "name_ar": "لفائف الربيع",
-        "name_fr": "Rouleaux de Printemps",
-        "category": "Appetizers",
-        "price": 22,
-        "currency": "MAD",
-        "image": "https://images.unsplash.com/photo-1616683693504-3ea0e0e8a71e?w=400&h=300&fit=crop",
-        "desc_en": "Vegetable spring rolls",
-        "desc_ar": "لفائف بالخضار",
-        "desc_fr": "Rouleaux de printemps aux légumes",
-        "spicy": false,
-        "popular": false,
-        "hidden": false
-      },
-      {
-        "id": 7,
-        "name_en": "Beef Tagine",
-        "name_ar": "طاجن لحم البقر",
-        "name_fr": "Tajine de Bœuf",
-        "category": "Main Courses",
-        "price": 65,
-        "currency": "MAD",
-        "image": "https://images.unsplash.com/photo-1512058564366-18510be2db19?w=400&h=300&fit=crop",
-        "desc_en": "Traditional Moroccan beef tagine with prunes",
-        "desc_ar": "طاجن لحم البقر المغربي التقليدي مع الخوخ",
-        "desc_fr": "Tajine marocain traditionnel de bœuf aux pruneaux",
-        "spicy": false,
-        "popular": true,
-        "hidden": false
-      },
-      {
-        "id": 8,
-        "name_en": "Chicken Couscous",
-        "name_ar": "كسكس الدجاج",
-        "name_fr": "Couscous au Poulet",
-        "category": "Main Courses",
-        "price": 48,
-        "currency": "MAD",
-        "image": "https://images.unsplash.com/photo-1530554764238-0b5d0b3d4e94?w=400&h=300&fit=crop",
-        "desc_en": "Steamed semolina with chicken and vegetables",
-        "desc_ar": "سميد مطبوخ على البخار مع الدجاج والخضار",
-        "desc_fr": "Semoule cuite à la vapeur avec poulet et légumes",
-        "spicy": false,
-        "popular": true,
-        "hidden": false
-      },
-      {
-        "id": 9,
-        "name_en": "Lamb Mechoui",
-        "name_ar": "لحم الضأن المشوي",
-        "name_fr": "Méchoui d'Agneau",
-        "category": "Main Courses",
-        "price": 75,
-        "currency": "MAD",
-        "image": "https://images.unsplash.com/photo-1546964124-0cce460f38ef?w=400&h=300&fit=crop",
-        "desc_en": "Slow-roasted lamb with traditional spices",
-        "desc_ar": "لحم ضأن مطبوخ ببطء مع توابل تقليدية",
-        "desc_fr": "Agneau rôti lentement avec des épices traditionnelles",
-        "spicy": false,
-        "popular": true,
-        "hidden": false
-      },
-      {
-        "id": 10,
-        "name_en": "Vegetable Tagine",
-        "name_ar": "طاجن الخضار",
-        "name_fr": "Tajine de Légumes",
-        "category": "Main Courses",
-        "price": 38,
-        "currency": "MAD",
-        "image": "https://images.unsplash.com/photo-1512058564366-18510be2db19?w=400&h=300&fit=crop",
-        "desc_en": "Seasonal vegetables cooked in traditional tagine",
-        "desc_ar": "خضروات موسمية مطبوخة في طاجن تقليدي",
-        "desc_fr": "Légumes de saison cuits dans un tajine traditionnel",
-        "spicy": false,
-        "popular": false,
-        "hidden": false
-      },
-      {
-        "id": 11,
-        "name_en": "Harira Soup",
-        "name_ar": "حريرة",
-        "name_fr": "Soupe Harira",
-        "category": "Appetizers",
-        "price": 18,
-        "currency": "MAD",
-        "image": "https://images.unsplash.com/photo-1547592166-23ac45744acd?w=400&h=300&fit=crop",
-        "desc_en": "Traditional Moroccan soup with lentils and chickpeas",
-        "desc_ar": "شورى مغربية تقليدية مع العدس والحمص",
-        "desc_fr": "Soupe marocaine traditionnelle aux lentilles et pois chiches",
-        "spicy": false,
-        "popular": true,
-        "hidden": false
-      },
-      {
-        "id": 12,
-        "name_en": "Briouats",
-        "name_ar": "بريوات",
-        "name_fr": "Briouates",
-        "category": "Appetizers",
-        "price": 25,
-        "currency": "MAD",
-        "image": "https://images.unsplash.com/photo-1616683693504-3ea0e0e8a71e?w=400&h=300&fit=crop",
-        "desc_en": "Crispy pastry filled with meat or cheese",
-        "desc_ar": "معجنات مقرمشة محشوة باللحم أو الجبن",
-        "desc_fr": "Pâtisserie croustillante farcie à la viande ou au fromage",
-        "spicy": false,
-        "popular": true,
-        "hidden": false
-      },
-      {
-        "id": 13,
-        "name_en": "Baklava",
-        "name_ar": "بقلاوة",
-        "name_fr": "Baklava",
-        "category": "Desserts",
-        "price": 28,
-        "currency": "MAD",
-        "image": "https://images.unsplash.com/photo-1581368135153-a506cf13531c?w=400&h=300&fit=crop",
-        "desc_en": "Sweet pastry made of layers of filo filled with nuts",
-        "desc_ar": "حلويات مصنوعة من طبقات من العجين محشوة بالمكسرات",
-        "desc_fr": "Pâtisserie sucrée faite de couches de filo farcies aux noix",
-        "spicy": false,
-        "popular": true,
-        "hidden": false
-      },
-      {
-        "id": 14,
-        "name_en": "Mint Tea",
-        "name_ar": "شاي بالنعناع",
-        "name_fr": "Thé à la Menthe",
-        "category": "Drinks",
-        "price": 12,
-        "currency": "MAD",
-        "image": "https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=400&h=300&fit=crop",
-        "desc_en": "Traditional Moroccan mint tea",
-        "desc_ar": "شاي مغربي تقليدي بالنعناع",
-        "desc_fr": "Thé à la menthe marocain traditionnel",
-        "spicy": false,
-        "popular": true,
-        "hidden": false
-      },
-      {
-        "id": 15,
-        "name_en": "Orange Juice",
-        "name_ar": "عصير برتقال",
-        "name_fr": "Jus d'Orange",
-        "category": "Drinks",
-        "price": 15,
-        "currency": "MAD",
-        "image": "https://images.unsplash.com/photo-1613478223719-2ab802602423?w=400&h=300&fit=crop",
-        "desc_en": "Freshly squeezed orange juice",
-        "desc_ar": 'عصير برتقال طازج',
-        "desc_fr": "Jus d'orange fraîchement pressé",
-        "spicy": false,
-        "popular": false,
-        "hidden": false
-      }
-    ];
+    document.addEventListener('DOMContentLoaded', () => {
+      /**
+       * ImandouAdmin Application Object
+       * Encapsulates the entire admin panel logic.
+       */
+      const ImandouAdmin = {
+        // Application state
+        state: {
+          menu: [],
+          categories: [],
+          settings: {},
+          isEditing: false,
+          currentItemIndex: null,
+          currentCategoryIndex: null,
+          currentLang: 'ar',
+          deleteCallback: null,
+          user: null,
+        },
 
-    // Firebase configuration
-    const firebaseConfig = {
-      apiKey: "AIzaSyCyPOzsEzdrRd9o7iHASzFoLyJQhpTW83E",
-      authDomain: "imandou-food.firebaseapp.com",
-      databaseURL: "https://imandou-food-default-rtdb.firebaseio.com",
-      projectId: "imandou-food",
-      storageBucket: "imandou-food.firebasestorage.app",
-      messagingSenderId: "839302179988",
-      appId: "1:839302179988:web:92636c32e1b00b587ad881",
-      measurementId: "G-7LE4J4XL9T"
-    };
+        // Firebase configuration and references
+        firebaseConfig: {
+          apiKey: "AIzaSyCyPOzsEzdrRd9o7iHASzFoLyJQhpTW83E",
+          authDomain: "imandou-food.firebaseapp.com",
+          databaseURL: "https://imandou-food-default-rtdb.firebaseio.com",
+          projectId: "imandou-food",
+          storageBucket: "imandou-food.appspot.com",
+          messagingSenderId: "839302179988",
+          appId: "1:839302179988:web:92636c32e1b00b587ad881",
+        },
+        firebaseApp: null,
+        firebaseRefs: {
+          db: null,
+          auth: null,
+          menu: null,
+          categories: null,
+          settings: null,
+        },
 
-    // Initialize Firebase
-    const app = firebase.initializeApp(firebaseConfig);
-    const database = firebase.database();
-    const auth = firebase.auth();
+        // Cached DOM elements
+        elements: {},
 
-    // مراجع Firebase
-    const menuRef = database.ref('menu');
-    const categoriesRef = database.ref('categories');
-    const settingsRef = database.ref('settings');
+        /**
+         * Initializes the application.
+         */
+        init() {
+          this.cacheDOMElements();
+          this.initFirebase();
+          this.setupEventListeners();
+          this.monitorAuthState();
+        },
 
-    // عناصر DOM
-    const mainContent = document.getElementById('mainContent');
-    const loginModal = document.getElementById('loginModal');
-    const loginBtn = document.getElementById('loginBtn');
-    const closeLoginModal = document.getElementById('closeLoginModal');
-    const logoutBtn = document.getElementById('logoutBtn');
-    const alertContainer = document.getElementById('alertContainer');
-    const toastContainer = document.getElementById('toastContainer');
-    const langButtons = document.querySelectorAll('.lang-btn');
-    const tabButtons = document.querySelectorAll('.tab-btn');
-    const tabContents = document.querySelectorAll('.tab-content');
-    
-    // عناصر إدارة الأصناف
-    const itemsList = document.getElementById('itemsList');
-    const itemsLoading = document.getElementById('itemsLoading');
-    const searchItemsInput = document.getElementById('searchItems');
-    const filterCategorySelect = document.getElementById('filterCategory');
-    const addItemBtn = document.getElementById('addItemBtn');
-    const itemModal = document.getElementById('itemModal');
-    const itemModalTitle = document.getElementById('itemModalTitle');
-    const itemIdInput = document.getElementById('itemId');
-    const itemNameArInput = document.getElementById('itemNameAr');
-    const itemNameEnInput = document.getElementById('itemNameEn');
-    const itemNameFrInput = document.getElementById('itemNameFr');
-    const itemCategorySelect = document.getElementById('itemCategory');
-    const itemPriceInput = document.getElementById('itemPrice');
-    const itemDescArInput = document.getElementById('itemDescAr');
-    const itemDescEnInput = document.getElementById('itemDescEn');
-    const itemDescFrInput = document.getElementById('itemDescFr');
-    const itemImageInput = document.getElementById('itemImage');
-    const itemImagePreview = document.getElementById('itemImagePreview');
-    const itemSpicyInput = document.getElementById('itemSpicy');
-    const itemPopularInput = document.getElementById('itemPopular');
-    const itemStatusInput = document.getElementById('itemStatus');
-    const saveItemBtn = document.getElementById('saveItemBtn');
-    const cancelItemBtn = document.getElementById('cancelItemBtn');
-    
-    // عناصر إدارة الأقسام
-    const categoriesList = document.getElementById('categoriesList');
-    const addCategoryBtn = document.getElementById('addCategoryBtn');
-    const categoryModal = document.getElementById('categoryModal');
-    const categoryModalTitle = document.getElementById('categoryModalTitle');
-    const categoryIdInput = document.getElementById('categoryId');
-    const categoryNameArInput = document.getElementById('categoryNameAr');
-    const categoryNameEnInput = document.getElementById('categoryNameEn');
-    const categoryNameFrInput = document.getElementById('categoryNameFr');
-    const categoryStatusInput = document.getElementById('categoryStatus');
-    const saveCategoryBtn = document.getElementById('saveCategoryBtn');
-    const cancelCategoryBtn = document.getElementById('cancelCategoryBtn');
-    
-    // عناصر الإعدادات العامة
-    const restaurantNameInput = document.getElementById('restaurantName');
-    const restaurantDescriptionInput = document.getElementById('restaurantDescription');
-    const backgroundImageInput = document.getElementById('backgroundImage');
-    const backgroundPreview = document.getElementById('backgroundPreview');
-    const accentColorInput = document.getElementById('accentColor');
-    const saveSettingsBtn = document.getElementById('saveSettingsBtn');
-    
-    // عناصر تأكيد الحذف
-    const confirmModal = document.getElementById('confirmModal');
-    const confirmModalTitle = document.getElementById('confirmModalTitle');
-    const confirmMessage = document.getElementById('confirmMessage');
-    const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
-    const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
-    
-    // متغيرات التطبيق
-    let menuData = [];
-    let categoriesData = [];
-    let settingsData = {};
-    let isEditing = false;
-    let currentItemId = null;
-    let currentCategoryId = null;
-    let currentLang = 'ar';
-    let deleteCallback = null;
+        /**
+         * Caches all required DOM elements for performance.
+         */
+        cacheDOMElements() {
+          const ids = [
+            'mainContent', 'loginModal', 'loginForm', 'loginBtn', 'logoutBtn',
+            'toastContainer', 'langContainer', 'tabsContainer', 'appTitle', 'heroTitle', 'heroSub',
+            'itemsList', 'itemsLoading', 'addItemBtn', 'searchItems', 'filterCategory',
+            'itemModal', 'itemModalTitle', 'itemForm', 'itemId', 'itemNameAr', 'itemNameEn', 'itemNameFr',
+            'itemCategory', 'itemPrice', 'itemDescAr', 'itemDescEn', 'itemDescFr',
+            'itemImage', 'itemImagePreview', 'itemSpicy', 'itemPopular', 'itemStatus', 'saveItemBtn',
+            'categoriesList', 'addCategoryBtn', 'categoryModal', 'categoryModalTitle', 'categoryForm',
+            'categoryId', 'categoryNameAr', 'categoryNameEn', 'categoryNameFr', 'categoryStatus', 'saveCategoryBtn',
+            'settingsForm', 'restaurantName', 'restaurantDescription', 'backgroundImage', 'backgroundPreview', 'accentColor', 'saveSettingsBtn',
+            'confirmModal', 'confirmModalTitle', 'confirmMessage', 'confirmDeleteBtn'
+          ];
+          ids.forEach(id => {
+            this.elements[id] = document.getElementById(id);
+          });
+          this.elements.tabContents = document.querySelectorAll('.tab-content');
+        },
 
-    // تهيئة التطبيق
-    function init() {
-      setupEventListeners();
-      
-      // مراقبة حالة المصادقة
-      auth.onAuthStateChanged((user) => {
-        if (user) {
-          // المستخدم مسجل الدخول
-          mainContent.style.display = 'block';
-          loginModal.classList.remove('active');
-          loadMenuData();
-          loadCategoriesData();
-          loadSettings();
-        } else {
-          // لا يوجد مستخدم مسجل الدخول
-          mainContent.style.display = 'none';
-          loginModal.classList.add('active');
-        }
-      });
-    }
+        /**
+         * Initializes Firebase and sets up database references.
+         */
+        initFirebase() {
+          this.firebaseApp = firebase.initializeApp(this.firebaseConfig);
+          this.firebaseRefs.db = firebase.database();
+          this.firebaseRefs.auth = firebase.auth();
+          this.firebaseRefs.menu = this.firebaseRefs.db.ref('menu');
+          this.firebaseRefs.categories = this.firebaseRefs.db.ref('categories');
+          this.firebaseRefs.settings = this.firebaseRefs.db.ref('settings');
+        },
 
-    // إعداد مستمعي الأحداث
-    function setupEventListeners() {
-      // أحداث تسجيل الدخول والخروج
-      loginBtn.addEventListener('click', loginUser);
-      closeLoginModal.addEventListener('click', () => loginModal.classList.remove('active'));
-      logoutBtn.addEventListener('click', logoutUser);
-      
-      // أحداث تغيير اللغة
-      langButtons.forEach(btn => {
-        btn.addEventListener('click', () => {
-          langButtons.forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
-          currentLang = btn.dataset.lang;
-          updateUIForLanguage();
-        });
-      });
-      
-      // أحداث التبويبات
-      tabButtons.forEach(btn => {
-        btn.addEventListener('click', () => {
-          const tabId = btn.dataset.tab;
-          switchTab(tabId);
-        });
-      });
-      
-      // أحداث إدارة الأصناف
-      addItemBtn.addEventListener('click', openItemModal);
-      searchItemsInput.addEventListener('input', debounce(filterItems, 300));
-      filterCategorySelect.addEventListener('change', filterItems);
-      itemImageInput.addEventListener('input', updateItemImagePreview);
-      saveItemBtn.addEventListener('click', saveItem);
-      cancelItemBtn.addEventListener('click', closeItemModal);
-      document.querySelector('#itemModal .close').addEventListener('click', closeItemModal);
-      
-      // أحداث إدارة الأقسام
-      addCategoryBtn.addEventListener('click', openCategoryModal);
-      saveCategoryBtn.addEventListener('click', saveCategory);
-      cancelCategoryBtn.addEventListener('click', closeCategoryModal);
-      document.querySelector('#categoryModal .close').addEventListener('click', closeCategoryModal);
-      
-      // أحداث الإعدادات العامة
-      backgroundImageInput.addEventListener('input', updateBackgroundPreview);
-      saveSettingsBtn.addEventListener('click', saveSettings);
-      
-      // أحداث تأكيد الحذف
-      confirmDeleteBtn.addEventListener('click', confirmDelete);
-      cancelDeleteBtn.addEventListener('click', closeConfirmModal);
-      document.querySelector('#confirmModal .close').addEventListener('click', closeConfirmModal);
-      
-      // زر العودة
-      document.getElementById('backBtn').addEventListener('click', () => {
-        window.history.back();
-      });
-    }
-
-    // تسجيل الدخول
-    function loginUser(e) {
-      e.preventDefault();
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
-
-      showLoading(loginBtn);
-      
-      auth.signInWithEmailAndPassword(email, password)
-        .then((userCredential) => {
-          hideLoading(loginBtn, '<i class="fas fa-sign-in-alt"></i> تسجيل الدخول');
-          showToast('تم تسجيل الدخول بنجاح!', 'success');
-        })
-        .catch((error) => {
-          hideLoading(loginBtn, '<i class="fas fa-sign-in-alt"></i> تسجيل الدخول');
-          showToast('خطأ في تسجيل الدخول: ' + error.message, 'error');
-        });
-    }
-
-    // تسجيل الخروج
-    function logoutUser() {
-      auth.signOut()
-        .then(() => {
-          showToast('تم تسجيل الخروج بنجاح', 'success');
-        })
-        .catch((error) => {
-          showToast('خطأ في تسجيل الخروج: ' + error.message, 'error');
-        });
-    }
-
-    // تحميل بيانات القائمة من Firebase
-    function loadMenuData() {
-      showLoading(itemsLoading);
-      
-      menuRef.on('value', (snapshot) => {
-        const firebaseData = snapshot.val();
-        
-        if (firebaseData && firebaseData.length > 0) {
-          menuData = firebaseData;
-        } else {
-          // إذا لم توجد بيانات في Firebase، نستخدم البيانات المحلية
-          menuData = menu;
-          menuRef.set(menuData)
-            .then(() => {
-              showToast('تم رفع القائمة إلى Firebase بنجاح', 'success');
-            })
-            .catch(error => {
-              showToast('حدث خطأ أثناء رفع القائمة: ' + error.message, 'error');
-            });
-        }
-        
-        updateCategoryDropdown();
-        renderItems();
-        hideLoading(itemsLoading);
-      });
-    }
-
-    // تحميل بيانات الأقسام من Firebase
-    function loadCategoriesData() {
-      categoriesRef.on('value', (snapshot) => {
-        const firebaseData = snapshot.val();
-        
-        if (firebaseData && firebaseData.length > 0) {
-          categoriesData = firebaseData;
-        } else {
-          // إذا لم توجد بيانات في Firebase، نستخرج الأقسام من القائمة
-          extractCategoriesFromMenu();
-        }
-        
-        renderCategories();
-      });
-    }
-
-    // استخراج الأقسام من القائمة
-    function extractCategoriesFromMenu() {
-      const categoriesSet = new Set();
-      menuData.forEach(item => {
-        categoriesSet.add(item.category);
-      });
-      
-      categoriesData = Array.from(categoriesSet).map((category, index) => ({
-        id: index + 1,
-        name_ar: category,
-        name_en: category,
-        name_fr: category,
-        hidden: false
-      }));
-      
-      // حفظ الأقسام في Firebase
-      categoriesRef.set(categoriesData)
-        .then(() => {
-          showToast('تم إنشاء الأقسام تلقائياً من القائمة', 'success');
-        })
-        .catch(error => {
-          showToast('حدث خطأ أثناء حفظ الأقسام: ' + error.message, 'error');
-        });
-    }
-
-    // تحميل الإعدادات من Firebase
-    function loadSettings() {
-      settingsRef.on('value', (snapshot) => {
-        settingsData = snapshot.val() || {};
-        applySettings();
-      });
-    }
-
-    // تطبيق الإعدادات على الواجهة
-    function applySettings() {
-      if (settingsData.restaurantName) {
-        restaurantNameInput.value = settingsData.restaurantName;
-        document.getElementById('appTitle').textContent = settingsData.restaurantName + ' - الإدارة';
-        document.getElementById('heroTitle').textContent = settingsData.restaurantName;
-      }
-      
-      if (settingsData.restaurantDescription) {
-        restaurantDescriptionInput.value = settingsData.restaurantDescription;
-      }
-      
-      if (settingsData.backgroundImage) {
-        backgroundImageInput.value = settingsData.backgroundImage;
-        updateBackgroundPreview();
-      }
-      
-      if (settingsData.accentColor) {
-        accentColorInput.value = settingsData.accentColor;
-        document.documentElement.style.setProperty('--accent', settingsData.accentColor);
-      }
-    }
-
-    // حفظ الإعدادات
-    function saveSettings() {
-      showLoading(saveSettingsBtn);
-      
-      const settings = {
-        restaurantName: restaurantNameInput.value,
-        restaurantDescription: restaurantDescriptionInput.value,
-        backgroundImage: backgroundImageInput.value,
-        accentColor: accentColorInput.value,
-        lastUpdated: new Date().toISOString()
-      };
-      
-      settingsRef.set(settings)
-        .then(() => {
-          hideLoading(saveSettingsBtn, '<i class="fas fa-save"></i> حفظ الإعدادات');
-          showToast('تم حفظ الإعدادات بنجاح', 'success');
-          applySettings();
-        })
-        .catch(error => {
-          hideLoading(saveSettingsBtn, '<i class="fas fa-save"></i> حفظ الإعدادات');
-          showToast('حدث خطأ أثناء حفظ الإعدادات: ' + error.message, 'error');
-        });
-    }
-
-    // تحديث معاينة صورة الخلفية
-    function updateBackgroundPreview() {
-      const url = backgroundImageInput.value;
-      if (url) {
-        backgroundPreview.innerHTML = `<img src="${url}" alt="معاينة الخلفية" onerror="this.parentElement.innerHTML='<span>معاينة الصورة</span>'">`;
-      } else {
-        backgroundPreview.innerHTML = '<span>معاينة الصورة</span>';
-      }
-    }
-
-    // تحديث معاينة صورة الصنف
-    function updateItemImagePreview() {
-      const url = itemImageInput.value;
-      if (url) {
-        itemImagePreview.innerHTML = `<img src="${url}" alt="معاينة الصورة" onerror="this.parentElement.innerHTML='<span>معاينة الصورة</span>'">`;
-      } else {
-        itemImagePreview.innerHTML = '<span>معاينة الصورة</span>';
-      }
-    }
-
-    // تحديث قائمة الأقسام في مودال الصنف
-    function updateCategoryDropdown() {
-      // تحديث قائمة التصفية
-      filterCategorySelect.innerHTML = '<option value="">جميع الأقسام</option>';
-      
-      // تحديث قائمة الأقسام في مودال الصنف
-      itemCategorySelect.innerHTML = '<option value="">اختر القسم</option>';
-      
-      categoriesData.forEach(category => {
-        if (!category.hidden) {
-          const option1 = document.createElement('option');
-          option1.value = category.name_ar;
-          option1.textContent = currentLang === 'ar' ? category.name_ar : currentLang === 'fr' ? category.name_fr : category.name_en;
-          filterCategorySelect.appendChild(option1);
+        /**
+         * Sets up all event listeners for the application.
+         */
+        setupEventListeners() {
+          this.elements.loginForm.addEventListener('submit', e => { e.preventDefault(); this.loginUser(); });
+          this.elements.logoutBtn.addEventListener('click', () => this.logoutUser());
           
-          const option2 = document.createElement('option');
-          option2.value = category.name_ar;
-          option2.textContent = currentLang === 'ar' ? category.name_ar : currentLang === 'fr' ? category.name_fr : category.name_en;
-          itemCategorySelect.appendChild(option2);
-        }
-      });
-    }
+          this.elements.langContainer.addEventListener('click', e => {
+            if (e.target.classList.contains('lang-btn')) this.switchLanguage(e.target.dataset.lang);
+          });
 
-    // عرض الأصناف في الجدول
-    function renderItems() {
-      itemsList.innerHTML = '';
-      
-      if (!menuData || menuData.length === 0) {
-        itemsList.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-[var(--muted)]">لا توجد أصناف</td></tr>`;
-        return;
-      }
-      
-      menuData.forEach((item, index) => {
-        const isHidden = item.hidden === true;
-        
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td><img src="${item.image}" alt="${item.name_ar}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 5px;"></td>
-          <td>${currentLang === 'ar' ? item.name_ar : currentLang === 'fr' ? item.name_fr : item.name_en}</td>
-          <td>${item.category}</td>
-          <td>${item.price} درهم</td>
-          <td>
-            <span class="badge ${isHidden ? 'badge-warning' : 'badge-success'}">
-              ${isHidden ? 'مخفي' : 'مفعل'}
-            </span>
-          </td>
-          <td>
-            <button class="pill btn-edit-item" data-index="${index}">
-              <i class="fas fa-edit"></i> تعديل
-            </button>
-            <button class="pill bg-[var(--danger)]/20 text-[var(--danger)] btn-delete-item" data-index="${index}">
-              <i class="fas fa-trash"></i> حذف
-            </button>
-          </td>
-        `;
-        itemsList.appendChild(tr);
-        
-        // إضافة أحداث النقر للأزرار
-        tr.querySelector('.btn-edit-item').addEventListener('click', (e) => {
-          e.stopPropagation();
-          editItem(index);
-        });
-        
-        tr.querySelector('.btn-delete-item').addEventListener('click', (e) => {
-          e.stopPropagation();
-          showConfirmModal(
-            'تأكيد الحذف',
-            'هل أنت متأكد من حذف هذا الصنف؟ لا يمكن التراجع عن هذا الإجراء.',
-            () => deleteItem(index)
-          );
-        });
-      });
-    }
+          this.elements.tabsContainer.addEventListener('click', e => {
+            if (e.target.classList.contains('tab-btn')) this.switchTab(e.target.dataset.tab);
+          });
 
-    // عرض الأقسام في الجدول
-    function renderCategories() {
-      categoriesList.innerHTML = '';
-      
-      if (!categoriesData || categoriesData.length === 0) {
-        categoriesList.innerHTML = `<tr><td colspan="4" class="text-center py-4 text-[var(--muted)]">لا توجد أقسام</td></tr>`;
-        return;
-      }
-      
-      categoriesData.forEach((category, index) => {
-        // حساب عدد الأصناف في هذا القسم
-        const itemCount = menuData.filter(item => item.category === category.name_ar).length;
-        const isHidden = category.hidden === true;
-        
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${currentLang === 'ar' ? category.name_ar : currentLang === 'fr' ? category.name_fr : category.name_en}</td>
-          <td>${itemCount}</td>
-          <td>
-            <span class="badge ${isHidden ? 'badge-warning' : 'badge-success'}">
-              ${isHidden ? 'مخفي' : 'مفعل'}
-            </span>
-          </td>
-          <td>
-            <button class="pill btn-edit-category" data-index="${index}">
-              <i class="fas fa-edit"></i> تعديل
-            </button>
-            <button class="pill bg-[var(--danger)]/20 text-[var(--danger)] btn-delete-category" data-index="${index}">
-              <i class="fas fa-trash"></i> حذف
-            </button>
-            <button class="pill ${isHidden ? 'bg-[var(--success)]/20 text-[var(--success)]' : 'bg-[var(--warning)]/20 text-[var(--warning)]'} btn-toggle-category" data-index="${index}">
-              <i class="fas ${isHidden ? 'fa-eye' : 'fa-eye-slash'}"></i> ${isHidden ? 'إظهار' : 'إخفاء'}
-            </button>
-          </td>
-        `;
-        categoriesList.appendChild(tr);
-        
-        // إضافة أحداث النقر للأزرار
-        tr.querySelector('.btn-edit-category').addEventListener('click', (e) => {
-          e.stopPropagation();
-          editCategory(index);
-        });
-        
-        tr.querySelector('.btn-delete-category').addEventListener('click', (e) => {
-          e.stopPropagation();
-          showConfirmModal(
-            'تأكيد الحذف',
-            'هل أنت متأكد من حذف هذا القسم؟ سيتم حذف جميع الأصناف المرتبطة به.',
-            () => deleteCategory(index)
-          );
-        });
-        
-        tr.querySelector('.btn-toggle-category').addEventListener('click', (e) => {
-          e.stopPropagation();
-          toggleCategoryVisibility(index);
-        });
-      });
-    }
+          // Modals
+          document.addEventListener('click', e => {
+            if (e.target.dataset.modalClose) this.toggleModal(e.target.dataset.modalClose, false);
+          });
+          this.elements.addItemBtn.addEventListener('click', () => this.openItemModal());
+          this.elements.addCategoryBtn.addEventListener('click', () => this.openCategoryModal());
 
-    // تصفية الأصناف
-    function filterItems() {
-      const searchText = searchItemsInput.value.toLowerCase();
-      const category = filterCategorySelect.value;
-      
-      const filtered = menuData.filter(item => {
-        const name = currentLang === 'ar' ? item.name_ar : currentLang === 'fr' ? item.name_fr : item.name_en;
-        const matchSearch = !searchText || name.toLowerCase().includes(searchText);
-        const matchCategory = !category || item.category === category;
-        
-        return matchSearch && matchCategory;
-      });
-      
-      itemsList.innerHTML = '';
-      
-      if (filtered.length === 0) {
-        itemsList.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-[var(--muted)]">لا توجد أصناف تطابق البحث</td></tr>`;
-        return;
-      }
-      
-      filtered.forEach((item, index) => {
-        const isHidden = item.hidden === true;
-        const originalIndex = menuData.findIndex(i => i.id === item.id);
-        
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td><img src="${item.image}" alt="${item.name_ar}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 5px;"></td>
-          <td>${currentLang === 'ar' ? item.name_ar : currentLang === 'fr' ? item.name_fr : item.name_en}</td>
-          <td>${item.category}</td>
-          <td>${item.price} درهم</td>
-          <td>
-            <span class="badge ${isHidden ? 'badge-warning' : 'badge-success'}">
-              ${isHidden ? 'مخفي' : 'مفعل'}
-            </span>
-          </td>
-          <td>
-            <button class="pill btn-edit-item" data-index="${originalIndex}">
-              <i class="fas fa-edit"></i> تعديل
-            </button>
-            <button class="pill bg-[var(--danger)]/20 text-[var(--danger)] btn-delete-item" data-index="${originalIndex}">
-              <i class="fas fa-trash"></i> حذف
-            </button>
-          </td>
-        `;
-        itemsList.appendChild(tr);
-        
-        // إضافة أحداث النقر للأزرار
-        tr.querySelector('.btn-edit-item').addEventListener('click', (e) => {
-          e.stopPropagation();
-          editItem(originalIndex);
-        });
-        
-        tr.querySelector('.btn-delete-item').addEventListener('click', (e) => {
-          e.stopPropagation();
-          showConfirmModal(
-            'تأكيد الحذف',
-            'هل أنت متأكد من حذف هذا الصنف؟ لا يمكن التراجع عن هذا الإجراء.',
-            () => deleteItem(originalIndex)
-          );
-        });
-      });
-    }
+          // Forms
+          this.elements.itemForm.addEventListener('submit', e => { e.preventDefault(); this.saveItem(); });
+          this.elements.categoryForm.addEventListener('submit', e => { e.preventDefault(); this.saveCategory(); });
+          this.elements.settingsForm.addEventListener('submit', e => { e.preventDefault(); this.saveSettings(); });
+          
+          // Event Delegation for lists
+          this.elements.itemsList.addEventListener('click', e => this.handleItemsListClick(e));
+          this.elements.categoriesList.addEventListener('click', e => this.handleCategoriesListClick(e));
+          
+          // Other listeners
+          this.elements.searchItems.addEventListener('input', this.debounce(() => this.renderItems(), 300));
+          this.elements.filterCategory.addEventListener('change', () => this.renderItems());
+          this.elements.itemImage.addEventListener('input', () => this.updateImagePreview(this.elements.itemImage, this.elements.itemImagePreview));
+          this.elements.backgroundImage.addEventListener('input', () => this.updateImagePreview(this.elements.backgroundImage, this.elements.backgroundPreview));
+          this.elements.confirmDeleteBtn.addEventListener('click', () => this.confirmDelete());
+        },
 
-    // فتح مودال إضافة صنف
-    function openItemModal() {
-      isEditing = false;
-      currentItemId = null;
-      itemModalTitle.textContent = 'إضافة صنف جديد';
-      itemModal.classList.add('active');
-      
-      // تفريغ الحقول
-      itemIdInput.value = '';
-      itemNameArInput.value = '';
-      itemNameEnInput.value = '';
-      itemNameFrInput.value = '';
-      itemCategorySelect.value = '';
-      itemPriceInput.value = '';
-      itemDescArInput.value = '';
-      itemDescEnInput.value = '';
-      itemDescFrInput.value = '';
-      itemImageInput.value = '';
-      itemImagePreview.innerHTML = '<span>معاينة الصورة</span>';
-      itemSpicyInput.checked = false;
-      itemPopularInput.checked = true;
-      itemStatusInput.checked = true;
-    }
+        //===============================================
+        //=============== AUTHENTICATION ================
+        //===============================================
 
-    // فتح مودال تعديل صنف
-    function editItem(index) {
-      const item = menuData[index];
-      if (!item) return;
-      
-      isEditing = true;
-      currentItemId = index;
-      itemModalTitle.textContent = 'تعديل الصنف';
-      itemModal.classList.add('active');
-      
-      // تعبئة الحقول
-      itemIdInput.value = item.id;
-      itemNameArInput.value = item.name_ar;
-      itemNameEnInput.value = item.name_en;
-      itemNameFrInput.value = item.name_fr || '';
-      itemCategorySelect.value = item.category;
-      itemPriceInput.value = item.price;
-      itemDescArInput.value = item.desc_ar;
-      itemDescEnInput.value = item.desc_en;
-      itemDescFrInput.value = item.desc_fr || '';
-      itemImageInput.value = item.image;
-      updateItemImagePreview();
-      itemSpicyInput.checked = item.spicy || false;
-      itemPopularInput.checked = item.popular || false;
-      itemStatusInput.checked = !item.hidden;
-    }
+        monitorAuthState() {
+          this.firebaseRefs.auth.onAuthStateChanged(user => {
+            if (user) {
+              this.state.user = user;
+              this.elements.mainContent.style.display = 'block';
+              this.toggleModal('loginModal', false);
+              this.loadAllData();
+            } else {
+              this.state.user = null;
+              this.elements.mainContent.style.display = 'none';
+              this.toggleModal('loginModal', true);
+            }
+          });
+        },
 
-    // حفظ الصنف
-    function saveItem() {
-      showLoading(saveItemBtn);
-      
-      const name_ar = itemNameArInput.value.trim();
-      const name_en = itemNameEnInput.value.trim();
-      const name_fr = itemNameFrInput.value.trim();
-      const category = itemCategorySelect.value;
-      const price = parseFloat(itemPriceInput.value);
-      const desc_ar = itemDescArInput.value.trim();
-      const desc_en = itemDescEnInput.value.trim();
-      const desc_fr = itemDescFrInput.value.trim();
-      const image = itemImageInput.value.trim();
-      const spicy = itemSpicyInput.checked;
-      const popular = itemPopularInput.checked;
-      const hidden = !itemStatusInput.checked;
-      
-      if (!name_ar || !name_en || !category || isNaN(price)) {
-        hideLoading(saveItemBtn, '<i class="fas fa-save"></i> حفظ');
-        showToast('الرجاء ملء جميع الحقول المطلوبة', 'error');
-        return;
-      }
-      
-      const itemData = {
-        id: isEditing ? menuData[currentItemId].id : Math.max(...menuData.map(i => i.id), 0) + 1,
-        name_ar,
-        name_en,
-        name_fr: name_fr || name_en,
-        category,
-        price,
-        currency: "MAD",
-        image: image || 'https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=800&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder',
-        desc_ar,
-        desc_en,
-        desc_fr: desc_fr || desc_en,
-        spicy,
-        popular,
-        hidden,
-        lastUpdated: new Date().toISOString()
-      };
-      
-      if (isEditing) {
-        // تحديث الصنف الموجود
-        menuData[currentItemId] = itemData;
-      } else {
-        // إضافة صنف جديد
-        menuData.push(itemData);
-      }
-      
-      // حفظ التغييرات في Firebase
-      menuRef.set(menuData)
-        .then(() => {
-          hideLoading(saveItemBtn, '<i class="fas fa-save"></i> حفظ');
-          showToast(isEditing ? 'تم تحديث الصنف بنجاح' : 'تم إضافة الصنف بنجاح', 'success');
-          closeItemModal();
-          updateCategoryDropdown();
-          renderItems();
-        })
-        .catch(error => {
-          hideLoading(saveItemBtn, '<i class="fas fa-save"></i> حفظ');
-          showToast('حدث خطأ أثناء حفظ الصنف: ' + error.message, 'error');
-        });
-    }
-
-    // حذف صنف
-    function deleteItem(index) {
-      showLoading(confirmDeleteBtn);
-      
-      // حذف الصنف من البيانات المحلية
-      const deletedItem = menuData[index];
-      menuData.splice(index, 1);
-      
-      // حفظ التغييرات في Firebase
-      menuRef.set(menuData)
-        .then(() => {
-          hideLoading(confirmDeleteBtn, '<i class="fas fa-trash"></i> نعم، احذف');
-          showToast('تم حذف الصنف بنجاح', 'success');
-          closeConfirmModal();
-          updateCategoryDropdown();
-          renderItems();
-        })
-        .catch(error => {
-          hideLoading(confirmDeleteBtn, '<i class="fas fa-trash"></i> نعم، احذف');
-          showToast('حدث خطأ أثناء حذف الصنف: ' + error.message, 'error');
-        });
-    }
-
-    // إغلاق مودال الصنف
-    function closeItemModal() {
-      itemModal.classList.remove('active');
-    }
-
-    // فتح مودال إضافة قسم
-    function openCategoryModal() {
-      isEditing = false;
-      currentCategoryId = null;
-      categoryModalTitle.textContent = 'إضافة قسم جديد';
-      categoryModal.classList.add('active');
-      
-      // تفريغ الحقول
-      categoryIdInput.value = '';
-      categoryNameArInput.value = '';
-      categoryNameEnInput.value = '';
-      categoryNameFrInput.value = '';
-      categoryStatusInput.checked = true;
-    }
-
-    // فتح مودال تعديل قسم
-    function editCategory(index) {
-      const category = categoriesData[index];
-      if (!category) return;
-      
-      isEditing = true;
-      currentCategoryId = index;
-      categoryModalTitle.textContent = 'تعديل القسم';
-      categoryModal.classList.add('active');
-      
-      // تعبئة الحقول
-      categoryIdInput.value = category.id;
-      categoryNameArInput.value = category.name_ar;
-      categoryNameEnInput.value = category.name_en;
-      categoryNameFrInput.value = category.name_fr || '';
-      categoryStatusInput.checked = !category.hidden;
-    }
-
-    // حفظ القسم
-    function saveCategory() {
-      showLoading(saveCategoryBtn);
-      
-      const name_ar = categoryNameArInput.value.trim();
-      const name_en = categoryNameEnInput.value.trim();
-      const name_fr = categoryNameFrInput.value.trim();
-      const hidden = !categoryStatusInput.checked;
-      
-      if (!name_ar || !name_en) {
-        hideLoading(saveCategoryBtn, '<i class="fas fa-save"></i> حفظ');
-        showToast('الرجاء إدخال اسم القسم', 'error');
-        return;
-      }
-      
-      const categoryData = {
-        id: isEditing ? categoriesData[currentCategoryId].id : Math.max(...categoriesData.map(c => c.id), 0) + 1,
-        name_ar,
-        name_en,
-        name_fr: name_fr || name_en,
-        hidden,
-        lastUpdated: new Date().toISOString()
-      };
-      
-      if (isEditing) {
-        // تحديث القسم الموجود
-        categoriesData[currentCategoryId] = categoryData;
-        
-        // تحديث جميع الأصناف التي تستخدم هذا القسم
-        const oldCategoryName = categoriesData[currentCategoryId].name_ar;
-        menuData.forEach(item => {
-          if (item.category === oldCategoryName) {
-            item.category = categoryData.name_ar;
+        async loginUser() {
+          const email = document.getElementById('email').value;
+          const password = document.getElementById('password').value;
+          this.toggleLoading(this.elements.loginBtn, true);
+          try {
+            await this.firebaseRefs.auth.signInWithEmailAndPassword(email, password);
+            this.showToast('تم تسجيل الدخول بنجاح!', 'success');
+          } catch (error) {
+            this.showToast(`خطأ في تسجيل الدخول: ${error.message}`, 'error');
+          } finally {
+            this.toggleLoading(this.elements.loginBtn, false, '<i class="fas fa-sign-in-alt"></i> تسجيل الدخول');
           }
-        });
-      } else {
-        // إضافة قسم جديد
-        categoriesData.push(categoryData);
-      }
-      
-      // حفظ التغييرات في Firebase
-      Promise.all([
-        categoriesRef.set(categoriesData),
-        menuRef.set(menuData)
-      ])
-      .then(() => {
-        hideLoading(saveCategoryBtn, '<i class="fas fa-save"></i> حفظ');
-        showToast(isEditing ? 'تم تحديث القسم بنجاح' : 'تم إضافة القسم بنجاح', 'success');
-        closeCategoryModal();
-        updateCategoryDropdown();
-        renderCategories();
-        renderItems();
-      })
-      .catch(error => {
-        hideLoading(saveCategoryBtn, '<i class="fas fa-save"></i> حفظ');
-        showToast('حدث خطأ أثناء حفظ القسم: ' + error.message, 'error');
-      });
-    }
-
-    // حذف قسم
-    function deleteCategory(index) {
-      showLoading(confirmDeleteBtn);
-      
-      // حذف القسم من البيانات المحلية
-      const deletedCategory = categoriesData[index];
-      categoriesData.splice(index, 1);
-      
-      // حذف جميع الأصناف المرتبطة بهذا القسم
-      menuData = menuData.filter(item => item.category !== deletedCategory.name_ar);
-      
-      // حفظ التغييرات في Firebase
-      Promise.all([
-        categoriesRef.set(categoriesData),
-        menuRef.set(menuData)
-      ])
-      .then(() => {
-        hideLoading(confirmDeleteBtn, '<i class="fas fa-trash"></i> نعم، احذف');
-        showToast('تم حذف القسم وجميع الأصناف المرتبطة به', 'success');
-        closeConfirmModal();
-        updateCategoryDropdown();
-        renderCategories();
-        renderItems();
-      })
-      .catch(error => {
-        hideLoading(confirmDeleteBtn, '<i class="fas fa-trash"></i> نعم، احذف');
-        showToast('حدث خطأ أثناء حذف القسم: ' + error.message, 'error');
-      });
-    }
-
-    // تبديل حالة إخفاء/إظهار القسم
-    function toggleCategoryVisibility(index) {
-      const category = categoriesData[index];
-      category.hidden = !category.hidden;
-      
-      // حفظ التغييرات في Firebase
-      categoriesRef.set(categoriesData)
-        .then(() => {
-          showToast(category.hidden ? 'تم إخفاء القسم' : 'تم إظهار القسم', 'success');
-          renderCategories();
-          updateCategoryDropdown();
-        })
-        .catch(error => {
-          showToast('حدث خطأ أثناء تغيير حالة القسم: ' + error.message, 'error');
-        });
-    }
-
-    // إغلاق مودال القسم
-    function closeCategoryModal() {
-      categoryModal.classList.remove('active');
-    }
-
-    // عرض مودال التأكيد
-    function showConfirmModal(title, message, callback) {
-      confirmModalTitle.textContent = title;
-      confirmMessage.textContent = message;
-      deleteCallback = callback;
-      confirmModal.classList.add('active');
-    }
-
-    // تأكيد الحذف
-    function confirmDelete() {
-      if (deleteCallback) {
-        deleteCallback();
-      }
-    }
-
-    // إغلاق مودال التأكيد
-    function closeConfirmModal() {
-      confirmModal.classList.remove('active');
-      deleteCallback = null;
-    }
-
-    // تبديل التبويبات
-    function switchTab(tabId) {
-      tabButtons.forEach(btn => {
-        if (btn.dataset.tab === tabId) {
-          btn.classList.add('active');
-        } else {
-          btn.classList.remove('active');
-        }
-      });
-      
-      tabContents.forEach(content => {
-        if (content.id === tabId + '-tab') {
-          content.classList.add('active');
-        } else {
-          content.classList.remove('active');
-        }
-      });
-    }
-
-    // تحديث واجهة المستخدم للغة المحددة
-    function updateUIForLanguage() {
-      document.documentElement.lang = currentLang;
-      document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
-      
-      // تحديث النصوص الثابتة
-      document.getElementById('appTitle').textContent = mapText('Imandou Food - الإدارة');
-      document.getElementById('heroTitle').textContent = mapText('نظام إدارة القائمة');
-      document.getElementById('heroSub').textContent = mapText('تحكم كامل في قائمة المطعم');
-      
-      // إعادة عرض الأصناف والأقسام
-      renderItems();
-      renderCategories();
-      updateCategoryDropdown();
-    }
-
-    // عرض رسالة toast
-    function showToast(message, type) {
-      const toast = document.createElement('div');
-      toast.className = `toast toast-${type}`;
-      toast.innerHTML = `
-        <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'}"></i>
-        <span>${message}</span>
-      `;
-      
-      toastContainer.appendChild(toast);
-      
-      // إزالة Toast بعد 5 ثواني
-      setTimeout(() => {
-        toast.style.animation = 'slideOut 0.3s ease';
-        setTimeout(() => {
-          toast.remove();
-        }, 300);
-      }, 5000);
-    }
-
-    // عرض تحميل على الزر
-    function showLoading(button) {
-      const originalHtml = button.innerHTML;
-      button.setAttribute('data-original', originalHtml);
-      button.innerHTML = '<div class="spinner"></div>';
-      button.disabled = true;
-    }
-
-    // إخفاء تحميل الزر
-    function hideLoading(button, text) {
-      button.innerHTML = text || button.getAttribute('data-original');
-      button.disabled = false;
-    }
-
-    // مساعد: تخطيط النص للتدويل
-    function mapText(text) {
-      const dict = {
-        'Imandou Food - الإدارة': {
-          'ar': 'Imandou Food - الإدارة',
-          'en': 'Imandou Food - Admin',
-          'fr': 'Imandou Food - Administration'
         },
-        'نظام إدارة القائمة': {
-          'ar': 'نظام إدارة القائمة',
-          'en': 'Menu Management System',
-          'fr': 'Système de Gestion de Menu'
+
+        async logoutUser() {
+          try {
+            await this.firebaseRefs.auth.signOut();
+            this.showToast('تم تسجيل الخروج بنجاح', 'success');
+          } catch (error) {
+            this.showToast(`خطأ في تسجيل الخروج: ${error.message}`, 'error');
+          }
         },
-        'تحكم كامل في قائمة المطعم': {
-          'ar': 'تحكم كامل في قائمة المطعم',
-          'en': 'Full control over restaurant menu',
-          'fr': 'Contrôle complet du menu du restaurant'
+        
+        //===============================================
+        //================== DATA HANDLING ================
+        //===============================================
+
+        loadAllData() {
+          this.elements.itemsLoading.style.display = 'block';
+          this.firebaseRefs.menu.on('value', snapshot => {
+            this.state.menu = snapshot.val() || [];
+            this.renderItems();
+            this.elements.itemsLoading.style.display = 'none';
+          });
+          this.firebaseRefs.categories.on('value', snapshot => {
+            this.state.categories = snapshot.val() || [];
+            this.renderCategories();
+            this.updateCategoryDropdowns();
+          });
+          this.firebaseRefs.settings.on('value', snapshot => {
+            this.state.settings = snapshot.val() || {};
+            this.applySettings();
+          });
+        },
+        
+        //===============================================
+        //=============== UI & RENDERING ================
+        //===============================================
+
+        renderItems() {
+          const searchText = this.elements.searchItems.value.toLowerCase();
+          const categoryFilter = this.elements.filterCategory.value;
+          const lang = this.state.currentLang;
+
+          const filteredItems = this.state.menu.filter(item => {
+            const name = item[`name_${lang}`] || item.name_en;
+            const matchesSearch = !searchText || name.toLowerCase().includes(searchText);
+            const matchesCategory = !categoryFilter || item.category === categoryFilter;
+            return matchesSearch && matchesCategory;
+          });
+
+          if (filteredItems.length === 0) {
+            this.elements.itemsList.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-[var(--muted)]">لا توجد أصناف.</td></tr>`;
+            return;
+          }
+          
+          this.elements.itemsList.innerHTML = filteredItems.map(item => {
+            const originalIndex = this.state.menu.findIndex(i => i.id === item.id);
+            const isHidden = item.hidden === true;
+            return `
+              <tr>
+                <td><img src="${item.image}" alt="${item.name_ar}" class="w-12 h-12 object-cover rounded-md"></td>
+                <td>${item[`name_${lang}`] || item.name_en}</td>
+                <td>${item.category}</td>
+                <td>${item.price} درهم</td>
+                <td><span class="badge ${isHidden ? 'badge-warning' : 'badge-success'}">${isHidden ? 'مخفي' : 'مفعل'}</span></td>
+                <td>
+                  <button type="button" class="pill btn-edit-item" data-index="${originalIndex}"><i class="fas fa-edit"></i></button>
+                  <button type="button" class="pill bg-[var(--danger)]/20 text-[var(--danger)] btn-delete-item" data-index="${originalIndex}"><i class="fas fa-trash"></i></button>
+                </td>
+              </tr>
+            `;
+          }).join('');
+        },
+        
+        renderCategories() {
+          const lang = this.state.currentLang;
+          if (this.state.categories.length === 0) {
+            this.elements.categoriesList.innerHTML = `<tr><td colspan="4" class="text-center py-4 text-[var(--muted)]">لا توجد أقسام.</td></tr>`;
+            return;
+          }
+          this.elements.categoriesList.innerHTML = this.state.categories.map((cat, index) => {
+            const itemCount = this.state.menu.filter(item => item.category === cat.name_ar).length;
+            const isHidden = cat.hidden === true;
+            return `
+              <tr>
+                <td>${cat[`name_${lang}`] || cat.name_en}</td>
+                <td>${itemCount}</td>
+                <td><span class="badge ${isHidden ? 'badge-warning' : 'badge-success'}">${isHidden ? 'مخفي' : 'مفعل'}</span></td>
+                <td>
+                  <button type="button" class="pill btn-edit-category" data-index="${index}"><i class="fas fa-edit"></i></button>
+                  <button type="button" class="pill bg-[var(--danger)]/20 text-[var(--danger)] btn-delete-category" data-index="${index}"><i class="fas fa-trash"></i></button>
+                </td>
+              </tr>
+            `;
+          }).join('');
+        },
+        
+        applySettings() {
+          const { restaurantName, restaurantDescription, backgroundImage, accentColor } = this.state.settings;
+          if (restaurantName) {
+            this.elements.restaurantName.value = restaurantName;
+            this.elements.appTitle.textContent = `${restaurantName} - الإدارة`;
+            this.elements.heroTitle.textContent = restaurantName;
+          }
+          if (restaurantDescription) this.elements.restaurantDescription.value = restaurantDescription;
+          if (backgroundImage) {
+            this.elements.backgroundImage.value = backgroundImage;
+            this.updateImagePreview(this.elements.backgroundImage, this.elements.backgroundPreview);
+          }
+          if (accentColor) {
+            this.elements.accentColor.value = accentColor;
+            document.documentElement.style.setProperty('--accent', accentColor);
+          }
+        },
+
+        updateCategoryDropdowns() {
+          const lang = this.state.currentLang;
+          const activeCategories = this.state.categories.filter(c => !c.hidden);
+          const options = activeCategories.map(cat => `<option value="${cat.name_ar}">${cat[`name_${lang}`] || cat.name_en}</option>`).join('');
+          this.elements.filterCategory.innerHTML = `<option value="">جميع الأقسام</option>${options}`;
+          this.elements.itemCategory.innerHTML = `<option value="">اختر القسم</option>${options}`;
+        },
+
+        //===============================================
+        //================= EVENT HANDLERS ==============
+        //===============================================
+        
+        handleItemsListClick(e) {
+            const editBtn = e.target.closest('.btn-edit-item');
+            if (editBtn) this.openItemModal(editBtn.dataset.index);
+
+            const deleteBtn = e.target.closest('.btn-delete-item');
+            if (deleteBtn) {
+                this.showConfirmModal(
+                    'تأكيد حذف الصنف',
+                    'هل أنت متأكد من حذف هذا الصنف؟ لا يمكن التراجع عن هذا الإجراء.',
+                    () => this.deleteItem(deleteBtn.dataset.index)
+                );
+            }
+        },
+
+        handleCategoriesListClick(e) {
+            const editBtn = e.target.closest('.btn-edit-category');
+            if (editBtn) this.openCategoryModal(editBtn.dataset.index);
+
+            const deleteBtn = e.target.closest('.btn-delete-category');
+            if (deleteBtn) {
+                this.showConfirmModal(
+                    'تأكيد حذف القسم',
+                    'هل أنت متأكد؟ سيتم حذف جميع الأصناف في هذا القسم أيضًا.',
+                    () => this.deleteCategory(deleteBtn.dataset.index)
+                );
+            }
+        },
+
+        //===============================================
+        //================ ITEM MANAGEMENT ==============
+        //===============================================
+
+        openItemModal(index = null) {
+          this.elements.itemForm.reset();
+          this.updateImagePreview(this.elements.itemImage, this.elements.itemImagePreview);
+          if (index !== null) { // Editing
+            this.state.isEditing = true;
+            this.state.currentItemIndex = index;
+            const item = this.state.menu[index];
+            this.elements.itemModalTitle.textContent = 'تعديل الصنف';
+            this.elements.itemId.value = item.id;
+            this.elements.itemNameAr.value = item.name_ar;
+            this.elements.itemNameEn.value = item.name_en;
+            this.elements.itemNameFr.value = item.name_fr || '';
+            this.elements.itemCategory.value = item.category;
+            this.elements.itemPrice.value = item.price;
+            this.elements.itemDescAr.value = item.desc_ar;
+            this.elements.itemDescEn.value = item.desc_en;
+            this.elements.itemDescFr.value = item.desc_fr || '';
+            this.elements.itemImage.value = item.image;
+            this.elements.itemSpicy.checked = item.spicy || false;
+            this.elements.itemPopular.checked = item.popular || false;
+            this.elements.itemStatus.checked = !item.hidden;
+            this.updateImagePreview(this.elements.itemImage, this.elements.itemImagePreview);
+          } else { // Adding
+            this.state.isEditing = false;
+            this.state.currentItemIndex = null;
+            this.elements.itemModalTitle.textContent = 'إضافة صنف جديد';
+          }
+          this.toggleModal('itemModal', true);
+        },
+
+        async saveItem() {
+            if (!this.elements.itemForm.checkValidity()) {
+              this.showToast('الرجاء ملء جميع الحقول المطلوبة.', 'error');
+              return;
+            }
+            this.toggleLoading(this.elements.saveItemBtn, true);
+
+            const itemData = {
+                id: this.state.isEditing ? this.state.menu[this.state.currentItemIndex].id : Date.now(),
+                name_ar: this.elements.itemNameAr.value.trim(),
+                name_en: this.elements.itemNameEn.value.trim(),
+                name_fr: this.elements.itemNameFr.value.trim(),
+                category: this.elements.itemCategory.value,
+                price: parseFloat(this.elements.itemPrice.value),
+                currency: "MAD",
+                desc_ar: this.elements.itemDescAr.value.trim(),
+                desc_en: this.elements.itemDescEn.value.trim(),
+                desc_fr: this.elements.itemDescFr.value.trim(),
+                image: this.elements.itemImage.value.trim() || 'https://placehold.co/400x300',
+                spicy: this.elements.itemSpicy.checked,
+                popular: this.elements.itemPopular.checked,
+                hidden: !this.elements.itemStatus.checked,
+                lastUpdated: new Date().toISOString()
+            };
+
+            const updatedMenu = [...this.state.menu];
+            if (this.state.isEditing) {
+                updatedMenu[this.state.currentItemIndex] = itemData;
+            } else {
+                updatedMenu.push(itemData);
+            }
+            
+            try {
+                await this.firebaseRefs.menu.set(updatedMenu);
+                this.showToast(this.state.isEditing ? 'تم تحديث الصنف' : 'تم إضافة الصنف', 'success');
+                this.toggleModal('itemModal', false);
+            } catch (error) {
+                this.showToast(`خطأ في الحفظ: ${error.message}`, 'error');
+            } finally {
+                this.toggleLoading(this.elements.saveItemBtn, false, 'حفظ');
+            }
+        },
+
+        async deleteItem(index) {
+          this.toggleLoading(this.elements.confirmDeleteBtn, true);
+          const updatedMenu = [...this.state.menu];
+          updatedMenu.splice(index, 1);
+          try {
+            await this.firebaseRefs.menu.set(updatedMenu);
+            this.showToast('تم حذف الصنف بنجاح', 'success');
+          } catch (error) {
+            this.showToast(`خطأ في الحذف: ${error.message}`, 'error');
+          } finally {
+            this.toggleLoading(this.elements.confirmDeleteBtn, false, '<i class="fas fa-trash"></i> نعم، احذف');
+            this.toggleModal('confirmModal', false);
+          }
+        },
+
+        //===============================================
+        //============== CATEGORY MANAGEMENT ============
+        //===============================================
+
+        openCategoryModal(index = null) {
+          this.elements.categoryForm.reset();
+          if (index !== null) { // Editing
+            this.state.isEditing = true;
+            this.state.currentCategoryIndex = index;
+            const cat = this.state.categories[index];
+            this.elements.categoryModalTitle.textContent = 'تعديل القسم';
+            this.elements.categoryId.value = cat.id;
+            this.elements.categoryNameAr.value = cat.name_ar;
+            this.elements.categoryNameEn.value = cat.name_en;
+            this.elements.categoryNameFr.value = cat.name_fr || '';
+            this.elements.categoryStatus.checked = !cat.hidden;
+          } else { // Adding
+            this.state.isEditing = false;
+            this.state.currentCategoryIndex = null;
+            this.elements.categoryModalTitle.textContent = 'إضافة قسم جديد';
+          }
+          this.toggleModal('categoryModal', true);
+        },
+
+        async saveCategory() {
+            if (!this.elements.categoryForm.checkValidity()) {
+              this.showToast('الرجاء ملء جميع الحقول المطلوبة.', 'error');
+              return;
+            }
+            this.toggleLoading(this.elements.saveCategoryBtn, true);
+
+            const categoryData = {
+                id: this.state.isEditing ? this.state.categories[this.state.currentCategoryIndex].id : Date.now(),
+                name_ar: this.elements.categoryNameAr.value.trim(),
+                name_en: this.elements.categoryNameEn.value.trim(),
+                name_fr: this.elements.categoryNameFr.value.trim(),
+                hidden: !this.elements.categoryStatus.checked,
+                lastUpdated: new Date().toISOString()
+            };
+
+            const updatedCategories = [...this.state.categories];
+            if (this.state.isEditing) {
+                updatedCategories[this.state.currentCategoryIndex] = categoryData;
+            } else {
+                updatedCategories.push(categoryData);
+            }
+            
+            try {
+                await this.firebaseRefs.categories.set(updatedCategories);
+                this.showToast(this.state.isEditing ? 'تم تحديث القسم' : 'تم إضافة القسم', 'success');
+                this.toggleModal('categoryModal', false);
+            } catch (error) {
+                this.showToast(`خطأ في الحفظ: ${error.message}`, 'error');
+            } finally {
+                this.toggleLoading(this.elements.saveCategoryBtn, false, 'حفظ');
+            }
+        },
+
+        async deleteCategory(index) {
+          this.toggleLoading(this.elements.confirmDeleteBtn, true);
+          const categoryToDelete = this.state.categories[index];
+          
+          const updatedCategories = [...this.state.categories];
+          updatedCategories.splice(index, 1);
+          
+          const updatedMenu = this.state.menu.filter(item => item.category !== categoryToDelete.name_ar);
+
+          try {
+            await Promise.all([
+              this.firebaseRefs.categories.set(updatedCategories),
+              this.firebaseRefs.menu.set(updatedMenu)
+            ]);
+            this.showToast('تم حذف القسم والأصناف المرتبطة به.', 'success');
+          } catch (error) {
+            this.showToast(`خطأ في الحذف: ${error.message}`, 'error');
+          } finally {
+            this.toggleLoading(this.elements.confirmDeleteBtn, false, '<i class="fas fa-trash"></i> نعم، احذف');
+            this.toggleModal('confirmModal', false);
+          }
+        },
+
+        //===============================================
+        //============= SETTINGS MANAGEMENT =============
+        //===============================================
+        async saveSettings() {
+          this.toggleLoading(this.elements.saveSettingsBtn, true);
+          const settings = {
+            restaurantName: this.elements.restaurantName.value,
+            restaurantDescription: this.elements.restaurantDescription.value,
+            backgroundImage: this.elements.backgroundImage.value,
+            accentColor: this.elements.accentColor.value,
+            lastUpdated: new Date().toISOString()
+          };
+          try {
+            await this.firebaseRefs.settings.set(settings);
+            this.showToast('تم حفظ الإعدادات بنجاح', 'success');
+          } catch (error) {
+            this.showToast(`خطأ في حفظ الإعدادات: ${error.message}`, 'error');
+          } finally {
+            this.toggleLoading(this.elements.saveSettingsBtn, false, '<i class="fas fa-save"></i> حفظ الإعدادات');
+          }
+        },
+
+        //===============================================
+        //================= UTILITIES ===================
+        //===============================================
+
+        switchLanguage(lang) {
+          this.state.currentLang = lang;
+          document.querySelectorAll('.lang-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.lang === lang);
+          });
+          document.documentElement.lang = lang;
+          document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+          this.renderItems();
+          this.renderCategories();
+          this.updateCategoryDropdowns();
+        },
+
+        switchTab(tabId) {
+          document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.tab === tabId));
+          this.elements.tabContents.forEach(content => {
+            content.style.display = content.id === `${tabId}-tab` ? 'block' : 'none';
+          });
+        },
+        
+        toggleModal(modalId, show) {
+            const modal = this.elements[modalId];
+            if (modal) modal.classList.toggle('active', show);
+        },
+        
+        showConfirmModal(title, message, callback) {
+          this.elements.confirmModalTitle.textContent = title;
+          this.elements.confirmMessage.textContent = message;
+          this.state.deleteCallback = callback;
+          this.toggleModal('confirmModal', true);
+        },
+
+        confirmDelete() {
+          if (typeof this.state.deleteCallback === 'function') {
+            this.state.deleteCallback();
+            this.state.deleteCallback = null;
+          }
+        },
+
+        showToast(message, type = 'success') {
+          const toast = document.createElement('div');
+          toast.className = `toast toast-${type}`;
+          toast.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i><span>${message}</span>`;
+          this.elements.toastContainer.appendChild(toast);
+          setTimeout(() => {
+            toast.style.animation = 'slideOut 0.3s ease forwards';
+            toast.addEventListener('animationend', () => toast.remove());
+          }, 4000);
+        },
+
+        toggleLoading(button, isLoading, text = '') {
+          if (isLoading) {
+            button.dataset.originalHtml = button.innerHTML;
+            button.innerHTML = '<div class="spinner"></div>';
+            button.disabled = true;
+          } else {
+            button.innerHTML = text || button.dataset.originalHtml;
+            button.disabled = false;
+          }
+        },
+
+        updateImagePreview(inputElement, previewElement) {
+          const url = inputElement.value;
+          previewElement.innerHTML = url ? `<img src="${url}" alt="Preview" onerror="this.parentElement.innerHTML='<span>فشل تحميل الصورة</span>'">` : '<span>معاينة الصورة</span>';
+        },
+        
+        debounce(func, wait) {
+          let timeout;
+          return (...args) => {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func.apply(this, args), wait);
+          };
         }
       };
-      
-      if (dict[text]) return dict[text][currentLang] || text;
-      return text;
-    }
 
-    // دالة Debounce لتحسين الأداء
-    function debounce(func, wait) {
-      let timeout;
-      return function executedFunction(...args) {
-        const later = () => {
-          clearTimeout(timeout);
-          func(...args);
-        };
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
-      };
-    }
-
-    // بدء التطبيق
-    document.addEventListener('DOMContentLoaded', init);
+      // Run the application
+      ImandouAdmin.init();
+    });
   </script>
 </body>
 </html>
