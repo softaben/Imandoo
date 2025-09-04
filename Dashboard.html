@@ -10,15 +10,13 @@
   
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-  
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
   <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
-  
-  <script src="Cairo-Regular-normal.js"></script>
 
   <style>
-    :root {
+    :root{
       --bg: #0f172a;
       --card: #0b1220;
       --text: #e2e8f0;
@@ -116,6 +114,7 @@
         box-shadow: 0 2px 8px rgba(0,0,0,0.2);
     }
     
+    /* طباعة التقرير */
     @media print {
       body * {
         visibility: hidden;
@@ -135,6 +134,46 @@
       .no-print {
         display: none !important;
       }
+    }
+    
+    /* تحسينات للإحصائيات */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+    }
+    
+    .stat-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+    }
+    
+    .export-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: center;
+    }
+    
+    .export-button {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 20px;
+      border-radius: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .export-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     }
   </style>
 </head>
@@ -158,41 +197,68 @@
 
   <section id="stats" class="mb-8">
     <h2 class="text-2xl font-bold mb-4">نظرة عامة</h2>
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div class="stats-grid">
       <div class="stat-card card p-5">
         <div class="flex items-center gap-4">
-          <div class="bg-blue-500/20 p-3 rounded-full"><i class="fas fa-dollar-sign text-blue-400 text-2xl"></i></div>
+          <div class="stat-icon bg-blue-500/20 text-blue-400">
+            <i class="fas fa-dollar-sign"></i>
+          </div>
           <div>
             <p class="text-[var(--muted)] text-sm">إجمالي الإيرادات (اليوم)</p>
             <p id="totalRevenue" class="text-2xl font-bold">0 درهم</p>
           </div>
         </div>
+        <div class="mt-3 text-xs text-green-400 flex items-center">
+          <i class="fas fa-arrow-up ml-1"></i>
+          <span id="revenueChange">0% عن الأمس</span>
+        </div>
       </div>
+      
       <div class="stat-card card p-5">
         <div class="flex items-center gap-4">
-          <div class="bg-green-500/20 p-3 rounded-full"><i class="fas fa-receipt text-green-400 text-2xl"></i></div>
+          <div class="stat-icon bg-green-500/20 text-green-400">
+            <i class="fas fa-receipt"></i>
+          </div>
           <div>
             <p class="text-[var(--muted)] text-sm">إجمالي الطلبات (اليوم)</p>
             <p id="totalOrders" class="text-2xl font-bold">0</p>
           </div>
         </div>
+        <div class="mt-3 text-xs text-green-400 flex items-center">
+          <i class="fas fa-arrow-up ml-1"></i>
+          <span id="ordersChange">0% عن الأمس</span>
+        </div>
       </div>
+      
       <div class="stat-card card p-5">
         <div class="flex items-center gap-4">
-          <div class="bg-yellow-500/20 p-3 rounded-full"><i class="fas fa-chart-pie text-yellow-400 text-2xl"></i></div>
+          <div class="stat-icon bg-yellow-500/20 text-yellow-400">
+            <i class="fas fa-chart-pie"></i>
+          </div>
           <div>
             <p class="text-[var(--muted)] text-sm">متوسط قيمة الطلب</p>
             <p id="avgOrderValue" class="text-2xl font-bold">0 درهم</p>
           </div>
         </div>
+        <div class="mt-3 text-xs text-green-400 flex items-center">
+          <i class="fas fa-arrow-up ml-1"></i>
+          <span id="avgOrderChange">0% عن الأمس</span>
+        </div>
       </div>
-       <div class="stat-card card p-5">
+      
+      <div class="stat-card card p-5">
         <div class="flex items-center gap-4">
-          <div class="bg-purple-500/20 p-3 rounded-full"><i class="fas fa-tasks text-purple-400 text-2xl"></i></div>
+          <div class="stat-icon bg-purple-500/20 text-purple-400">
+            <i class="fas fa-tasks"></i>
+          </div>
           <div>
             <p class="text-[var(--muted)] text-sm">الطلبات النشطة الآن</p>
             <p id="activeOrders" class="text-2xl font-bold">0</p>
           </div>
+        </div>
+        <div class="mt-3 text-xs text-blue-400 flex items-center">
+          <i class="fas fa-clock ml-1"></i>
+          <span id="activeOrdersTime">يتم التحديث...</span>
         </div>
       </div>
     </div>
@@ -202,22 +268,25 @@
     <h2 class="text-2xl font-bold mb-4">إدارة النظام</h2>
     <div class="card p-5 flex flex-wrap items-center justify-between gap-4">
       <div class="flex flex-wrap gap-4">
-        <button onclick="window.location.reload()" class="pill text-white bg-blue-600 hover:bg-blue-700 transition w-full md:w-auto">
+        <button onclick="window.location.reload()" class="pill text-white bg-blue-600 hover:bg-blue-700 transition">
             <i class="fas fa-sync-alt"></i> تحديث الصفحة
         </button>
-        <button id="deleteAllBtn" class="pill text-white bg-red-600 hover:bg-red-700 transition w-full md:w-auto">
+        <button onclick="deleteAllOrders()" class="pill text-white bg-red-600 hover:bg-red-700 transition">
             <i class="fas fa-trash-alt"></i> حذف جميع الطلبات
         </button>
       </div>
-      <div class="flex flex-wrap gap-4">
-        <button onclick="showExportModal('completed')" class="pill text-white bg-green-600 hover:bg-green-700 transition w-full md:w-auto">
-            <i class="fas fa-download"></i> تصدير المكتمل
+      <div class="export-buttons mt-4 md:mt-0">
+        <button onclick="downloadCompletedOrders('xlsx')" class="export-button bg-green-600 text-white">
+            <i class="fas fa-file-excel"></i> Excel المكتمل
         </button>
-        <button onclick="showExportModal('cancelled')" class="pill text-white bg-red-600 hover:bg-red-700 transition w-full md:w-auto">
-            <i class="fas fa-download"></i> تصدير الملغى
+        <button onclick="downloadCompletedOrders('pdf')" class="export-button bg-red-600 text-white">
+            <i class="fas fa-file-pdf"></i> PDF المكتمل
         </button>
-        <button onclick="showExportModal('all')" class="pill text-white bg-purple-600 hover:bg-purple-700 transition w-full md:w-auto">
-            <i class="fas fa-download"></i> تصدير الكل
+        <button onclick="printCompletedOrders()" class="export-button bg-blue-600 text-white">
+            <i class="fas fa-print"></i> طباعة المكتمل
+        </button>
+        <button onclick="downloadAllData()" class="export-button bg-purple-600 text-white">
+            <i class="fas fa-download"></i> تحميل الكل
         </button>
       </div>
     </div>
@@ -261,99 +330,137 @@
       </div>
     </div>
     
-    <div id="completed-orders-section" class="space-y-4 hidden"></div>
-    <div id="cancelled-orders-section" class="space-y-4 hidden"></div>
-    
-  </section>
-
-  <div id="export-modal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 hidden">
-    <div class="card p-6 w-full max-w-md">
-      <h3 class="text-xl font-bold mb-4" id="export-modal-title">تصدير البيانات</h3>
-      
-      <div class="mb-4">
-        <label class="block mb-2">نوع التصدير:</label>
-        <select id="export-type" class="w-full bg-slate-800 rounded-lg p-2 border border-slate-700">
-          <option value="xlsx">Excel (.xlsx)</option>
-          <option value="pdf">PDF (.pdf)</option>
-          <option value="print">طباعة مباشرة</option>
-        </select>
-      </div>
-      
-      <div class="mb-4">
-        <label class="block mb-2">الفترة الزمنية:</label>
-        <select id="export-period" class="w-full bg-slate-800 rounded-lg p-2 border border-slate-700">
-          <option value="today">اليوم</option>
-          <option value="yesterday">أمس</option>
-          <option value="week">هذا الأسبوع</option>
-          <option value="month">هذا الشهر</option>
-          <option value="all">كل الفترات</option>
-        </select>
-      </div>
-      
-      <div class="flex justify-end gap-3 mt-6">
-        <button onclick="document.getElementById('export-modal').classList.add('hidden')" class="pill bg-gray-600 hover:bg-gray-700">
-          إلغاء
-        </button>
-        <button onclick="processExport()" class="pill bg-green-600 hover:bg-green-700">
-          تصدير
+    <div id="completed-orders-section" class="space-y-4 hidden">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-xl font-bold">الطلبات المكتملة</h3>
+        <button onclick="downloadCompletedOrders('pdf')" class="pill bg-green-600 text-white">
+          <i class="fas fa-download ml-2"></i> تحميل التقرير
         </button>
       </div>
     </div>
-  </div>
+    
+    <div id="cancelled-orders-section" class="space-y-4 hidden">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-xl font-bold">الطلبات الملغاة</h3>
+        <button onclick="downloadCancelledOrders('pdf')" class="pill bg-red-600 text-white">
+          <i class="fas fa-download ml-2"></i> تحميل التقرير
+        </button>
+      </div>
+    </div>
+    
+  </section>
 
+  <!-- قسم الطباعة (مخفي) -->
   <div id="print-section" class="hidden"></div>
-  <audio id="notification-sound" src="https://assets.mixkit.co/sfx/preview/mixkit-positive-notification-951.mp3" preload="auto"></audio>
-  
-  <script>
-    const firebaseConfig = {
-        apiKey: "AIzaSyCyPOzsEzdrRd9o7iHASzFoLyJQhpTW83E",
-        authDomain: "imandou-food.firebaseapp.com",
-        databaseURL: "https://imandou-food-default-rtdb.firebaseio.com",
-        projectId: "imandou-food"
-    };
 
+  <audio id="notification-sound" src="https://assets.mixkit.co/sfx/preview/mixkit-positive-notification-951.mp3" preload="auto"></audio>
+
+<script>
+    // Configuration for Firebase project. Please replace with your actual project details.
+    const firebaseConfig = {
+      apiKey: "AIzaSyCyPOzsEzdrRd9o7iHASzFoLyJQhpTW83E",
+      authDomain: "imandou-food.firebaseapp.com",
+      databaseURL: "https://imandou-food-default-rtdb.firebaseio.com",
+      projectId: "imandou-food"
+    };
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
-    const ordersRef = database.ref('orders');
 
+    // DOM elements for Kanban columns
     const columns = {
         new: document.getElementById('new-orders'),
         preparing: document.getElementById('preparing-orders'),
         ready: document.getElementById('ready-orders')
     };
 
+    // DOM elements for statistics
     const statElements = {
         totalRevenue: document.getElementById('totalRevenue'),
         totalOrders: document.getElementById('totalOrders'),
         avgOrderValue: document.getElementById('avgOrderValue'),
         activeOrders: document.getElementById('activeOrders'),
+        revenueChange: document.getElementById('revenueChange'),
+        ordersChange: document.getElementById('ordersChange'),
+        avgOrderChange: document.getElementById('avgOrderChange'),
+        activeOrdersTime: document.getElementById('activeOrdersTime')
     };
 
+    // DOM elements for different order sections
     const completedOrdersSection = document.getElementById('completed-orders-section');
     const cancelledOrdersSection = document.getElementById('cancelled-orders-section');
     const activeOrdersSection = document.getElementById('active-orders-section');
-    const deleteAllBtn = document.getElementById('deleteAllBtn');
+    
+    // Notification sound for new orders
     const notificationSound = document.getElementById('notification-sound');
 
-    let allOrdersData = {};
-    let currentExportType = '';
+    let allOrdersData = [];
+    let yesterdayStats = {
+        revenue: 0,
+        orders: 0,
+        avgOrderValue: 0
+    };
+    
+    // Password for deleting all orders
+    let DELETE_PASSWORD = localStorage.getItem('imandou_delete_password') || "admin123";
 
     document.addEventListener('DOMContentLoaded', () => {
-        loadSettings();
-        listenForChildEvents();
-        deleteAllBtn.addEventListener('click', deleteAllOrders);
-        showOrdersByStatus('active');
+        // Load initial settings and start listening for orders
+        loadSettingsAndOrders();
+        updateActiveOrdersTime();
+        setInterval(updateActiveOrdersTime, 60000); // Update every minute
     });
 
-    async function loadSettings() {
+    // Fetches settings from Firebase and applies them
+    async function loadSettingsAndOrders() {
         try {
             const settingsSnap = await database.ref('settings').once('value');
             applySettings(settingsSnap.val() || {});
-        } catch (error) {
+            
+            // Load yesterday's stats for comparison
+            loadYesterdayStats();
+            
+            // Start listening for orders
+            listenForOrders();
+        } catch(error) {
             console.error("Error loading settings:", error);
         }
     }
-
+    
+    // Load yesterday's statistics for comparison
+    async function loadYesterdayStats() {
+        try {
+            // Calculate yesterday's date
+            const yesterday = new Date();
+            yesterday.setDate(yesterday.getDate() - 1);
+            const yesterdayStart = new Date(yesterday.getFullYear(), yesterday.getMonth(), yesterday.getDate(), 0, 0, 0).getTime();
+            const yesterdayEnd = yesterdayStart + 86400000; // 24 hours in milliseconds
+            
+            // Get yesterday's orders
+            const ordersSnapshot = await database.ref('orders')
+                .orderByChild('timestamp')
+                .startAt(yesterdayStart)
+                .endAt(yesterdayEnd)
+                .once('value');
+                
+            let yesterdayOrders = [];
+            ordersSnapshot.forEach(childSnapshot => {
+                const order = childSnapshot.val();
+                if (order.status === 'completed') {
+                    yesterdayOrders.push(order);
+                }
+            });
+            
+            // Calculate yesterday's stats
+            yesterdayStats.revenue = yesterdayOrders.reduce((sum, order) => sum + order.totalPrice, 0);
+            yesterdayStats.orders = yesterdayOrders.length;
+            yesterdayStats.avgOrderValue = yesterdayStats.orders > 0 ? (yesterdayStats.revenue / yesterdayStats.orders) : 0;
+            
+        } catch(error) {
+            console.error("Error loading yesterday's stats:", error);
+        }
+    }
+    
+    // Applies a background image and accent color from settings
     function applySettings(settings) {
         if (settings.backgroundImage) {
             document.body.style.setProperty('--background-image', `url('${settings.backgroundImage}')`);
@@ -363,66 +470,89 @@
         }
     }
 
-    function listenForChildEvents() {
-        ordersRef.on('child_added', (snapshot) => {
-            const order = { id: snapshot.key, ...snapshot.val() };
-            allOrdersData[order.id] = order;
-            renderOrder(order);
-            calculateAndDisplayStats();
-            notificationSound.play().catch(e => console.log("Audio play failed:", e));
-        });
-
-        ordersRef.on('child_changed', (snapshot) => {
-            const order = { id: snapshot.key, ...snapshot.val() };
-            allOrdersData[order.id] = order;
-            renderOrder(order);
-            calculateAndDisplayStats();
-        });
-
-        ordersRef.on('child_removed', (snapshot) => {
-            const orderId = snapshot.key;
-            delete allOrdersData[orderId];
-            const card = document.getElementById(`order-${orderId}`);
-            if (card) {
-                card.remove();
+    // Listens for real-time changes in the 'orders' node in Firebase
+    function listenForOrders() {
+        const ordersRef = database.ref('orders').orderByChild('timestamp');
+        
+        ordersRef.on('value', (snapshot) => {
+            allOrdersData = [];
+            let newOrderCountBefore = 0;
+            // Get data and count new orders before updating
+            if (allOrdersData.length > 0) {
+                 newOrderCountBefore = allOrdersData.filter(o => o.status === 'new').length;
             }
-            calculateAndDisplayStats();
+            
+            snapshot.forEach(childSnapshot => {
+                allOrdersData.push({ id: childSnapshot.key, ...childSnapshot.val() });
+            });
+            allOrdersData.reverse();
+            
+            // Check for new orders and play a sound
+            const newOrderCountAfter = allOrdersData.filter(o => o.status === 'new').length;
+            if (newOrderCountAfter > newOrderCountBefore) {
+                 notificationSound.play().catch(e => console.log("Audio play failed:", e));
+            }
+
+            // Render the orders based on the currently active tab
+            const activeTab = document.querySelector('.tab-button.active');
+            if (activeTab) {
+                const status = activeTab.getAttribute('onclick').split("'")[1];
+                showOrdersByStatus(status, false); // Pass false to prevent re-fetching data
+            } else {
+                showOrdersByStatus('active'); // Default to active if no tab is active
+            }
+            
+            // Update stats
+            calculateAndDisplayStats(allOrdersData);
         });
     }
 
-    function renderOrder(order) {
-        const oldCard = document.getElementById(`order-${order.id}`);
-        if (oldCard) {
-            oldCard.remove();
+    // Renders orders in a specific container
+    function renderOrders(orders, container) {
+        container.innerHTML = '';
+        if (orders.length === 0) {
+            container.innerHTML = `<p class="text-[var(--muted)] text-center pt-8">لا توجد طلبات في هذا القسم حالياً...</p>`;
+            return;
         }
-
-        const orderCard = createOrderCard(order);
-        const status = order.status || 'new';
-
-        if (['new', 'preparing', 'ready'].includes(status)) {
-            columns[status].appendChild(orderCard);
-            updateEmptyMessage(columns[status]);
-            completedOrdersSection.classList.add('hidden');
-            cancelledOrdersSection.classList.add('hidden');
-        } else if (status === 'completed' && !completedOrdersSection.classList.contains('hidden')) {
-            completedOrdersSection.appendChild(orderCard);
-        } else if (status === 'cancelled' && !cancelledOrdersSection.classList.contains('hidden')) {
-            cancelledOrdersSection.appendChild(orderCard);
-        }
+        orders.forEach(order => {
+            const orderCard = createOrderCard(order);
+            container.appendChild(orderCard);
+        });
     }
 
+    // Renders active orders in the Kanban board
+    function renderActiveOrders(orders) {
+        Object.values(columns).forEach(col => col.innerHTML = `<p class="text-[var(--muted)] text-center pt-8">لا توجد طلبات في هذا القسم حالياً...</p>`);
+        let activeOrdersCount = 0;
+
+        orders.forEach(order => {
+            const orderCard = createOrderCard(order);
+            const status = order.status || 'new';
+
+            if (columns[status]) {
+                columns[status].innerHTML = columns[status].innerHTML.includes('لا توجد') ? '' : columns[status].innerHTML;
+                columns[status].appendChild(orderCard);
+                activeOrdersCount++;
+            }
+        });
+        
+        statElements.activeOrders.textContent = activeOrdersCount;
+    }
+    
+    // Creates an HTML card for a single order
     function createOrderCard(order) {
         const card = document.createElement('div');
         card.className = `order-card card p-4 space-y-3 ${order.status === 'completed' || order.status === 'cancelled' ? 'opacity-80' : ''}`;
         card.id = `order-${order.id}`;
-
+        
+        // Use Arabic item names from the order data
         const itemsHtml = order.items.map(item => `
             <li class="flex justify-between items-center text-sm">
                 <span>${item.names.ar} <span class="text-xs text-[var(--muted)]">x${item.quantity}</span></span>
                 <span class="font-semibold">${item.price * item.quantity} د.م</span>
             </li>
         `).join('');
-
+        
         let actionButtonsHtml = '';
         if (order.status === 'new') {
             actionButtonsHtml = `<button class="pill status-preparing" onclick="updateOrderStatus('${order.id}', 'preparing')"><i class="fas fa-play"></i> بدء التحضير</button>`;
@@ -451,27 +581,38 @@
         `;
         return card;
     }
-
+    
+    // Updates an order's status in Firebase
     function updateOrderStatus(orderId, newStatus) {
         database.ref('orders/' + orderId).update({
             status: newStatus
         }).catch(err => console.error("Update failed:", err));
     }
-
+    
+    // Deletes all orders from Firebase after password confirmation
     function deleteAllOrders() {
+      const password = prompt("يرجى إدخال كلمة المرور لتأكيد حذف جميع الطلبات:");
+      
+      if (password === null) return;
+
+      if (password === DELETE_PASSWORD) {
         const confirmation = confirm("هل أنت متأكد؟ سيؤدي هذا الإجراء إلى حذف جميع الطلبات نهائيًا.");
         if (confirmation) {
-            ordersRef.remove()
-                .then(() => {
-                    alert("تم حذف جميع الطلبات بنجاح!");
-                })
-                .catch((error) => {
-                    alert("فشل في حذف الطلبات. يرجى المحاولة مرة أخرى.");
-                    console.error("Error deleting orders:", error);
-                });
+          database.ref('orders').remove()
+            .then(() => {
+              alert("تم حذف جميع الطلبات بنجاح!");
+            })
+            .catch((error) => {
+              alert("فشل في حذف الطلبات. يرجى المحاولة مرة أخرى.");
+              console.error("Error deleting orders:", error);
+            });
         }
+      } else {
+        alert("كلمة المرور غير صحيحة. عملية الحذف ملغاة.");
+      }
     }
-
+    
+    // Hides/shows order sections based on the selected tab
     function showOrdersByStatus(status) {
         document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
         document.querySelector(`.tab-button[onclick="showOrdersByStatus('${status}')"]`).classList.add('active');
@@ -482,124 +623,111 @@
 
         if (status === 'active') {
             activeOrdersSection.classList.remove('hidden');
-            Object.values(columns).forEach(col => col.innerHTML = '');
-            const activeOrders = Object.values(allOrdersData).filter(o => ['new', 'preparing', 'ready'].includes(o.status));
-            activeOrders.forEach(renderOrder);
-            Object.values(columns).forEach(col => updateEmptyMessage(col));
+            const activeOrders = allOrdersData.filter(o => o.status !== 'completed' && o.status !== 'cancelled');
+            renderActiveOrders(activeOrders);
         } else if (status === 'completed') {
             completedOrdersSection.classList.remove('hidden');
-            completedOrdersSection.innerHTML = '';
-            const completedOrders = Object.values(allOrdersData).filter(o => o.status === 'completed');
-            completedOrders.forEach(order => completedOrdersSection.appendChild(createOrderCard(order)));
-            updateEmptyMessage(completedOrdersSection);
+            const completedOrders = allOrdersData.filter(o => o.status === 'completed');
+            renderOrders(completedOrders, completedOrdersSection);
         } else if (status === 'cancelled') {
             cancelledOrdersSection.classList.remove('hidden');
-            cancelledOrdersSection.innerHTML = '';
-            const cancelledOrders = Object.values(allOrdersData).filter(o => o.status === 'cancelled');
-            cancelledOrders.forEach(order => cancelledOrdersSection.appendChild(createOrderCard(order)));
-            updateEmptyMessage(cancelledOrdersSection);
+            const cancelledOrders = allOrdersData.filter(o => o.status === 'cancelled');
+            renderOrders(cancelledOrders, cancelledOrdersSection);
         }
     }
 
-    function updateEmptyMessage(container) {
-        if (container.children.length === 0) {
-            container.innerHTML = `<p class="text-[var(--muted)] text-center pt-8">لا توجد طلبات في هذا القسم حالياً...</p>`;
-        } else if (container.children.length > 0 && container.querySelector('.text-center')) {
-            const emptyMessage = container.querySelector('.text-center');
-            if (emptyMessage) emptyMessage.remove();
-        }
-    }
-
-    function calculateAndDisplayStats() {
-        const ordersArray = Object.values(allOrdersData);
+    // Calculates and displays daily statistics
+    function calculateAndDisplayStats(allOrders) {
         const today = new Date().setHours(0, 0, 0, 0);
-        const todaysOrders = ordersArray.filter(o => new Date(o.timestamp) >= today && o.status === 'completed');
+        const todaysOrders = allOrders.filter(o => new Date(o.timestamp) >= today && o.status === 'completed');
 
         const totalRevenue = todaysOrders.reduce((sum, order) => sum + order.totalPrice, 0);
         const totalOrders = todaysOrders.length;
         const avgOrderValue = totalOrders > 0 ? (totalRevenue / totalOrders) : 0;
-        const activeOrdersCount = ordersArray.filter(o => ['new', 'preparing', 'ready'].includes(o.status)).length;
 
+        // Update stat elements
         statElements.totalRevenue.textContent = `${totalRevenue.toFixed(2)} درهم`;
         statElements.totalOrders.textContent = totalOrders;
         statElements.avgOrderValue.textContent = `${avgOrderValue.toFixed(2)} درهم`;
-        statElements.activeOrders.textContent = activeOrdersCount;
+        
+        // Calculate and display changes from yesterday
+        const revenueChange = yesterdayStats.revenue > 0 ? 
+            ((totalRevenue - yesterdayStats.revenue) / yesterdayStats.revenue * 100).toFixed(1) : 0;
+        const ordersChange = yesterdayStats.orders > 0 ? 
+            ((totalOrders - yesterdayStats.orders) / yesterdayStats.orders * 100).toFixed(1) : 0;
+        const avgOrderChange = yesterdayStats.avgOrderValue > 0 ? 
+            ((avgOrderValue - yesterdayStats.avgOrderValue) / yesterdayStats.avgOrderValue * 100).toFixed(1) : 0;
+            
+        // Update change indicators
+        statElements.revenueChange.textContent = `${revenueChange}% عن الأمس`;
+        statElements.ordersChange.textContent = `${ordersChange}% عن الأمس`;
+        statElements.avgOrderChange.textContent = `${avgOrderChange}% عن الأمس`;
+        
+        // Set color based on change (green for positive, red for negative)
+        statElements.revenueChange.style.color = revenueChange >= 0 ? '#10b981' : '#ef4444';
+        statElements.ordersChange.style.color = ordersChange >= 0 ? '#10b981' : '#ef4444';
+        statElements.avgOrderChange.style.color = avgOrderChange >= 0 ? '#10b981' : '#ef4444';
+        
+        // Update icons
+        statElements.revenueChange.innerHTML = `${revenueChange >= 0 ? '<i class="fas fa-arrow-up ml-1"></i>' : '<i class="fas fa-arrow-down ml-1"></i>'} ${Math.abs(revenueChange)}% عن الأمس`;
+        statElements.ordersChange.innerHTML = `${ordersChange >= 0 ? '<i class="fas fa-arrow-up ml-1"></i>' : '<i class="fas fa-arrow-down ml-1"></i>'} ${Math.abs(ordersChange)}% عن الأمس`;
+        statElements.avgOrderChange.innerHTML = `${avgOrderChange >= 0 ? '<i class="fas fa-arrow-up ml-1"></i>' : '<i class="fas fa-arrow-down ml-1"></i>'} ${Math.abs(avgOrderChange)}% عن الأمس`;
+    }
+    
+    // Update active orders time
+    function updateActiveOrdersTime() {
+        const now = new Date();
+        statElements.activeOrdersTime.innerHTML = `<i class="fas fa-clock ml-1"></i> آخر تحديث: ${now.toLocaleTimeString('ar-MA')}`;
     }
 
-    function showExportModal(type) {
-        currentExportType = type;
-        const modal = document.getElementById('export-modal');
-        const title = document.getElementById('export-modal-title');
-        
-        let titleText = 'تصدير البيانات';
-        if (type === 'completed') titleText = 'تصدير الطلبات المكتملة';
-        else if (type === 'cancelled') titleText = 'تصدير الطلبات الملغاة';
-        else if (type === 'all') titleText = 'تصدير جميع الطلبات';
-        
-        title.textContent = titleText;
-        modal.classList.remove('hidden');
-    }
-
-    function processExport() {
-        const exportType = document.getElementById('export-type').value;
-        const period = document.getElementById('export-period').value;
-        
-        let ordersToExport = [];
-        const ordersArray = Object.values(allOrdersData);
-        
-        if (currentExportType === 'completed') {
-            ordersToExport = ordersArray.filter(o => o.status === 'completed');
-        } else if (currentExportType === 'cancelled') {
-            ordersToExport = ordersArray.filter(o => o.status === 'cancelled');
-        } else if (currentExportType === 'all') {
-            ordersToExport = ordersArray;
+    // New functions for downloading data to Excel or PDF
+    function downloadCompletedOrders(format) {
+        const completedOrders = allOrdersData.filter(o => o.status === 'completed');
+        if (completedOrders.length === 0) {
+            alert("لا توجد طلبات مكتملة لتحميلها.");
+            return;
         }
-        
-        ordersToExport = filterOrdersByPeriod(ordersToExport, period);
-        
-        if (ordersToExport.length === 0) {
-            alert("لا توجد طلبات لتصديرها بناءً على المعايير المحددة.");
-            document.getElementById('export-modal').classList.add('hidden');
+        if (format === 'xlsx') {
+            downloadExcel(completedOrders, 'rapport-des-commandes-complétées');
+        } else if (format === 'pdf') {
+            downloadPDF(completedOrders, 'rapport-des-commandes-complétées');
+        }
+    }
+    
+    function downloadCancelledOrders(format) {
+        const cancelledOrders = allOrdersData.filter(o => o.status === 'cancelled');
+        if (cancelledOrders.length === 0) {
+            alert("لا توجد طلبات ملغاة لتحميلها.");
+            return;
+        }
+        if (format === 'xlsx') {
+            downloadExcel(cancelledOrders, 'rapport-des-commandes-annulées');
+        } else if (format === 'pdf') {
+            downloadPDF(cancelledOrders, 'rapport-des-commandes-annulées');
+        }
+    }
+    
+    function downloadAllData() {
+        if (allOrdersData.length === 0) {
+            alert("لا توجد طلبات لتحميلها.");
             return;
         }
         
-        if (exportType === 'xlsx') {
-            downloadExcel(ordersToExport, `rapport-des-commandes-${currentExportType}`);
-        } else if (exportType === 'pdf') {
-            downloadPDF(ordersToExport, `rapport-des-commandes-${currentExportType}`);
-        } else if (exportType === 'print') {
-            printOrders(ordersToExport, currentExportType);
-        }
-        
-        document.getElementById('export-modal').classList.add('hidden');
+        // Create a custom dialog for format selection
+        const format = confirm("اضغط على موافق لتحميل كملف Excel أو إلغاء لتحميل كملف PDF") ? 'xlsx' : 'pdf';
+        downloadExcel(allOrdersData, 'rapport-des-commandes-toutes', format);
     }
-
-    function filterOrdersByPeriod(orders, period) {
-        const now = new Date();
-        let startDate;
-        
-        switch(period) {
-            case 'today':
-                startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-                break;
-            case 'yesterday':
-                startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
-                break;
-            case 'week':
-                startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7);
-                break;
-            case 'month':
-                startDate = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
-                break;
-            case 'all':
-            default:
-                return orders;
+    
+    function printCompletedOrders() {
+        const completedOrders = allOrdersData.filter(o => o.status === 'completed');
+        if (completedOrders.length === 0) {
+            alert("لا توجد طلبات مكتملة للطباعة.");
+            return;
         }
-        
-        return orders.filter(order => new Date(order.timestamp) >= startDate);
+        printOrders(completedOrders, 'الطلبات المكتملة');
     }
-
-    function downloadExcel(orders, filename) {
+    
+    function downloadExcel(orders, filename, format = 'xlsx') {
         const data = orders.map(order => ({
             'ID de la commande': order.id,
             'Numéro de table': order.tableNumber,
@@ -613,19 +741,12 @@
         const ws = XLSX.utils.json_to_sheet(data);
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "Commandes");
-        XLSX.writeFile(wb, `${filename}.xlsx`);
+        XLSX.writeFile(wb, `${filename}.${format}`);
     }
 
     function downloadPDF(orders, filename) {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF({ orientation: 'landscape' });
-        
-        // 1. إضافة الخط العربي إلى وثيقة PDF
-        doc.addFont('Cairo-Regular-normal.js', 'Cairo', 'normal');
-        doc.setFont('Cairo');
-        
-        // 2. تفعيل اتجاه الكتابة من اليمين إلى اليسار
-        doc.setRTL(true);
         
         doc.setFontSize(16);
         doc.text(filename, 148, 20, null, null, "center");
@@ -658,14 +779,9 @@
         
         doc.save(`${filename}.pdf`);
     }
-
-    function printOrders(orders, type) {
+    
+    function printOrders(orders, title) {
         const printSection = document.getElementById('print-section');
-        let title = 'تقرير الطلبات';
-        
-        if (type === 'completed') title = 'تقرير الطلبات المكتملة';
-        else if (type === 'cancelled') title = 'تقرير الطلبات الملغاة';
-        else if (type === 'all') title = 'تقرير جميع الطلبات';
         
         let html = `
             <div style="padding: 20px; font-family: 'Cairo', sans-serif; direction: rtl;">
@@ -710,6 +826,8 @@
         printSection.innerHTML = html;
         window.print();
     }
-  </script>
+
+</script>
+
 </body>
 </html>
