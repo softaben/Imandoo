@@ -249,6 +249,7 @@
   <audio id="notification-sound" src="https://assets.mixkit.co/sfx/preview/mixkit-positive-notification-951.mp3" preload="auto"></audio>
 
 <script>
+    // Configuration for Firebase project. Please replace with your actual project details.
     const firebaseConfig = {
       apiKey: "AIzaSyCyPOzsEzdrRd9o7iHASzFoLyJQhpTW83E",
       authDomain: "imandou-food.firebaseapp.com",
@@ -258,30 +259,40 @@
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
 
+    // DOM elements for Kanban columns
     const columns = {
         new: document.getElementById('new-orders'),
         preparing: document.getElementById('preparing-orders'),
         ready: document.getElementById('ready-orders')
     };
+
+    // DOM elements for statistics
     const statElements = {
         totalRevenue: document.getElementById('totalRevenue'),
         totalOrders: document.getElementById('totalOrders'),
         avgOrderValue: document.getElementById('avgOrderValue'),
         activeOrders: document.getElementById('activeOrders'),
     };
+
+    // DOM elements for different order sections
     const completedOrdersSection = document.getElementById('completed-orders-section');
     const cancelledOrdersSection = document.getElementById('cancelled-orders-section');
     const activeOrdersSection = document.getElementById('active-orders-section');
+    
+    // Notification sound for new orders
     const notificationSound = document.getElementById('notification-sound');
 
     let allOrdersData = [];
     
+    // Password for deleting all orders
     let DELETE_PASSWORD = localStorage.getItem('imandou_delete_password') || "admin123";
 
     document.addEventListener('DOMContentLoaded', () => {
+        // Load initial settings and start listening for orders
         loadSettingsAndOrders();
     });
 
+    // Fetches settings from Firebase and applies them
     async function loadSettingsAndOrders() {
         try {
             const settingsSnap = await database.ref('settings').once('value');
@@ -292,6 +303,7 @@
         }
     }
     
+    // Applies a background image and accent color from settings
     function applySettings(settings) {
         if (settings.backgroundImage) {
             document.body.style.setProperty('--background-image', `url('${settings.backgroundImage}')`);
@@ -301,21 +313,44 @@
         }
     }
 
+    // Listens for real-time changes in the 'orders' node in Firebase
     function listenForOrders() {
         const ordersRef = database.ref('orders').orderByChild('timestamp');
         
         ordersRef.on('value', (snapshot) => {
             allOrdersData = [];
+            let newOrderCountBefore = 0;
+            // Get data and count new orders before updating
+            if (allOrdersData.length > 0) {
+                 newOrderCountBefore = allOrdersData.filter(o => o.status === 'new').length;
+            }
+            
             snapshot.forEach(childSnapshot => {
                 allOrdersData.push({ id: childSnapshot.key, ...childSnapshot.val() });
             });
             allOrdersData.reverse();
             
-            showOrdersByStatus('active');
+            // Check for new orders and play a sound
+            const newOrderCountAfter = allOrdersData.filter(o => o.status === 'new').length;
+            if (newOrderCountAfter > newOrderCountBefore) {
+                 notificationSound.play().catch(e => console.log("Audio play failed:", e));
+            }
+
+            // Render the orders based on the currently active tab
+            const activeTab = document.querySelector('.tab-button.active');
+            if (activeTab) {
+                const status = activeTab.getAttribute('onclick').split("'")[1];
+                showOrdersByStatus(status, false); // Pass false to prevent re-fetching data
+            } else {
+                showOrdersByStatus('active'); // Default to active if no tab is active
+            }
+            
+            // Update stats
             calculateAndDisplayStats(allOrdersData);
         });
     }
 
+    // Renders orders in a specific container
     function renderOrders(orders, container) {
         container.innerHTML = '';
         if (orders.length === 0) {
@@ -328,8 +363,9 @@
         });
     }
 
+    // Renders active orders in the Kanban board
     function renderActiveOrders(orders) {
-        Object.values(columns).forEach(col => col.innerHTML = '');
+        Object.values(columns).forEach(col => col.innerHTML = `<p class="text-[var(--muted)] text-center pt-8">لا توجد طلبات في هذا القسم حالياً...</p>`);
         let activeOrdersCount = 0;
 
         orders.forEach(order => {
@@ -337,30 +373,25 @@
             const status = order.status || 'new';
 
             if (columns[status]) {
+                columns[status].innerHTML = columns[status].innerHTML.includes('لا توجد') ? '' : columns[status].innerHTML;
                 columns[status].appendChild(orderCard);
                 activeOrdersCount++;
             }
         });
         
         statElements.activeOrders.textContent = activeOrdersCount;
-
-        const hasNewOrders = orders.some(o => o.status === 'new');
-        if (hasNewOrders && columns.new.innerHTML.trim() !== '') {
-            const lastNewOrderTime = Math.max(...orders.filter(o => o.status === 'new').map(o => o.timestamp));
-            if (Date.now() - lastNewOrderTime < 30000) {
-                 notificationSound.play().catch(e => console.log("Audio play failed:", e));
-            }
-        }
     }
     
+    // Creates an HTML card for a single order
     function createOrderCard(order) {
         const card = document.createElement('div');
         card.className = `order-card card p-4 space-y-3 ${order.status === 'completed' || order.status === 'cancelled' ? 'opacity-80' : ''}`;
         card.id = `order-${order.id}`;
         
+        // Use Arabic item names from the order data
         const itemsHtml = order.items.map(item => `
             <li class="flex justify-between items-center text-sm">
-                <span>${item.name_ar} <span class="text-xs text-[var(--muted)]">x${item.quantity}</span></span>
+                <span>${item.names.ar} <span class="text-xs text-[var(--muted)]">x${item.quantity}</span></span>
                 <span class="font-semibold">${item.price * item.quantity} د.م</span>
             </li>
         `).join('');
@@ -380,7 +411,7 @@
             <div class="flex justify-between items-center pb-2 border-b border-slate-800">
                 <div>
                     <h4 class="font-bold text-lg">طاولة رقم ${order.tableNumber}</h4>
-                    <p class="text-xs text-[var(--muted)]">${new Date(order.timestamp).toLocaleTimeString('ar-MA')}</p>
+                    <p class="text-xs text-[var(--muted)]">${new Date(order.timestamp).toLocaleString('ar-MA')}</p>
                 </div>
                 <div class="font-bold text-lg text-[var(--accent)]">${order.totalPrice} د.م</div>
             </div>
@@ -394,12 +425,14 @@
         return card;
     }
     
+    // Updates an order's status in Firebase
     function updateOrderStatus(orderId, newStatus) {
         database.ref('orders/' + orderId).update({
             status: newStatus
         }).catch(err => console.error("Update failed:", err));
     }
     
+    // Deletes all orders from Firebase after password confirmation
     function deleteAllOrders() {
       const password = prompt("يرجى إدخال كلمة المرور لتأكيد حذف جميع الطلبات:");
       
@@ -411,7 +444,6 @@
           database.ref('orders').remove()
             .then(() => {
               alert("تم حذف جميع الطلبات بنجاح!");
-              window.location.reload(); 
             })
             .catch((error) => {
               alert("فشل في حذف الطلبات. يرجى المحاولة مرة أخرى.");
@@ -423,6 +455,7 @@
       }
     }
     
+    // Hides/shows order sections based on the selected tab
     function showOrdersByStatus(status) {
         document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
         document.querySelector(`.tab-button[onclick="showOrdersByStatus('${status}')"]`).classList.add('active');
@@ -446,6 +479,7 @@
         }
     }
 
+    // Calculates and displays daily statistics
     function calculateAndDisplayStats(allOrders) {
         const today = new Date().setHours(0, 0, 0, 0);
         const todaysOrders = allOrders.filter(o => new Date(o.timestamp) >= today && o.status === 'completed');
@@ -459,7 +493,7 @@
         statElements.avgOrderValue.textContent = `${avgOrderValue.toFixed(2)} درهم`;
     }
 
-    // New functions for downloading data
+    // New functions for downloading data to Excel or PDF
     function downloadCompletedOrders(format) {
         const completedOrders = allOrdersData.filter(o => o.status === 'completed');
         if (completedOrders.length === 0) {
@@ -490,10 +524,10 @@
         const data = orders.map(order => ({
             'ID de la commande': order.id,
             'Numéro de table': order.tableNumber,
-            'Date': new Date(order.timestamp).toLocaleString('fr-FR'),
+            'Date': new Date(order.timestamp).toLocaleString('ar-MA'),
             'Statut': order.status,
             'Total': order.totalPrice,
-            'Articles': order.items.map(item => `${item.name_ar} (x${item.quantity})`).join(', '),
+            'Articles': order.items.map(item => `${item.names.ar} (x${item.quantity})`).join(', '),
             'Remarques': order.notes || ''
         }));
         
@@ -507,21 +541,28 @@
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF({ orientation: 'landscape' });
         
-        doc.setFont('Amiri', 'normal');
+        // Add a font that supports Arabic characters
+        // Note: You need to embed a font file that supports Arabic to display correctly in PDF
+        // This is a placeholder and might require a separate font file to be loaded.
+        // For example:
+        // doc.addFileToVFS('Amiri-Regular.ttf', fontBase64);
+        // doc.addFont('Amiri-Regular.ttf', 'Amiri', 'normal');
+        // doc.setFont('Amiri');
+        
         doc.setFontSize(16);
         doc.text(filename, 148, 20, null, null, "center");
 
         const data = orders.map(order => [
             order.id,
             order.tableNumber,
-            new Date(order.timestamp).toLocaleString('fr-FR'),
+            new Date(order.timestamp).toLocaleString('ar-MA'),
             order.status,
             order.totalPrice,
-            order.items.map(item => `${item.name_ar} (x${item.quantity})`).join(', '),
+            order.items.map(item => `${item.names.ar} (x${item.quantity})`).join(', '),
             order.notes || ''
         ]);
         
-        const headers = [['ID de la commande', 'Numéro de table', 'Date', 'Statut', 'Total', 'Articles', 'Remarques']];
+        const headers = [['ID الطلب', 'رقم الطاولة', 'التاريخ', 'الحالة', 'الإجمالي', 'الأصناف', 'ملاحظات']];
 
         doc.autoTable({
             startY: 30,
@@ -533,7 +574,7 @@
             bodyStyles: { textColor: [226, 232, 240] },
             theme: 'striped',
             didDrawPage: function(data) {
-                let str = "Page " + doc.internal.getNumberOfPages()
+                let str = "صفحة " + doc.internal.getNumberOfPages()
                 doc.setFontSize(10)
                 doc.text(str, data.settings.margin.left, doc.internal.pageSize.height - 10)
             }
