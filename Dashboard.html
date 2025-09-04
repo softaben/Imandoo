@@ -5,54 +5,72 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>لوحة تحكم الطلبات - Imandou Food</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 
   <style>
+    /* Same CSS variables as the menu page */
     :root{
       --bg: #0f172a;
-      --card: #1e293b;
+      --card: #0b1220;
       --text: #e2e8f0;
       --muted: #94a3b8;
       --accent: #fbbf24;
       --radius-lg: 14px;
+      --radius-md: 8px;
       --success: #10b981;
       --danger: #ef4444;
       --info: #3b82f6;
-      --border-color: #334155;
     }
     
     body {
-      font-family: 'Cairo', sans-serif;
+      font-family: 'Cairo', 'Inter', sans-serif;
       background: var(--bg);
       color: var(--text);
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
     }
+    body::before {
+      content: '';
+      position: fixed; top: 0; left: 0;
+      width: 100%; height: 100%;
+      background-image: var(--background-image, url('https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&q=80&w=2070'));
+      background-size: cover; background-position: center;
+      opacity: 0.08; z-index: -1;
+      transition: background-image 0.5s ease-in-out;
+    }
+
     .card {
-      background: var(--card);
+      background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.04));
       border-radius: var(--radius-lg);
-      border: 1px solid var(--border-color);
+      box-shadow: 0 8px 25px rgba(2,6,23,0.7);
+      border: 1px solid rgba(255,255,255,0.04);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
     }
     .stat-card {
-        background: linear-gradient(145deg, #2a3a54, #1e293b);
+        background: linear-gradient(145deg, rgba(255,255,255,0.03), rgba(255,255,255,0.05));
     }
+    h1, h2, h3 { font-family: 'Playfair Display', serif; font-weight: 700; }
+
     .pill {
-      border-radius: 999px; padding: 6px 14px;
-      font-weight: 600; font-size: 0.8rem;
-      cursor: pointer; transition: all 0.2s ease;
-      display: inline-flex; align-items: center; gap: 6px;
-      border: 1px solid transparent;
+      background: rgba(255,255,255,0.03); border-radius: 999px;
+      padding: 8px 16px; font-weight:500; color:var(--text);
+      display:inline-flex; gap:8px; align-items:center;
+      border: 1px solid rgba(255,255,255,0.05);
+      transition: all 0.2s ease; cursor: pointer;
+      font-size: 0.9rem; white-space: nowrap;
     }
-    .pill:hover { opacity: 0.8; transform: translateY(-1px); }
+    .pill:hover { background: rgba(255,255,255,0.07); transform: translateY(-1px); }
     .pill.status-new { background-color: var(--info); color: white; }
-    .pill.status-preparing { background-color: var(--accent); color: var(--bg); }
+    .pill.status-preparing { background-color: var(--accent); color: #0f172a; }
     .pill.status-ready { background-color: var(--success); color: white; }
-    .pill.status-completed { background-color: var(--muted); color: var(--bg); }
+    .pill.status-completed { background-color: var(--muted); color: #0f172a; }
+    .pill.status-cancelled { background-color: var(--danger); color: white; }
 
     .kanban-board {
         display: grid;
@@ -60,27 +78,55 @@
         gap: 20px;
     }
     .kanban-column {
-        background-color: #162033;
+        background-color: var(--card);
         border-radius: var(--radius-lg);
-        padding: 16px;
+        padding: 24px;
         min-height: 400px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.3);
     }
     .order-card {
         animation: fadeIn 0.5s ease;
     }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    .tabs {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 24px;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.05);
+        border-radius: 999px;
+        padding: 4px;
+    }
+    .tab-button {
+        padding: 10px 20px;
+        font-weight: 600;
+        color: var(--muted);
+        border-radius: 999px;
+        transition: all 0.2s ease;
+        cursor: pointer;
+    }
+    .tab-button.active {
+        color: #0f172a;
+        background-color: var(--accent);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
   </style>
 </head>
 <body class="p-4 md:p-8">
 
-  <header class="flex justify-between items-center mb-8 pb-4 border-b border-[var(--border-color)]">
-    <div>
-      <h1 class="text-3xl font-bold">لوحة تحكم الطلبات</h1>
-      <p class="text-[var(--muted)]">متابعة لحظية للطلبات والإحصائيات</p>
+  <header class="flex justify-between items-center mb-8 pb-4 border-b border-slate-800">
+    <div class="flex items-center gap-4">
+        <h1 class="text-3xl font-bold">لوحة تحكم الطلبات</h1>
+        <p class="text-[var(--muted)]">متابعة لحظية</p>
     </div>
-    <div class="flex items-center gap-3">
-        <i class="fas fa-signal text-green-500"></i>
-        <span class="font-semibold">متصل</span>
+    <div class="flex items-center gap-4">
+        <a href="stats.html" class="pill text-white hover:bg-slate-700 transition"><i class="fas fa-chart-line"></i> الإحصائيات</a>
+        <a href="users.html" class="pill text-white hover:bg-slate-700 transition"><i class="fas fa-user-circle"></i> حسابي</a>
+        <div class="flex items-center gap-2 text-green-500">
+            <i class="fas fa-signal"></i>
+            <span class="font-semibold">متصل</span>
+        </div>
     </div>
   </header>
 
@@ -126,43 +172,66 @@
     </div>
   </section>
   
-  <section class="mb-8">
-      <h2 class="text-2xl font-bold mb-4">الأصناف الأكثر طلباً</h2>
-      <div class="card p-5 h-96">
-          <canvas id="popularItemsChart"></canvas>
+  <section id="system-management" class="mb-8">
+    <h2 class="text-2xl font-bold mb-4">إدارة النظام</h2>
+    <div class="card p-5 flex flex-col md:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-4 w-full md:w-auto">
+        <button onclick="window.location.reload()" class="pill text-white bg-blue-600 hover:bg-blue-700 transition w-full md:w-auto">
+            <i class="fas fa-sync-alt"></i> تحديث الصفحة
+        </button>
+        <button onclick="deleteAllOrders()" class="pill text-white bg-red-600 hover:bg-red-700 transition w-full md:w-auto">
+            <i class="fas fa-trash-alt"></i> حذف جميع الطلبات
+        </button>
       </div>
+    </div>
   </section>
 
   <section id="live-orders">
     <h2 class="text-2xl font-bold mb-4">الطلبات الحالية</h2>
-    <div class="kanban-board">
+    
+    <div class="tabs mb-4">
+      <button class="tab-button active" onclick="showOrdersByStatus('active')">
+        <i class="fas fa-tachometer-alt ml-2"></i> الطلبات النشطة
+      </button>
+      <button class="tab-button" onclick="showOrdersByStatus('completed')">
+        <i class="fas fa-check-double ml-2"></i> الطلبات المكتملة
+      </button>
+      <button class="tab-button" onclick="showOrdersByStatus('cancelled')">
+        <i class="fas fa-times-circle ml-2"></i> الطلبات الملغاة
+      </button>
+    </div>
+
+    <div id="active-orders-section" class="kanban-board">
       <div class="kanban-column">
-        <h3 class="text-lg font-bold mb-4 border-b-2 border-blue-500 pb-2 flex items-center gap-2">
-            <i class="fas fa-bell text-blue-500"></i> طلبات جديدة
+        <h3 class="text-lg font-bold mb-4 border-b-2 border-info pb-2 flex items-center gap-2">
+            <i class="fas fa-bell text-info"></i> طلبات جديدة
         </h3>
         <div id="new-orders" class="space-y-4">
             <p class="text-[var(--muted)] text-center pt-8">لا توجد طلبات جديدة حالياً...</p>
         </div>
       </div>
       <div class="kanban-column">
-        <h3 class="text-lg font-bold mb-4 border-b-2 border-yellow-500 pb-2 flex items-center gap-2">
-            <i class="fas fa-utensils text-yellow-500"></i> قيد التحضير
+        <h3 class="text-lg font-bold mb-4 border-b-2 border-accent pb-2 flex items-center gap-2">
+            <i class="fas fa-utensils text-accent"></i> قيد التحضير
         </h3>
         <div id="preparing-orders" class="space-y-4"></div>
       </div>
       <div class="kanban-column">
-        <h3 class="text-lg font-bold mb-4 border-b-2 border-green-500 pb-2 flex items-center gap-2">
-            <i class="fas fa-check-circle text-green-500"></i> جاهزة للاستلام
+        <h3 class="text-lg font-bold mb-4 border-b-2 border-success pb-2 flex items-center gap-2">
+            <i class="fas fa-check-circle text-success"></i> جاهزة للاستلام
         </h3>
         <div id="ready-orders" class="space-y-4"></div>
       </div>
     </div>
+    
+    <div id="completed-orders-section" class="space-y-4 hidden"></div>
+    <div id="cancelled-orders-section" class="space-y-4 hidden"></div>
+    
   </section>
 
   <audio id="notification-sound" src="https://assets.mixkit.co/sfx/preview/mixkit-positive-notification-951.mp3" preload="auto"></audio>
 
 <script>
-    // --- Firebase Configuration ---
     const firebaseConfig = {
       apiKey: "AIzaSyCyPOzsEzdrRd9o7iHASzFoLyJQhpTW83E",
       authDomain: "imandou-food.firebaseapp.com",
@@ -172,7 +241,6 @@
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
 
-    // --- DOM Elements ---
     const columns = {
         new: document.getElementById('new-orders'),
         preparing: document.getElementById('preparing-orders'),
@@ -184,35 +252,66 @@
         avgOrderValue: document.getElementById('avgOrderValue'),
         activeOrders: document.getElementById('activeOrders'),
     };
+    const completedOrdersSection = document.getElementById('completed-orders-section');
+    const cancelledOrdersSection = document.getElementById('cancelled-orders-section');
+    const activeOrdersSection = document.getElementById('active-orders-section');
     const notificationSound = document.getElementById('notification-sound');
-    let popularItemsChart;
 
-    // --- App Initialization ---
+    let allOrdersData = [];
+    
+    let DELETE_PASSWORD = localStorage.getItem('imandou_delete_password') || "admin123";
+
     document.addEventListener('DOMContentLoaded', () => {
-        listenForOrders();
+        loadSettingsAndOrders();
     });
 
-    // --- Real-time Order Listener ---
+    async function loadSettingsAndOrders() {
+        try {
+            const settingsSnap = await database.ref('settings').once('value');
+            applySettings(settingsSnap.val() || {});
+            listenForOrders();
+        } catch(error) {
+            console.error("Error loading settings:", error);
+        }
+    }
+    
+    function applySettings(settings) {
+        if (settings.backgroundImage) {
+            document.body.style.setProperty('--background-image', `url('${settings.backgroundImage}')`);
+        }
+        if (settings.accentColor) {
+            document.documentElement.style.setProperty('--accent', settings.accentColor);
+        }
+    }
+
     function listenForOrders() {
         const ordersRef = database.ref('orders').orderByChild('timestamp');
         
         ordersRef.on('value', (snapshot) => {
-            const orders = [];
+            allOrdersData = [];
             snapshot.forEach(childSnapshot => {
-                orders.push({ id: childSnapshot.key, ...childSnapshot.val() });
+                allOrdersData.push({ id: childSnapshot.key, ...childSnapshot.val() });
             });
+            allOrdersData.reverse();
             
-            // Reverse to show newest first
-            orders.reverse();
-            
-            renderOrders(orders);
-            calculateAndDisplayStats(orders);
+            showOrdersByStatus('active');
+            calculateAndDisplayStats(allOrdersData);
         });
     }
 
-    // --- Rendering ---
-    function renderOrders(orders) {
-        // Clear all columns first
+    function renderOrders(orders, container) {
+        container.innerHTML = '';
+        if (orders.length === 0) {
+            container.innerHTML = `<p class="text-[var(--muted)] text-center pt-8">لا توجد طلبات في هذا القسم حالياً...</p>`;
+            return;
+        }
+        orders.forEach(order => {
+            const orderCard = createOrderCard(order);
+            container.appendChild(orderCard);
+        });
+    }
+
+    function renderActiveOrders(orders) {
         Object.values(columns).forEach(col => col.innerHTML = '');
         let activeOrdersCount = 0;
 
@@ -223,35 +322,23 @@
             if (columns[status]) {
                 columns[status].appendChild(orderCard);
                 activeOrdersCount++;
-            } else if (status !== 'completed') {
-                 // Fallback for any unknown status, put in 'new'
-                 columns.new.appendChild(orderCard);
-                 activeOrdersCount++;
             }
         });
         
         statElements.activeOrders.textContent = activeOrdersCount;
 
-        // Check for new orders to play sound
         const hasNewOrders = orders.some(o => o.status === 'new');
         if (hasNewOrders && columns.new.innerHTML.trim() !== '') {
             const lastNewOrderTime = Math.max(...orders.filter(o => o.status === 'new').map(o => o.timestamp));
-            // Play sound only for recent orders (e.g., within the last 30 seconds)
             if (Date.now() - lastNewOrderTime < 30000) {
                  notificationSound.play().catch(e => console.log("Audio play failed:", e));
             }
-            if (columns.new.querySelector('.text-\\[var\\(--muted\\)\\]')) {
-                 columns.new.innerHTML = ''; // Clear "no orders" message if it exists
-                 orders.filter(o => o.status === 'new').forEach(o => columns.new.appendChild(createOrderCard(o)));
-            }
-        } else if (columns.new.innerHTML.trim() === '') {
-             columns.new.innerHTML = `<p class="text-[var(--muted)] text-center pt-8">لا توجد طلبات جديدة حالياً...</p>`;
         }
     }
     
     function createOrderCard(order) {
         const card = document.createElement('div');
-        card.className = 'order-card card p-4 space-y-3';
+        card.className = `order-card card p-4 space-y-3 ${order.status === 'completed' || order.status === 'cancelled' ? 'opacity-80' : ''}`;
         card.id = `order-${order.id}`;
         
         const itemsHtml = order.items.map(item => `
@@ -260,15 +347,20 @@
                 <span class="font-semibold">${item.price * item.quantity} د.م</span>
             </li>
         `).join('');
-
-        const actionButtonsHtml = {
-            'new': `<button class="pill status-preparing" onclick="updateOrderStatus('${order.id}', 'preparing')"><i class="fas fa-play"></i> بدء التحضير</button>`,
-            'preparing': `<button class="pill status-ready" onclick="updateOrderStatus('${order.id}', 'ready')"><i class="fas fa-check"></i> تم التجهيز</button>`,
-            'ready': `<button class="pill status-completed" onclick="updateOrderStatus('${order.id}', 'completed')"><i class="fas fa-check-double"></i> إكمال الطلب</button>`
-        }[order.status];
         
+        let actionButtonsHtml = '';
+        if (order.status === 'new') {
+            actionButtonsHtml = `<button class="pill status-preparing" onclick="updateOrderStatus('${order.id}', 'preparing')"><i class="fas fa-play"></i> بدء التحضير</button>`;
+        } else if (order.status === 'preparing') {
+            actionButtonsHtml = `<button class="pill status-ready" onclick="updateOrderStatus('${order.id}', 'ready')"><i class="fas fa-check"></i> تم التجهيز</button>`;
+        } else if (order.status === 'ready') {
+            actionButtonsHtml = `<button class="pill status-completed" onclick="updateOrderStatus('${order.id}', 'completed')"><i class="fas fa-check-double"></i> إكمال الطلب</button>`;
+        }
+
+        const cancelDeleteButtons = `<button class="pill status-cancelled" onclick="updateOrderStatus('${order.id}', 'cancelled')"><i class="fas fa-times-circle"></i> إلغاء الطلب</button>`;
+
         card.innerHTML = `
-            <div class="flex justify-between items-center pb-2 border-b border-[var(--border-color)]">
+            <div class="flex justify-between items-center pb-2 border-b border-slate-800">
                 <div>
                     <h4 class="font-bold text-lg">طاولة رقم ${order.tableNumber}</h4>
                     <p class="text-xs text-[var(--muted)]">${new Date(order.timestamp).toLocaleTimeString('ar-MA')}</p>
@@ -276,20 +368,67 @@
                 <div class="font-bold text-lg text-[var(--accent)]">${order.totalPrice} د.م</div>
             </div>
             <ul class="space-y-1">${itemsHtml}</ul>
-            ${order.notes ? `<div class="pt-2 text-sm italic text-yellow-300/80"><i class="fas fa-sticky-note mr-2"></i><strong>ملاحظة:</strong> ${order.notes}</div>` : ''}
-            <div class="pt-3 flex justify-end">${actionButtonsHtml}</div>
+            ${order.notes ? `<div class="pt-2 text-sm italic text-yellow-300/80"><i class="fas fa-sticky-note ml-2"></i><strong>ملاحظة:</strong> ${order.notes}</div>` : ''}
+            <div class="pt-3 flex justify-between">
+                ${cancelDeleteButtons}
+                ${actionButtonsHtml}
+            </div>
         `;
         return card;
     }
     
-    // --- Actions ---
     function updateOrderStatus(orderId, newStatus) {
         database.ref('orders/' + orderId).update({
             status: newStatus
         }).catch(err => console.error("Update failed:", err));
     }
+    
+    function deleteAllOrders() {
+      const password = prompt("يرجى إدخال كلمة المرور لتأكيد حذف جميع الطلبات:");
+      
+      if (password === null) return;
 
-    // --- Statistics ---
+      if (password === DELETE_PASSWORD) {
+        const confirmation = confirm("هل أنت متأكد؟ سيؤدي هذا الإجراء إلى حذف جميع الطلبات نهائيًا.");
+        if (confirmation) {
+          database.ref('orders').remove()
+            .then(() => {
+              alert("تم حذف جميع الطلبات بنجاح!");
+              window.location.reload(); 
+            })
+            .catch((error) => {
+              alert("فشل في حذف الطلبات. يرجى المحاولة مرة أخرى.");
+              console.error("Error deleting orders:", error);
+            });
+        }
+      } else {
+        alert("كلمة المرور غير صحيحة. عملية الحذف ملغاة.");
+      }
+    }
+    
+    function showOrdersByStatus(status) {
+        document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+        document.querySelector(`.tab-button[onclick="showOrdersByStatus('${status}')"]`).classList.add('active');
+
+        activeOrdersSection.classList.add('hidden');
+        completedOrdersSection.classList.add('hidden');
+        cancelledOrdersSection.classList.add('hidden');
+
+        if (status === 'active') {
+            activeOrdersSection.classList.remove('hidden');
+            const activeOrders = allOrdersData.filter(o => o.status !== 'completed' && o.status !== 'cancelled');
+            renderActiveOrders(activeOrders);
+        } else if (status === 'completed') {
+            completedOrdersSection.classList.remove('hidden');
+            const completedOrders = allOrdersData.filter(o => o.status === 'completed');
+            renderOrders(completedOrders, completedOrdersSection);
+        } else if (status === 'cancelled') {
+            cancelledOrdersSection.classList.remove('hidden');
+            const cancelledOrders = allOrdersData.filter(o => o.status === 'cancelled');
+            renderOrders(cancelledOrders, cancelledOrdersSection);
+        }
+    }
+
     function calculateAndDisplayStats(allOrders) {
         const today = new Date().setHours(0, 0, 0, 0);
         const todaysOrders = allOrders.filter(o => new Date(o.timestamp) >= today && o.status === 'completed');
@@ -301,66 +440,6 @@
         statElements.totalRevenue.textContent = `${totalRevenue.toFixed(2)} درهم`;
         statElements.totalOrders.textContent = totalOrders;
         statElements.avgOrderValue.textContent = `${avgOrderValue.toFixed(2)} درهم`;
-
-        // Calculate most popular items from all completed orders
-        const itemCounts = {};
-        allOrders.filter(o => o.status === 'completed').forEach(order => {
-            order.items.forEach(item => {
-                itemCounts[item.name_ar] = (itemCounts[item.name_ar] || 0) + item.quantity;
-            });
-        });
-        
-        const sortedItems = Object.entries(itemCounts)
-            .sort(([,a], [,b]) => b - a)
-            .slice(0, 7); // Get top 7 items
-            
-        renderPopularItemsChart(sortedItems);
-    }
-    
-    function renderPopularItemsChart(items) {
-        const ctx = document.getElementById('popularItemsChart').getContext('2d');
-        const labels = items.map(item => item[0]);
-        const data = items.map(item => item[1]);
-        
-        if (popularItemsChart) {
-            popularItemsChart.destroy();
-        }
-
-        popularItemsChart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: 'الكمية المباعة',
-                    data: data,
-                    backgroundColor: 'rgba(251, 191, 36, 0.6)',
-                    borderColor: 'rgba(251, 191, 36, 1)',
-                    borderWidth: 1,
-                    borderRadius: 5,
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                indexAxis: 'y',
-                scales: {
-                    x: {
-                        beginAtZero: true,
-                        ticks: { color: 'var(--muted)' },
-                        grid: { color: 'rgba(255,255,255,0.05)' }
-                    },
-                    y: {
-                        ticks: { color: 'var(--text)', font: { size: 14 } },
-                        grid: { display: false }
-                    }
-                },
-                plugins: {
-                    legend: {
-                        display: false
-                    }
-                }
-            }
-        });
     }
 
 </script>
