@@ -396,40 +396,40 @@
         
         function downloadExcel(orders, filename) {
             const data = orders.map(order => ({
-                'معرف الطلب': order.id,
-                'رقم الطاولة': order.tableNumber,
-                'التاريخ': new Date(order.timestamp).toLocaleString('ar-MA'),
-                'الحالة': order.status,
-                'الإجمالي': order.totalPrice,
-                'الأصناف': order.items.map(item => `${item.name_ar} (x${item.quantity})`).join(', '),
-                'ملاحظات': order.notes || ''
+                'ID de la commande': order.id,
+                'Numéro de table': order.tableNumber,
+                'Date': new Date(order.timestamp).toLocaleString('fr-FR'),
+                'Statut': order.status,
+                'Total': order.totalPrice,
+                'Articles': order.items.map(item => `${item.name_ar} (x${item.quantity})`).join(', '),
+                'Remarques': order.notes || ''
             }));
             
             const ws = XLSX.utils.json_to_sheet(data);
             const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "الطلبات");
-            XLSX.writeFile(wb, `${filename}.xlsx`);
+            XLSX.utils.book_append_sheet(wb, ws, "Rapport des Commandes");
+            XLSX.writeFile(wb, "rapport-des-commandes.xlsx");
         }
 
         function downloadPDF(orders, filename) {
             const { jsPDF } = window.jspdf;
-            const doc = new jsPDF({ orientation: 'landscape' }); // Landscape for more data
+            const doc = new jsPDF({ orientation: 'landscape' });
             
             doc.setFont('Amiri', 'normal');
             doc.setFontSize(16);
-            doc.text(filename, 148, 20, null, null, "center");
+            doc.text("Rapport des Commandes Complétées", 148, 20, null, null, "center");
 
             const data = orders.map(order => [
                 order.id,
                 order.tableNumber,
-                new Date(order.timestamp).toLocaleString('ar-MA'),
+                new Date(order.timestamp).toLocaleString('fr-FR'),
                 order.status,
                 order.totalPrice,
                 order.items.map(item => `${item.name_ar} (x${item.quantity})`).join(', '),
                 order.notes || ''
             ]);
             
-            const headers = [['معرف الطلب', 'رقم الطاولة', 'التاريخ', 'الحالة', 'الإجمالي', 'الأصناف', 'ملاحظات']];
+            const headers = [['ID de la commande', 'Numéro de table', 'Date', 'Statut', 'Total', 'Articles', 'Remarques']];
 
             doc.autoTable({
                 startY: 30,
@@ -441,7 +441,7 @@
                 bodyStyles: { textColor: [226, 232, 240] },
                 theme: 'striped',
                 didDrawPage: function(data) {
-                    let str = "الصفحة " + doc.internal.getNumberOfPages()
+                    let str = "Page " + doc.internal.getNumberOfPages()
                     doc.setFontSize(10)
                     doc.text(str, data.settings.margin.left, doc.internal.pageSize.height - 10)
                 }
