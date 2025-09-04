@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title data-lang-key="appTitleMain">نظام إدارة قائمة Imandou Food</title>
+  <title>نظام إدارة قائمة Imandou Food</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
@@ -47,7 +47,7 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background-image: var(--background-image, url('https://images.unsplash.com/photo-1563245372-f21724e3856d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2064&q=80'));
+      background-image: url('https://images.unsplash.com/photo-1563245372-f21724e3856d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2064&q=80');
       background-size: cover;
       background-position: center;
       opacity: 0.08;
@@ -132,18 +132,18 @@
   <div id="loginModal" class="modal active">
     <div class="modal-content">
       <div class="modal-header">
-        <h3 class="modal-title" data-lang-key="loginTitle">تسجيل الدخول</h3>
+        <h3 class="modal-title">تسجيل الدخول</h3>
       </div>
       <form id="loginForm">
         <div class="modal-body">
-          <label for="email" class="block mb-2 text-sm font-medium" data-lang-key="emailLabel">البريد الإلكتروني</label>
+          <label for="email" class="block mb-2 text-sm font-medium">البريد الإلكتروني</label>
           <input type="email" id="email" class="form-input" required>
-          <label for="password" class="block mb-2 text-sm font-medium" data-lang-key="passwordLabel">كلمة المرور</label>
+          <label for="password" class="block mb-2 text-sm font-medium">كلمة المرور</label>
           <input type="password" id="password" class="form-input" required>
         </div>
         <div class="modal-footer">
           <button type="submit" id="loginBtn" class="pill bg-[var(--accent)] text-black font-semibold">
-            <i class="fas fa-sign-in-alt"></i> <span data-lang-key="loginBtn">تسجيل الدخول</span>
+            <i class="fas fa-sign-in-alt"></i> تسجيل الدخول
           </button>
         </div>
       </form>
@@ -152,21 +152,11 @@
 
   <main id="mainContent" class="app p-4" style="display: none;">
     <header class="flex items-center justify-between mb-3">
-      <h1 id="appTitle" class="text-xl font-semibold" data-lang-key="appTitleHeader"></h1>
+      <h1 id="appTitle" class="text-xl font-semibold"></h1>
       <div class="flex items-center gap-3">
-        <div class="relative inline-block text-white">
-          <select id="language-select" class="bg-slate-800 text-white rounded-full py-2 px-4 appearance-none cursor-pointer">
-              <option value="ar">العربية</option>
-              <option value="en">English</option>
-              <option value="fr">Français</option>
-          </select>
-          <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-              <i class="fas fa-caret-down text-white"></i>
-          </div>
-      </div>
-        <a href="index.html" class="pill"><i class="fas fa-eye"></i> <span data-lang-key="viewMenuLink">عرض القائمة</span></a>
+        <a href="index.html" class="pill"><i class="fas fa-eye"></i> عرض القائمة</a>
         <button type="button" id="logoutBtn" class="pill bg-red-500/20 text-red-300">
-          <i class="fas fa-sign-out-alt"></i> <span data-lang-key="logoutBtn">تسجيل الخروج</span>
+          <i class="fas fa-sign-out-alt"></i> تسجيل الخروج
         </button>
       </div>
     </header>
@@ -181,34 +171,25 @@
 
     <nav class="mb-4">
       <div class="flex gap-2" id="tabsContainer">
-        <button type="button" class="pill tab-btn active" data-tab="items"><i class="fas fa-utensils"></i> <span data-lang-key="itemsTab">الأصناف</span></button>
-        <button type="button" class="pill tab-btn" data-tab="categories"><i class="fas fa-layer-group"></i> <span data-lang-key="categoriesTab">الأقسام</span></button>
-        <button type="button" class="pill tab-btn" data-tab="settings"><i class="fas fa-cog"></i> <span data-lang-key="settingsTab">الإعدادات</span></button>
+        <button type="button" class="pill tab-btn active" data-tab="items"><i class="fas fa-utensils"></i> الأصناف</button>
+        <button type="button" class="pill tab-btn" data-tab="categories"><i class="fas fa-layer-group"></i> الأقسام</button>
+        <button type="button" class="pill tab-btn" data-tab="settings"><i class="fas fa-cog"></i> الإعدادات</button>
       </div>
     </nav>
     
     <div id="items-tab" class="tab-content">
       <div class="card mb-4">
         <div class="flex items-center justify-between mb-4">
-          <h3 class="text-lg font-semibold" data-lang-key="itemsTitle">الأصناف</h3>
-          <button type="button" id="addItemBtn" class="pill bg-[var(--accent)] text-black"><i class="fas fa-plus"></i> <span data-lang-key="addItemBtn">إضافة صنف</span></button>
+          <h3 class="text-lg font-semibold">الأصناف</h3>
+          <button type="button" id="addItemBtn" class="pill bg-[var(--accent)] text-black"><i class="fas fa-plus"></i> إضافة صنف</button>
         </div>
         <div class="flex gap-2 mb-4">
-          <input type="text" id="searchItems" data-lang-key-placeholder="searchItemsPlaceholder" placeholder="بحث في الأصناف..." class="form-input flex-1">
-          <select id="filterCategory" class="form-input flex-1"><option value="" data-lang-key="allCategoriesOption">جميع الأقسام</option></select>
+          <input type="text" id="searchItems" placeholder="بحث في الأصناف..." class="form-input flex-1">
+          <select id="filterCategory" class="form-input flex-1"><option value="">جميع الأقسام</option></select>
         </div>
         <div class="overflow-x-auto">
           <table class="table w-full">
-            <thead>
-              <tr>
-                <th data-lang-key="imageCol">الصورة</th>
-                <th data-lang-key="nameCol">الاسم</th>
-                <th data-lang-key="categoryCol">القسم</th>
-                <th data-lang-key="priceCol">السعر</th>
-                <th data-lang-key="statusCol">الحالة</th>
-                <th data-lang-key="actionsCol">الإجراءات</th>
-              </tr>
-            </thead>
+            <thead><tr><th>الصورة</th><th>الاسم</th><th>القسم</th><th>السعر</th><th>الحالة</th><th>الإجراءات</th></tr></thead>
             <tbody id="itemsList"></tbody>
           </table>
         </div>
@@ -218,18 +199,11 @@
     <div id="categories-tab" class="tab-content" style="display:none;">
       <div class="card mb-4">
         <div class="flex items-center justify-between mb-4">
-          <h3 class="text-lg font-semibold" data-lang-key="categoriesTitle">الأقسام</h3>
-          <button type="button" id="addCategoryBtn" class="pill bg-[var(--accent)] text-black"><i class="fas fa-plus"></i> <span data-lang-key="addCategoryBtn">إضافة قسم</span></button>
+          <h3 class="text-lg font-semibold">الأقسام</h3>
+          <button type="button" id="addCategoryBtn" class="pill bg-[var(--accent)] text-black"><i class="fas fa-plus"></i> إضافة قسم</button>
         </div>
         <table class="table w-full">
-          <thead>
-            <tr>
-              <th data-lang-key="categoryNameCol">اسم القسم</th>
-              <th data-lang-key="itemCountCol">عدد الأصناف</th>
-              <th data-lang-key="statusCol">الحالة</th>
-              <th data-lang-key="actionsCol">الإجراءات</th>
-            </tr>
-          </thead>
+          <thead><tr><th>اسم القسم</th><th>عدد الأصناف</th><th>الحالة</th><th>الإجراءات</th></tr></thead>
           <tbody id="categoriesList"></tbody>
         </table>
       </div>
@@ -237,14 +211,14 @@
 
     <div id="settings-tab" class="tab-content" style="display:none;">
       <div class="card mb-4">
-        <h3 class="text-lg font-semibold mb-4" data-lang-key="generalSettingsTitle">الإعدادات العامة</h3>
+        <h3 class="text-lg font-semibold mb-4">الإعدادات العامة</h3>
         <form id="settingsForm">
-          <label for="restaurantName" data-lang-key="restaurantNameLabel">اسم المطعم</label><input type="text" id="restaurantName" class="form-input">
-          <label for="restaurantDescription" data-lang-key="restaurantDescriptionLabel">وصف المطعم</label><textarea id="restaurantDescription" class="form-input" rows="3"></textarea>
-          <label for="backgroundImage" data-lang-key="backgroundImageLabel">رابط صورة الخلفية</label><input type="url" id="backgroundImage" class="form-input">
-          <div class="image-preview" id="backgroundPreview"><span data-lang-key="imagePreviewText">معاينة الصورة</span></div>
-          <label for="accentColor" class="mt-4" data-lang-key="accentColorLabel">لون التمييز</label><input type="color" id="accentColor" class="form-input p-1 h-10 w-full">
-          <button type="submit" id="saveSettingsBtn" class="pill bg-[var(--accent)] text-black mt-4"><i class="fas fa-save"></i> <span data-lang-key="saveSettingsBtn">حفظ الإعدادات</span></button>
+          <label for="restaurantName">اسم المطعم</label><input type="text" id="restaurantName" class="form-input">
+          <label for="restaurantDescription">وصف المطعم</label><textarea id="restaurantDescription" class="form-input" rows="3"></textarea>
+          <label for="backgroundImage">رابط صورة الخلفية</label><input type="url" id="backgroundImage" class="form-input">
+          <div class="image-preview" id="backgroundPreview"><span>معاينة الصورة</span></div>
+          <label for="accentColor" class="mt-4">لون التمييز</label><input type="color" id="accentColor" class="form-input p-1 h-10 w-full">
+          <button type="submit" id="saveSettingsBtn" class="pill bg-[var(--accent)] text-black mt-4"><i class="fas fa-save"></i> حفظ الإعدادات</button>
         </form>
       </div>
     </div>
@@ -256,25 +230,25 @@
         <div class="modal-header"><h3 id="itemModalTitle" class="modal-title"></h3><button type="button" class="close" data-modal-close="itemModal">&times;</button></div>
         <div class="modal-body">
           <input type="hidden" name="id">
-          <label for="itemNameAr" data-lang-key="itemNameArLabel">اسم الصنف (العربية)</label><input type="text" id="itemNameAr" name="name_ar" class="form-input" required>
-          <label for="itemNameEn" data-lang-key="itemNameEnLabel">اسم الصنف (الإنجليزية)</label><input type="text" id="itemNameEn" name="name_en" class="form-input" required>
-          <label for="itemNameFr" data-lang-key="itemNameFrLabel">اسم الصنف (الفرنسية)</label><input type="text" id="itemNameFr" name="name_fr" class="form-input">
+          <label for="itemNameAr">اسم الصنف (العربية)</label><input type="text" id="itemNameAr" name="name_ar" class="form-input" required>
+          <label for="itemNameEn">اسم الصنف (الإنجليزية)</label><input type="text" id="itemNameEn" name="name_en" class="form-input" required>
+          <label for="itemNameFr">اسم الصنف (الفرنسية)</label><input type="text" id="itemNameFr" name="name_fr" class="form-input">
           <div class="grid grid-cols-2 gap-4">
-            <div><label for="itemCategory" data-lang-key="itemCategoryLabel">القسم</label><select id="itemCategory" name="category" class="form-input" required><option value="" data-lang-key="selectCategoryOption">اختر القسم</option></select></div>
-            <div><label for="itemPrice" data-lang-key="itemPriceLabel">السعر (درهم)</label><input type="number" id="itemPrice" name="price" class="form-input" min="0" step="0.01" required></div>
+            <div><label for="itemCategory">القسم</label><select id="itemCategory" name="category" class="form-input" required><option value="">اختر القسم</option></select></div>
+            <div><label for="itemPrice">السعر (درهم)</label><input type="number" id="itemPrice" name="price" class="form-input" min="0" step="0.01" required></div>
           </div>
-          <label for="itemDescAr" data-lang-key="itemDescArLabel">الوصف (العربية)</label><textarea id="itemDescAr" name="desc_ar" class="form-input" rows="2"></textarea>
-          <label for="itemImage" data-lang-key="itemImageLabel">رابط الصورة</label><input type="url" id="itemImage" name="image" class="form-input">
-          <div class="image-preview" id="itemImagePreview"><span data-lang-key="imagePreviewText">معاينة الصورة</span></div>
+          <label for="itemDescAr">الوصف (العربية)</label><textarea id="itemDescAr" name="desc_ar" class="form-input" rows="2"></textarea>
+          <label for="itemImage">رابط الصورة</label><input type="url" id="itemImage" name="image" class="form-input">
+          <div class="image-preview" id="itemImagePreview"><span>معاينة الصورة</span></div>
           <div class="flex justify-around mt-4">
-            <div class="toggle-container"><label class="switch"><input type="checkbox" name="spicy"><span class="slider"></span></label><span data-lang-key="spicyLabel">حار</span></div>
-            <div class="toggle-container"><label class="switch"><input type="checkbox" name="popular" checked><span class="slider"></span></label><span data-lang-key="popularLabel">شائع</span></div>
-            <div class="toggle-container"><label class="switch"><input type="checkbox" name="status" checked><span class="slider"></span></label><span data-lang-key="activeLabel">مفعل</span></div>
+            <div class="toggle-container"><label class="switch"><input type="checkbox" name="spicy"><span class="slider"></span></label><span>حار</span></div>
+            <div class="toggle-container"><label class="switch"><input type="checkbox" name="popular" checked><span class="slider"></span></label><span>شائع</span></div>
+            <div class="toggle-container"><label class="switch"><input type="checkbox" name="status" checked><span class="slider"></span></label><span>مفعل</span></div>
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="pill" data-modal-close="itemModal" data-lang-key="cancelBtn">إلغاء</button>
-          <button type="submit" id="saveItemBtn" class="pill bg-[var(--accent)] text-black"><span data-lang-key="saveBtn">حفظ</span></button>
+          <button type="button" class="pill" data-modal-close="itemModal">إلغاء</button>
+          <button type="submit" id="saveItemBtn" class="pill bg-[var(--accent)] text-black">حفظ</button>
         </div>
       </form>
     </div>
@@ -286,14 +260,14 @@
         <div class="modal-header"><h3 id="categoryModalTitle" class="modal-title"></h3><button type="button" class="close" data-modal-close="categoryModal">&times;</button></div>
         <div class="modal-body">
           <input type="hidden" name="id">
-          <label for="categoryNameAr" data-lang-key="categoryNameArLabel">اسم القسم (العربية)</label><input type="text" id="categoryNameAr" name="name_ar" class="form-input" required>
-          <label for="categoryNameEn" data-lang-key="categoryNameEnLabel">اسم القسم (الإنجليزية)</label><input type="text" id="categoryNameEn" name="name_en" class="form-input" required>
-          <label for="categoryNameFr" data-lang-key="categoryNameFrLabel">اسم القسم (الفرنسية)</label><input type="text" id="categoryNameFr" name="name_fr" class="form-input">
-          <div class="toggle-container mt-4"><label class="switch"><input type="checkbox" name="status" checked><span class="slider"></span></label><span data-lang-key="activeLabel">مفعل</span></div>
+          <label for="categoryNameAr">اسم القسم (العربية)</label><input type="text" id="categoryNameAr" name="name_ar" class="form-input" required>
+          <label for="categoryNameEn">اسم القسم (الإنجليزية)</label><input type="text" id="categoryNameEn" name="name_en" class="form-input" required>
+          <label for="categoryNameFr">اسم القسم (الفرنسية)</label><input type="text" id="categoryNameFr" name="name_fr" class="form-input">
+          <div class="toggle-container mt-4"><label class="switch"><input type="checkbox" name="status" checked><span class="slider"></span></label><span>مفعل</span></div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="pill" data-modal-close="categoryModal" data-lang-key="cancelBtn">إلغاء</button>
-          <button type="submit" id="saveCategoryBtn" class="pill bg-[var(--accent)] text-black"><span data-lang-key="saveBtn">حفظ</span></button>
+          <button type="button" class="pill" data-modal-close="categoryModal">إلغاء</button>
+          <button type="submit" id="saveCategoryBtn" class="pill bg-[var(--accent)] text-black">حفظ</button>
         </div>
       </form>
     </div>
@@ -304,8 +278,8 @@
       <div class="modal-header"><h3 id="confirmModalTitle" class="modal-title"></h3><button type="button" class="close" data-modal-close="confirmModal">&times;</button></div>
       <div class="modal-body"><p id="confirmMessage"></p></div>
       <div class="modal-footer">
-        <button type="button" class="pill" data-modal-close="confirmModal"><i class="fas fa-times"></i> <span data-lang-key="cancelBtn">إلغاء</span></button>
-        <button type="button" id="confirmDeleteBtn" class="pill bg-[var(--danger)] text-white"><i class="fas fa-trash"></i> <span data-lang-key="confirmDeleteBtn">نعم، احذف</span></button>
+        <button type="button" class="pill" data-modal-close="confirmModal"><i class="fas fa-times"></i> إلغاء</button>
+        <button type="button" id="confirmDeleteBtn" class="pill bg-[var(--danger)] text-white"><i class="fas fa-trash"></i> نعم، احذف</button>
       </div>
     </div>
   </div>
@@ -315,6 +289,8 @@
       /**
        * @class ImandouAdminApp
        * @description Manages the entire admin panel application logic.
+       * This class-based approach provides a structured, maintainable, and modern way
+       * to build the application, encapsulating state, DOM interactions, and business logic.
        */
       class ImandouAdminApp {
         
@@ -351,234 +327,6 @@
         
         elements = {};
         firebaseRefs = {};
-        
-        translations = {
-          'ar': {
-            'appTitleMain': 'نظام إدارة قائمة Imandou Food',
-            'loginTitle': 'تسجيل الدخول',
-            'emailLabel': 'البريد الإلكتروني',
-            'passwordLabel': 'كلمة المرور',
-            'loginBtn': 'تسجيل الدخول',
-            'appTitleHeader': 'الإدارة',
-            'viewMenuLink': 'عرض القائمة',
-            'logoutBtn': 'تسجيل الخروج',
-            'itemsTab': 'الأصناف',
-            'categoriesTab': 'الأقسام',
-            'settingsTab': 'الإعدادات',
-            'itemsTitle': 'الأصناف',
-            'addItemBtn': 'إضافة صنف',
-            'searchItemsPlaceholder': 'بحث في الأصناف...',
-            'allCategoriesOption': 'جميع الأقسام',
-            'imageCol': 'الصورة',
-            'nameCol': 'الاسم',
-            'categoryCol': 'القسم',
-            'priceCol': 'السعر',
-            'statusCol': 'الحالة',
-            'actionsCol': 'الإجراءات',
-            'categoriesTitle': 'الأقسام',
-            'addCategoryBtn': 'إضافة قسم',
-            'categoryNameCol': 'اسم القسم',
-            'itemCountCol': 'عدد الأصناف',
-            'generalSettingsTitle': 'الإعدادات العامة',
-            'restaurantNameLabel': 'اسم المطعم',
-            'restaurantDescriptionLabel': 'وصف المطعم',
-            'backgroundImageLabel': 'رابط صورة الخلفية',
-            'imagePreviewText': 'معاينة الصورة',
-            'accentColorLabel': 'لون التمييز',
-            'saveSettingsBtn': 'حفظ الإعدادات',
-            'itemNameArLabel': 'اسم الصنف (العربية)',
-            'itemNameEnLabel': 'اسم الصنف (الإنجليزية)',
-            'itemNameFrLabel': 'اسم الصنف (الفرنسية)',
-            'itemCategoryLabel': 'القسم',
-            'selectCategoryOption': 'اختر القسم',
-            'itemPriceLabel': 'السعر (درهم)',
-            'itemDescArLabel': 'الوصف (العربية)',
-            'itemImageLabel': 'رابط الصورة',
-            'spicyLabel': 'حار',
-            'popularLabel': 'شائع',
-            'activeLabel': 'مفعل',
-            'cancelBtn': 'إلغاء',
-            'saveBtn': 'حفظ',
-            'confirmDeleteBtn': 'نعم، احذف',
-            'itemModalTitleAdd': 'إضافة صنف جديد',
-            'itemModalTitleEdit': 'تعديل الصنف',
-            'categoryModalTitleAdd': 'إضافة قسم جديد',
-            'categoryModalTitleEdit': 'تعديل القسم',
-            'confirmDeleteTitleItem': 'تأكيد حذف الصنف',
-            'confirmDeleteMessageItem': 'هل أنت متأكد؟ لا يمكن التراجع عن هذا الإجراء.',
-            'confirmDeleteTitleCategory': 'تأكيد حذف القسم',
-            'confirmDeleteMessageCategory': 'سيتم حذف جميع الأصناف في هذا القسم أيضًا.',
-            'toastLoginSuccess': 'تم تسجيل الدخول بنجاح!',
-            'toastLoginError': 'خطأ في تسجيل الدخول: ',
-            'toastLogoutSuccess': 'تم تسجيل الخروج بنجاح',
-            'toastLogoutError': 'خطأ في تسجيل الخروج: ',
-            'toastSaveItemSuccess': 'تم حفظ الصنف بنجاح',
-            'toastUpdateItemSuccess': 'تم تحديث الصنف بنجاح',
-            'toastSaveError': 'خطأ في الحفظ: ',
-            'toastDeleteItemSuccess': 'تم حذف الصنف بنجاح',
-            'toastDeleteItemError': 'فشل الحذف: ',
-            'toastSaveCategorySuccess': 'تم حفظ القسم بنجاح',
-            'toastUpdateCategorySuccess': 'تم تحديث القسم بنجاح',
-            'toastDeleteCategorySuccess': 'تم حذف القسم بنجاح.',
-            'toastDeleteCategoryError': 'فشل الحذف: ',
-            'toastSaveSettingsSuccess': 'تم حفظ الإعدادات بنجاح',
-            'toastSaveSettingsError': 'خطأ: ',
-            'toastValidationRequired': 'الرجاء ملء الحقول المطلوبة.',
-            'toastImageLoadFail': 'فشل تحميل الصورة',
-            'emptyItems': 'لا توجد أصناف حاليًا.',
-            'emptyCategories': 'لا توجد أقسام حاليًا.'
-          },
-          'en': {
-            'appTitleMain': 'Imandou Food Menu Management System',
-            'loginTitle': 'Login',
-            'emailLabel': 'Email',
-            'passwordLabel': 'Password',
-            'loginBtn': 'Login',
-            'appTitleHeader': 'Admin Panel',
-            'viewMenuLink': 'View Menu',
-            'logoutBtn': 'Logout',
-            'itemsTab': 'Items',
-            'categoriesTab': 'Categories',
-            'settingsTab': 'Settings',
-            'itemsTitle': 'Items',
-            'addItemBtn': 'Add Item',
-            'searchItemsPlaceholder': 'Search items...',
-            'allCategoriesOption': 'All Categories',
-            'imageCol': 'Image',
-            'nameCol': 'Name',
-            'categoryCol': 'Category',
-            'priceCol': 'Price',
-            'statusCol': 'Status',
-            'actionsCol': 'Actions',
-            'categoriesTitle': 'Categories',
-            'addCategoryBtn': 'Add Category',
-            'categoryNameCol': 'Category Name',
-            'itemCountCol': 'Item Count',
-            'generalSettingsTitle': 'General Settings',
-            'restaurantNameLabel': 'Restaurant Name',
-            'restaurantDescriptionLabel': 'Restaurant Description',
-            'backgroundImageLabel': 'Background Image URL',
-            'imagePreviewText': 'Image Preview',
-            'accentColorLabel': 'Accent Color',
-            'saveSettingsBtn': 'Save Settings',
-            'itemNameArLabel': 'Item Name (Arabic)',
-            'itemNameEnLabel': 'Item Name (English)',
-            'itemNameFrLabel': 'Item Name (French)',
-            'itemCategoryLabel': 'Category',
-            'selectCategoryOption': 'Select Category',
-            'itemPriceLabel': 'Price (MAD)',
-            'itemDescArLabel': 'Description (Arabic)',
-            'itemImageLabel': 'Image URL',
-            'spicyLabel': 'Spicy',
-            'popularLabel': 'Popular',
-            'activeLabel': 'Active',
-            'cancelBtn': 'Cancel',
-            'saveBtn': 'Save',
-            'confirmDeleteBtn': 'Yes, Delete',
-            'itemModalTitleAdd': 'Add New Item',
-            'itemModalTitleEdit': 'Edit Item',
-            'categoryModalTitleAdd': 'Add New Category',
-            'categoryModalTitleEdit': 'Edit Category',
-            'confirmDeleteTitleItem': 'Confirm Item Deletion',
-            'confirmDeleteMessageItem': 'Are you sure? This action cannot be undone.',
-            'confirmDeleteTitleCategory': 'Confirm Category Deletion',
-            'confirmDeleteMessageCategory': 'All items in this category will also be deleted.',
-            'toastLoginSuccess': 'Login successful!',
-            'toastLoginError': 'Login error: ',
-            'toastLogoutSuccess': 'Logged out successfully',
-            'toastLogoutError': 'Logout error: ',
-            'toastSaveItemSuccess': 'Item saved successfully',
-            'toastUpdateItemSuccess': 'Item updated successfully',
-            'toastSaveError': 'Error saving: ',
-            'toastDeleteItemSuccess': 'Item deleted successfully',
-            'toastDeleteItemError': 'Deletion failed: ',
-            'toastSaveCategorySuccess': 'Category saved successfully',
-            'toastUpdateCategorySuccess': 'Category updated successfully',
-            'toastDeleteCategorySuccess': 'Category deleted successfully.',
-            'toastDeleteCategoryError': 'Deletion failed: ',
-            'toastSaveSettingsSuccess': 'Settings saved successfully',
-            'toastSaveSettingsError': 'Error: ',
-            'toastValidationRequired': 'Please fill in all required fields.',
-            'toastImageLoadFail': 'Image failed to load',
-            'emptyItems': 'No items currently available.',
-            'emptyCategories': 'No categories currently available.'
-          },
-          'fr': {
-            'appTitleMain': 'Système de gestion de menu Imandou Food',
-            'loginTitle': 'Connexion',
-            'emailLabel': 'Email',
-            'passwordLabel': 'Mot de passe',
-            'loginBtn': 'Se connecter',
-            'appTitleHeader': 'Admin',
-            'viewMenuLink': 'Voir le menu',
-            'logoutBtn': 'Déconnexion',
-            'itemsTab': 'Plats',
-            'categoriesTab': 'Catégories',
-            'settingsTab': 'Paramètres',
-            'itemsTitle': 'Plats',
-            'addItemBtn': 'Ajouter un plat',
-            'searchItemsPlaceholder': 'Rechercher des plats...',
-            'allCategoriesOption': 'Toutes les catégories',
-            'imageCol': 'Image',
-            'nameCol': 'Nom',
-            'categoryCol': 'Catégorie',
-            'priceCol': 'Prix',
-            'statusCol': 'Statut',
-            'actionsCol': 'Actions',
-            'categoriesTitle': 'Catégories',
-            'addCategoryBtn': 'Ajouter une catégorie',
-            'categoryNameCol': 'Nom de la catégorie',
-            'itemCountCol': 'Nombre de plats',
-            'generalSettingsTitle': 'Paramètres généraux',
-            'restaurantNameLabel': 'Nom du restaurant',
-            'restaurantDescriptionLabel': 'Description du restaurant',
-            'backgroundImageLabel': 'URL de l\'image de fond',
-            'imagePreviewText': 'Aperçu de l\'image',
-            'accentColorLabel': 'Couleur d\'accentuation',
-            'saveSettingsBtn': 'Sauvegarder',
-            'itemNameArLabel': 'Nom du plat (Arabe)',
-            'itemNameEnLabel': 'Nom du plat (Anglais)',
-            'itemNameFrLabel': 'Nom du plat (Français)',
-            'itemCategoryLabel': 'Catégorie',
-            'selectCategoryOption': 'Sélectionner une catégorie',
-            'itemPriceLabel': 'Prix (MAD)',
-            'itemDescArLabel': 'Description (Arabe)',
-            'itemImageLabel': 'URL de l\'image',
-            'spicyLabel': 'Épicé',
-            'popularLabel': 'Populaire',
-            'activeLabel': 'Activé',
-            'cancelBtn': 'Annuler',
-            'saveBtn': 'Sauvegarder',
-            'confirmDeleteBtn': 'Oui, supprimer',
-            'itemModalTitleAdd': 'Ajouter un nouveau plat',
-            'itemModalTitleEdit': 'Modifier le plat',
-            'categoryModalTitleAdd': 'Ajouter une nouvelle catégorie',
-            'categoryModalTitleEdit': 'Modifier la catégorie',
-            'confirmDeleteTitleItem': 'Confirmer la suppression',
-            'confirmDeleteMessageItem': 'Êtes-vous sûr ? Cette action est irréversible.',
-            'confirmDeleteTitleCategory': 'Confirmer la suppression',
-            'confirmDeleteMessageCategory': 'Tous les plats de cette catégorie seront également supprimés.',
-            'toastLoginSuccess': 'Connexion réussie !',
-            'toastLoginError': 'Erreur de connexion : ',
-            'toastLogoutSuccess': 'Déconnecté avec succès',
-            'toastLogoutError': 'Erreur de déconnexion : ',
-            'toastSaveItemSuccess': 'Plat sauvegardé avec succès',
-            'toastUpdateItemSuccess': 'Plat mis à jour avec succès',
-            'toastSaveError': 'Erreur de sauvegarde : ',
-            'toastDeleteItemSuccess': 'Plat supprimé avec succès',
-            'toastDeleteItemError': 'Échec de la suppression : ',
-            'toastSaveCategorySuccess': 'Catégorie sauvegardée avec succès',
-            'toastUpdateCategorySuccess': 'Catégorie mise à jour avec succès',
-            'toastDeleteCategorySuccess': 'Catégorie supprimée avec succès.',
-            'toastDeleteCategoryError': 'Échec de la suppression : ',
-            'toastSaveSettingsSuccess': 'Paramètres sauvegardés avec succès',
-            'toastSaveSettingsError': 'Erreur : ',
-            'toastValidationRequired': 'Veuillez remplir tous les champs requis.',
-            'toastImageLoadFail': 'Le chargement de l\'image a échoué',
-            'emptyItems': 'Aucun plat disponible pour le moment.',
-            'emptyCategories': 'Aucune catégorie disponible pour le moment.'
-          }
-        };
 
         /**
          * Initializes the application by setting up Firebase, caching DOM elements,
@@ -588,11 +336,6 @@
           this._cacheDOMElements();
           this._initFirebase();
           this._setupEventListeners();
-          
-          this.state.currentLang = localStorage.getItem('lang') || 'ar';
-          this.elements.languageSelect.value = this.state.currentLang;
-          this.setLanguage(this.state.currentLang);
-
           this._monitorAuthState();
         }
 
@@ -607,7 +350,7 @@
         _cacheDOMElements() {
           const ids = [
             'mainContent', 'loginForm', 'loginBtn', 'logoutBtn', 'toastContainer', 'tabsContainer', 'appTitle', 'heroTitle', 'heroSub',
-            'itemsList', 'addItemBtn', 'searchItems', 'filterCategory', 'language-select',
+            'itemsList', 'addItemBtn', 'searchItems', 'filterCategory',
             'itemForm', 'itemModalTitle', 'itemImage', 'itemImagePreview', 'saveItemBtn',
             'categoriesList', 'addCategoryBtn', 'categoryForm', 'categoryModalTitle', 'saveCategoryBtn',
             'settingsForm', 'restaurantName', 'restaurantDescription', 'backgroundImage', 'backgroundPreview', 'accentColor', 'saveSettingsBtn',
@@ -666,35 +409,7 @@
           });
           this.elements.itemImage.addEventListener('input', () => this._updateImagePreview(this.elements.itemImage, this.elements.itemImagePreview));
           this.elements.backgroundImage.addEventListener('input', () => this._updateImagePreview(this.elements.backgroundImage, this.elements.backgroundPreview));
-          this.elements['language-select'].addEventListener('change', (e) => this.setLanguage(e.target.value));
         }
-
-        setLanguage(lang) {
-          this.state.currentLang = lang;
-          const t = this.translations[lang];
-          
-          document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
-          document.documentElement.lang = lang;
-          
-          document.title = t.appTitleMain;
-          
-          document.querySelectorAll('[data-lang-key]').forEach(el => {
-            const key = el.dataset.langKey;
-            el.textContent = t[key];
-          });
-          
-          document.querySelectorAll('[data-lang-key-placeholder]').forEach(el => {
-            const key = el.dataset.langKeyPlaceholder;
-            el.placeholder = t[key];
-          });
-          
-          localStorage.setItem('lang', lang);
-          this._renderItems();
-          this._renderCategories();
-          this._updateCategoryDropdowns();
-          this._applySettings();
-        }
-
 
         //================================================
         //=============== AUTHENTICATION ===============
@@ -717,27 +432,25 @@
         }
 
         async loginUser() {
-          const t = this.translations[this.state.currentLang];
           this._toggleLoading(this.elements.loginBtn, true);
           try {
             const email = this.elements.loginForm.elements.email.value;
             const password = this.elements.loginForm.elements.password.value;
             await this.firebaseRefs.auth.signInWithEmailAndPassword(email, password);
-            this._showToast(t.toastLoginSuccess, 'success');
+            this._showToast('تم تسجيل الدخول بنجاح!', 'success');
           } catch (error) {
-            this._showToast(`${t.toastLoginError}${error.message}`, 'error');
+            this._showToast(`خطأ في تسجيل الدخول: ${error.message}`, 'error');
           } finally {
             this._toggleLoading(this.elements.loginBtn, false);
           }
         }
 
         async logoutUser() {
-          const t = this.translations[this.state.currentLang];
           try {
             await this.firebaseRefs.auth.signOut();
-            this._showToast(t.toastLogoutSuccess, 'success');
+            this._showToast('تم تسجيل الخروج بنجاح', 'success');
           } catch (error) {
-            this._showToast(`${t.toastLogoutError}${error.message}`, 'error');
+            this._showToast(`خطأ في تسجيل الخروج: ${error.message}`, 'error');
           }
         }
 
@@ -782,12 +495,11 @@
         _renderItems() {
           const list = this.elements.itemsList;
           list.innerHTML = '';
-          const t = this.translations[this.state.currentLang];
           
           const filteredItems = this._getFilteredItems();
 
           if (filteredItems.length === 0) {
-            list.innerHTML = this._createEmptyStateHTML(`<i class="fas fa-utensils icon"></i><p>${t.emptyItems}</p>`);
+            list.innerHTML = this._createEmptyStateHTML('<i class="fas fa-utensils icon"></i><p>لا توجد أصناف حاليًا.</p>');
             return;
           }
           
@@ -802,10 +514,9 @@
         _renderCategories() {
           const list = this.elements.categoriesList;
           list.innerHTML = '';
-          const t = this.translations[this.state.currentLang];
 
           if (this.state.categories.length === 0) {
-            list.innerHTML = this._createEmptyStateHTML(`<i class="fas fa-layer-group icon"></i><p>${t.emptyCategories}</p>`);
+            list.innerHTML = this._createEmptyStateHTML('<i class="fas fa-layer-group icon"></i><p>لا توجد أقسام حاليًا.</p>');
             return;
           }
 
@@ -817,14 +528,13 @@
         }
 
         _applySettings() {
-          const t = this.translations[this.state.currentLang];
           const { restaurantName, restaurantDescription, backgroundImage, accentColor } = this.state.settings;
           this.elements.restaurantName.value = restaurantName || 'Imandou Food';
           this.elements.restaurantDescription.value = restaurantDescription || 'مطعم يقدم أطباق شهية';
           this.elements.backgroundImage.value = backgroundImage || '';
           this.elements.accentColor.value = accentColor || '#fbbf24';
           
-          this.elements.appTitle.textContent = `${this.elements.restaurantName.value} - ${t.appTitleHeader}`;
+          this.elements.appTitle.textContent = `${this.elements.restaurantName.value} - الإدارة`;
           this.elements.heroTitle.textContent = this.elements.restaurantName.value;
           this.elements.heroSub.textContent = this.elements.restaurantDescription.value;
           this._updateImagePreview(this.elements.backgroundImage, this.elements.backgroundPreview);
@@ -832,11 +542,10 @@
         }
 
         _updateCategoryDropdowns() {
-          const t = this.translations[this.state.currentLang];
           const activeCategories = this.state.categories.filter(c => !c.hidden);
-          const optionsHTML = activeCategories.map(cat => `<option value="${cat.name_ar}">${cat[`name_${this.state.currentLang}`] || cat.name_fr}</option>`).join('');
-          this.elements.filterCategory.innerHTML = `<option value="">${t.allCategoriesOption}</option>${optionsHTML}`;
-          this.elements.itemForm.elements.category.innerHTML = `<option value="">${t.selectCategoryOption}</option>${optionsHTML}`;
+          const optionsHTML = activeCategories.map(cat => `<option value="${cat.name_ar}">${cat.name_ar}</option>`).join('');
+          this.elements.filterCategory.innerHTML = `<option value="">جميع الأقسام</option>${optionsHTML}`;
+          this.elements.itemForm.elements.category.innerHTML = `<option value="">اختر القسم</option>${optionsHTML}`;
         }
         
         //================================================
@@ -844,24 +553,22 @@
         //================================================
 
         _handleItemsListClick(e) {
-            const t = this.translations[this.state.currentLang];
             const editBtn = e.target.closest('.btn-edit-item');
             if (editBtn) this._openItemModal(editBtn.dataset.index);
 
             const deleteBtn = e.target.closest('.btn-delete-item');
             if (deleteBtn) {
-                this._showConfirmModal(t.confirmDeleteTitleItem, t.confirmDeleteMessageItem, () => this.deleteItem(deleteBtn.dataset.index));
+                this._showConfirmModal('تأكيد حذف الصنف', 'هل أنت متأكد؟ لا يمكن التراجع عن هذا الإجراء.', () => this.deleteItem(deleteBtn.dataset.index));
             }
         }
 
         _handleCategoriesListClick(e) {
-            const t = this.translations[this.state.currentLang];
             const editBtn = e.target.closest('.btn-edit-category');
             if (editBtn) this._openCategoryModal(editBtn.dataset.index);
 
             const deleteBtn = e.target.closest('.btn-delete-category');
             if (deleteBtn) {
-                this._showConfirmModal(t.confirmDeleteTitleCategory, t.confirmDeleteMessageCategory, () => this.deleteCategory(deleteBtn.dataset.index));
+                this._showConfirmModal('تأكيد حذف القسم', 'سيتم حذف جميع الأصناف في هذا القسم أيضًا.', () => this.deleteCategory(deleteBtn.dataset.index));
             }
         }
 
@@ -870,7 +577,6 @@
         //================================================
 
         _openItemModal(index = null) {
-          const t = this.translations[this.state.currentLang];
           const form = this.elements.itemForm;
           form.reset();
           this._clearValidation(form);
@@ -881,7 +587,7 @@
           
           if (this.state.isEditing) {
             const item = this.state.menu[index];
-            this.elements.itemModalTitle.textContent = t.itemModalTitleEdit;
+            this.elements.itemModalTitle.textContent = 'تعديل الصنف';
             form.elements.id.value = item.id;
             form.elements.name_ar.value = item.name_ar;
             form.elements.name_en.value = item.name_en;
@@ -895,13 +601,12 @@
             form.elements.status.checked = !item.hidden;
             this._updateImagePreview(form.elements.image, this.elements.itemImagePreview);
           } else {
-            this.elements.itemModalTitle.textContent = t.itemModalTitleAdd;
+            this.elements.itemModalTitle.textContent = 'إضافة صنف جديد';
           }
           this._toggleModal('itemModal', true);
         }
 
         async saveItem() {
-          const t = this.translations[this.state.currentLang];
           const form = this.elements.itemForm;
           if (!this._validateForm(form)) return;
           
@@ -927,10 +632,10 @@
           
           try {
             await this.firebaseRefs.menu.set(updatedMenu);
-            this._showToast(this.state.isEditing ? t.toastUpdateItemSuccess : t.toastSaveItemSuccess, 'success');
+            this._showToast(this.state.isEditing ? 'تم تحديث الصنف' : 'تم إضافة الصنف', 'success');
             this._toggleModal('itemModal', false);
           } catch (error) {
-            this._showToast(`${t.toastSaveError}${error.message}`, 'error');
+            this._showToast(`خطأ في الحفظ: ${error.message}`, 'error');
           } finally {
             this._toggleFormState(form, false);
             this._toggleLoading(this.elements.saveItemBtn, false);
@@ -938,7 +643,6 @@
         }
 
         async deleteItem(index) {
-          const t = this.translations[this.state.currentLang];
           const updatedMenu = [...this.state.menu];
           const itemToDelete = updatedMenu[index];
           
@@ -949,12 +653,12 @@
 
           try {
             await this.firebaseRefs.menu.set(updatedMenu);
-            this._showToast(t.toastDeleteItemSuccess, 'success');
+            this._showToast('تم حذف الصنف بنجاح', 'success');
           } catch (error) {
             // Revert UI on failure
             this.state.menu.splice(index, 0, itemToDelete);
             this._renderItems();
-            this._showToast(`${t.toastDeleteItemError}${error.message}`, 'error');
+            this._showToast(`فشل الحذف: ${error.message}`, 'error');
           }
         }
         
@@ -963,7 +667,6 @@
         //================================================
 
         _openCategoryModal(index = null) {
-          const t = this.translations[this.state.currentLang];
           const form = this.elements.categoryForm;
           form.reset();
           this._clearValidation(form);
@@ -973,20 +676,19 @@
 
           if (this.state.isEditing) {
             const cat = this.state.categories[index];
-            this.elements.categoryModalTitle.textContent = t.categoryModalTitleEdit;
+            this.elements.categoryModalTitle.textContent = 'تعديل القسم';
             form.elements.id.value = cat.id;
             form.elements.name_ar.value = cat.name_ar;
             form.elements.name_en.value = cat.name_en;
             form.elements.name_fr.value = cat.name_fr || '';
             form.elements.status.checked = !cat.hidden;
           } else {
-            this.elements.categoryModalTitle.textContent = t.categoryModalTitleAdd;
+            this.elements.categoryModalTitle.textContent = 'إضافة قسم جديد';
           }
           this._toggleModal('categoryModal', true);
         }
 
         async saveCategory() {
-          const t = this.translations[this.state.currentLang];
           const form = this.elements.categoryForm;
           if (!this._validateForm(form)) return;
 
@@ -1012,10 +714,10 @@
           
           try {
             await this.firebaseRefs.categories.set(updatedCategories);
-            this._showToast(this.state.isEditing ? t.toastUpdateCategorySuccess : t.toastSaveCategorySuccess, 'success');
+            this._showToast(this.state.isEditing ? 'تم تحديث القسم' : 'تم إضافة القسم', 'success');
             this._toggleModal('categoryModal', false);
           } catch (error) {
-            this._showToast(`${t.toastSaveError}${error.message}`, 'error');
+            this._showToast(`خطأ في الحفظ: ${error.message}`, 'error');
           } finally {
             this._toggleFormState(form, false);
             this._toggleLoading(this.elements.saveCategoryBtn, false);
@@ -1023,7 +725,6 @@
         }
 
         async deleteCategory(index) {
-          const t = this.translations[this.state.currentLang];
           const categoryToDelete = this.state.categories[index];
           const originalCategories = [...this.state.categories];
           const originalMenu = [...this.state.menu];
@@ -1039,14 +740,14 @@
               this.firebaseRefs.categories.set(this.state.categories),
               this.firebaseRefs.menu.set(this.state.menu)
             ]);
-            this._showToast(t.toastDeleteCategorySuccess, 'success');
+            this._showToast('تم حذف القسم بنجاح.', 'success');
           } catch (error) {
             // Revert UI on failure
             this.state.categories = originalCategories;
             this.state.menu = originalMenu;
             this._renderCategories();
             this._renderItems();
-            this._showToast(`${t.toastDeleteCategoryError}${error.message}`, 'error');
+            this._showToast(`فشل الحذف: ${error.message}`, 'error');
           }
         }
 
@@ -1055,7 +756,6 @@
         //================================================
 
         async saveSettings() {
-          const t = this.translations[this.state.currentLang];
           const form = this.elements.settingsForm;
           this._toggleFormState(form, true);
           this._toggleLoading(this.elements.saveSettingsBtn, true);
@@ -1070,9 +770,9 @@
           
           try {
             await this.firebaseRefs.settings.set(settings);
-            this._showToast(t.toastSaveSettingsSuccess, 'success');
+            this._showToast('تم حفظ الإعدادات بنجاح', 'success');
           } catch (error) {
-            this._showToast(`${t.toastSaveSettingsError}${error.message}`, 'error');
+            this._showToast(`خطأ: ${error.message}`, 'error');
           } finally {
             this._toggleFormState(form, false);
             this._toggleLoading(this.elements.saveSettingsBtn, false);
@@ -1135,8 +835,7 @@
         }
 
         _updateImagePreview(input, preview) {
-          const t = this.translations[this.state.currentLang];
-          preview.innerHTML = input.value ? `<img src="${input.value}" alt="Preview" onerror="this.parentElement.innerHTML='<span>${t.toastImageLoadFail}</span>'">` : `<span>${t.imagePreviewText}</span>`;
+          preview.innerHTML = input.value ? `<img src="${input.value}" alt="Preview" onerror="this.parentElement.innerHTML='<span>فشل تحميل الصورة</span>'">` : '<span>معاينة الصورة</span>';
         }
         
         _toggleFormState(formElement, disabled) {
@@ -1149,22 +848,20 @@
           const searchText = this.elements.searchItems.value.toLowerCase();
           const categoryFilter = this.elements.filterCategory.value;
           return this.state.menu.filter(item => {
-            const name = item[`name_${this.state.currentLang}`] || item.name_fr;
+            const name = item.name_ar || item.name_en;
             return (!searchText || name.toLowerCase().includes(searchText)) &&
                    (!categoryFilter || item.category === categoryFilter);
           });
         }
         
         _createItemRowElement(item, index) {
-            const t = this.translations[this.state.currentLang];
             const tr = document.createElement('tr');
-            const itemName = item[`name_${this.state.currentLang}`] || item.name_fr;
             tr.innerHTML = `
-              <td><img src="${item.image}" alt="${itemName}" class="w-12 h-12 object-cover rounded-md"></td>
-              <td>${itemName}</td>
+              <td><img src="${item.image}" alt="${item.name_ar}" class="w-12 h-12 object-cover rounded-md"></td>
+              <td>${item.name_ar}</td>
               <td>${item.category}</td>
               <td>${item.price} د.م.</td>
-              <td><span class="badge ${item.hidden ? 'badge-warning' : 'badge-success'}">${item.hidden ? t.hiddenLabel : t.activeLabel}</span></td>
+              <td><span class="badge ${item.hidden ? 'badge-warning' : 'badge-success'}">${item.hidden ? 'مخفي' : 'مفعل'}</span></td>
               <td class="flex gap-2">
                 <button type="button" class="pill btn-edit-item" data-index="${index}"><i class="fas fa-edit"></i></button>
                 <button type="button" class="pill bg-[var(--danger)]/20 text-[var(--danger)] btn-delete-item" data-index="${index}"><i class="fas fa-trash"></i></button>
@@ -1173,14 +870,12 @@
         }
 
         _createCategoryRowElement(cat, index) {
-            const t = this.translations[this.state.currentLang];
             const tr = document.createElement('tr');
-            const categoryName = cat[`name_${this.state.currentLang}`] || cat.name_fr;
             const itemCount = this.state.menu.filter(item => item.category === cat.name_ar).length;
             tr.innerHTML = `
-              <td>${categoryName}</td>
+              <td>${cat.name_ar}</td>
               <td>${itemCount}</td>
-              <td><span class="badge ${cat.hidden ? 'badge-warning' : 'badge-success'}">${cat.hidden ? t.hiddenLabel : t.activeLabel}</span></td>
+              <td><span class="badge ${cat.hidden ? 'badge-warning' : 'badge-success'}">${cat.hidden ? 'مخفي' : 'مفعل'}</span></td>
               <td class="flex gap-2">
                 <button type="button" class="pill btn-edit-category" data-index="${index}"><i class="fas fa-edit"></i></button>
                 <button type="button" class="pill bg-[var(--danger)]/20 text-[var(--danger)] btn-delete-category" data-index="${index}"><i class="fas fa-trash"></i></button>
@@ -1193,7 +888,6 @@
         }
 
         _validateForm(form) {
-            const t = this.translations[this.state.currentLang];
             this._clearValidation(form);
             let isValid = true;
             const requiredFields = form.querySelectorAll('[required]');
@@ -1203,7 +897,7 @@
                     isValid = false;
                 }
             });
-            if (!isValid) this._showToast(t.toastValidationRequired, 'error');
+            if (!isValid) this._showToast('الرجاء ملء الحقول المطلوبة.', 'error');
             return isValid;
         }
 
