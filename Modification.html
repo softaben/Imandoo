@@ -23,7 +23,11 @@
       --accent: #fbbf24;
       --radius-lg: 14px;
       --radius-md: 8px;
+      --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
     }
+    
     html,body{height:100%}
     body{
       font-family: 'Inter', system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -144,25 +148,6 @@
       background: rgba(255,255,255,0.2);
     }
 
-    /* Cart drawer overlay */
-    .cart-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.5);
-      z-index: 40;
-      opacity: 0;
-      visibility: hidden;
-      transition: all 0.3s ease;
-    }
-    
-    .cart-overlay.active {
-      opacity: 1;
-      visibility: visible;
-    }
-
     /* Improved Typography */
     h1, h2, h3, h4, h5, h6 {
       font-family: 'Playfair Display', serif;
@@ -227,6 +212,7 @@
     .form-input:focus {
       outline: none;
       border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.1);
     }
 
     /* Modal styles */
@@ -305,21 +291,21 @@
     }
 
     .alert-success {
-      background: rgba(76, 175, 80, 0.15);
-      color: #4CAF50;
-      border-left: 4px solid #4CAF50;
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--success);
+      border-left: 4px solid var(--success);
     }
 
     .alert-danger {
-      background: rgba(244, 67, 54, 0.15);
-      color: #F44336;
-      border-left: 4px solid #F44336;
+      background: rgba(239, 68, 68, 0.15);
+      color: var(--danger);
+      border-left: 4px solid var(--danger);
     }
 
     .alert-warning {
-      background: rgba(255, 152, 0, 0.15);
-      color: #FF9800;
-      border-left: 4px solid #FF9800;
+      background: rgba(245, 158, 11, 0.15);
+      color: var(--warning);
+      border-left: 4px solid var(--warning);
     }
 
     /* Toggle switch */
@@ -379,26 +365,6 @@
       font-weight: 500;
     }
 
-    /* Image preview */
-    .image-preview {
-      width: 100%;
-      height: 150px;
-      border-radius: var(--radius-md);
-      border: 1px solid rgba(255,255,255,0.05);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-      margin-bottom: 12px;
-      background: rgba(255,255,255,0.02);
-    }
-
-    .image-preview img {
-      max-width: 100%;
-      max-height: 100%;
-      object-fit: cover;
-    }
-
     /* Table styles */
     .table {
       width: 100%;
@@ -432,22 +398,87 @@
     }
 
     .badge-success {
-      background: rgba(76, 175, 80, 0.15);
-      color: #4CAF50;
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--success);
     }
 
     .badge-danger {
-      background: rgba(244, 67, 54, 0.15);
-      color: #F44336;
+      background: rgba(239, 68, 68, 0.15);
+      color: var(--danger);
     }
 
     .badge-warning {
-      background: rgba(255, 152, 0, 0.15);
-      color: #FF9800;
+      background: rgba(245, 158, 11, 0.15);
+      color: var(--warning);
+    }
+
+    /* Toast notification */
+    .toast-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .toast {
+      padding: 12px 16px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      animation: slideIn 0.3s ease;
+    }
+
+    .toast-success {
+      background: var(--success);
+      color: white;
+    }
+
+    .toast-error {
+      background: var(--danger);
+      color: white;
+    }
+
+    .toast-warning {
+      background: var(--warning);
+      color: white;
+    }
+
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    @keyframes slideOut {
+      from { transform: translateX(0); opacity: 1; }
+      to { transform: translateX(100%); opacity: 0; }
+    }
+
+    /* Loading spinner */
+    .spinner {
+      border: 3px solid rgba(255,255,255,0.1);
+      border-radius: 50%;
+      border-top: 3px solid var(--accent);
+      width: 24px;
+      height: 24px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
   </style>
 </head>
 <body>
+  <!-- Toast notifications container -->
+  <div class="toast-container" id="toastContainer"></div>
+
   <!-- نافذة تسجيل الدخول -->
   <div class="modal" id="loginModal">
     <div class="modal-content">
@@ -568,6 +599,9 @@
               <!-- سيتم تعبئتها ديناميكياً -->
             </tbody>
           </table>
+        </div>
+        <div id="itemsLoading" class="p-4">
+          <div class="spinner"></div>
         </div>
       </div>
     </div>
@@ -764,6 +798,27 @@
     </div>
   </div>
 
+  <!-- مودال تأكيد الحذف -->
+  <div class="modal" id="confirmModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="confirmModalTitle">تأكيد الحذف</h3>
+        <button class="close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p id="confirmMessage">هل أنت متأكد من أنك تريد الحذف؟</p>
+      </div>
+      <div class="modal-footer">
+        <button class="pill bg-[var(--danger)] text-white" id="confirmDeleteBtn">
+          <i class="fas fa-trash"></i> نعم، احذف
+        </button>
+        <button class="pill" id="cancelDeleteBtn">
+          <i class="fas fa-times"></i> إلغاء
+        </button>
+      </div>
+    </div>
+  </div>
+
   <script>
     // بيانات القائمة الحالية
     const menu = [
@@ -780,7 +835,8 @@
         "desc_ar": "نودلز مقلاة مع روبيان حار وخضار",
         "desc_fr": "Nouilles sautées avec crevettes épicées et légumes",
         "spicy": true,
-        "popular": true
+        "popular": true,
+        "hidden": false
       },
       {
         "id": 2,
@@ -795,7 +851,8 @@
         "desc_ar": "نودلز طازجة مع خضار مشكلة",
         "desc_fr": "Nouilles fraîches avec légumes assortis",
         "spicy": false,
-        "popular": false
+        "popular": false,
+        "hidden": false
       },
       {
         "id": 3,
@@ -810,7 +867,8 @@
         "desc_ar": "قطع دجاج مقلية بتوابل شرقية",
         "desc_fr": "Morceaux de poulet frits aux épices orientales",
         "spicy": false,
-        "popular": true
+        "popular": true,
+        "hidden": false
       },
       {
         "id": 4,
@@ -825,7 +883,8 @@
         "desc_ar": "دجاج متبل بالفلفل الحار",
         "desc_fr": "Poulet mariné au piment",
         "spicy": true,
-        "popular": false
+        "popular": false,
+        "hidden": false
       },
       {
         "id": 5,
@@ -838,9 +897,10 @@
         "image": "https://images.unsplash.com/photo-1616683693504-3ea0e0e8a71e?w=400&h=300&fit=crop",
         "desc_en": "Lightly spiced shrimp appetizer",
         "desc_ar": "مقبلات روبيان متبلة خفيفة",
-        "desc_fr": "Apéritif de crevettes légèrement épicé",
+        "desc_fr": "Apéritif de crevettes légèremente épicé",
         "spicy": false,
-        "popular": true
+        "popular": true,
+        "hidden": false
       },
       {
         "id": 6,
@@ -855,7 +915,8 @@
         "desc_ar": "لفائف بالخضار",
         "desc_fr": "Rouleaux de printemps aux légumes",
         "spicy": false,
-        "popular": false
+        "popular": false,
+        "hidden": false
       },
       {
         "id": 7,
@@ -870,7 +931,8 @@
         "desc_ar": "طاجن لحم البقر المغربي التقليدي مع الخوخ",
         "desc_fr": "Tajine marocain traditionnel de bœuf aux pruneaux",
         "spicy": false,
-        "popular": true
+        "popular": true,
+        "hidden": false
       },
       {
         "id": 8,
@@ -885,7 +947,8 @@
         "desc_ar": "سميد مطبوخ على البخار مع الدجاج والخضار",
         "desc_fr": "Semoule cuite à la vapeur avec poulet et légumes",
         "spicy": false,
-        "popular": true
+        "popular": true,
+        "hidden": false
       },
       {
         "id": 9,
@@ -900,7 +963,8 @@
         "desc_ar": "لحم ضأن مطبوخ ببطء مع توابل تقليدية",
         "desc_fr": "Agneau rôti lentement avec des épices traditionnelles",
         "spicy": false,
-        "popular": true
+        "popular": true,
+        "hidden": false
       },
       {
         "id": 10,
@@ -915,7 +979,8 @@
         "desc_ar": "خضروات موسمية مطبوخة في طاجن تقليدي",
         "desc_fr": "Légumes de saison cuits dans un tajine traditionnel",
         "spicy": false,
-        "popular": false
+        "popular": false,
+        "hidden": false
       },
       {
         "id": 11,
@@ -930,7 +995,8 @@
         "desc_ar": "شورى مغربية تقليدية مع العدس والحمص",
         "desc_fr": "Soupe marocaine traditionnelle aux lentilles et pois chiches",
         "spicy": false,
-        "popular": true
+        "popular": true,
+        "hidden": false
       },
       {
         "id": 12,
@@ -945,7 +1011,8 @@
         "desc_ar": "معجنات مقرمشة محشوة باللحم أو الجبن",
         "desc_fr": "Pâtisserie croustillante farcie à la viande ou au fromage",
         "spicy": false,
-        "popular": true
+        "popular": true,
+        "hidden": false
       },
       {
         "id": 13,
@@ -960,7 +1027,8 @@
         "desc_ar": "حلويات مصنوعة من طبقات من العجين محشوة بالمكسرات",
         "desc_fr": "Pâtisserie sucrée faite de couches de filo farcies aux noix",
         "spicy": false,
-        "popular": true
+        "popular": true,
+        "hidden": false
       },
       {
         "id": 14,
@@ -975,7 +1043,8 @@
         "desc_ar": "شاي مغربي تقليدي بالنعناع",
         "desc_fr": "Thé à la menthe marocain traditionnel",
         "spicy": false,
-        "popular": true
+        "popular": true,
+        "hidden": false
       },
       {
         "id": 15,
@@ -987,10 +1056,11 @@
         "currency": "MAD",
         "image": "https://images.unsplash.com/photo-1613478223719-2ab802602423?w=400&h=300&fit=crop",
         "desc_en": "Freshly squeezed orange juice",
-        "desc_ar": "عصير برتقال طازج",
+        "desc_ar": 'عصير برتقال طازج',
         "desc_fr": "Jus d'orange fraîchement pressé",
         "spicy": false,
-        "popular": false
+        "popular": false,
+        "hidden": false
       }
     ];
 
@@ -1013,6 +1083,7 @@
 
     // مراجع Firebase
     const menuRef = database.ref('menu');
+    const categoriesRef = database.ref('categories');
     const settingsRef = database.ref('settings');
 
     // عناصر DOM
@@ -1022,12 +1093,14 @@
     const closeLoginModal = document.getElementById('closeLoginModal');
     const logoutBtn = document.getElementById('logoutBtn');
     const alertContainer = document.getElementById('alertContainer');
+    const toastContainer = document.getElementById('toastContainer');
     const langButtons = document.querySelectorAll('.lang-btn');
     const tabButtons = document.querySelectorAll('.tab-btn');
     const tabContents = document.querySelectorAll('.tab-content');
     
     // عناصر إدارة الأصناف
     const itemsList = document.getElementById('itemsList');
+    const itemsLoading = document.getElementById('itemsLoading');
     const searchItemsInput = document.getElementById('searchItems');
     const filterCategorySelect = document.getElementById('filterCategory');
     const addItemBtn = document.getElementById('addItemBtn');
@@ -1071,14 +1144,22 @@
     const accentColorInput = document.getElementById('accentColor');
     const saveSettingsBtn = document.getElementById('saveSettingsBtn');
     
+    // عناصر تأكيد الحذف
+    const confirmModal = document.getElementById('confirmModal');
+    const confirmModalTitle = document.getElementById('confirmModalTitle');
+    const confirmMessage = document.getElementById('confirmMessage');
+    const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+    const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
+    
     // متغيرات التطبيق
     let menuData = [];
-    let settingsData = {};
     let categoriesData = [];
+    let settingsData = {};
     let isEditing = false;
     let currentItemId = null;
     let currentCategoryId = null;
     let currentLang = 'ar';
+    let deleteCallback = null;
 
     // تهيئة التطبيق
     function init() {
@@ -1091,6 +1172,7 @@
           mainContent.style.display = 'block';
           loginModal.classList.remove('active');
           loadMenuData();
+          loadCategoriesData();
           loadSettings();
         } else {
           // لا يوجد مستخدم مسجل الدخول
@@ -1127,7 +1209,7 @@
       
       // أحداث إدارة الأصناف
       addItemBtn.addEventListener('click', openItemModal);
-      searchItemsInput.addEventListener('input', filterItems);
+      searchItemsInput.addEventListener('input', debounce(filterItems, 300));
       filterCategorySelect.addEventListener('change', filterItems);
       itemImageInput.addEventListener('input', updateItemImagePreview);
       saveItemBtn.addEventListener('click', saveItem);
@@ -1144,6 +1226,11 @@
       backgroundImageInput.addEventListener('input', updateBackgroundPreview);
       saveSettingsBtn.addEventListener('click', saveSettings);
       
+      // أحداث تأكيد الحذف
+      confirmDeleteBtn.addEventListener('click', confirmDelete);
+      cancelDeleteBtn.addEventListener('click', closeConfirmModal);
+      document.querySelector('#confirmModal .close').addEventListener('click', closeConfirmModal);
+      
       // زر العودة
       document.getElementById('backBtn').addEventListener('click', () => {
         window.history.back();
@@ -1156,12 +1243,16 @@
       const email = document.getElementById('email').value;
       const password = document.getElementById('password').value;
 
+      showLoading(loginBtn);
+      
       auth.signInWithEmailAndPassword(email, password)
         .then((userCredential) => {
-          showAlert('تم تسجيل الدخول بنجاح!', 'success');
+          hideLoading(loginBtn, '<i class="fas fa-sign-in-alt"></i> تسجيل الدخول');
+          showToast('تم تسجيل الدخول بنجاح!', 'success');
         })
         .catch((error) => {
-          showAlert('خطأ في تسجيل الدخول: ' + error.message, 'danger');
+          hideLoading(loginBtn, '<i class="fas fa-sign-in-alt"></i> تسجيل الدخول');
+          showToast('خطأ في تسجيل الدخول: ' + error.message, 'error');
         });
     }
 
@@ -1169,15 +1260,17 @@
     function logoutUser() {
       auth.signOut()
         .then(() => {
-          showAlert('تم تسجيل الخروج بنجاح', 'success');
+          showToast('تم تسجيل الخروج بنجاح', 'success');
         })
         .catch((error) => {
-          showAlert('خطأ في تسجيل الخروج: ' + error.message, 'danger');
+          showToast('خطأ في تسجيل الخروج: ' + error.message, 'error');
         });
     }
 
     // تحميل بيانات القائمة من Firebase
     function loadMenuData() {
+      showLoading(itemsLoading);
+      
       menuRef.on('value', (snapshot) => {
         const firebaseData = snapshot.val();
         
@@ -1188,35 +1281,58 @@
           menuData = menu;
           menuRef.set(menuData)
             .then(() => {
-              showAlert('تم رفع القائمة إلى Firebase بنجاح', 'success');
+              showToast('تم رفع القائمة إلى Firebase بنجاح', 'success');
             })
             .catch(error => {
-              showAlert('حدث خطأ أثناء رفع القائمة: ' + error.message, 'danger');
+              showToast('حدث خطأ أثناء رفع القائمة: ' + error.message, 'error');
             });
         }
         
-        extractCategories();
-        renderItems();
         updateCategoryDropdown();
+        renderItems();
+        hideLoading(itemsLoading);
       });
     }
 
-    // استخراج الأقسام من البيانات
-    function extractCategories() {
+    // تحميل بيانات الأقسام من Firebase
+    function loadCategoriesData() {
+      categoriesRef.on('value', (snapshot) => {
+        const firebaseData = snapshot.val();
+        
+        if (firebaseData && firebaseData.length > 0) {
+          categoriesData = firebaseData;
+        } else {
+          // إذا لم توجد بيانات في Firebase، نستخرج الأقسام من القائمة
+          extractCategoriesFromMenu();
+        }
+        
+        renderCategories();
+      });
+    }
+
+    // استخراج الأقسام من القائمة
+    function extractCategoriesFromMenu() {
       const categoriesSet = new Set();
       menuData.forEach(item => {
         categoriesSet.add(item.category);
       });
-      categoriesData = Array.from(categoriesSet);
       
-      // تحديث قائمة التصفية
-      filterCategorySelect.innerHTML = '<option value="">جميع الأقسام</option>';
-      categoriesData.forEach(category => {
-        const option = document.createElement('option');
-        option.value = category;
-        option.textContent = category;
-        filterCategorySelect.appendChild(option);
-      });
+      categoriesData = Array.from(categoriesSet).map((category, index) => ({
+        id: index + 1,
+        name_ar: category,
+        name_en: category,
+        name_fr: category,
+        hidden: false
+      }));
+      
+      // حفظ الأقسام في Firebase
+      categoriesRef.set(categoriesData)
+        .then(() => {
+          showToast('تم إنشاء الأقسام تلقائياً من القائمة', 'success');
+        })
+        .catch(error => {
+          showToast('حدث خطأ أثناء حفظ الأقسام: ' + error.message, 'error');
+        });
     }
 
     // تحميل الإعدادات من Firebase
@@ -1252,20 +1368,25 @@
 
     // حفظ الإعدادات
     function saveSettings() {
+      showLoading(saveSettingsBtn);
+      
       const settings = {
         restaurantName: restaurantNameInput.value,
         restaurantDescription: restaurantDescriptionInput.value,
         backgroundImage: backgroundImageInput.value,
-        accentColor: accentColorInput.value
+        accentColor: accentColorInput.value,
+        lastUpdated: new Date().toISOString()
       };
       
       settingsRef.set(settings)
         .then(() => {
-          showAlert('تم حفظ الإعدادات بنجاح', 'success');
+          hideLoading(saveSettingsBtn, '<i class="fas fa-save"></i> حفظ الإعدادات');
+          showToast('تم حفظ الإعدادات بنجاح', 'success');
           applySettings();
         })
         .catch(error => {
-          showAlert('حدث خطأ أثناء حفظ الإعدادات: ' + error.message, 'danger');
+          hideLoading(saveSettingsBtn, '<i class="fas fa-save"></i> حفظ الإعدادات');
+          showToast('حدث خطأ أثناء حفظ الإعدادات: ' + error.message, 'error');
         });
     }
 
@@ -1273,7 +1394,7 @@
     function updateBackgroundPreview() {
       const url = backgroundImageInput.value;
       if (url) {
-        backgroundPreview.innerHTML = `<img src="${url}" alt="معاينة الخلفية">`;
+        backgroundPreview.innerHTML = `<img src="${url}" alt="معاينة الخلفية" onerror="this.parentElement.innerHTML='<span>معاينة الصورة</span>'">`;
       } else {
         backgroundPreview.innerHTML = '<span>معاينة الصورة</span>';
       }
@@ -1283,10 +1404,33 @@
     function updateItemImagePreview() {
       const url = itemImageInput.value;
       if (url) {
-        itemImagePreview.innerHTML = `<img src="${url}" alt="معاينة الصورة">`;
+        itemImagePreview.innerHTML = `<img src="${url}" alt="معاينة الصورة" onerror="this.parentElement.innerHTML='<span>معاينة الصورة</span>'">`;
       } else {
         itemImagePreview.innerHTML = '<span>معاينة الصورة</span>';
       }
+    }
+
+    // تحديث قائمة الأقسام في مودال الصنف
+    function updateCategoryDropdown() {
+      // تحديث قائمة التصفية
+      filterCategorySelect.innerHTML = '<option value="">جميع الأقسام</option>';
+      
+      // تحديث قائمة الأقسام في مودال الصنف
+      itemCategorySelect.innerHTML = '<option value="">اختر القسم</option>';
+      
+      categoriesData.forEach(category => {
+        if (!category.hidden) {
+          const option1 = document.createElement('option');
+          option1.value = category.name_ar;
+          option1.textContent = currentLang === 'ar' ? category.name_ar : currentLang === 'fr' ? category.name_fr : category.name_en;
+          filterCategorySelect.appendChild(option1);
+          
+          const option2 = document.createElement('option');
+          option2.value = category.name_ar;
+          option2.textContent = currentLang === 'ar' ? category.name_ar : currentLang === 'fr' ? category.name_fr : category.name_en;
+          itemCategorySelect.appendChild(option2);
+        }
+      });
     }
 
     // عرض الأصناف في الجدول
@@ -1316,7 +1460,7 @@
             <button class="pill btn-edit-item" data-index="${index}">
               <i class="fas fa-edit"></i> تعديل
             </button>
-            <button class="pill bg-red-500/20 text-red-300 btn-delete-item" data-index="${index}">
+            <button class="pill bg-[var(--danger)]/20 text-[var(--danger)] btn-delete-item" data-index="${index}">
               <i class="fas fa-trash"></i> حذف
             </button>
           </td>
@@ -1331,7 +1475,70 @@
         
         tr.querySelector('.btn-delete-item').addEventListener('click', (e) => {
           e.stopPropagation();
-          deleteItem(index);
+          showConfirmModal(
+            'تأكيد الحذف',
+            'هل أنت متأكد من حذف هذا الصنف؟ لا يمكن التراجع عن هذا الإجراء.',
+            () => deleteItem(index)
+          );
+        });
+      });
+    }
+
+    // عرض الأقسام في الجدول
+    function renderCategories() {
+      categoriesList.innerHTML = '';
+      
+      if (!categoriesData || categoriesData.length === 0) {
+        categoriesList.innerHTML = `<tr><td colspan="4" class="text-center py-4 text-[var(--muted)]">لا توجد أقسام</td></tr>`;
+        return;
+      }
+      
+      categoriesData.forEach((category, index) => {
+        // حساب عدد الأصناف في هذا القسم
+        const itemCount = menuData.filter(item => item.category === category.name_ar).length;
+        const isHidden = category.hidden === true;
+        
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${currentLang === 'ar' ? category.name_ar : currentLang === 'fr' ? category.name_fr : category.name_en}</td>
+          <td>${itemCount}</td>
+          <td>
+            <span class="badge ${isHidden ? 'badge-warning' : 'badge-success'}">
+              ${isHidden ? 'مخفي' : 'مفعل'}
+            </span>
+          </td>
+          <td>
+            <button class="pill btn-edit-category" data-index="${index}">
+              <i class="fas fa-edit"></i> تعديل
+            </button>
+            <button class="pill bg-[var(--danger)]/20 text-[var(--danger)] btn-delete-category" data-index="${index}">
+              <i class="fas fa-trash"></i> حذف
+            </button>
+            <button class="pill ${isHidden ? 'bg-[var(--success)]/20 text-[var(--success)]' : 'bg-[var(--warning)]/20 text-[var(--warning)]'} btn-toggle-category" data-index="${index}">
+              <i class="fas ${isHidden ? 'fa-eye' : 'fa-eye-slash'}"></i> ${isHidden ? 'إظهار' : 'إخفاء'}
+            </button>
+          </td>
+        `;
+        categoriesList.appendChild(tr);
+        
+        // إضافة أحداث النقر للأزرار
+        tr.querySelector('.btn-edit-category').addEventListener('click', (e) => {
+          e.stopPropagation();
+          editCategory(index);
+        });
+        
+        tr.querySelector('.btn-delete-category').addEventListener('click', (e) => {
+          e.stopPropagation();
+          showConfirmModal(
+            'تأكيد الحذف',
+            'هل أنت متأكد من حذف هذا القسم؟ سيتم حذف جميع الأصناف المرتبطة به.',
+            () => deleteCategory(index)
+          );
+        });
+        
+        tr.querySelector('.btn-toggle-category').addEventListener('click', (e) => {
+          e.stopPropagation();
+          toggleCategoryVisibility(index);
         });
       });
     }
@@ -1345,6 +1552,7 @@
         const name = currentLang === 'ar' ? item.name_ar : currentLang === 'fr' ? item.name_fr : item.name_en;
         const matchSearch = !searchText || name.toLowerCase().includes(searchText);
         const matchCategory = !category || item.category === category;
+        
         return matchSearch && matchCategory;
       });
       
@@ -1374,7 +1582,7 @@
             <button class="pill btn-edit-item" data-index="${originalIndex}">
               <i class="fas fa-edit"></i> تعديل
             </button>
-            <button class="pill bg-red-500/20 text-red-300 btn-delete-item" data-index="${originalIndex}">
+            <button class="pill bg-[var(--danger)]/20 text-[var(--danger)] btn-delete-item" data-index="${originalIndex}">
               <i class="fas fa-trash"></i> حذف
             </button>
           </td>
@@ -1389,20 +1597,12 @@
         
         tr.querySelector('.btn-delete-item').addEventListener('click', (e) => {
           e.stopPropagation();
-          deleteItem(originalIndex);
+          showConfirmModal(
+            'تأكيد الحذف',
+            'هل أنت متأكد من حذف هذا الصنف؟ لا يمكن التراجع عن هذا الإجراء.',
+            () => deleteItem(originalIndex)
+          );
         });
-      });
-    }
-
-    // تحديث قائمة الأقسام في مودال الصنف
-    function updateCategoryDropdown() {
-      itemCategorySelect.innerHTML = '<option value="">اختر القسم</option>';
-      
-      categoriesData.forEach(category => {
-        const option = document.createElement('option');
-        option.value = category;
-        option.textContent = category;
-        itemCategorySelect.appendChild(option);
       });
     }
 
@@ -1459,6 +1659,8 @@
 
     // حفظ الصنف
     function saveItem() {
+      showLoading(saveItemBtn);
+      
       const name_ar = itemNameArInput.value.trim();
       const name_en = itemNameEnInput.value.trim();
       const name_fr = itemNameFrInput.value.trim();
@@ -1473,7 +1675,8 @@
       const hidden = !itemStatusInput.checked;
       
       if (!name_ar || !name_en || !category || isNaN(price)) {
-        showAlert('الرجاء ملء جميع الحقول المطلوبة', 'danger');
+        hideLoading(saveItemBtn, '<i class="fas fa-save"></i> حفظ');
+        showToast('الرجاء ملء جميع الحقول المطلوبة', 'error');
         return;
       }
       
@@ -1491,7 +1694,8 @@
         desc_fr: desc_fr || desc_en,
         spicy,
         popular,
-        hidden
+        hidden,
+        lastUpdated: new Date().toISOString()
       };
       
       if (isEditing) {
@@ -1505,34 +1709,38 @@
       // حفظ التغييرات في Firebase
       menuRef.set(menuData)
         .then(() => {
-          showAlert(isEditing ? 'تم تحديث الصنف بنجاح' : 'تم إضافة الصنف بنجاح', 'success');
+          hideLoading(saveItemBtn, '<i class="fas fa-save"></i> حفظ');
+          showToast(isEditing ? 'تم تحديث الصنف بنجاح' : 'تم إضافة الصنف بنجاح', 'success');
           closeItemModal();
-          extractCategories();
+          updateCategoryDropdown();
           renderItems();
         })
         .catch(error => {
-          showAlert('حدث خطأ أثناء حفظ الصنف: ' + error.message, 'danger');
+          hideLoading(saveItemBtn, '<i class="fas fa-save"></i> حفظ');
+          showToast('حدث خطأ أثناء حفظ الصنف: ' + error.message, 'error');
         });
     }
 
     // حذف صنف
     function deleteItem(index) {
-      if (!confirm('هل أنت متأكد من حذف هذا الصنف؟')) {
-        return;
-      }
+      showLoading(confirmDeleteBtn);
       
       // حذف الصنف من البيانات المحلية
+      const deletedItem = menuData[index];
       menuData.splice(index, 1);
       
       // حفظ التغييرات في Firebase
       menuRef.set(menuData)
         .then(() => {
-          showAlert('تم حذف الصنف بنجاح', 'success');
-          extractCategories();
+          hideLoading(confirmDeleteBtn, '<i class="fas fa-trash"></i> نعم، احذف');
+          showToast('تم حذف الصنف بنجاح', 'success');
+          closeConfirmModal();
+          updateCategoryDropdown();
           renderItems();
         })
         .catch(error => {
-          showAlert('حدث خطأ أثناء حذف الصنف: ' + error.message, 'danger');
+          hideLoading(confirmDeleteBtn, '<i class="fas fa-trash"></i> نعم، احذف');
+          showToast('حدث خطأ أثناء حذف الصنف: ' + error.message, 'error');
         });
     }
 
@@ -1556,27 +1764,154 @@
       categoryStatusInput.checked = true;
     }
 
+    // فتح مودال تعديل قسم
+    function editCategory(index) {
+      const category = categoriesData[index];
+      if (!category) return;
+      
+      isEditing = true;
+      currentCategoryId = index;
+      categoryModalTitle.textContent = 'تعديل القسم';
+      categoryModal.classList.add('active');
+      
+      // تعبئة الحقول
+      categoryIdInput.value = category.id;
+      categoryNameArInput.value = category.name_ar;
+      categoryNameEnInput.value = category.name_en;
+      categoryNameFrInput.value = category.name_fr || '';
+      categoryStatusInput.checked = !category.hidden;
+    }
+
     // حفظ القسم
     function saveCategory() {
+      showLoading(saveCategoryBtn);
+      
       const name_ar = categoryNameArInput.value.trim();
       const name_en = categoryNameEnInput.value.trim();
       const name_fr = categoryNameFrInput.value.trim();
       const hidden = !categoryStatusInput.checked;
       
       if (!name_ar || !name_en) {
-        showAlert('الرجاء إدخال اسم القسم', 'danger');
+        hideLoading(saveCategoryBtn, '<i class="fas fa-save"></i> حفظ');
+        showToast('الرجاء إدخال اسم القسم', 'error');
         return;
       }
       
-      // في هذا الإصدار البسيط، نقوم فقط بتعديل الأصناف الحالية
-      // يمكن تطوير النظام ليدعم إدارة الأقسام بشكل منفصل في المستقبل
-      showAlert('يتم دمج إدارة الأقسام مع إدارة الأصناف في هذا الإصدار', 'warning');
-      closeCategoryModal();
+      const categoryData = {
+        id: isEditing ? categoriesData[currentCategoryId].id : Math.max(...categoriesData.map(c => c.id), 0) + 1,
+        name_ar,
+        name_en,
+        name_fr: name_fr || name_en,
+        hidden,
+        lastUpdated: new Date().toISOString()
+      };
+      
+      if (isEditing) {
+        // تحديث القسم الموجود
+        categoriesData[currentCategoryId] = categoryData;
+        
+        // تحديث جميع الأصناف التي تستخدم هذا القسم
+        const oldCategoryName = categoriesData[currentCategoryId].name_ar;
+        menuData.forEach(item => {
+          if (item.category === oldCategoryName) {
+            item.category = categoryData.name_ar;
+          }
+        });
+      } else {
+        // إضافة قسم جديد
+        categoriesData.push(categoryData);
+      }
+      
+      // حفظ التغييرات في Firebase
+      Promise.all([
+        categoriesRef.set(categoriesData),
+        menuRef.set(menuData)
+      ])
+      .then(() => {
+        hideLoading(saveCategoryBtn, '<i class="fas fa-save"></i> حفظ');
+        showToast(isEditing ? 'تم تحديث القسم بنجاح' : 'تم إضافة القسم بنجاح', 'success');
+        closeCategoryModal();
+        updateCategoryDropdown();
+        renderCategories();
+        renderItems();
+      })
+      .catch(error => {
+        hideLoading(saveCategoryBtn, '<i class="fas fa-save"></i> حفظ');
+        showToast('حدث خطأ أثناء حفظ القسم: ' + error.message, 'error');
+      });
+    }
+
+    // حذف قسم
+    function deleteCategory(index) {
+      showLoading(confirmDeleteBtn);
+      
+      // حذف القسم من البيانات المحلية
+      const deletedCategory = categoriesData[index];
+      categoriesData.splice(index, 1);
+      
+      // حذف جميع الأصناف المرتبطة بهذا القسم
+      menuData = menuData.filter(item => item.category !== deletedCategory.name_ar);
+      
+      // حفظ التغييرات في Firebase
+      Promise.all([
+        categoriesRef.set(categoriesData),
+        menuRef.set(menuData)
+      ])
+      .then(() => {
+        hideLoading(confirmDeleteBtn, '<i class="fas fa-trash"></i> نعم، احذف');
+        showToast('تم حذف القسم وجميع الأصناف المرتبطة به', 'success');
+        closeConfirmModal();
+        updateCategoryDropdown();
+        renderCategories();
+        renderItems();
+      })
+      .catch(error => {
+        hideLoading(confirmDeleteBtn, '<i class="fas fa-trash"></i> نعم، احذف');
+        showToast('حدث خطأ أثناء حذف القسم: ' + error.message, 'error');
+      });
+    }
+
+    // تبديل حالة إخفاء/إظهار القسم
+    function toggleCategoryVisibility(index) {
+      const category = categoriesData[index];
+      category.hidden = !category.hidden;
+      
+      // حفظ التغييرات في Firebase
+      categoriesRef.set(categoriesData)
+        .then(() => {
+          showToast(category.hidden ? 'تم إخفاء القسم' : 'تم إظهار القسم', 'success');
+          renderCategories();
+          updateCategoryDropdown();
+        })
+        .catch(error => {
+          showToast('حدث خطأ أثناء تغيير حالة القسم: ' + error.message, 'error');
+        });
     }
 
     // إغلاق مودال القسم
     function closeCategoryModal() {
       categoryModal.classList.remove('active');
+    }
+
+    // عرض مودال التأكيد
+    function showConfirmModal(title, message, callback) {
+      confirmModalTitle.textContent = title;
+      confirmMessage.textContent = message;
+      deleteCallback = callback;
+      confirmModal.classList.add('active');
+    }
+
+    // تأكيد الحذف
+    function confirmDelete() {
+      if (deleteCallback) {
+        deleteCallback();
+      }
+    }
+
+    // إغلاق مودال التأكيد
+    function closeConfirmModal() {
+      confirmModal.classList.remove('active');
+      deleteCallback = null;
     }
 
     // تبديل التبويبات
@@ -1608,24 +1943,44 @@
       document.getElementById('heroTitle').textContent = mapText('نظام إدارة القائمة');
       document.getElementById('heroSub').textContent = mapText('تحكم كامل في قائمة المطعم');
       
-      // إعادة عرض الأصناف
+      // إعادة عرض الأصناف والأقسام
       renderItems();
+      renderCategories();
+      updateCategoryDropdown();
     }
 
-    // عرض رسالة تنبيه
-    function showAlert(message, type) {
-      const alert = document.createElement('div');
-      alert.className = `alert alert-${type}`;
-      alert.innerHTML = `
-        <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
-        ${message}
+    // عرض رسالة toast
+    function showToast(message, type) {
+      const toast = document.createElement('div');
+      toast.className = `toast toast-${type}`;
+      toast.innerHTML = `
+        <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'}"></i>
+        <span>${message}</span>
       `;
-      alertContainer.appendChild(alert);
       
-      // إزالة التنبيه بعد 5 ثواني
+      toastContainer.appendChild(toast);
+      
+      // إزالة Toast بعد 5 ثواني
       setTimeout(() => {
-        alert.remove();
+        toast.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => {
+          toast.remove();
+        }, 300);
       }, 5000);
+    }
+
+    // عرض تحميل على الزر
+    function showLoading(button) {
+      const originalHtml = button.innerHTML;
+      button.setAttribute('data-original', originalHtml);
+      button.innerHTML = '<div class="spinner"></div>';
+      button.disabled = true;
+    }
+
+    // إخفاء تحميل الزر
+    function hideLoading(button, text) {
+      button.innerHTML = text || button.getAttribute('data-original');
+      button.disabled = false;
     }
 
     // مساعد: تخطيط النص للتدويل
@@ -1650,6 +2005,19 @@
       
       if (dict[text]) return dict[text][currentLang] || text;
       return text;
+    }
+
+    // دالة Debounce لتحسين الأداء
+    function debounce(func, wait) {
+      let timeout;
+      return function executedFunction(...args) {
+        const later = () => {
+          clearTimeout(timeout);
+          func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+      };
     }
 
     // بدء التطبيق
