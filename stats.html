@@ -12,6 +12,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-to-image"></script>
     <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
 
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
@@ -105,10 +106,37 @@
                 <h3 class="text-xl font-semibold mb-4 text-center">الطلبات الشهرية</h3>
                 <canvas id="monthlyOrdersChart"></canvas>
             </div>
-            <div class="card p-6 lg:col-span-2">
+            <div class="card p-6">
+                <h3 class="text-xl font-semibold mb-4 text-center">إيرادات أيام الأسبوع</h3>
+                <canvas id="weeklyRevenueChart"></canvas>
+            </div>
+            <div class="card p-6">
                 <h3 class="text-xl font-semibold mb-4 text-center">الأصناف الأكثر مبيعًا</h3>
                 <canvas id="popularItemsChart"></canvas>
             </div>
+        </div>
+    </section>
+
+    <section class="mb-8">
+        <div class="flex flex-col md:flex-row items-center justify-between mb-4">
+            <h2 class="text-2xl font-bold">الحصيلة الشهرية</h2>
+            <button onclick="archiveAndDownloadLastMonth()" class="pill text-white bg-blue-600 hover:bg-blue-700 transition mt-4 md:mt-0">
+                <i class="fas fa-cloud-download-alt"></i> تحميل وأرشفة بيانات الشهر الماضي
+            </button>
+        </div>
+        <div class="card p-6 overflow-x-auto">
+            <table class="w-full text-right table-auto">
+                <thead>
+                    <tr class="border-b border-slate-700">
+                        <th class="p-4 text-sm font-semibold text-[var(--muted)]">الشهر</th>
+                        <th class="p-4 text-sm font-semibold text-[var(--muted)]">إجمالي الإيرادات</th>
+                        <th class="p-4 text-sm font-semibold text-[var(--muted)]">عدد الطلبات</th>
+                        <th class="p-4 text-sm font-semibold text-[var(--muted)]">أعلى صنف مبيعًا</th>
+                    </tr>
+                </thead>
+                <tbody id="monthly-summary-table">
+                    </tbody>
+            </table>
         </div>
     </section>
 
@@ -154,6 +182,7 @@
                     allOrdersData.push({ id: childSnapshot.key, ...childSnapshot.val() });
                 });
                 renderCharts(allOrdersData);
+                loadMonthlySummaries();
             }).catch(error => console.error("Error fetching orders:", error));
         }
 
@@ -166,7 +195,7 @@
                 acc[date] = (acc[date] || 0) + order.totalPrice;
                 return acc;
             }, {});
-            renderChart('dailyRevenueChart', Object.keys(dailyRevenue), Object.values(dailyRevenue), 'bar', 'الإيرادات اليومية', 'rgba(251, 191, 36, 0.6)');
+            renderChart('dailyRevenueChart', Object.keys(dailyRevenue), Object.values(dailyRevenue), 'bar', 'Revenus Quotidiens', 'rgba(251, 191, 36, 0.6)');
 
             // Monthly Orders Data
             const monthlyOrders = completedOrders.reduce((acc, order) => {
@@ -175,6 +204,17 @@
                 return acc;
             }, {});
             renderChart('monthlyOrdersChart', Object.keys(monthlyOrders), Object.values(monthlyOrders), 'line', 'عدد الطلبات', 'rgba(16, 185, 129, 0.8)');
+            
+            // Weekly Revenue Data
+            const weeklyRevenue = completedOrders.reduce((acc, order) => {
+                const day = new Date(order.timestamp).toLocaleString('ar-MA', { weekday: 'long' });
+                acc[day] = (acc[day] || 0) + order.totalPrice;
+                return acc;
+            }, {});
+            const daysOrder = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+            const sortedWeeklyData = daysOrder.map(day => weeklyRevenue[day] || 0);
+            renderChart('weeklyRevenueChart', daysOrder, sortedWeeklyData, 'bar', 'الإيرادات اليومية', '#3b82f6');
+
 
             // Popular Items Data
             const itemCounts = completedOrders.reduce((acc, order) => {
@@ -234,8 +274,9 @@
         async function downloadPDF() {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
+            
             doc.setFont('Amiri', 'normal');
-            doc.text("تقرير إحصائيات المبيعات", 100, 20, null, null, "center");
+            doc.text("Rapport de Statistiques des Ventes", 100, 20, null, null, "center");
             
             const chartImage1 = await document.getElementById('dailyRevenueChart').toDataURL('image/png');
             doc.addImage(chartImage1, 'PNG', 15, 30, 180, 80);
@@ -248,11 +289,113 @@
             const chartImage3 = await document.getElementById('popularItemsChart').toDataURL('image/png');
             doc.addImage(chartImage3, 'PNG', 15, 30, 180, 80);
 
-            doc.save('تقرير-الإحصائيات.pdf');
+            doc.save('rapport-de-statistiques.pdf');
         }
 
         function downloadExcel() {
             const data = allOrdersData.map(order => ({
+                'ID de la commande': order.id,
+                'Numéro de table': order.tableNumber,
+                'Date': new Date(order.timestamp).toLocaleString('fr-FR'),
+                'Statut': order.status,
+                'Total': order.totalPrice,
+                'Articles': order.items.map(item => `${item.name_ar} (x${item.quantity})`).join(', '),
+                'Remarques': order.notes || ''
+            }));
+            
+            const ws = XLSX.utils.json_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Rapport des Commandes");
+            XLSX.writeFile(wb, "rapport-des-commandes.xlsx");
+        }
+
+        // New functions for monthly archiving
+        async function loadMonthlySummaries() {
+            const tableBody = document.getElementById('monthly-summary-table');
+            tableBody.innerHTML = '';
+            const summariesRef = database.ref('monthly_summaries').orderByKey();
+            const snapshot = await summariesRef.once('value');
+
+            if (!snapshot.exists()) {
+                tableBody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-[var(--muted)]">لا توجد حصيلة شهرية مؤرشفة بعد.</td></tr>`;
+                return;
+            }
+
+            snapshot.forEach(childSnapshot => {
+                const summary = childSnapshot.val();
+                const row = document.createElement('tr');
+                row.className = 'border-b border-slate-800 last:border-b-0';
+                row.innerHTML = `
+                    <td class="p-4">${summary.month}</td>
+                    <td class="p-4">${summary.totalRevenue.toFixed(2)} د.م</td>
+                    <td class="p-4">${summary.totalOrders}</td>
+                    <td class="p-4">${summary.topItem}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+        
+        async function archiveAndDownloadLastMonth() {
+            const confirmation = confirm("هل أنت متأكد من أرشفة بيانات الشهر الماضي؟ سيتم حذف جميع الطلبات من هذا الشهر بعد تحميلها.");
+            if (!confirmation) return;
+
+            const now = new Date();
+            const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+            const thisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+            const lastMonthName = lastMonth.toLocaleString('ar-MA', { month: 'long', year: 'numeric' });
+            
+            const ordersToArchive = allOrdersData.filter(order => {
+                const orderDate = new Date(order.timestamp);
+                return orderDate >= lastMonth && orderDate < thisMonth && (order.status === 'completed' || order.status === 'cancelled');
+            });
+
+            if (ordersToArchive.length === 0) {
+                alert("لا توجد طلبات مكتملة أو ملغاة من الشهر الماضي لأرشفتها.");
+                return;
+            }
+
+            // Calculate summary
+            const summary = {
+                month: lastMonthName,
+                totalRevenue: ordersToArchive.filter(o => o.status === 'completed').reduce((sum, order) => sum + order.totalPrice, 0),
+                totalOrders: ordersToArchive.filter(o => o.status === 'completed').length
+            };
+            
+            const itemCounts = ordersToArchive.filter(o => o.status === 'completed').reduce((acc, order) => {
+                order.items.forEach(item => { acc[item.name_ar] = (acc[item.name_ar] || 0) + item.quantity; });
+                return acc;
+            }, {});
+            const topItem = Object.entries(itemCounts).sort(([,a],[,b]) => b - a)[0];
+            summary.topItem = topItem ? topItem[0] : 'لا يوجد';
+
+            // Generate downloads
+            await downloadExcel(ordersToArchive, `حصيلة-${lastMonthName}`);
+            await downloadPDF(ordersToArchive, `حصيلة-${lastMonthName}`);
+            
+            // Save summary and delete orders
+            const summaryKey = `${lastMonth.getFullYear()}-${(lastMonth.getMonth() + 1).toString().padStart(2, '0')}`;
+            await database.ref(`monthly_summaries/${summaryKey}`).set(summary)
+                .then(() => {
+                    console.log("Monthly summary saved successfully.");
+                    const updates = {};
+                    ordersToArchive.forEach(order => {
+                        updates[`/orders/${order.id}`] = null; // Set to null to remove
+                    });
+                    return database.ref().update(updates);
+                })
+                .then(() => {
+                    alert("تمت الأرشفة بنجاح! تم تحميل التقارير وحذف بيانات الشهر الماضي من النظام.");
+                    window.location.reload();
+                })
+                .catch(error => {
+                    alert("فشل في الأرشفة أو الحذف. يرجى المحاولة مرة أخرى.");
+                    console.error("Archiving failed:", error);
+                });
+        }
+        
+        function downloadExcel(orders, filename) {
+            const data = orders.map(order => ({
                 'معرف الطلب': order.id,
                 'رقم الطاولة': order.tableNumber,
                 'التاريخ': new Date(order.timestamp).toLocaleString('ar-MA'),
@@ -264,9 +407,49 @@
             
             const ws = XLSX.utils.json_to_sheet(data);
             const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "تقرير الطلبات");
-            XLSX.writeFile(wb, "تقرير-الطلبات.xlsx");
+            XLSX.utils.book_append_sheet(wb, ws, "الطلبات");
+            XLSX.writeFile(wb, `${filename}.xlsx`);
         }
+
+        function downloadPDF(orders, filename) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({ orientation: 'landscape' }); // Landscape for more data
+            
+            doc.setFont('Amiri', 'normal');
+            doc.setFontSize(16);
+            doc.text(filename, 148, 20, null, null, "center");
+
+            const data = orders.map(order => [
+                order.id,
+                order.tableNumber,
+                new Date(order.timestamp).toLocaleString('ar-MA'),
+                order.status,
+                order.totalPrice,
+                order.items.map(item => `${item.name_ar} (x${item.quantity})`).join(', '),
+                order.notes || ''
+            ]);
+            
+            const headers = [['معرف الطلب', 'رقم الطاولة', 'التاريخ', 'الحالة', 'الإجمالي', 'الأصناف', 'ملاحظات']];
+
+            doc.autoTable({
+                startY: 30,
+                head: headers,
+                body: data,
+                styles: { font: 'Amiri', fontStyle: 'normal' },
+                headStyles: { fillColor: [30, 41, 59] },
+                alternateRowStyles: { fillColor: [15, 23, 42] },
+                bodyStyles: { textColor: [226, 232, 240] },
+                theme: 'striped',
+                didDrawPage: function(data) {
+                    let str = "الصفحة " + doc.internal.getNumberOfPages()
+                    doc.setFontSize(10)
+                    doc.text(str, data.settings.margin.left, doc.internal.pageSize.height - 10)
+                }
+            });
+            
+            doc.save(`${filename}.pdf`);
+        }
+
     </script>
 </body>
 </html>
