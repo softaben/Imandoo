@@ -604,7 +604,7 @@
             'Date': new Date(order.timestamp).toLocaleString('fr-FR'),
             'Statut': order.status,
             'Total': order.totalPrice,
-            'Articles': order.items.map(item => `${item.names.ar} (x${item.quantity})`).join(', '),
+            'Articles': order.items.map(item => `${item.names.fr} (x${item.quantity})`).join(', '),
             'Notes': order.notes || ''
         }));
         
@@ -627,7 +627,7 @@
             new Date(order.timestamp).toLocaleString('fr-FR'),
             order.status,
             order.totalPrice,
-            order.items.map(item => `${item.names.ar} (x${item.quantity})`).join(', '),
+            order.items.map(item => `${item.names.fr} (x${item.quantity})`).join(', '),
             order.notes || ''
         ]);
         
@@ -686,7 +686,7 @@
                     <td style="border: 1px solid #ddd; padding: 8px;">${new Date(order.timestamp).toLocaleString('fr-FR')}</td>
                     <td style="border: 1px solid #ddd; padding: 8px;">${order.status}</td>
                     <td style="border: 1px solid #ddd; padding: 8px;">${order.totalPrice} D.H</td>
-                    <td style="border: 1px solid #ddd; padding: 8px;">${order.items.map(item => `${item.names.ar} (x${item.quantity})`).join(', ')}</td>
+                    <td style="border: 1px solid #ddd; padding: 8px;">${order.items.map(item => `${item.names.fr} (x${item.quantity})`).join(', ')}</td>
                     <td style="border: 1px solid #ddd; padding: 8px;">${order.notes || ''}</td>
                 </tr>
             `;
