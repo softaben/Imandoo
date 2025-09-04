@@ -88,10 +88,10 @@
         <div class="flex flex-col md:flex-row items-center justify-between mb-4">
             <h2 class="text-2xl font-bold">ملخص الإحصائيات</h2>
             <div class="flex gap-4 mt-4 md:mt-0">
-                <button onclick="downloadPDF()" class="pill text-white bg-red-600 hover:bg-red-700 transition">
+                <button onclick="downloadPDF(allOrdersData, 'rapport-de-statistiques')" class="pill text-white bg-red-600 hover:bg-red-700 transition">
                     <i class="fas fa-file-pdf"></i> تحميل PDF
                 </button>
-                <button onclick="downloadExcel()" class="pill text-white bg-green-600 hover:bg-green-700 transition">
+                <button onclick="downloadExcel(allOrdersData, 'rapport-des-commandes')" class="pill text-white bg-green-600 hover:bg-green-700 transition">
                     <i class="fas fa-file-excel"></i> تحميل Excel
                 </button>
             </div>
@@ -271,7 +271,7 @@
             window.myCharts[canvasId] = new Chart(ctx, chartConfig);
         }
         
-        async function downloadPDF() {
+        async function downloadPDF(orders, filename) {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
             
@@ -289,11 +289,11 @@
             const chartImage3 = await document.getElementById('popularItemsChart').toDataURL('image/png');
             doc.addImage(chartImage3, 'PNG', 15, 30, 180, 80);
 
-            doc.save('rapport-de-statistiques.pdf');
+            doc.save(`${filename}.pdf`);
         }
 
-        function downloadExcel() {
-            const data = allOrdersData.map(order => ({
+        function downloadExcel(orders, filename) {
+            const data = orders.map(order => ({
                 'ID de la commande': order.id,
                 'Numéro de table': order.tableNumber,
                 'Date': new Date(order.timestamp).toLocaleString('fr-FR'),
@@ -306,7 +306,7 @@
             const ws = XLSX.utils.json_to_sheet(data);
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, "Rapport des Commandes");
-            XLSX.writeFile(wb, "rapport-des-commandes.xlsx");
+            XLSX.writeFile(wb, `${filename}.xlsx`);
         }
 
         // New functions for monthly archiving
@@ -370,8 +370,8 @@
             summary.topItem = topItem ? topItem[0] : 'لا يوجد';
 
             // Generate downloads
-            await downloadExcel(ordersToArchive, `حصيلة-${lastMonthName}`);
-            await downloadPDF(ordersToArchive, `حصيلة-${lastMonthName}`);
+            await downloadExcel(ordersToArchive, `archive-${lastMonthName}`);
+            await downloadPDF(ordersToArchive, `archive-${lastMonthName}`);
             
             // Save summary and delete orders
             const summaryKey = `${lastMonth.getFullYear()}-${(lastMonth.getMonth() + 1).toString().padStart(2, '0')}`;
@@ -408,7 +408,7 @@
             const ws = XLSX.utils.json_to_sheet(data);
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, "Rapport des Commandes");
-            XLSX.writeFile(wb, "rapport-des-commandes.xlsx");
+            XLSX.writeFile(wb, `${filename}.xlsx`);
         }
 
         function downloadPDF(orders, filename) {
@@ -417,7 +417,7 @@
             
             doc.setFont('Amiri', 'normal');
             doc.setFontSize(16);
-            doc.text("Rapport des Commandes Complétées", 148, 20, null, null, "center");
+            doc.text("Rapport des Commandes", 148, 20, null, null, "center");
 
             const data = orders.map(order => [
                 order.id,
