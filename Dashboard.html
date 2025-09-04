@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>لوحة تحكم الطلبات - Imandou Food</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+  <style>
+    :root{
+      --bg: #0f172a;
+      --card: #1e293b;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --accent: #fbbf24;
+      --radius-lg: 14px;
+      --success: #10b981;
+      --danger: #ef4444;
+      --info: #3b82f6;
+      --border-color: #334155;
+    }
+    
+    body {
+      font-family: 'Cairo', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    .card {
+      background: var(--card);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-color);
+    }
+    .stat-card {
+        background: linear-gradient(145deg, #2a3a54, #1e293b);
+    }
+    .pill {
+      border-radius: 999px; padding: 6px 14px;
+      font-weight: 600; font-size: 0.8rem;
+      cursor: pointer; transition: all 0.2s ease;
+      display: inline-flex; align-items: center; gap: 6px;
+      border: 1px solid transparent;
+    }
+    .pill:hover { opacity: 0.8; transform: translateY(-1px); }
+    .pill.status-new { background-color: var(--info); color: white; }
+    .pill.status-preparing { background-color: var(--accent); color: var(--bg); }
+    .pill.status-ready { background-color: var(--success); color: white; }
+    .pill.status-completed { background-color: var(--muted); color: var(--bg); }
+
+    .kanban-board {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 20px;
+    }
+    .kanban-column {
+        background-color: #162033;
+        border-radius: var(--radius-lg);
+        padding: 16px;
+        min-height: 400px;
+    }
+    .order-card {
+        animation: fadeIn 0.5s ease;
+    }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
+</head>
+<body class="p-4 md:p-8">
+
+  <header class="flex justify-between items-center mb-8 pb-4 border-b border-[var(--border-color)]">
+    <div>
+      <h1 class="text-3xl font-bold">لوحة تحكم الطلبات</h1>
+      <p class="text-[var(--muted)]">متابعة لحظية للطلبات والإحصائيات</p>
+    </div>
+    <div class="flex items-center gap-3">
+        <i class="fas fa-signal text-green-500"></i>
+        <span class="font-semibold">متصل</span>
+    </div>
+  </header>
+
+  <section id="stats" class="mb-8">
+    <h2 class="text-2xl font-bold mb-4">نظرة عامة</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div class="stat-card card p-5">
+        <div class="flex items-center gap-4">
+          <div class="bg-blue-500/20 p-3 rounded-full"><i class="fas fa-dollar-sign text-blue-400 text-2xl"></i></div>
+          <div>
+            <p class="text-[var(--muted)] text-sm">إجمالي الإيرادات (اليوم)</p>
+            <p id="totalRevenue" class="text-2xl font-bold">0 درهم</p>
+          </div>
+        </div>
+      </div>
+      <div class="stat-card card p-5">
+        <div class="flex items-center gap-4">
+          <div class="bg-green-500/20 p-3 rounded-full"><i class="fas fa-receipt text-green-400 text-2xl"></i></div>
+          <div>
+            <p class="text-[var(--muted)] text-sm">إجمالي الطلبات (اليوم)</p>
+            <p id="totalOrders" class="text-2xl font-bold">0</p>
+          </div>
+        </div>
+      </div>
+      <div class="stat-card card p-5">
+        <div class="flex items-center gap-4">
+          <div class="bg-yellow-500/20 p-3 rounded-full"><i class="fas fa-chart-pie text-yellow-400 text-2xl"></i></div>
+          <div>
+            <p class="text-[var(--muted)] text-sm">متوسط قيمة الطلب</p>
+            <p id="avgOrderValue" class="text-2xl font-bold">0 درهم</p>
+          </div>
+        </div>
+      </div>
+       <div class="stat-card card p-5">
+        <div class="flex items-center gap-4">
+          <div class="bg-purple-500/20 p-3 rounded-full"><i class="fas fa-tasks text-purple-400 text-2xl"></i></div>
+          <div>
+            <p class="text-[var(--muted)] text-sm">الطلبات النشطة الآن</p>
+            <p id="activeOrders" class="text-2xl font-bold">0</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  
+  <section class="mb-8">
+      <h2 class="text-2xl font-bold mb-4">الأصناف الأكثر طلباً</h2>
+      <div class="card p-5 h-96">
+          <canvas id="popularItemsChart"></canvas>
+      </div>
+  </section>
+
+  <section id="live-orders">
+    <h2 class="text-2xl font-bold mb-4">الطلبات الحالية</h2>
+    <div class="kanban-board">
+      <div class="kanban-column">
+        <h3 class="text-lg font-bold mb-4 border-b-2 border-blue-500 pb-2 flex items-center gap-2">
+            <i class="fas fa-bell text-blue-500"></i> طلبات جديدة
+        </h3>
+        <div id="new-orders" class="space-y-4">
+            <p class="text-[var(--muted)] text-center pt-8">لا توجد طلبات جديدة حالياً...</p>
+        </div>
+      </div>
+      <div class="kanban-column">
+        <h3 class="text-lg font-bold mb-4 border-b-2 border-yellow-500 pb-2 flex items-center gap-2">
+            <i class="fas fa-utensils text-yellow-500"></i> قيد التحضير
+        </h3>
+        <div id="preparing-orders" class="space-y-4"></div>
+      </div>
+      <div class="kanban-column">
+        <h3 class="text-lg font-bold mb-4 border-b-2 border-green-500 pb-2 flex items-center gap-2">
+            <i class="fas fa-check-circle text-green-500"></i> جاهزة للاستلام
+        </h3>
+        <div id="ready-orders" class="space-y-4"></div>
+      </div>
+    </div>
+  </section>
+
+  <audio id="notification-sound" src="https://assets.mixkit.co/sfx/preview/mixkit-positive-notification-951.mp3" preload="auto"></audio>
+
+<script>
+    // --- Firebase Configuration ---
+    const firebaseConfig = {
+      apiKey: "AIzaSyCyPOzsEzdrRd9o7iHASzFoLyJQhpTW83E",
+      authDomain: "imandou-food.firebaseapp.com",
+      databaseURL: "https://imandou-food-default-rtdb.firebaseio.com",
+      projectId: "imandou-food"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+
+    // --- DOM Elements ---
+    const columns = {
+        new: document.getElementById('new-orders'),
+        preparing: document.getElementById('preparing-orders'),
+        ready: document.getElementById('ready-orders')
+    };
+    const statElements = {
+        totalRevenue: document.getElementById('totalRevenue'),
+        totalOrders: document.getElementById('totalOrders'),
+        avgOrderValue: document.getElementById('avgOrderValue'),
+        activeOrders: document.getElementById('activeOrders'),
+    };
+    const notificationSound = document.getElementById('notification-sound');
+    let popularItemsChart;
+
+    // --- App Initialization ---
+    document.addEventListener('DOMContentLoaded', () => {
+        listenForOrders();
+    });
+
+    // --- Real-time Order Listener ---
+    function listenForOrders() {
+        const ordersRef = database.ref('orders').orderByChild('timestamp');
+        
+        ordersRef.on('value', (snapshot) => {
+            const orders = [];
+            snapshot.forEach(childSnapshot => {
+                orders.push({ id: childSnapshot.key, ...childSnapshot.val() });
+            });
+            
+            // Reverse to show newest first
+            orders.reverse();
+            
+            renderOrders(orders);
+            calculateAndDisplayStats(orders);
+        });
+    }
+
+    // --- Rendering ---
+    function renderOrders(orders) {
+        // Clear all columns first
+        Object.values(columns).forEach(col => col.innerHTML = '');
+        let activeOrdersCount = 0;
+
+        orders.forEach(order => {
+            const orderCard = createOrderCard(order);
+            const status = order.status || 'new';
+
+            if (columns[status]) {
+                columns[status].appendChild(orderCard);
+                activeOrdersCount++;
+            } else if (status !== 'completed') {
+                 // Fallback for any unknown status, put in 'new'
+                 columns.new.appendChild(orderCard);
+                 activeOrdersCount++;
+            }
+        });
+        
+        statElements.activeOrders.textContent = activeOrdersCount;
+
+        // Check for new orders to play sound
+        const hasNewOrders = orders.some(o => o.status === 'new');
+        if (hasNewOrders && columns.new.innerHTML.trim() !== '') {
+            const lastNewOrderTime = Math.max(...orders.filter(o => o.status === 'new').map(o => o.timestamp));
+            // Play sound only for recent orders (e.g., within the last 30 seconds)
+            if (Date.now() - lastNewOrderTime < 30000) {
+                 notificationSound.play().catch(e => console.log("Audio play failed:", e));
+            }
+            if (columns.new.querySelector('.text-\\[var\\(--muted\\)\\]')) {
+                 columns.new.innerHTML = ''; // Clear "no orders" message if it exists
+                 orders.filter(o => o.status === 'new').forEach(o => columns.new.appendChild(createOrderCard(o)));
+            }
+        } else if (columns.new.innerHTML.trim() === '') {
+             columns.new.innerHTML = `<p class="text-[var(--muted)] text-center pt-8">لا توجد طلبات جديدة حالياً...</p>`;
+        }
+    }
+    
+    function createOrderCard(order) {
+        const card = document.createElement('div');
+        card.className = 'order-card card p-4 space-y-3';
+        card.id = `order-${order.id}`;
+        
+        const itemsHtml = order.items.map(item => `
+            <li class="flex justify-between items-center text-sm">
+                <span>${item.name_ar} <span class="text-xs text-[var(--muted)]">x${item.quantity}</span></span>
+                <span class="font-semibold">${item.price * item.quantity} د.م</span>
+            </li>
+        `).join('');
+
+        const actionButtonsHtml = {
+            'new': `<button class="pill status-preparing" onclick="updateOrderStatus('${order.id}', 'preparing')"><i class="fas fa-play"></i> بدء التحضير</button>`,
+            'preparing': `<button class="pill status-ready" onclick="updateOrderStatus('${order.id}', 'ready')"><i class="fas fa-check"></i> تم التجهيز</button>`,
+            'ready': `<button class="pill status-completed" onclick="updateOrderStatus('${order.id}', 'completed')"><i class="fas fa-check-double"></i> إكمال الطلب</button>`
+        }[order.status];
+        
+        card.innerHTML = `
+            <div class="flex justify-between items-center pb-2 border-b border-[var(--border-color)]">
+                <div>
+                    <h4 class="font-bold text-lg">طاولة رقم ${order.tableNumber}</h4>
+                    <p class="text-xs text-[var(--muted)]">${new Date(order.timestamp).toLocaleTimeString('ar-MA')}</p>
+                </div>
+                <div class="font-bold text-lg text-[var(--accent)]">${order.totalPrice} د.م</div>
+            </div>
+            <ul class="space-y-1">${itemsHtml}</ul>
+            ${order.notes ? `<div class="pt-2 text-sm italic text-yellow-300/80"><i class="fas fa-sticky-note mr-2"></i><strong>ملاحظة:</strong> ${order.notes}</div>` : ''}
+            <div class="pt-3 flex justify-end">${actionButtonsHtml}</div>
+        `;
+        return card;
+    }
+    
+    // --- Actions ---
+    function updateOrderStatus(orderId, newStatus) {
+        database.ref('orders/' + orderId).update({
+            status: newStatus
+        }).catch(err => console.error("Update failed:", err));
+    }
+
+    // --- Statistics ---
+    function calculateAndDisplayStats(allOrders) {
+        const today = new Date().setHours(0, 0, 0, 0);
+        const todaysOrders = allOrders.filter(o => new Date(o.timestamp) >= today && o.status === 'completed');
+
+        const totalRevenue = todaysOrders.reduce((sum, order) => sum + order.totalPrice, 0);
+        const totalOrders = todaysOrders.length;
+        const avgOrderValue = totalOrders > 0 ? (totalRevenue / totalOrders) : 0;
+
+        statElements.totalRevenue.textContent = `${totalRevenue.toFixed(2)} درهم`;
+        statElements.totalOrders.textContent = totalOrders;
+        statElements.avgOrderValue.textContent = `${avgOrderValue.toFixed(2)} درهم`;
+
+        // Calculate most popular items from all completed orders
+        const itemCounts = {};
+        allOrders.filter(o => o.status === 'completed').forEach(order => {
+            order.items.forEach(item => {
+                itemCounts[item.name_ar] = (itemCounts[item.name_ar] || 0) + item.quantity;
+            });
+        });
+        
+        const sortedItems = Object.entries(itemCounts)
+            .sort(([,a], [,b]) => b - a)
+            .slice(0, 7); // Get top 7 items
+            
+        renderPopularItemsChart(sortedItems);
+    }
+    
+    function renderPopularItemsChart(items) {
+        const ctx = document.getElementById('popularItemsChart').getContext('2d');
+        const labels = items.map(item => item[0]);
+        const data = items.map(item => item[1]);
+        
+        if (popularItemsChart) {
+            popularItemsChart.destroy();
+        }
+
+        popularItemsChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'الكمية المباعة',
+                    data: data,
+                    backgroundColor: 'rgba(251, 191, 36, 0.6)',
+                    borderColor: 'rgba(251, 191, 36, 1)',
+                    borderWidth: 1,
+                    borderRadius: 5,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y',
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        ticks: { color: 'var(--muted)' },
+                        grid: { color: 'rgba(255,255,255,0.05)' }
+                    },
+                    y: {
+                        ticks: { color: 'var(--text)', font: { size: 14 } },
+                        grid: { display: false }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+    }
+
+</script>
+
+</body>
+</html>
