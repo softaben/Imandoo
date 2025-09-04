@@ -1,928 +1,705 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="fr" dir="ltr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>نظام إدارة قائمة Imandou Food</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-  <style>
-    /*==============================================*/
-    /*=============== Root & Globals ===============*/
-    /*==============================================*/
-    :root{
-      --bg: #0f172a;
-      --card: #0b1220;
-      --text: #e2e8f0;
-      --muted: #94a3b8;
-      --accent: #fbbf24;
-      --radius-lg: 14px;
-      --radius-md: 8px;
-      --success: #10b981;
-      --danger: #ef4444;
-      --warning: #f59e0b;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-lang-key="pageTitle"></title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     
-    html,body{ height:100% }
-    body{
-      font-family: 'Inter', system-ui, -apple-system, "Segoe UI", sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      -webkit-font-smoothing:antialiased;
-      -moz-osx-font-smoothing:grayscale;
-      overflow-x: hidden;
-      position: relative;
-      font-weight: 400;
-      line-height: 1.6;
-    }
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-to-image"></script>
+    <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
 
-    body::before {
-      content: '';
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-image: url('https://images.unsplash.com/photo-1563245372-f21724e3856d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2064&q=80');
-      background-size: cover;
-      background-position: center;
-      opacity: 0.08;
-      z-index: -1;
-      pointer-events: none;
-    }
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 
-    /*==============================================*/
-    /*================ Typography ==================*/
-    /*==============================================*/
-    h1, h2, h3, h4, h5, h6 {
-      font-family: 'Playfair Display', serif;
-      font-weight: 600;
-      letter-spacing: -0.025em;
-    }
+    <style>
+        :root{
+          --bg: #0f172a;
+          --card: #0b1220;
+          --text: #e2e8f0;
+          --muted: #94a3b8;
+          --accent: #fbbf24;
+          --radius-lg: 14px;
+          --radius-md: 8px;
+          --success: #10b981;
+          --danger: #ef4444;
+          --info: #3b82f6;
+        }
+        
+        body {
+          font-family: 'Inter', 'Cairo', sans-serif;
+          background: var(--bg);
+          color: var(--text);
+        }
+        body::before {
+          content: '';
+          position: fixed; top: 0; left: 0;
+          width: 100%; height: 100%;
+          background-image: var(--background-image, url('https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&q=80&w=2070'));
+          background-size: cover; background-position: center;
+          opacity: 0.08; z-index: -1;
+          transition: background-image 0.5s ease-in-out;
+        }
+        h1, h2, h3 { font-family: 'Playfair Display', serif; font-weight: 700; }
+        [dir="rtl"] h1, [dir="rtl"] h2, [dir="rtl"] h3 { font-family: 'Cairo', sans-serif; }
 
-    #appTitle { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 1.5rem; }
-    #heroTitle { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 2rem; letter-spacing: -0.03em; }
-    .dish-name { font-family: 'Inter', sans-serif; font-weight: 500; font-size: 1.1rem; }
-    .price { font-family: 'Inter', sans-serif; font-weight: 600; }
-    input, button, .pill { font-family: 'Inter', sans-serif; }
+        .card {
+          background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.04));
+          border-radius: var(--radius-lg);
+          box-shadow: 0 8px 25px rgba(2,6,23,0.7);
+          border: 1px solid rgba(255,255,255,0.04);
+          backdrop-filter: blur(12px);
+          -webkit-backdrop-filter: blur(12px);
+        }
+        .pill {
+          background: rgba(255,255,255,0.03); border-radius: 999px;
+          padding: 8px 16px; font-weight:500; color:var(--text);
+          display:inline-flex; gap:8px; align-items:center;
+          border: 1px solid rgba(255,255,255,0.05);
+          transition: all 0.2s ease; cursor: pointer;
+          font-size: 0.9rem; white-space: nowrap;
+        }
+        .pill:hover { background: rgba(255,255,255,0.07); transform: translateY(-1px); }
 
-    [lang="ar"] body, [dir="rtl"] body { font-family: 'Cairo', 'Inter', sans-serif; }
-    [lang="ar"] h1, [lang="ar"] h2, [lang="ar"] h3, [dir="rtl"] h1, [dir="rtl"] h2, [dir="rtl"] h3 { font-family: 'Cairo', 'Playfair Display', serif; }
-
-    /*==============================================*/
-    /*================= Components =================*/
-    /*==============================================*/
-    .app { max-width: 480px; margin: 0 auto; min-height:100vh; display:flex; flex-direction:column; position: relative; z-index: 1; }
-    .card{ background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.03)); border-radius: var(--radius-lg); padding: 12px; box-shadow: 0 6px 18px rgba(2,6,23,0.6); border: 1px solid rgba(255,255,255,0.03); backdrop-filter: blur(10px); }
-    .pill { background: rgba(255,255,255,0.02); border-radius: 999px; padding: 8px 12px; font-weight:500; color:var(--text); display:inline-flex; gap:8px; align-items:center; border: 1px solid rgba(255,255,255,0.03); transition: all 0.2s ease; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 0.875rem; }
-    .pill:hover { background: rgba(255,255,255,0.05); }
-
-    .form-input { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: var(--radius-md); padding: 10px 12px; color: var(--text); width: 100%; margin-bottom: 12px; }
-    .form-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.1); }
-    .form-input.is-invalid { border-color: var(--danger); }
-
-    .image-preview { margin-top: 10px; width: 100%; height: 150px; background-color: rgba(255, 255, 255, 0.03); border: 1px dashed rgba(255, 255, 255, 0.1); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; overflow: hidden; color: var(--muted); }
-    .image-preview img { width: 100%; height: 100%; object-fit: cover; }
-
-    /* Modal styles */
-    .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 20px; backdrop-filter: blur(5px); }
-    .modal.active { display: flex; }
-    .modal-content { background: var(--card); border-radius: var(--radius-lg); width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5); border: 1px solid rgba(255,255,255,0.05); }
-    .modal-header { padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; align-items: center; }
-    .modal-title { font-size: 1.5rem; font-weight: 700; margin: 0; }
-    .close { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text); }
-    .modal-body { padding: 20px; }
-    .modal-footer { padding: 20px; border-top: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: flex-end; gap: 10px; }
-
-    /* Table styles */
-    .table { width: 100%; border-collapse: collapse; margin-top: 16px; }
-    .table th, .table td { padding: 12px; text-align: right; border-bottom: 1px solid rgba(255,255,255,0.05); }
-    .table th { background: rgba(255,255,255,0.03); font-weight: 600; }
-    .table tr:hover { background: rgba(255,255,255,0.02); }
-
-    /* Badge styles */
-    .badge { display: inline-block; padding: 4px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; }
-    .badge-success { background: rgba(16, 185, 129, 0.15); color: var(--success); }
-    .badge-danger { background: rgba(239, 68, 68, 0.15); color: var(--danger); }
-    .badge-warning { background: rgba(245, 158, 11, 0.15); color: var(--warning); }
-
-    /* Toggle switch */
-    .toggle-container { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
-    .switch { position: relative; display: inline-block; width: 50px; height: 24px; }
-    .switch input { opacity: 0; width: 0; height: 0; }
-    .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(255,255,255,0.1); transition: .4s; border-radius: 34px; }
-    .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
-    input:checked + .slider { background-color: var(--accent); }
-    input:checked + .slider:before { transform: translateX(26px); }
-
-    /*==============================================*/
-    /*================== Utilities =================*/
-    /*==============================================*/
-    .fab { position: fixed; right: 20px; bottom: 18px; z-index: 60; transition: transform 0.3s ease; }
-    .fab:hover { transform: scale(1.05); }
-    [dir="rtl"] .fab { right: auto; left: 20px; }
-    @media(min-width:768px){ .app{max-width:720px} }
-
-    /* Toast notification */
-    .toast-container { position: fixed; top: 20px; right: 20px; z-index: 1000; display: flex; flex-direction: column; gap: 10px; }
-    .toast { padding: 12px 16px; border-radius: var(--radius-md); display: flex; align-items: center; gap: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); animation: slideIn 0.3s ease; }
-    .toast-success { background: var(--success); color: white; }
-    .toast-error { background: var(--danger); color: white; }
-    @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-    @keyframes slideOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }
-
-    /* Loading spinner */
-    .spinner { border: 3px solid rgba(255,255,255,0.1); border-radius: 50%; border-top: 3px solid var(--accent); width: 24px; height: 24px; animation: spin 1s linear infinite; }
-    button .spinner { width: 20px; height: 20px; }
-    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-  </style>
+        canvas {
+            max-height: 400px;
+        }
+        .loading-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.9); display: flex;
+            justify-content: center; align-items: center; z-index: 50;
+            flex-direction: column;
+            text-align: center;
+        }
+        .spinner {
+          border: 4px solid rgba(255, 255, 255, 0.1);
+          border-top: 4px solid var(--accent);
+          border-radius: 50%;
+          width: 40px;
+          height: 40px;
+          animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+    </style>
 </head>
-<body>
+<body class="p-4 md:p-8">
 
-  <div class="toast-container" id="toastContainer"></div>
-
-  <div class="modal active" id="loginModal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3 class="modal-title">تسجيل الدخول</h3>
-        <button type="button" class="close" data-modal-close="loginModal">&times;</button>
-      </div>
-      <form id="loginForm">
-        <div class="modal-body">
-          <div class="form-group">
-            <label for="email" class="block mb-2 text-sm font-medium">البريد الإلكتروني</label>
-            <input type="email" class="form-input" id="email" required>
-          </div>
-          <div class="form-group">
-            <label for="password" class="block mb-2 text-sm font-medium">كلمة المرور</label>
-            <input type="password" class="form-input" id="password" required>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="submit" class="pill bg-[var(--accent)] text-black font-semibold" id="loginBtn">
-            <i class="fas fa-sign-in-alt"></i> تسجيل الدخول
-          </button>
-        </div>
-      </form>
+    <div id="loading-overlay" class="loading-overlay">
+      <div class="spinner"></div>
+      <p id="loading-text" class="text-white mt-4 text-lg" data-lang-key="loadingText"></p>
     </div>
-  </div>
 
-  <main class="app p-4" id="mainContent" style="display: none;">
-    <header class="flex items-center justify-between mb-3">
-      <div class="flex items-center gap-3">
-        <h1 id="appTitle" class="text-xl font-semibold">Imandou Food - الإدارة</h1>
-      </div>
-      <div class="flex items-center gap-3">
-        <a href="index.html" class="pill">
-          <i class="fas fa-eye"></i> عرض القائمة
-        </a>
-        <button type="button" id="logoutBtn" class="pill bg-red-500/20 text-red-300">
-          <i class="fas fa-sign-out-alt"></i> تسجيل الخروج
-        </button>
-      </div>
+    <header class="flex flex-col md:flex-row justify-between items-center mb-8 pb-4 border-b border-slate-800">
+        <div class="flex items-center gap-4 mb-4 md:mb-0">
+            <h1 class="text-3xl font-bold" data-lang-key="headerTitle"></h1>
+            <p class="text-[var(--muted)]" data-lang-key="headerSubtitle"></p>
+        </div>
+        <div class="flex items-center gap-4">
+            <div class="relative inline-block text-white">
+                <select id="language-select" class="bg-slate-800 text-white rounded-full py-2 px-4 appearance-none cursor-pointer">
+                    <option value="fr">Français</option>
+                    <option value="ar">العربية</option>
+                    <option value="en">English</option>
+                </select>
+                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                    <i class="fas fa-caret-down text-white"></i>
+                </div>
+            </div>
+            <a href="Dashboard.html" class="pill text-white hover:bg-slate-700 transition" data-lang-key="dashboardLink"><i class="fas fa-home"></i> <span></span></a>
+            <a href="modification.html" class="pill text-white hover:bg-slate-700 transition" data-lang-key="menuLink"><i class="fas fa-edit"></i> <span></span></a>
+            <a href="users.html" class="pill text-white hover:bg-slate-700 transition" data-lang-key="accountLink"><i class="fas fa-user-circle"></i> <span></span></a>
+        </div>
     </header>
 
-    <section class="card mb-4 relative overflow-hidden">
-        <div class="flex items-center gap-3">
-          <img src="https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=400&auto=format&fit=crop" alt="hero" class="w-28 h-28 object-cover rounded-lg shadow-md">
-          <div>
-            <div id="heroTitle" class="text-2xl font-bold">نظام إدارة القائمة</div>
-            <div id="heroSub" class="text-sm text-[var(--muted)]">تحكم كامل في قائمة المطعم</div>
-          </div>
+    <section class="mb-8">
+        <div class="flex flex-col md:flex-row items-center justify-between mb-4">
+            <h2 class="text-2xl font-bold" data-lang-key="summaryTitle"></h2>
+            <div class="flex gap-4 mt-4 md:mt-0">
+                <button onclick="downloadPDF(allOrdersData)" class="pill text-white bg-red-600 hover:bg-red-700 transition">
+                    <i class="fas fa-file-pdf"></i> <span data-lang-key="downloadPdfBtn"></span>
+                </button>
+                <button onclick="downloadExcel(allOrdersData)" class="pill text-white bg-green-600 hover:bg-green-700 transition">
+                    <i class="fas fa-file-excel"></i> <span data-lang-key="downloadExcelBtn"></span>
+                </button>
+            </div>
+        </div>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div class="card p-6">
+                <h3 class="text-xl font-semibold mb-4 text-center" data-lang-key="dailyRevenueChartTitle"></h3>
+                <canvas id="dailyRevenueChart"></canvas>
+            </div>
+            <div class="card p-6">
+                <h3 class="text-xl font-semibold mb-4 text-center" data-lang-key="monthlyOrdersChartTitle"></h3>
+                <canvas id="monthlyOrdersChart"></canvas>
+            </div>
+            <div class="card p-6">
+                <h3 class="text-xl font-semibold mb-4 text-center" data-lang-key="weeklyRevenueChartTitle"></h3>
+                <canvas id="weeklyRevenueChart"></canvas>
+            </div>
+            <div class="card p-6">
+                <h3 class="text-xl font-semibold mb-4 text-center" data-lang-key="popularItemsChartTitle"></h3>
+                <canvas id="popularItemsChart"></canvas>
+            </div>
         </div>
     </section>
 
-    <nav class="flex justify-between items-center mb-4">
-      <div class="flex gap-2" id="langContainer">
-        <button type="button" class="pill lang-btn active" data-lang="ar">العربية</button>
-        <button type="button" class="pill lang-btn" data-lang="en">English</button>
-        <button type="button" class="pill lang-btn" data-lang="fr">Français</button>
-      </div>
-      <div class="flex gap-2" id="tabsContainer">
-        <button type="button" class="pill tab-btn active" data-tab="items"><i class="fas fa-utensils"></i> الأصناف</button>
-        <button type="button" class="pill tab-btn" data-tab="categories"><i class="fas fa-layer-group"></i> الأقسام</button>
-        <button type="button" class="pill tab-btn" data-tab="settings"><i class="fas fa-cog"></i> الإعدادات</button>
-      </div>
-    </nav>
-    
-    <div class="tab-content active" id="items-tab">
-      <div class="card mb-4">
-        <div class="flex items-center justify-between mb-4">
-          <h2 class="text-lg font-semibold">الأصناف</h2>
-          <button type="button" class="pill bg-[var(--accent)] text-black" id="addItemBtn">
-            <i class="fas fa-plus"></i> إضافة صنف
-          </button>
+    <section class="mb-8">
+        <div class="flex flex-col md:flex-row items-center justify-between mb-4">
+            <h2 class="text-2xl font-bold" data-lang-key="monthlySummaryTitle"></h2>
+            <button onclick="archiveAndDownloadLastMonth()" class="pill text-white bg-blue-600 hover:bg-blue-700 transition mt-4 md:mt-0" data-lang-key="archiveBtn">
+                <i class="fas fa-cloud-download-alt"></i> <span data-lang-key="archiveBtnText"></span>
+            </button>
         </div>
-        <div class="flex gap-2 mb-4">
-          <input type="text" id="searchItems" placeholder="بحث في الأصناف..." class="form-input flex-1">
-          <select id="filterCategory" class="form-input flex-1">
-            <option value="">جميع الأقسام</option>
-          </select>
+        <div class="card p-6 overflow-x-auto">
+            <table class="w-full text-right table-auto">
+                <thead>
+                    <tr class="border-b border-slate-700">
+                        <th class="p-4 text-sm font-semibold text-[var(--muted)]" data-lang-key="tableHeaderMonth"></th>
+                        <th class="p-4 text-sm font-semibold text-[var(--muted)]" data-lang-key="tableHeaderRevenue"></th>
+                        <th class="p-4 text-sm font-semibold text-[var(--muted)]" data-lang-key="tableHeaderOrders"></th>
+                        <th class="p-4 text-sm font-semibold text-[var(--muted)]" data-lang-key="tableHeaderTopItem"></th>
+                    </tr>
+                </thead>
+                <tbody id="monthly-summary-table">
+                    </tbody>
+            </table>
         </div>
-        <div class="overflow-x-auto">
-          <table class="table">
-            <thead><tr><th>الصورة</th><th>الاسم</th><th>القسم</th><th>السعر</th><th>الحالة</th><th>الإجراءات</th></tr></thead>
-            <tbody id="itemsList"></tbody>
-          </table>
-        </div>
-        <div id="itemsLoading" class="p-4" style="display:none;"><div class="spinner mx-auto"></div></div>
-      </div>
-    </div>
+    </section>
 
-    <div class="tab-content" id="categories-tab" style="display:none;">
-      <div class="card mb-4">
-        <div class="flex items-center justify-between mb-4">
-          <h2 class="text-lg font-semibold">الأقسام</h2>
-          <button type="button" class="pill bg-[var(--accent)] text-black" id="addCategoryBtn">
-            <i class="fas fa-plus"></i> إضافة قسم
-          </button>
+    <section class="mb-8">
+        <div class="flex flex-col md:flex-row items-center justify-between mb-4">
+            <h2 class="text-2xl font-bold" data-lang-key="dailySalesTitle"></h2>
         </div>
-        <table class="table">
-          <thead><tr><th>اسم القسم</th><th>عدد الأصناف</th><th>الحالة</th><th>الإجراءات</th></tr></thead>
-          <tbody id="categoriesList"></tbody>
-        </table>
-      </div>
-    </div>
-
-    <div class="tab-content" id="settings-tab" style="display:none;">
-      <div class="card mb-4">
-        <h2 class="text-lg font-semibold mb-4">الإعدادات العامة</h2>
-        <form id="settingsForm">
-          <label for="restaurantName" class="block mb-2 text-sm font-medium">اسم المطعم</label>
-          <input type="text" id="restaurantName" class="form-input" value="Imandou Food">
-          <label for="restaurantDescription" class="block mb-2 text-sm font-medium">وصف المطعم</label>
-          <textarea id="restaurantDescription" class="form-input" rows="3">مطعم يقدم أطباق شرقية أصلية</textarea>
-          <label for="backgroundImage" class="block mb-2 text-sm font-medium">صورة الخلفية</label>
-          <input type="text" id="backgroundImage" class="form-input" placeholder="أدخل رابط الصورة">
-          <div class="image-preview" id="backgroundPreview"><span>معاينة الصورة</span></div>
-          <label for="accentColor" class="block mt-4 mb-2 text-sm font-medium">لون التمييز</label>
-          <input type="color" id="accentColor" class="form-input p-1 h-10" value="#fbbf24">
-          <button type="submit" class="pill bg-[var(--accent)] text-black mt-4" id="saveSettingsBtn">
-            <i class="fas fa-save"></i> حفظ الإعدادات
-          </button>
-        </form>
-      </div>
-    </div>
-  </main>
-
-  <div class="modal" id="itemModal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3 class="modal-title" id="itemModalTitle"></h3>
-        <button type="button" class="close" data-modal-close="itemModal">&times;</button>
-      </div>
-      <form id="itemForm">
-        <div class="modal-body">
-            <input type="hidden" id="itemId">
-            <label for="itemNameAr">اسم الصنف (العربية)</label><input type="text" id="itemNameAr" class="form-input" required>
-            <label for="itemNameEn">اسم الصنف (الإنجليزية)</label><input type="text" id="itemNameEn" class="form-input" required>
-            <label for="itemNameFr">اسم الصنف (الفرنسية)</label><input type="text" id="itemNameFr" class="form-input">
-            <div class="grid grid-cols-2 gap-4">
-              <div><label for="itemCategory">القسم</label><select id="itemCategory" class="form-input" required><option value="">اختر القسم</option></select></div>
-              <div><label for="itemPrice">السعر (درهم)</label><input type="number" id="itemPrice" class="form-input" min="0" step="0.01" required></div>
-            </div>
-            <label for="itemDescAr">الوصف (العربية)</label><textarea id="itemDescAr" class="form-input" rows="2"></textarea>
-            <label for="itemDescEn">الوصف (الإنجليزية)</label><textarea id="itemDescEn" class="form-input" rows="2"></textarea>
-            <label for="itemDescFr">الوصف (الفرنسية)</label><textarea id="itemDescFr" class="form-input" rows="2"></textarea>
-            <label for="itemImage">رابط الصورة</label><input type="text" id="itemImage" class="form-input" placeholder="أدخل رابط الصورة">
-            <div class="image-preview" id="itemImagePreview"><span>معاينة الصورة</span></div>
-            <div class="flex justify-around mt-4">
-                <div class="toggle-container"><label class="switch"><input type="checkbox" id="itemSpicy"><span class="slider"></span></label><span>حار</span></div>
-                <div class="toggle-container"><label class="switch"><input type="checkbox" id="itemPopular" checked><span class="slider"></span></label><span>شائع</span></div>
-                <div class="toggle-container"><label class="switch"><input type="checkbox" id="itemStatus" checked><span class="slider"></span></label><span>مفعل</span></div>
-            </div>
+        <div class="card p-6 overflow-x-auto">
+            <table class="w-full text-right table-auto">
+                <thead>
+                    <tr class="border-b border-slate-700">
+                        <th class="p-4 text-sm font-semibold text-[var(--muted)]" data-lang-key="tableHeaderDate"></th>
+                        <th class="p-4 text-sm font-semibold text-[var(--muted)]" data-lang-key="tableHeaderRevenue"></th>
+                        <th class="p-4 text-sm font-semibold text-[var(--muted)]" data-lang-key="tableHeaderItemsSold"></th>
+                    </tr>
+                </thead>
+                <tbody id="daily-items-table">
+                    </tbody>
+            </table>
         </div>
-        <div class="modal-footer">
-            <button type="button" class="pill" data-modal-close="itemModal">إلغاء</button>
-            <button type="submit" class="pill bg-[var(--accent)] text-black" id="saveItemBtn">حفظ</button>
-        </div>
-      </form>
-    </div>
-  </div>
+    </section>
 
-  <div class="modal" id="categoryModal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3 class="modal-title" id="categoryModalTitle"></h3>
-        <button type="button" class="close" data-modal-close="categoryModal">&times;</button>
-      </div>
-      <form id="categoryForm">
-        <div class="modal-body">
-            <input type="hidden" id="categoryId">
-            <label for="categoryNameAr">اسم القسم (العربية)</label><input type="text" id="categoryNameAr" class="form-input" required>
-            <label for="categoryNameEn">اسم القسم (الإنجليزية)</label><input type="text" id="categoryNameEn" class="form-input" required>
-            <label for="categoryNameFr">اسم القسم (الفرنسية)</label><input type="text" id="categoryNameFr" class="form-input">
-            <div class="toggle-container mt-4"><label class="switch"><input type="checkbox" id="categoryStatus" checked><span class="slider"></span></label><span>مفعل</span></div>
-        </div>
-        <div class="modal-footer">
-            <button type="button" class="pill" data-modal-close="categoryModal">إلغاء</button>
-            <button type="submit" class="pill bg-[var(--accent)] text-black" id="saveCategoryBtn">حفظ</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <div class="modal" id="confirmModal">
-    <div class="modal-content">
-      <div class="modal-header"><h3 class="modal-title" id="confirmModalTitle"></h3><button type="button" class="close" data-modal-close="confirmModal">&times;</button></div>
-      <div class="modal-body"><p id="confirmMessage"></p></div>
-      <div class="modal-footer">
-          <button type="button" class="pill" data-modal-close="confirmModal"><i class="fas fa-times"></i> إلغاء</button>
-          <button type="button" class="pill bg-[var(--danger)] text-white" id="confirmDeleteBtn"><i class="fas fa-trash"></i> نعم، احذف</button>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      /**
-       * ImandouAdmin Application Object
-       * Encapsulates the entire admin panel logic.
-       */
-      const ImandouAdmin = {
-        // Application state
-        state: {
-          menu: [],
-          categories: [],
-          settings: {},
-          isEditing: false,
-          currentItemIndex: null,
-          currentCategoryIndex: null,
-          currentLang: 'ar',
-          deleteCallback: null,
-          user: null,
-        },
-
-        // Firebase configuration and references
-        firebaseConfig: {
+    <script>
+        const firebaseConfig = {
           apiKey: "AIzaSyCyPOzsEzdrRd9o7iHASzFoLyJQhpTW83E",
           authDomain: "imandou-food.firebaseapp.com",
           databaseURL: "https://imandou-food-default-rtdb.firebaseio.com",
-          projectId: "imandou-food",
-          storageBucket: "imandou-food.appspot.com",
-          messagingSenderId: "839302179988",
-          appId: "1:839302179988:web:92636c32e1b00b587ad881",
-        },
-        firebaseApp: null,
-        firebaseRefs: {
-          db: null,
-          auth: null,
-          menu: null,
-          categories: null,
-          settings: null,
-        },
+          projectId: "imandou-food"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
 
-        // Cached DOM elements
-        elements: {},
-
-        /**
-         * Initializes the application.
-         */
-        init() {
-          this.cacheDOMElements();
-          this.initFirebase();
-          this.setupEventListeners();
-          this.monitorAuthState();
-        },
-
-        /**
-         * Caches all required DOM elements for performance.
-         */
-        cacheDOMElements() {
-          const ids = [
-            'mainContent', 'loginModal', 'loginForm', 'loginBtn', 'logoutBtn',
-            'toastContainer', 'langContainer', 'tabsContainer', 'appTitle', 'heroTitle', 'heroSub',
-            'itemsList', 'itemsLoading', 'addItemBtn', 'searchItems', 'filterCategory',
-            'itemModal', 'itemModalTitle', 'itemForm', 'itemId', 'itemNameAr', 'itemNameEn', 'itemNameFr',
-            'itemCategory', 'itemPrice', 'itemDescAr', 'itemDescEn', 'itemDescFr',
-            'itemImage', 'itemImagePreview', 'itemSpicy', 'itemPopular', 'itemStatus', 'saveItemBtn',
-            'categoriesList', 'addCategoryBtn', 'categoryModal', 'categoryModalTitle', 'categoryForm',
-            'categoryId', 'categoryNameAr', 'categoryNameEn', 'categoryNameFr', 'categoryStatus', 'saveCategoryBtn',
-            'settingsForm', 'restaurantName', 'restaurantDescription', 'backgroundImage', 'backgroundPreview', 'accentColor', 'saveSettingsBtn',
-            'confirmModal', 'confirmModalTitle', 'confirmMessage', 'confirmDeleteBtn'
-          ];
-          ids.forEach(id => {
-            this.elements[id] = document.getElementById(id);
-          });
-          this.elements.tabContents = document.querySelectorAll('.tab-content');
-        },
-
-        /**
-         * Initializes Firebase and sets up database references.
-         */
-        initFirebase() {
-          this.firebaseApp = firebase.initializeApp(this.firebaseConfig);
-          this.firebaseRefs.db = firebase.database();
-          this.firebaseRefs.auth = firebase.auth();
-          this.firebaseRefs.menu = this.firebaseRefs.db.ref('menu');
-          this.firebaseRefs.categories = this.firebaseRefs.db.ref('categories');
-          this.firebaseRefs.settings = this.firebaseRefs.db.ref('settings');
-        },
-
-        /**
-         * Sets up all event listeners for the application.
-         */
-        setupEventListeners() {
-          this.elements.loginForm.addEventListener('submit', e => { e.preventDefault(); this.loginUser(); });
-          this.elements.logoutBtn.addEventListener('click', () => this.logoutUser());
-          
-          this.elements.langContainer.addEventListener('click', e => {
-            if (e.target.classList.contains('lang-btn')) this.switchLanguage(e.target.dataset.lang);
-          });
-
-          this.elements.tabsContainer.addEventListener('click', e => {
-            if (e.target.classList.contains('tab-btn')) this.switchTab(e.target.dataset.tab);
-          });
-
-          // Modals
-          document.addEventListener('click', e => {
-            if (e.target.dataset.modalClose) this.toggleModal(e.target.dataset.modalClose, false);
-          });
-          this.elements.addItemBtn.addEventListener('click', () => this.openItemModal());
-          this.elements.addCategoryBtn.addEventListener('click', () => this.openCategoryModal());
-
-          // Forms
-          this.elements.itemForm.addEventListener('submit', e => { e.preventDefault(); this.saveItem(); });
-          this.elements.categoryForm.addEventListener('submit', e => { e.preventDefault(); this.saveCategory(); });
-          this.elements.settingsForm.addEventListener('submit', e => { e.preventDefault(); this.saveSettings(); });
-          
-          // Event Delegation for lists
-          this.elements.itemsList.addEventListener('click', e => this.handleItemsListClick(e));
-          this.elements.categoriesList.addEventListener('click', e => this.handleCategoriesListClick(e));
-          
-          // Other listeners
-          this.elements.searchItems.addEventListener('input', this.debounce(() => this.renderItems(), 300));
-          this.elements.filterCategory.addEventListener('change', () => this.renderItems());
-          this.elements.itemImage.addEventListener('input', () => this.updateImagePreview(this.elements.itemImage, this.elements.itemImagePreview));
-          this.elements.backgroundImage.addEventListener('input', () => this.updateImagePreview(this.elements.backgroundImage, this.elements.backgroundPreview));
-          this.elements.confirmDeleteBtn.addEventListener('click', () => this.confirmDelete());
-        },
-
-        //===============================================
-        //=============== AUTHENTICATION ================
-        //===============================================
-
-        monitorAuthState() {
-          this.firebaseRefs.auth.onAuthStateChanged(user => {
-            if (user) {
-              this.state.user = user;
-              this.elements.mainContent.style.display = 'block';
-              this.toggleModal('loginModal', false);
-              this.loadAllData();
-            } else {
-              this.state.user = null;
-              this.elements.mainContent.style.display = 'none';
-              this.toggleModal('loginModal', true);
-            }
-          });
-        },
-
-        async loginUser() {
-          const email = document.getElementById('email').value;
-          const password = document.getElementById('password').value;
-          this.toggleLoading(this.elements.loginBtn, true);
-          try {
-            await this.firebaseRefs.auth.signInWithEmailAndPassword(email, password);
-            this.showToast('تم تسجيل الدخول بنجاح!', 'success');
-          } catch (error) {
-            this.showToast(`خطأ في تسجيل الدخول: ${error.message}`, 'error');
-          } finally {
-            this.toggleLoading(this.elements.loginBtn, false, '<i class="fas fa-sign-in-alt"></i> تسجيل الدخول');
-          }
-        },
-
-        async logoutUser() {
-          try {
-            await this.firebaseRefs.auth.signOut();
-            this.showToast('تم تسجيل الخروج بنجاح', 'success');
-          } catch (error) {
-            this.showToast(`خطأ في تسجيل الخروج: ${error.message}`, 'error');
-          }
-        },
+        let allOrdersData = [];
+        let currentLang = 'fr';
         
-        //===============================================
-        //================== DATA HANDLING ================
-        //===============================================
-
-        loadAllData() {
-          this.elements.itemsLoading.style.display = 'block';
-          this.firebaseRefs.menu.on('value', snapshot => {
-            this.state.menu = snapshot.val() || [];
-            this.renderItems();
-            this.elements.itemsLoading.style.display = 'none';
-          });
-          this.firebaseRefs.categories.on('value', snapshot => {
-            this.state.categories = snapshot.val() || [];
-            this.renderCategories();
-            this.updateCategoryDropdowns();
-          });
-          this.firebaseRefs.settings.on('value', snapshot => {
-            this.state.settings = snapshot.val() || {};
-            this.applySettings();
-          });
-        },
-        
-        //===============================================
-        //=============== UI & RENDERING ================
-        //===============================================
-
-        renderItems() {
-          const searchText = this.elements.searchItems.value.toLowerCase();
-          const categoryFilter = this.elements.filterCategory.value;
-          const lang = this.state.currentLang;
-
-          const filteredItems = this.state.menu.filter(item => {
-            const name = item[`name_${lang}`] || item.name_en;
-            const matchesSearch = !searchText || name.toLowerCase().includes(searchText);
-            const matchesCategory = !categoryFilter || item.category === categoryFilter;
-            return matchesSearch && matchesCategory;
-          });
-
-          if (filteredItems.length === 0) {
-            this.elements.itemsList.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-[var(--muted)]">لا توجد أصناف.</td></tr>`;
-            return;
-          }
-          
-          this.elements.itemsList.innerHTML = filteredItems.map(item => {
-            const originalIndex = this.state.menu.findIndex(i => i.id === item.id);
-            const isHidden = item.hidden === true;
-            return `
-              <tr>
-                <td><img src="${item.image}" alt="${item.name_ar}" class="w-12 h-12 object-cover rounded-md"></td>
-                <td>${item[`name_${lang}`] || item.name_en}</td>
-                <td>${item.category}</td>
-                <td>${item.price} درهم</td>
-                <td><span class="badge ${isHidden ? 'badge-warning' : 'badge-success'}">${isHidden ? 'مخفي' : 'مفعل'}</span></td>
-                <td>
-                  <button type="button" class="pill btn-edit-item" data-index="${originalIndex}"><i class="fas fa-edit"></i></button>
-                  <button type="button" class="pill bg-[var(--danger)]/20 text-[var(--danger)] btn-delete-item" data-index="${originalIndex}"><i class="fas fa-trash"></i></button>
-                </td>
-              </tr>
-            `;
-          }).join('');
-        },
-        
-        renderCategories() {
-          const lang = this.state.currentLang;
-          if (this.state.categories.length === 0) {
-            this.elements.categoriesList.innerHTML = `<tr><td colspan="4" class="text-center py-4 text-[var(--muted)]">لا توجد أقسام.</td></tr>`;
-            return;
-          }
-          this.elements.categoriesList.innerHTML = this.state.categories.map((cat, index) => {
-            const itemCount = this.state.menu.filter(item => item.category === cat.name_ar).length;
-            const isHidden = cat.hidden === true;
-            return `
-              <tr>
-                <td>${cat[`name_${lang}`] || cat.name_en}</td>
-                <td>${itemCount}</td>
-                <td><span class="badge ${isHidden ? 'badge-warning' : 'badge-success'}">${isHidden ? 'مخفي' : 'مفعل'}</span></td>
-                <td>
-                  <button type="button" class="pill btn-edit-category" data-index="${index}"><i class="fas fa-edit"></i></button>
-                  <button type="button" class="pill bg-[var(--danger)]/20 text-[var(--danger)] btn-delete-category" data-index="${index}"><i class="fas fa-trash"></i></button>
-                </td>
-              </tr>
-            `;
-          }).join('');
-        },
-        
-        applySettings() {
-          const { restaurantName, restaurantDescription, backgroundImage, accentColor } = this.state.settings;
-          if (restaurantName) {
-            this.elements.restaurantName.value = restaurantName;
-            this.elements.appTitle.textContent = `${restaurantName} - الإدارة`;
-            this.elements.heroTitle.textContent = restaurantName;
-          }
-          if (restaurantDescription) this.elements.restaurantDescription.value = restaurantDescription;
-          if (backgroundImage) {
-            this.elements.backgroundImage.value = backgroundImage;
-            this.updateImagePreview(this.elements.backgroundImage, this.elements.backgroundPreview);
-          }
-          if (accentColor) {
-            this.elements.accentColor.value = accentColor;
-            document.documentElement.style.setProperty('--accent', accentColor);
-          }
-        },
-
-        updateCategoryDropdowns() {
-          const lang = this.state.currentLang;
-          const activeCategories = this.state.categories.filter(c => !c.hidden);
-          const options = activeCategories.map(cat => `<option value="${cat.name_ar}">${cat[`name_${lang}`] || cat.name_en}</option>`).join('');
-          this.elements.filterCategory.innerHTML = `<option value="">جميع الأقسام</option>${options}`;
-          this.elements.itemCategory.innerHTML = `<option value="">اختر القسم</option>${options}`;
-        },
-
-        //===============================================
-        //================= EVENT HANDLERS ==============
-        //===============================================
-        
-        handleItemsListClick(e) {
-            const editBtn = e.target.closest('.btn-edit-item');
-            if (editBtn) this.openItemModal(editBtn.dataset.index);
-
-            const deleteBtn = e.target.closest('.btn-delete-item');
-            if (deleteBtn) {
-                this.showConfirmModal(
-                    'تأكيد حذف الصنف',
-                    'هل أنت متأكد من حذف هذا الصنف؟ لا يمكن التراجع عن هذا الإجراء.',
-                    () => this.deleteItem(deleteBtn.dataset.index)
-                );
+        const translations = {
+            'fr': {
+                // UI
+                'pageTitle': 'Statistiques des ventes - Imandou Food',
+                'loadingText': 'Chargement des données...',
+                'headerTitle': 'Statistiques des ventes',
+                'headerSubtitle': 'Analyse des données de vente',
+                'dashboardLink': 'Tableau de bord',
+                'menuLink': 'Modifier le menu',
+                'accountLink': 'Mon compte',
+                'summaryTitle': 'Résumé des statistiques',
+                'downloadPdfBtn': 'Télécharger PDF',
+                'downloadExcelBtn': 'Télécharger Excel',
+                'monthlySummaryTitle': 'Résumé mensuel',
+                'archiveBtn': 'Archiver & télécharger le mois dernier',
+                'archiveBtnText': 'Archiver & télécharger le mois dernier',
+                'dailySalesTitle': 'Résumé des ventes quotidiennes',
+                // Chart Labels
+                'dailyRevenueChartTitle': 'Revenus quotidiens',
+                'monthlyOrdersChartTitle': 'Commandes mensuelles',
+                'weeklyRevenueChartTitle': 'Revenus par jour de la semaine',
+                'popularItemsChartTitle': 'Articles les plus vendus',
+                // Table Headers
+                'tableHeaderMonth': 'Mois',
+                'tableHeaderRevenue': 'Revenu total',
+                'tableHeaderOrders': 'Nombre de commandes',
+                'tableHeaderTopItem': 'Article le plus vendu',
+                'tableHeaderDate': 'Date',
+                'tableHeaderItemsSold': 'Articles vendus',
+                // Messages & Alerts
+                'archiveConfirm': 'Êtes-vous sûr de vouloir archiver les données du mois dernier ?',
+                'noOrdersToArchive': "Il n'y a pas de commandes terminées ou annulées du mois dernier à archiver.",
+                'archiveSuccess': 'Archivage réussi ! Les rapports ont été téléchargés et les données du mois dernier ont été supprimées du système.',
+                'archiveFailed': 'L\'archivage ou la suppression a échoué. Veuillez réessayer.',
+                'noMonthlySummary': 'Aucun résumé mensuel n\'est encore archivé.',
+                'noDailySales': 'Aucune vente n\'a encore été réalisée.',
+                // PDF/Excel
+                'pdfTitle': 'Rapport des statistiques',
+                'excelSheetName': 'Rapport des Commandes',
+                'pdfHeaderId': 'ID Commande',
+                'pdfHeaderTableNo': 'N° de table',
+                'pdfHeaderDate': 'Date',
+                'pdfHeaderStatus': 'Statut',
+                'pdfHeaderTotal': 'Total',
+                'pdfHeaderItems': 'Articles',
+                'pdfHeaderNotes': 'Notes',
+                'page': 'Page',
+                // Placeholders
+                'noItem': 'Aucun'
+            },
+            'en': {
+                // UI
+                'pageTitle': 'Sales Statistics - Imandou Food',
+                'loadingText': 'Loading data...',
+                'headerTitle': 'Sales Statistics',
+                'headerSubtitle': 'Sales Data Analysis',
+                'dashboardLink': 'Dashboard',
+                'menuLink': 'Edit Menu',
+                'accountLink': 'My Account',
+                'summaryTitle': 'Statistics Summary',
+                'downloadPdfBtn': 'Download PDF',
+                'downloadExcelBtn': 'Download Excel',
+                'monthlySummaryTitle': 'Monthly Summary',
+                'archiveBtn': 'Archive & Download Last Month',
+                'archiveBtnText': 'Archive & Download Last Month',
+                'dailySalesTitle': 'Daily Sales Summary',
+                // Chart Labels
+                'dailyRevenueChartTitle': 'Daily Revenue',
+                'monthlyOrdersChartTitle': 'Monthly Orders',
+                'weeklyRevenueChartTitle': 'Weekly Revenue',
+                'popularItemsChartTitle': 'Most Sold Items',
+                // Table Headers
+                'tableHeaderMonth': 'Month',
+                'tableHeaderRevenue': 'Total Revenue',
+                'tableHeaderOrders': 'Number of Orders',
+                'tableHeaderTopItem': 'Top Sold Item',
+                'tableHeaderDate': 'Date',
+                'tableHeaderItemsSold': 'Items Sold',
+                // Messages & Alerts
+                'archiveConfirm': 'Are you sure you want to archive last month\'s data?',
+                'noOrdersToArchive': 'There are no completed or canceled orders from last month to archive.',
+                'archiveSuccess': 'Archiving successful! Reports have been downloaded and last month\'s data has been removed from the system.',
+                'archiveFailed': 'Archiving or deletion failed. Please try again.',
+                'noMonthlySummary': 'No monthly summary has been archived yet.',
+                'noDailySales': 'No sales have been made yet.',
+                // PDF/Excel
+                'pdfTitle': 'Statistics Report',
+                'excelSheetName': 'Orders Report',
+                'pdfHeaderId': 'Order ID',
+                'pdfHeaderTableNo': 'Table No.',
+                'pdfHeaderDate': 'Date',
+                'pdfHeaderStatus': 'Status',
+                'pdfHeaderTotal': 'Total',
+                'pdfHeaderItems': 'Items',
+                'pdfHeaderNotes': 'Notes',
+                'page': 'Page',
+                // Placeholders
+                'noItem': 'None'
+            },
+            'ar': {
+                // UI
+                'pageTitle': 'إحصائيات المبيعات - Imandou Food',
+                'loadingText': 'جاري تحميل البيانات...',
+                'headerTitle': 'إحصائيات المبيعات',
+                'headerSubtitle': 'تحليل بيانات المبيعات',
+                'dashboardLink': 'لوحة التحكم',
+                'menuLink': 'تعديل القائمة',
+                'accountLink': 'حسابي',
+                'summaryTitle': 'ملخص الإحصائيات',
+                'downloadPdfBtn': 'تحميل PDF',
+                'downloadExcelBtn': 'تحميل Excel',
+                'monthlySummaryTitle': 'الحصيلة الشهرية',
+                'archiveBtn': 'أرشفة وتحميل الشهر الماضي',
+                'archiveBtnText': 'أرشفة وتحميل الشهر الماضي',
+                'dailySalesTitle': 'حصيلة المبيعات اليومية',
+                // Chart Labels
+                'dailyRevenueChartTitle': 'الإيرادات اليومية',
+                'monthlyOrdersChartTitle': 'الطلبات الشهرية',
+                'weeklyRevenueChartTitle': 'إيرادات أيام الأسبوع',
+                'popularItemsChartTitle': 'الأصناف الأكثر مبيعًا',
+                // Table Headers
+                'tableHeaderMonth': 'الشهر',
+                'tableHeaderRevenue': 'إجمالي الإيرادات',
+                'tableHeaderOrders': 'عدد الطلبات',
+                'tableHeaderTopItem': 'أعلى صنف مبيعًا',
+                'tableHeaderDate': 'التاريخ',
+                'tableHeaderItemsSold': 'الكميات المباعة',
+                // Messages & Alerts
+                'archiveConfirm': 'هل أنت متأكد من أرشفة بيانات الشهر الماضي؟',
+                'noOrdersToArchive': 'لا توجد طلبات مكتملة أو ملغاة من الشهر الماضي لأرشفتها.',
+                'archiveSuccess': 'تمت الأرشفة بنجاح! تم تحميل التقارير وحذف بيانات الشهر الماضي من النظام.',
+                'archiveFailed': 'فشل في الأرشفة أو الحذف. يرجى المحاولة مرة أخرى.',
+                'noMonthlySummary': 'لا توجد حصيلة شهرية مؤرشفة بعد.',
+                'noDailySales': 'لا توجد مبيعات مكتملة بعد.',
+                // PDF/Excel
+                'pdfTitle': 'تقرير الإحصائيات',
+                'excelSheetName': 'تقرير الطلبات',
+                'pdfHeaderId': 'معرف الطلب',
+                'pdfHeaderTableNo': 'رقم الطاولة',
+                'pdfHeaderDate': 'التاريخ',
+                'pdfHeaderStatus': 'الحالة',
+                'pdfHeaderTotal': 'الإجمالي',
+                'pdfHeaderItems': 'الأصناف',
+                'pdfHeaderNotes': 'ملاحظات',
+                'page': 'صفحة',
+                // Placeholders
+                'noItem': 'لا يوجد'
             }
-        },
+        };
 
-        handleCategoriesListClick(e) {
-            const editBtn = e.target.closest('.btn-edit-category');
-            if (editBtn) this.openCategoryModal(editBtn.dataset.index);
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedLang = localStorage.getItem('lang') || 'fr';
+            document.getElementById('language-select').value = savedLang;
+            setLanguage(savedLang);
+            loadSettingsAndOrders();
+        });
 
-            const deleteBtn = e.target.closest('.btn-delete-category');
-            if (deleteBtn) {
-                this.showConfirmModal(
-                    'تأكيد حذف القسم',
-                    'هل أنت متأكد؟ سيتم حذف جميع الأصناف في هذا القسم أيضًا.',
-                    () => this.deleteCategory(deleteBtn.dataset.index)
-                );
-            }
-        },
+        document.getElementById('language-select').addEventListener('change', (e) => {
+            setLanguage(e.target.value);
+            loadSettingsAndOrders();
+        });
 
-        //===============================================
-        //================ ITEM MANAGEMENT ==============
-        //===============================================
+        function setLanguage(lang) {
+            currentLang = lang;
+            const t = translations[lang];
 
-        openItemModal(index = null) {
-          this.elements.itemForm.reset();
-          this.updateImagePreview(this.elements.itemImage, this.elements.itemImagePreview);
-          if (index !== null) { // Editing
-            this.state.isEditing = true;
-            this.state.currentItemIndex = index;
-            const item = this.state.menu[index];
-            this.elements.itemModalTitle.textContent = 'تعديل الصنف';
-            this.elements.itemId.value = item.id;
-            this.elements.itemNameAr.value = item.name_ar;
-            this.elements.itemNameEn.value = item.name_en;
-            this.elements.itemNameFr.value = item.name_fr || '';
-            this.elements.itemCategory.value = item.category;
-            this.elements.itemPrice.value = item.price;
-            this.elements.itemDescAr.value = item.desc_ar;
-            this.elements.itemDescEn.value = item.desc_en;
-            this.elements.itemDescFr.value = item.desc_fr || '';
-            this.elements.itemImage.value = item.image;
-            this.elements.itemSpicy.checked = item.spicy || false;
-            this.elements.itemPopular.checked = item.popular || false;
-            this.elements.itemStatus.checked = !item.hidden;
-            this.updateImagePreview(this.elements.itemImage, this.elements.itemImagePreview);
-          } else { // Adding
-            this.state.isEditing = false;
-            this.state.currentItemIndex = null;
-            this.elements.itemModalTitle.textContent = 'إضافة صنف جديد';
-          }
-          this.toggleModal('itemModal', true);
-        },
-
-        async saveItem() {
-            if (!this.elements.itemForm.checkValidity()) {
-              this.showToast('الرجاء ملء جميع الحقول المطلوبة.', 'error');
-              return;
-            }
-            this.toggleLoading(this.elements.saveItemBtn, true);
-
-            const itemData = {
-                id: this.state.isEditing ? this.state.menu[this.state.currentItemIndex].id : Date.now(),
-                name_ar: this.elements.itemNameAr.value.trim(),
-                name_en: this.elements.itemNameEn.value.trim(),
-                name_fr: this.elements.itemNameFr.value.trim(),
-                category: this.elements.itemCategory.value,
-                price: parseFloat(this.elements.itemPrice.value),
-                currency: "MAD",
-                desc_ar: this.elements.itemDescAr.value.trim(),
-                desc_en: this.elements.itemDescEn.value.trim(),
-                desc_fr: this.elements.itemDescFr.value.trim(),
-                image: this.elements.itemImage.value.trim() || 'https://placehold.co/400x300',
-                spicy: this.elements.itemSpicy.checked,
-                popular: this.elements.itemPopular.checked,
-                hidden: !this.elements.itemStatus.checked,
-                lastUpdated: new Date().toISOString()
-            };
-
-            const updatedMenu = [...this.state.menu];
-            if (this.state.isEditing) {
-                updatedMenu[this.state.currentItemIndex] = itemData;
-            } else {
-                updatedMenu.push(itemData);
-            }
+            // Set text direction
+            document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
             
-            try {
-                await this.firebaseRefs.menu.set(updatedMenu);
-                this.showToast(this.state.isEditing ? 'تم تحديث الصنف' : 'تم إضافة الصنف', 'success');
-                this.toggleModal('itemModal', false);
-            } catch (error) {
-                this.showToast(`خطأ في الحفظ: ${error.message}`, 'error');
-            } finally {
-                this.toggleLoading(this.elements.saveItemBtn, false, 'حفظ');
-            }
-        },
-
-        async deleteItem(index) {
-          this.toggleLoading(this.elements.confirmDeleteBtn, true);
-          const updatedMenu = [...this.state.menu];
-          updatedMenu.splice(index, 1);
-          try {
-            await this.firebaseRefs.menu.set(updatedMenu);
-            this.showToast('تم حذف الصنف بنجاح', 'success');
-          } catch (error) {
-            this.showToast(`خطأ في الحذف: ${error.message}`, 'error');
-          } finally {
-            this.toggleLoading(this.elements.confirmDeleteBtn, false, '<i class="fas fa-trash"></i> نعم، احذف');
-            this.toggleModal('confirmModal', false);
-          }
-        },
-
-        //===============================================
-        //============== CATEGORY MANAGEMENT ============
-        //===============================================
-
-        openCategoryModal(index = null) {
-          this.elements.categoryForm.reset();
-          if (index !== null) { // Editing
-            this.state.isEditing = true;
-            this.state.currentCategoryIndex = index;
-            const cat = this.state.categories[index];
-            this.elements.categoryModalTitle.textContent = 'تعديل القسم';
-            this.elements.categoryId.value = cat.id;
-            this.elements.categoryNameAr.value = cat.name_ar;
-            this.elements.categoryNameEn.value = cat.name_en;
-            this.elements.categoryNameFr.value = cat.name_fr || '';
-            this.elements.categoryStatus.checked = !cat.hidden;
-          } else { // Adding
-            this.state.isEditing = false;
-            this.state.currentCategoryIndex = null;
-            this.elements.categoryModalTitle.textContent = 'إضافة قسم جديد';
-          }
-          this.toggleModal('categoryModal', true);
-        },
-
-        async saveCategory() {
-            if (!this.elements.categoryForm.checkValidity()) {
-              this.showToast('الرجاء ملء جميع الحقول المطلوبة.', 'error');
-              return;
-            }
-            this.toggleLoading(this.elements.saveCategoryBtn, true);
-
-            const categoryData = {
-                id: this.state.isEditing ? this.state.categories[this.state.currentCategoryIndex].id : Date.now(),
-                name_ar: this.elements.categoryNameAr.value.trim(),
-                name_en: this.elements.categoryNameEn.value.trim(),
-                name_fr: this.elements.categoryNameFr.value.trim(),
-                hidden: !this.elements.categoryStatus.checked,
-                lastUpdated: new Date().toISOString()
-            };
-
-            const updatedCategories = [...this.state.categories];
-            if (this.state.isEditing) {
-                updatedCategories[this.state.currentCategoryIndex] = categoryData;
-            } else {
-                updatedCategories.push(categoryData);
-            }
-            
-            try {
-                await this.firebaseRefs.categories.set(updatedCategories);
-                this.showToast(this.state.isEditing ? 'تم تحديث القسم' : 'تم إضافة القسم', 'success');
-                this.toggleModal('categoryModal', false);
-            } catch (error) {
-                this.showToast(`خطأ في الحفظ: ${error.message}`, 'error');
-            } finally {
-                this.toggleLoading(this.elements.saveCategoryBtn, false, 'حفظ');
-            }
-        },
-
-        async deleteCategory(index) {
-          this.toggleLoading(this.elements.confirmDeleteBtn, true);
-          const categoryToDelete = this.state.categories[index];
-          
-          const updatedCategories = [...this.state.categories];
-          updatedCategories.splice(index, 1);
-          
-          const updatedMenu = this.state.menu.filter(item => item.category !== categoryToDelete.name_ar);
-
-          try {
-            await Promise.all([
-              this.firebaseRefs.categories.set(updatedCategories),
-              this.firebaseRefs.menu.set(updatedMenu)
-            ]);
-            this.showToast('تم حذف القسم والأصناف المرتبطة به.', 'success');
-          } catch (error) {
-            this.showToast(`خطأ في الحذف: ${error.message}`, 'error');
-          } finally {
-            this.toggleLoading(this.elements.confirmDeleteBtn, false, '<i class="fas fa-trash"></i> نعم، احذف');
-            this.toggleModal('confirmModal', false);
-          }
-        },
-
-        //===============================================
-        //============= SETTINGS MANAGEMENT =============
-        //===============================================
-        async saveSettings() {
-          this.toggleLoading(this.elements.saveSettingsBtn, true);
-          const settings = {
-            restaurantName: this.elements.restaurantName.value,
-            restaurantDescription: this.elements.restaurantDescription.value,
-            backgroundImage: this.elements.backgroundImage.value,
-            accentColor: this.elements.accentColor.value,
-            lastUpdated: new Date().toISOString()
-          };
-          try {
-            await this.firebaseRefs.settings.set(settings);
-            this.showToast('تم حفظ الإعدادات بنجاح', 'success');
-          } catch (error) {
-            this.showToast(`خطأ في حفظ الإعدادات: ${error.message}`, 'error');
-          } finally {
-            this.toggleLoading(this.elements.saveSettingsBtn, false, '<i class="fas fa-save"></i> حفظ الإعدادات');
-          }
-        },
-
-        //===============================================
-        //================= UTILITIES ===================
-        //===============================================
-
-        switchLanguage(lang) {
-          this.state.currentLang = lang;
-          document.querySelectorAll('.lang-btn').forEach(btn => {
-            btn.classList.toggle('active', btn.dataset.lang === lang);
-          });
-          document.documentElement.lang = lang;
-          document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
-          this.renderItems();
-          this.renderCategories();
-          this.updateCategoryDropdowns();
-        },
-
-        switchTab(tabId) {
-          document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.tab === tabId));
-          this.elements.tabContents.forEach(content => {
-            content.style.display = content.id === `${tabId}-tab` ? 'block' : 'none';
-          });
-        },
-        
-        toggleModal(modalId, show) {
-            const modal = this.elements[modalId];
-            if (modal) modal.classList.toggle('active', show);
-        },
-        
-        showConfirmModal(title, message, callback) {
-          this.elements.confirmModalTitle.textContent = title;
-          this.elements.confirmMessage.textContent = message;
-          this.state.deleteCallback = callback;
-          this.toggleModal('confirmModal', true);
-        },
-
-        confirmDelete() {
-          if (typeof this.state.deleteCallback === 'function') {
-            this.state.deleteCallback();
-            this.state.deleteCallback = null;
-          }
-        },
-
-        showToast(message, type = 'success') {
-          const toast = document.createElement('div');
-          toast.className = `toast toast-${type}`;
-          toast.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i><span>${message}</span>`;
-          this.elements.toastContainer.appendChild(toast);
-          setTimeout(() => {
-            toast.style.animation = 'slideOut 0.3s ease forwards';
-            toast.addEventListener('animationend', () => toast.remove());
-          }, 4000);
-        },
-
-        toggleLoading(button, isLoading, text = '') {
-          if (isLoading) {
-            button.dataset.originalHtml = button.innerHTML;
-            button.innerHTML = '<div class="spinner"></div>';
-            button.disabled = true;
-          } else {
-            button.innerHTML = text || button.dataset.originalHtml;
-            button.disabled = false;
-          }
-        },
-
-        updateImagePreview(inputElement, previewElement) {
-          const url = inputElement.value;
-          previewElement.innerHTML = url ? `<img src="${url}" alt="Preview" onerror="this.parentElement.innerHTML='<span>فشل تحميل الصورة</span>'">` : '<span>معاينة الصورة</span>';
-        },
-        
-        debounce(func, wait) {
-          let timeout;
-          return (...args) => {
-            clearTimeout(timeout);
-            timeout = setTimeout(() => func.apply(this, args), wait);
-          };
+            // Update static content
+            document.title = t.pageTitle;
+            document.querySelectorAll('[data-lang-key]').forEach(el => {
+                const key = el.dataset.langKey;
+                if (key.includes('Link')) {
+                    el.querySelector('span').textContent = t[key];
+                } else {
+                    el.textContent = t[key];
+                }
+            });
+            localStorage.setItem('lang', lang);
         }
-      };
 
-      // Run the application
-      ImandouAdmin.init();
-    });
-  </script>
+        async function loadSettingsAndOrders() {
+            const loadingOverlay = document.getElementById('loading-overlay');
+            loadingOverlay.style.display = 'flex';
+            
+            try {
+                const settingsSnap = await database.ref('settings').once('value');
+                applySettings(settingsSnap.val() || {});
+                fetchOrders();
+            } catch(error) {
+                console.error("Error loading settings:", error);
+                loadingOverlay.style.display = 'none';
+            }
+        }
+        
+        function applySettings(settings) {
+            if (settings.backgroundImage) {
+                document.body.style.setProperty('--background-image', `url('${settings.backgroundImage}')`);
+            }
+            if (settings.accentColor) {
+                document.documentElement.style.setProperty('--accent', settings.accentColor);
+            }
+        }
+
+        function fetchOrders() {
+            database.ref('orders').once('value').then(snapshot => {
+                allOrdersData = [];
+                snapshot.forEach(childSnapshot => {
+                    allOrdersData.push({ id: childSnapshot.key, ...childSnapshot.val() });
+                });
+                renderCharts(allOrdersData);
+                loadMonthlySummaries();
+                renderDailyItemsTable(allOrdersData);
+                document.getElementById('loading-overlay').style.display = 'none';
+            }).catch(error => {
+                console.error("Error fetching orders:", error);
+                document.getElementById('loading-overlay').style.display = 'none';
+            });
+        }
+
+        function renderCharts(orders) {
+            const t = translations[currentLang];
+            const completedOrders = orders.filter(o => o.status === 'completed');
+            
+            // Daily Revenue Data
+            const dailyRevenue = completedOrders.reduce((acc, order) => {
+                const date = new Date(order.timestamp).toISOString().split('T')[0];
+                acc[date] = (acc[date] || 0) + order.totalPrice;
+                return acc;
+            }, {});
+            renderChart('dailyRevenueChart', Object.keys(dailyRevenue), Object.values(dailyRevenue), 'bar', t.dailyRevenueChartTitle, 'rgba(251, 191, 36, 0.6)');
+
+            // Monthly Orders Data
+            const monthlyOrders = completedOrders.reduce((acc, order) => {
+                const month = new Date(order.timestamp).toLocaleString(currentLang === 'ar' ? 'ar-MA' : 'fr-FR', { month: 'long', year: 'numeric' });
+                acc[month] = (acc[month] || 0) + 1;
+                return acc;
+            }, {});
+            renderChart('monthlyOrdersChart', Object.keys(monthlyOrders), Object.values(monthlyOrders), 'line', t.monthlyOrdersChartTitle, 'rgba(16, 185, 129, 0.8)');
+            
+            // Weekly Revenue Data
+            const weeklyRevenue = completedOrders.reduce((acc, order) => {
+                const day = new Date(order.timestamp).toLocaleString(currentLang === 'ar' ? 'ar-MA' : 'fr-FR', { weekday: 'long' });
+                acc[day] = (acc[day] || 0) + order.totalPrice;
+                return acc;
+            }, {});
+            const daysOrder_fr = ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'];
+            const daysOrder_ar = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+            const daysOrder_en = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+            const daysOrder = currentLang === 'ar' ? daysOrder_ar : (currentLang === 'en' ? daysOrder_en : daysOrder_fr);
+            const sortedWeeklyData = daysOrder.map(day => weeklyRevenue[day] || 0);
+            renderChart('weeklyRevenueChart', daysOrder, sortedWeeklyData, 'bar', t.weeklyRevenueChartTitle, '#3b82f6');
+
+            // Popular Items Data
+            const itemCounts = completedOrders.reduce((acc, order) => {
+                order.items.forEach(item => {
+                    const itemName = item[`name_${currentLang}`] || item.name_fr;
+                    acc[itemName] = (acc[itemName] || 0) + item.quantity;
+                });
+                return acc;
+            }, {});
+            const sortedItems = Object.entries(itemCounts).sort(([,a], [,b]) => b - a).slice(0, 10);
+            renderChart('popularItemsChart', sortedItems.map(i => i[0]), sortedItems.map(i => i[1]), 'pie', t.popularItemsChartTitle, ['#fbbf24', '#10b981', '#3b82f6', '#ef4444', '#f59e0b', '#06b6d4', '#6366f1', '#a855f7', '#ec4899', '#f43f5e']);
+        }
+
+        function renderChart(canvasId, labels, data, type, label, color) {
+            const ctx = document.getElementById(canvasId).getContext('2d');
+            
+            if (window.myCharts && window.myCharts[canvasId]) {
+                window.myCharts[canvasId].destroy();
+            }
+
+            const chartConfig = {
+                type: type,
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: label,
+                        data: data,
+                        backgroundColor: color,
+                        borderColor: type === 'line' ? color : 'transparent',
+                        borderWidth: type === 'line' ? 2 : 0,
+                        fill: type === 'line' ? true : false,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: type !== 'pie', labels: { color: 'var(--text)' } }
+                    },
+                    scales: {
+                        x: { ticks: { color: 'var(--muted)' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+                        y: { beginAtZero: true, ticks: { color: 'var(--muted)' }, grid: { color: 'rgba(255,255,255,0.05)' } }
+                    }
+                }
+            };
+            
+            if (type === 'pie') {
+                delete chartConfig.options.scales;
+                chartConfig.options.plugins.legend.display = true;
+            }
+
+            window.myCharts = window.myCharts || {};
+            window.myCharts[canvasId] = new Chart(ctx, chartConfig);
+        }
+        
+        async function downloadPDF(orders) {
+            const { jsPDF } = window.jspdf;
+            const t = translations[currentLang];
+            const doc = new jsPDF({ orientation: 'landscape' });
+            
+            doc.setFont('Helvetica', 'normal'); // Default font for English/French
+            if (currentLang === 'ar') {
+                doc.setFont('Amiri', 'normal'); // Arabic font
+            }
+            doc.setFontSize(16);
+            doc.text(t.pdfTitle, 148, 20, null, null, "center");
+
+            const data = orders.map(order => [
+                order.id,
+                order.tableNumber,
+                new Date(order.timestamp).toLocaleString(currentLang === 'ar' ? 'ar-MA' : 'fr-FR', {dateStyle: 'short', timeStyle: 'short'}),
+                order.status,
+                order.totalPrice,
+                order.items.map(item => `${item[`name_${currentLang}`] || item.name_fr} (x${item.quantity})`).join(', '),
+                order.notes || ''
+            ]);
+            
+            const headers = [[t.pdfHeaderId, t.pdfHeaderTableNo, t.pdfHeaderDate, t.pdfHeaderStatus, t.pdfHeaderTotal, t.pdfHeaderItems, t.pdfHeaderNotes]];
+
+            doc.autoTable({
+                startY: 30,
+                head: headers,
+                body: data,
+                styles: { font: 'Helvetica', fontStyle: 'normal' },
+                headStyles: { fillColor: [30, 41, 59] },
+                alternateRowStyles: { fillColor: [15, 23, 42] },
+                bodyStyles: { textColor: [226, 232, 240] },
+                theme: 'striped',
+                didDrawPage: function(data) {
+                    let str = `${t.page} ${doc.internal.getNumberOfPages()}`;
+                    doc.setFontSize(10);
+                    doc.text(str, data.settings.margin.left, doc.internal.pageSize.height - 10);
+                }
+            });
+            
+            doc.save(`${t.pdfTitle.replace(/\s/g, '-')}.pdf`);
+        }
+
+        function downloadExcel(orders) {
+            const t = translations[currentLang];
+            const data = orders.map(order => ({
+                [t.pdfHeaderId]: order.id,
+                [t.pdfHeaderTableNo]: order.tableNumber,
+                [t.pdfHeaderDate]: new Date(order.timestamp).toLocaleString(currentLang === 'ar' ? 'ar-MA' : 'fr-FR', {dateStyle: 'short', timeStyle: 'short'}),
+                [t.pdfHeaderStatus]: order.status,
+                [t.pdfHeaderTotal]: order.totalPrice,
+                [t.pdfHeaderItems]: order.items.map(item => `${item[`name_${currentLang}`] || item.name_fr} (x${item.quantity})`).join(', '),
+                [t.pdfHeaderNotes]: order.notes || ''
+            }));
+            
+            const ws = XLSX.utils.json_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, t.excelSheetName);
+            XLSX.writeFile(wb, `${t.excelSheetName.replace(/\s/g, '-')}.xlsx`);
+        }
+        
+        async function loadMonthlySummaries() {
+            const tableBody = document.getElementById('monthly-summary-table');
+            tableBody.innerHTML = '';
+            const t = translations[currentLang];
+            const summariesRef = database.ref('monthly_summaries').orderByKey();
+            const snapshot = await summariesRef.once('value');
+
+            if (!snapshot.exists()) {
+                tableBody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-[var(--muted)]">${t.noMonthlySummary}</td></tr>`;
+                return;
+            }
+
+            snapshot.forEach(childSnapshot => {
+                const summary = childSnapshot.val();
+                const row = document.createElement('tr');
+                row.className = 'border-b border-slate-800 last:border-b-0';
+                row.innerHTML = `
+                    <td class="p-4">${summary.month}</td>
+                    <td class="p-4">${summary.totalRevenue.toFixed(2)} MAD</td>
+                    <td class="p-4">${summary.totalOrders}</td>
+                    <td class="p-4">${summary.topItem || t.noItem}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+        
+        async function renderDailyItemsTable(orders) {
+            const tableBody = document.getElementById('daily-items-table');
+            tableBody.innerHTML = '';
+            const t = translations[currentLang];
+            
+            const dailyData = {};
+
+            orders.filter(o => o.status === 'completed').forEach(order => {
+                const date = new Date(order.timestamp).toLocaleDateString(currentLang === 'ar' ? 'ar-MA' : 'fr-FR');
+                if (!dailyData[date]) {
+                    dailyData[date] = { totalRevenue: 0, itemsSold: {} };
+                }
+                dailyData[date].totalRevenue += order.totalPrice;
+                order.items.forEach(item => {
+                    const itemName = item[`name_${currentLang}`] || item.name_fr;
+                    dailyData[date].itemsSold[itemName] = (dailyData[date].itemsSold[itemName] || 0) + item.quantity;
+                });
+            });
+
+            const sortedDates = Object.keys(dailyData).sort((a, b) => new Date(b) - new Date(a));
+            
+            if (sortedDates.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="3" class="p-4 text-center text-[var(--muted)]">${t.noDailySales}</td></tr>`;
+                return;
+            }
+
+            sortedDates.forEach(date => {
+                const data = dailyData[date];
+                const itemsList = Object.entries(data.itemsSold).map(([name, quantity]) => `${name} (x${quantity})`).join(', ');
+
+                const row = document.createElement('tr');
+                row.className = 'border-b border-slate-800 last:border-b-0';
+                row.innerHTML = `
+                    <td class="p-4">${date}</td>
+                    <td class="p-4">${data.totalRevenue.toFixed(2)} MAD</td>
+                    <td class="p-4">${itemsList}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+        
+        async function archiveAndDownloadLastMonth() {
+            const t = translations[currentLang];
+            const confirmation = confirm(t.archiveConfirm);
+            if (!confirmation) return;
+
+            const now = new Date();
+            const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+            const thisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+            const lastMonthName = lastMonth.toLocaleString(currentLang === 'ar' ? 'ar-MA' : 'fr-FR', { month: 'long', year: 'numeric' });
+            
+            const ordersToArchive = allOrdersData.filter(order => {
+                const orderDate = new Date(order.timestamp);
+                return orderDate >= lastMonth && orderDate < thisMonth && (order.status === 'completed' || order.status === 'cancelled');
+            });
+
+            if (ordersToArchive.length === 0) {
+                alert(t.noOrdersToArchive);
+                return;
+            }
+
+            const summary = {
+                month: lastMonthName,
+                totalRevenue: ordersToArchive.filter(o => o.status === 'completed').reduce((sum, order) => sum + order.totalPrice, 0),
+                totalOrders: ordersToArchive.filter(o => o.status === 'completed').length
+            };
+            
+            const itemCounts = ordersToArchive.filter(o => o.status === 'completed').reduce((acc, order) => {
+                order.items.forEach(item => { const itemName = item[`name_${currentLang}`] || item.name_fr; acc[itemName] = (acc[itemName] || 0) + item.quantity; });
+                return acc;
+            }, {});
+            const topItem = Object.entries(itemCounts).sort(([,a],[,b]) => b - a)[0];
+            summary.topItem = topItem ? topItem[0] : t.noItem;
+
+            await downloadExcel(ordersToArchive, `${t.excelSheetName.replace(/\s/g, '-')}-${lastMonthName.replace(/\s/g, '-')}`);
+            await downloadPDF(ordersToArchive, `${t.pdfTitle.replace(/\s/g, '-')}-${lastMonthName.replace(/\s/g, '-')}`);
+            
+            const summaryKey = `${lastMonth.getFullYear()}-${(lastMonth.getMonth() + 1).toString().padStart(2, '0')}`;
+            await database.ref(`monthly_summaries/${summaryKey}`).set(summary)
+                .then(() => {
+                    console.log("Monthly summary saved successfully.");
+                    const updates = {};
+                    ordersToArchive.forEach(order => {
+                        updates[`/orders/${order.id}`] = null;
+                    });
+                    return database.ref().update(updates);
+                })
+                .then(() => {
+                    alert(t.archiveSuccess);
+                    window.location.reload();
+                })
+                .catch(error => {
+                    alert(t.archiveFailed);
+                    console.error("Archiving failed:", error);
+                });
+        }
+    </script>
 </body>
 </html>
