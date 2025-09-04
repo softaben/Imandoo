@@ -14,6 +14,8 @@
   <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+  
+  <script src="Cairo-Regular-normal.js"></script>
 
   <style>
     :root {
@@ -303,7 +305,6 @@
   <audio id="notification-sound" src="https://assets.mixkit.co/sfx/preview/mixkit-positive-notification-951.mp3" preload="auto"></audio>
   
   <script>
-    // Firebase configuration. Replace with your actual project details.
     const firebaseConfig = {
         apiKey: "AIzaSyCyPOzsEzdrRd9o7iHASzFoLyJQhpTW83E",
         authDomain: "imandou-food.firebaseapp.com",
@@ -311,19 +312,16 @@
         projectId: "imandou-food"
     };
 
-    // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
     const ordersRef = database.ref('orders');
 
-    // DOM elements for Kanban columns
     const columns = {
         new: document.getElementById('new-orders'),
         preparing: document.getElementById('preparing-orders'),
         ready: document.getElementById('ready-orders')
     };
 
-    // DOM elements for statistics
     const statElements = {
         totalRevenue: document.getElementById('totalRevenue'),
         totalOrders: document.getElementById('totalOrders'),
@@ -331,19 +329,15 @@
         activeOrders: document.getElementById('activeOrders'),
     };
 
-    // DOM elements for different order sections
     const completedOrdersSection = document.getElementById('completed-orders-section');
     const cancelledOrdersSection = document.getElementById('cancelled-orders-section');
     const activeOrdersSection = document.getElementById('active-orders-section');
     const deleteAllBtn = document.getElementById('deleteAllBtn');
-
-    // Notification sound
     const notificationSound = document.getElementById('notification-sound');
 
     let allOrdersData = {};
     let currentExportType = '';
 
-    // Event listeners
     document.addEventListener('DOMContentLoaded', () => {
         loadSettings();
         listenForChildEvents();
@@ -625,6 +619,13 @@
     function downloadPDF(orders, filename) {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF({ orientation: 'landscape' });
+        
+        // 1. إضافة الخط العربي إلى وثيقة PDF
+        doc.addFont('Cairo-Regular-normal.js', 'Cairo', 'normal');
+        doc.setFont('Cairo');
+        
+        // 2. تفعيل اتجاه الكتابة من اليمين إلى اليسار
+        doc.setRTL(true);
         
         doc.setFontSize(16);
         doc.text(filename, 148, 20, null, null, "center");
