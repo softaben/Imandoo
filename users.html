@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة الحساب - Imandou Food</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+
+    <style>
+        :root{
+          --bg: #0f172a;
+          --card: #0b1220;
+          --text: #e2e8f0;
+          --muted: #94a3b8;
+          --accent: #fbbf24;
+          --radius-lg: 14px;
+          --radius-md: 8px;
+          --success: #10b981;
+          --danger: #ef4444;
+          --info: #3b82f6;
+        }
+        
+        body {
+          font-family: 'Cairo', 'Inter', sans-serif;
+          background: var(--bg);
+          color: var(--text);
+          -webkit-font-smoothing: antialiased;
+          -moz-osx-font-smoothing: grayscale;
+        }
+        body::before {
+          content: '';
+          position: fixed; top: 0; left: 0;
+          width: 100%; height: 100%;
+          background-image: var(--background-image, url('https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&q=80&w=2070'));
+          background-size: cover; background-position: center;
+          opacity: 0.08; z-index: -1;
+          transition: background-image 0.5s ease-in-out;
+        }
+        h1, h2, h3 { font-family: 'Playfair Display', serif; font-weight: 700; }
+
+        .card {
+          background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.04));
+          border-radius: var(--radius-lg);
+          box-shadow: 0 8px 25px rgba(2,6,23,0.7);
+          border: 1px solid rgba(255,255,255,0.04);
+          backdrop-filter: blur(12px);
+          -webkit-backdrop-filter: blur(12px);
+        }
+        .pill {
+          background: rgba(255,255,255,0.03); border-radius: 999px;
+          padding: 8px 16px; font-weight:500; color:var(--text);
+          display:inline-flex; gap:8px; align-items:center;
+          border: 1px solid rgba(255,255,255,0.05);
+          transition: all 0.2s ease; cursor: pointer;
+          font-size: 0.9rem; white-space: nowrap;
+        }
+        .pill:hover { background: rgba(255,255,255,0.07); transform: translateY(-1px); }
+        .form-input {
+          background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05);
+          border-radius: var(--radius-md); padding: 12px; color: var(--text); width: 100%; margin-bottom: 12px;
+          transition: border-color 0.2s ease;
+        }
+        .form-input:focus { outline: none; border-color: var(--accent); }
+    </style>
+</head>
+<body class="p-4 md:p-8 flex items-center justify-center min-h-screen">
+    
+    <div class="w-full max-w-lg">
+        <header class="flex justify-between items-center mb-8 pb-4 border-b border-slate-800">
+            <h1 class="text-3xl font-bold">إدارة الحساب</h1>
+            <div class="flex items-center gap-4">
+                <a href="index.html" class="pill text-white hover:bg-slate-700 transition"><i class="fas fa-home"></i> لوحة التحكم</a>
+                <a href="stats.html" class="pill text-white hover:bg-slate-700 transition"><i class="fas fa-chart-line"></i> الإحصائيات</a>
+            </div>
+        </header>
+
+        <div class="card p-8 space-y-8">
+            <div class="space-y-4 text-center">
+                <h2 class="text-2xl font-bold">معلومات الحساب</h2>
+                <div id="auth-status" class="card p-4">
+                    <p class="text-[var(--muted)]">جارٍ التحقق من حالة الدخول...</p>
+                </div>
+            </div>
+
+            <div class="space-y-4">
+                <h3 class="text-xl font-semibold">تغيير كلمة مرور الدخول</h3>
+                <div>
+                    <label for="newPassword" class="block mb-2 font-medium text-[var(--muted)]">كلمة المرور الجديدة</label>
+                    <input type="password" id="newPassword" class="form-input text-lg" placeholder="أدخل كلمة المرور الجديدة (6 أحرف على الأقل)">
+                </div>
+                <div>
+                    <label for="confirmPassword" class="block mb-2 font-medium text-[var(--muted)]">تأكيد كلمة المرور</label>
+                    <input type="password" id="confirmPassword" class="form-input text-lg" placeholder="أعد إدخال كلمة المرور">
+                </div>
+                <button onclick="changeUserPassword()" class="pill text-white bg-blue-600 hover:bg-blue-700 transition w-full">
+                    <i class="fas fa-key"></i> تغيير كلمة المرور
+                </button>
+            </div>
+
+            <div class="mt-8 pt-8 border-t border-dashed border-slate-800">
+                <h3 class="text-xl font-semibold mb-4">تغيير كلمة مرور إعادة الضبط</h3>
+                <p class="text-[var(--muted)] text-sm mb-4">هذه الكلمة تستخدم لإعادة ضبط قاعدة البيانات بالكامل.</p>
+                <div class="flex flex-col sm:flex-row items-center gap-4">
+                    <input type="password" id="deletePasswordInput" class="flex-grow w-full sm:w-auto form-input" placeholder="أدخل كلمة مرور جديدة">
+                    <button onclick="changeDeletePassword()" class="pill text-white bg-green-600 hover:bg-green-700 transition w-full sm:w-auto">
+                        <i class="fas fa-save"></i> حفظ
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+<script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCyPOzsEzdrRd9o7iHASzFoLyJQhpTW83E",
+      authDomain: "imandou-food.firebaseapp.com",
+      databaseURL: "https://imandou-food-default-rtdb.firebaseio.com",
+      projectId: "imandou-food"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const database = firebase.database();
+
+    const deletePasswordInput = document.getElementById('deletePasswordInput');
+    const newPasswordInput = document.getElementById('newPassword');
+    const confirmPasswordInput = document.getElementById('confirmPassword');
+    const authStatus = document.getElementById('auth-status');
+    
+    let DELETE_PASSWORD = localStorage.getItem('imandou_delete_password') || "admin123";
+
+    document.addEventListener('DOMContentLoaded', () => {
+        loadSettings();
+        deletePasswordInput.value = DELETE_PASSWORD;
+    });
+
+    async function loadSettings() {
+        try {
+            const settingsSnap = await database.ref('settings').once('value');
+            applySettings(settingsSnap.val() || {});
+        } catch(error) {
+            console.error("Error loading settings:", error);
+        }
+    }
+    
+    function applySettings(settings) {
+        if (settings.backgroundImage) {
+            document.body.style.setProperty('--background-image', `url('${settings.backgroundImage}')`);
+        }
+        if (settings.accentColor) {
+            document.documentElement.style.setProperty('--accent', settings.accentColor);
+        }
+    }
+
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        authStatus.innerHTML = `<p class="text-[var(--success)] font-bold">تم تسجيل الدخول كـ: ${user.email}</p>`;
+      } else {
+        authStatus.innerHTML = `<p class="text-[var(--danger)] font-bold">لم يتم تسجيل الدخول. لا يمكن تغيير كلمة مرور الحساب.</p>`;
+      }
+    });
+
+    function changeUserPassword() {
+        const user = auth.currentUser;
+        if (!user) {
+            alert("يرجى تسجيل الدخول أولاً لتغيير كلمة المرور.");
+            return;
+        }
+
+        const newPassword = newPasswordInput.value;
+        const confirmPassword = confirmPasswordInput.value;
+
+        if (newPassword.length < 6) {
+            alert("يجب أن تكون كلمة المرور 6 أحرف على الأقل.");
+            return;
+        }
+
+        if (newPassword !== confirmPassword) {
+            alert("كلمتا المرور غير متطابقتين.");
+            return;
+        }
+
+        user.updatePassword(newPassword).then(() => {
+            alert("تم تغيير كلمة مرور حسابك بنجاح!");
+            newPasswordInput.value = "";
+            confirmPasswordInput.value = "";
+        }).catch((error) => {
+            if (error.code === 'auth/requires-recent-login') {
+                alert("يرجى إعادة تسجيل الدخول لتغيير كلمة المرور. هذه خطوة أمنية.");
+            } else {
+                alert(`حدث خطأ: ${error.message}`);
+            }
+        });
+    }
+
+    function changeDeletePassword() {
+      const newPassword = deletePasswordInput.value;
+      if (newPassword.length < 4) {
+        alert("كلمة المرور يجب أن تكون 4 أحرف على الأقل.");
+        return;
+      }
+      DELETE_PASSWORD = newPassword;
+      localStorage.setItem('imandou_delete_password', newPassword);
+      alert("تم حفظ كلمة المرور الجديدة بنجاح!");
+    }
+</script>
+</body>
+</html>
