@@ -10,6 +10,7 @@
     
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 
     <style>
         :root{
@@ -101,17 +102,38 @@
                 <button onclick="changeUserPassword()" class="pill text-white bg-blue-600 hover:bg-blue-700 transition w-full">
                     <i class="fas fa-key"></i> تغيير كلمة المرور
                 </button>
+                <button onclick="signOut()" class="pill text-white bg-red-600 hover:bg-red-700 transition w-full">
+                    <i class="fas fa-sign-out-alt"></i> تسجيل الخروج
+                </button>
             </div>
 
             <div class="mt-8 pt-8 border-t border-dashed border-slate-800">
                 <h3 class="text-xl font-semibold mb-4">تغيير كلمة مرور إعادة الضبط</h3>
                 <p class="text-[var(--muted)] text-sm mb-4">هذه الكلمة تستخدم لإعادة ضبط قاعدة البيانات بالكامل.</p>
-                <div class="flex flex-col sm:flex-row items-center gap-4">
-                    <input type="password" id="deletePasswordInput" class="flex-grow w-full sm:w-auto form-input" placeholder="أدخل كلمة مرور جديدة">
-                    <button onclick="changeDeletePassword()" class="pill text-white bg-green-600 hover:bg-green-700 transition w-full sm:w-auto">
-                        <i class="fas fa-save"></i> حفظ
+                <div class="relative flex items-center mb-4">
+                    <input type="password" id="deletePasswordInput" class="form-input" placeholder="أدخل كلمة مرور جديدة">
+                    <button id="toggleDeletePassword" class="absolute left-3 text-[var(--muted)] hover:text-[var(--text)] transition">
+                        <i class="fas fa-eye"></i>
                     </button>
                 </div>
+                <button onclick="changeDeletePassword()" class="pill text-white bg-green-600 hover:bg-green-700 transition w-full">
+                    <i class="fas fa-save"></i> حفظ كلمة المرور
+                </button>
+            </div>
+
+            <div class="mt-8 pt-8 border-t border-dashed border-slate-800">
+                <h3 class="text-xl font-semibold mb-4">إعدادات المظهر</h3>
+                <div class="mb-4">
+                    <label for="accentColorInput" class="block mb-2 font-medium text-[var(--muted)]">اللون الرئيسي</label>
+                    <input type="color" id="accentColorInput" class="w-full h-12 rounded-lg cursor-pointer transition">
+                </div>
+                <div class="mb-4">
+                    <label for="backgroundImageInput" class="block mb-2 font-medium text-[var(--muted)]">رابط صورة الخلفية</label>
+                    <input type="text" id="backgroundImageInput" class="form-input" placeholder="مثال: https://.../image.jpg">
+                </div>
+                <button onclick="saveThemeSettings()" class="pill text-white bg-purple-600 hover:bg-purple-700 transition w-full">
+                    <i class="fas fa-palette"></i> حفظ إعدادات المظهر
+                </button>
             </div>
         </div>
     </div>
@@ -131,18 +153,32 @@
     const newPasswordInput = document.getElementById('newPassword');
     const confirmPasswordInput = document.getElementById('confirmPassword');
     const authStatus = document.getElementById('auth-status');
+    const accentColorInput = document.getElementById('accentColorInput');
+    const backgroundImageInput = document.getElementById('backgroundImageInput');
+    const toggleDeletePasswordBtn = document.getElementById('toggleDeletePassword');
     
     let DELETE_PASSWORD = localStorage.getItem('imandou_delete_password') || "admin123";
 
     document.addEventListener('DOMContentLoaded', () => {
         loadSettings();
         deletePasswordInput.value = DELETE_PASSWORD;
+        // Hide initial delete password value
+        deletePasswordInput.type = 'password'; 
+    });
+
+    toggleDeletePasswordBtn.addEventListener('click', () => {
+        const type = deletePasswordInput.type === 'password' ? 'text' : 'password';
+        deletePasswordInput.type = type;
+        toggleDeletePasswordBtn.innerHTML = `<i class="fas fa-${type === 'password' ? 'eye' : 'eye-slash'}"></i>`;
     });
 
     async function loadSettings() {
         try {
             const settingsSnap = await database.ref('settings').once('value');
-            applySettings(settingsSnap.val() || {});
+            const settings = settingsSnap.val() || {};
+            applySettings(settings);
+            if (settings.accentColor) accentColorInput.value = settings.accentColor;
+            if (settings.backgroundImage) backgroundImageInput.value = settings.backgroundImage;
         } catch(error) {
             console.error("Error loading settings:", error);
         }
@@ -161,7 +197,7 @@
       if (user) {
         authStatus.innerHTML = `<p class="text-[var(--success)] font-bold">تم تسجيل الدخول كـ: ${user.email}</p>`;
       } else {
-        authStatus.innerHTML = `<p class="text-[var(--danger)] font-bold">لم يتم تسجيل الدخول. لا يمكن تغيير كلمة مرور الحساب.</p>`;
+        authStatus.innerHTML = `<p class="text-[var(--danger)] font-bold">لم يتم تسجيل الدخول. <a href="login.html" class="underline hover:text-white transition">سجل الدخول الآن</a></p>`;
       }
     });
 
@@ -192,9 +228,21 @@
         }).catch((error) => {
             if (error.code === 'auth/requires-recent-login') {
                 alert("يرجى إعادة تسجيل الدخول لتغيير كلمة المرور. هذه خطوة أمنية.");
+                auth.signOut().then(() => {
+                    window.location.href = 'login.html';
+                });
             } else {
                 alert(`حدث خطأ: ${error.message}`);
             }
+        });
+    }
+
+    function signOut() {
+        auth.signOut().then(() => {
+            alert("تم تسجيل الخروج بنجاح.");
+            window.location.href = 'login.html';
+        }).catch(error => {
+            alert(`فشل تسجيل الخروج: ${error.message}`);
         });
     }
 
@@ -207,6 +255,21 @@
       DELETE_PASSWORD = newPassword;
       localStorage.setItem('imandou_delete_password', newPassword);
       alert("تم حفظ كلمة المرور الجديدة بنجاح!");
+    }
+
+    function saveThemeSettings() {
+        const accentColor = accentColorInput.value;
+        const backgroundImage = backgroundImageInput.value;
+
+        database.ref('settings').update({
+            accentColor: accentColor,
+            backgroundImage: backgroundImage
+        }).then(() => {
+            alert("تم حفظ إعدادات المظهر بنجاح! سيتم تطبيقها عند تحديث الصفحات.");
+            applySettings({ accentColor, backgroundImage });
+        }).catch(error => {
+            alert("فشل في حفظ الإعدادات: " + error.message);
+        });
     }
 </script>
 </body>
