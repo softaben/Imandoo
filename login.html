@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل الدخول - Imandou Food</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+
+    <style>
+        :root{
+          --bg: #0f172a;
+          --card: #0b1220;
+          --text: #e2e8f0;
+          --muted: #94a3b8;
+          --accent: #fbbf24;
+          --radius-lg: 14px;
+          --radius-md: 8px;
+          --success: #10b981;
+          --danger: #ef4444;
+          --info: #3b82f6;
+        }
+        
+        body {
+          font-family: 'Cairo', 'Inter', sans-serif;
+          background: var(--bg);
+          color: var(--text);
+          -webkit-font-smoothing: antialiased;
+          -moz-osx-font-smoothing: grayscale;
+        }
+        body::before {
+          content: '';
+          position: fixed; top: 0; left: 0;
+          width: 100%; height: 100%;
+          background-image: var(--background-image, url('https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&q=80&w=2070'));
+          background-size: cover; background-position: center;
+          opacity: 0.08; z-index: -1;
+          transition: background-image 0.5s ease-in-out;
+        }
+        h1, h2, h3 { font-family: 'Playfair Display', serif; font-weight: 700; }
+
+        .card {
+          background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.04));
+          border-radius: var(--radius-lg);
+          box-shadow: 0 8px 25px rgba(2,6,23,0.7);
+          border: 1px solid rgba(255,255,255,0.04);
+          backdrop-filter: blur(12px);
+          -webkit-backdrop-filter: blur(12px);
+        }
+        .form-input {
+          background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05);
+          border-radius: var(--radius-md); padding: 12px; color: var(--text); width: 100%; margin-bottom: 12px;
+          transition: border-color 0.2s ease;
+        }
+        .form-input:focus { outline: none; border-color: var(--accent); }
+
+        .btn-primary {
+            background-color: var(--accent);
+            color: #0f172a;
+            font-weight: 600;
+            padding: 12px 24px;
+            border-radius: var(--radius-md);
+            transition: all 0.2s ease;
+            width: 100%;
+        }
+        .btn-primary:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(251, 191, 36, 0.4);
+        }
+        #auth-message {
+            text-align: center;
+            padding: 12px;
+            border-radius: var(--radius-md);
+            margin-bottom: 16px;
+            font-weight: 500;
+            display: none;
+        }
+        .message-success { background-color: rgba(16, 185, 129, 0.2); color: var(--success); }
+        .message-danger { background-color: rgba(239, 68, 68, 0.2); color: var(--danger); }
+    </style>
+</head>
+<body class="p-4 md:p-8 flex items-center justify-center min-h-screen">
+    
+    <div class="w-full max-w-sm">
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold">Imandou Food</h1>
+            <p class="text-lg text-[var(--muted)] mt-2">نظام إدارة المطاعم</p>
+        </div>
+
+        <div class="card p-8 space-y-6">
+            <div class="text-center">
+                <h2 class="text-2xl font-bold">تسجيل الدخول</h2>
+            </div>
+            
+            <div id="auth-message"></div>
+
+            <form id="auth-form" class="space-y-4">
+                <div>
+                    <label for="email" class="block mb-2 font-medium text-[var(--muted)]">البريد الإلكتروني</label>
+                    <input type="email" id="email" class="form-input text-lg" placeholder="example@gmail.com" required>
+                </div>
+                <div>
+                    <label for="password" class="block mb-2 font-medium text-[var(--muted)]">كلمة المرور</label>
+                    <input type="password" id="password" class="form-input text-lg" placeholder="أدخل كلمة المرور" required>
+                </div>
+                <button type="submit" class="btn-primary flex items-center justify-center gap-2">
+                    <span class="fa-solid fa-sign-in-alt"></span>
+                    <span>تسجيل الدخول</span>
+                </button>
+            </form>
+        </div>
+    </div>
+    
+<script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCyPOzsEzdrRd9o7iHASzFoLyJQhpTW83E",
+      authDomain: "imandou-food.firebaseapp.com",
+      databaseURL: "https://imandou-food-default-rtdb.firebaseio.com",
+      projectId: "imandou-food"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+    const form = document.getElementById('auth-form');
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+    const authMessage = document.getElementById('auth-message');
+
+    document.addEventListener('DOMContentLoaded', () => {
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                window.location.href = 'Dashboard.html';
+            }
+        });
+    });
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = emailInput.value;
+        const password = passwordInput.value;
+
+        try {
+            await auth.signInWithEmailAndPassword(email, password);
+            showMessage('تم تسجيل الدخول بنجاح!', 'success');
+            setTimeout(() => window.location.href = 'Dashboard.html', 1500);
+        } catch (error) {
+            console.error(error);
+            let errorMessage = "حدث خطأ غير متوقع.";
+            switch(error.code) {
+                case 'auth/invalid-email':
+                    errorMessage = "البريد الإلكتروني غير صحيح.";
+                    break;
+                case 'auth/user-not-found':
+                case 'auth/wrong-password':
+                    errorMessage = "البريد الإلكتروني أو كلمة المرور غير صحيحة.";
+                    break;
+            }
+            showMessage(errorMessage, 'danger');
+        }
+    });
+
+    function showMessage(message, type) {
+        authMessage.textContent = message;
+        authMessage.className = `message-${type}`;
+        authMessage.style.display = 'block';
+    }
+</script>
+</body>
+</html>
