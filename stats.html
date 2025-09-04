@@ -5,84 +5,92 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>إحصائيات المبيعات - Imandou Food</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-to-image"></script>
     <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
-    
+
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 
     <style>
-        /* Custom CSS Variables for Professional Dark Theme */
-        :root {
-          --bg: #121212;
-          --card: #1e1e1e;
-          --text: #e0e0e0;
-          --muted: #a0a0a0;
-          --accent: #bb86fc;
-          --success: #66bb6a;
-          --info: #42a5f5;
-          --border-color: #333333;
-          --shadow: 0 4px 12px rgba(0,0,0,0.3);
-          --radius-lg: 12px;
+        :root{
+          --bg: #0f172a;
+          --card: #0b1220;
+          --text: #e2e8f0;
+          --muted: #94a3b8;
+          --accent: #fbbf24;
+          --radius-lg: 14px;
+          --radius-md: 8px;
+          --success: #10b981;
+          --danger: #ef4444;
+          --info: #3b82f6;
         }
+        
         body {
-          font-family: 'Cairo', sans-serif;
+          font-family: 'Cairo', 'Inter', sans-serif;
           background: var(--bg);
           color: var(--text);
-          -webkit-font-smoothing: antialiased;
-          -moz-osx-font-smoothing: grayscale;
         }
+        body::before {
+          content: '';
+          position: fixed; top: 0; left: 0;
+          width: 100%; height: 100%;
+          background-image: var(--background-image, url('https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&q=80&w=2070'));
+          background-size: cover; background-position: center;
+          opacity: 0.08; z-index: -1;
+          transition: background-image 0.5s ease-in-out;
+        }
+        h1, h2, h3 { font-family: 'Playfair Display', serif; font-weight: 700; }
+
         .card {
-          background: var(--card);
+          background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.04));
           border-radius: var(--radius-lg);
-          border: 1px solid var(--border-color);
-          box-shadow: var(--shadow);
+          box-shadow: 0 8px 25px rgba(2,6,23,0.7);
+          border: 1px solid rgba(255,255,255,0.04);
+          backdrop-filter: blur(12px);
+          -webkit-backdrop-filter: blur(12px);
         }
-        .nav-link {
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 16px;
-            border-radius: 8px;
-            font-weight: 600;
+        .pill {
+          background: rgba(255,255,255,0.03); border-radius: 999px;
+          padding: 8px 16px; font-weight:500; color:var(--text);
+          display:inline-flex; gap:8px; align-items:center;
+          border: 1px solid rgba(255,255,255,0.05);
+          transition: all 0.2s ease; cursor: pointer;
+          font-size: 0.9rem; white-space: nowrap;
         }
-        .nav-link:hover {
-            color: var(--accent);
-            background-color: rgba(187, 134, 252, 0.1);
-        }
+        .pill:hover { background: rgba(255,255,255,0.07); transform: translateY(-1px); }
+
         canvas {
             max-height: 400px;
         }
     </style>
 </head>
-<body class="p-6 md:p-10">
+<body class="p-4 md:p-8">
 
-    <header class="flex flex-col md:flex-row justify-between items-center mb-10 pb-6 border-b border-[var(--border-color)]">
-        <div class="flex items-center gap-4 mb-4 md:mb-0">
+    <header class="flex justify-between items-center mb-8 pb-4 border-b border-slate-800">
+        <div class="flex items-center gap-4">
             <h1 class="text-3xl font-bold">إحصائيات المبيعات</h1>
             <p class="text-[var(--muted)]">تحليل بيانات المبيعات</p>
         </div>
         <div class="flex items-center gap-4">
-            <a href="index.html" class="nav-link text-white"><i class="fas fa-home"></i> لوحة التحكم</a>
-            <a href="users.html" class="nav-link text-white"><i class="fas fa-user-circle"></i> حسابي</a>
+            <a href="index.html" class="pill text-white hover:bg-slate-700 transition"><i class="fas fa-home"></i> لوحة التحكم</a>
+            <a href="users.html" class="pill text-white hover:bg-slate-700 transition"><i class="fas fa-user-circle"></i> حسابي</a>
         </div>
     </header>
 
-    <section class="mb-10">
-        <div class="flex flex-col md:flex-row items-center justify-between mb-6">
+    <section class="mb-8">
+        <div class="flex flex-col md:flex-row items-center justify-between mb-4">
             <h2 class="text-2xl font-bold">ملخص الإحصائيات</h2>
             <div class="flex gap-4 mt-4 md:mt-0">
-                <button onclick="downloadPDF()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg transition-colors duration-200">
-                    <i class="fas fa-file-pdf ml-2"></i> تحميل PDF
+                <button onclick="downloadPDF()" class="pill text-white bg-red-600 hover:bg-red-700 transition">
+                    <i class="fas fa-file-pdf"></i> تحميل PDF
                 </button>
-                <button onclick="downloadExcel()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition-colors duration-200">
-                    <i class="fas fa-file-excel ml-2"></i> تحميل Excel
+                <button onclick="downloadExcel()" class="pill text-white bg-green-600 hover:bg-green-700 transition">
+                    <i class="fas fa-file-excel"></i> تحميل Excel
                 </button>
             </div>
         </div>
@@ -104,7 +112,6 @@
     </section>
 
     <script>
-        // Firebase Configuration
         const firebaseConfig = {
           apiKey: "AIzaSyCyPOzsEzdrRd9o7iHASzFoLyJQhpTW83E",
           authDomain: "imandou-food.firebaseapp.com",
@@ -117,10 +124,28 @@
         let allOrdersData = [];
 
         document.addEventListener('DOMContentLoaded', () => {
-            fetchOrders();
+            loadSettingsAndOrders();
         });
 
-        // Function to fetch data from Firebase
+        async function loadSettingsAndOrders() {
+            try {
+                const settingsSnap = await database.ref('settings').once('value');
+                applySettings(settingsSnap.val() || {});
+                fetchOrders();
+            } catch(error) {
+                console.error("Error loading settings:", error);
+            }
+        }
+        
+        function applySettings(settings) {
+            if (settings.backgroundImage) {
+                document.body.style.setProperty('--background-image', `url('${settings.backgroundImage}')`);
+            }
+            if (settings.accentColor) {
+                document.documentElement.style.setProperty('--accent', settings.accentColor);
+            }
+        }
+
         function fetchOrders() {
             database.ref('orders').once('value').then(snapshot => {
                 allOrdersData = [];
@@ -131,7 +156,6 @@
             }).catch(error => console.error("Error fetching orders:", error));
         }
 
-        // Function to process data and render charts
         function renderCharts(orders) {
             const completedOrders = orders.filter(o => o.status === 'completed');
             
@@ -141,7 +165,7 @@
                 acc[date] = (acc[date] || 0) + order.totalPrice;
                 return acc;
             }, {});
-            renderBarChart('dailyRevenueChart', Object.keys(dailyRevenue), Object.values(dailyRevenue), 'الإيرادات اليومية', '#bb86fc');
+            renderChart('dailyRevenueChart', Object.keys(dailyRevenue), Object.values(dailyRevenue), 'bar', 'الإيرادات اليومية', 'rgba(251, 191, 36, 0.6)');
 
             // Monthly Orders Data
             const monthlyOrders = completedOrders.reduce((acc, order) => {
@@ -149,7 +173,7 @@
                 acc[month] = (acc[month] || 0) + 1;
                 return acc;
             }, {});
-            renderLineChart('monthlyOrdersChart', Object.keys(monthlyOrders), Object.values(monthlyOrders), 'عدد الطلبات', '#66bb6a');
+            renderChart('monthlyOrdersChart', Object.keys(monthlyOrders), Object.values(monthlyOrders), 'line', 'عدد الطلبات', 'rgba(16, 185, 129, 0.8)');
 
             // Popular Items Data
             const itemCounts = completedOrders.reduce((acc, order) => {
@@ -159,97 +183,53 @@
                 return acc;
             }, {});
             const sortedItems = Object.entries(itemCounts).sort(([,a], [,b]) => b - a).slice(0, 10);
-            renderPieChart('popularItemsChart', sortedItems.map(i => i[0]), sortedItems.map(i => i[1]));
+            renderChart('popularItemsChart', sortedItems.map(i => i[0]), sortedItems.map(i => i[1]), 'pie', 'الكمية المباعة', ['#fbbf24', '#10b981', '#3b82f6', '#ef4444', '#f59e0b', '#06b6d4', '#6366f1', '#a855f7', '#ec4899', '#f43f5e']);
         }
 
-        // Bar Chart Renderer
-        function renderBarChart(canvasId, labels, data, label, color) {
+        function renderChart(canvasId, labels, data, type, label, color) {
             const ctx = document.getElementById(canvasId).getContext('2d');
-            new Chart(ctx, {
-                type: 'bar',
+            
+            // Destroy previous chart instance if it exists
+            if (window.myCharts && window.myCharts[canvasId]) {
+                window.myCharts[canvasId].destroy();
+            }
+
+            const chartConfig = {
+                type: type,
                 data: {
                     labels: labels,
                     datasets: [{
                         label: label,
                         data: data,
                         backgroundColor: color,
-                        borderColor: color,
-                        borderWidth: 1,
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        x: { ticks: { color: 'var(--muted)' }, grid: { color: 'rgba(255,255,255,0.05)' } },
-                        y: { beginAtZero: true, ticks: { color: 'var(--muted)' }, grid: { color: 'rgba(255,255,255,0.05)' } }
-                    },
-                    plugins: { legend: { display: false } }
-                }
-            });
-        }
-        
-        // Line Chart Renderer
-        function renderLineChart(canvasId, labels, data, label, color) {
-            const ctx = document.getElementById(canvasId).getContext('2d');
-            new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: label,
-                        data: data,
-                        borderColor: color,
-                        backgroundColor: 'rgba(102, 187, 106, 0.2)',
-                        borderWidth: 2,
-                        tension: 0.4,
-                        fill: true
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        x: { ticks: { color: 'var(--muted)' }, grid: { color: 'rgba(255,255,255,0.05)' } },
-                        y: { beginAtZero: true, ticks: { color: 'var(--muted)' }, grid: { color: 'rgba(255,255,255,0.05)' } }
-                    },
-                    plugins: { legend: { display: false } }
-                }
-            });
-        }
-
-        // Pie Chart Renderer
-        function renderPieChart(canvasId, labels, data) {
-            const ctx = document.getElementById(canvasId).getContext('2d');
-            const backgroundColors = ['#bb86fc', '#66bb6a', '#42a5f5', '#ef5350', '#ffc107', '#26c6da', '#7e57c2', '#ffa726', '#bdbdbd', '#8d6e63'];
-            new Chart(ctx, {
-                type: 'pie',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        data: data,
-                        backgroundColor: backgroundColors,
-                        hoverOffset: 4,
+                        borderColor: type === 'line' ? color : 'transparent',
+                        borderWidth: type === 'line' ? 2 : 0,
+                        fill: type === 'line' ? true : false,
+                        tension: 0.4
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: {
-                            position: 'right',
-                            labels: { color: 'var(--text)' }
-                        },
-                        title: {
-                            display: false
-                        }
+                        legend: { display: type !== 'pie', labels: { color: 'var(--text)' } }
+                    },
+                    scales: {
+                        x: { ticks: { color: 'var(--muted)' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+                        y: { beginAtZero: true, ticks: { color: 'var(--muted)' }, grid: { color: 'rgba(255,255,255,0.05)' } }
                     }
                 }
-            });
-        }
+            };
+            
+            if (type === 'pie') {
+                delete chartConfig.options.scales;
+                chartConfig.options.plugins.legend.display = true;
+            }
 
-        // PDF and Excel export functions
-        // Note: For Arabic fonts in jsPDF, you need to include a font file. This is a placeholder.
+            window.myCharts = window.myCharts || {};
+            window.myCharts[canvasId] = new Chart(ctx, chartConfig);
+        }
+        
         async function downloadPDF() {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
