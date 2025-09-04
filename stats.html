@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إحصائيات المبيعات - Imandou Food</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-to-image"></script>
+    <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+    
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+    <style>
+        /* Custom CSS Variables for Professional Dark Theme */
+        :root {
+          --bg: #121212;
+          --card: #1e1e1e;
+          --text: #e0e0e0;
+          --muted: #a0a0a0;
+          --accent: #bb86fc;
+          --success: #66bb6a;
+          --info: #42a5f5;
+          --border-color: #333333;
+          --shadow: 0 4px 12px rgba(0,0,0,0.3);
+          --radius-lg: 12px;
+        }
+        body {
+          font-family: 'Cairo', sans-serif;
+          background: var(--bg);
+          color: var(--text);
+          -webkit-font-smoothing: antialiased;
+          -moz-osx-font-smoothing: grayscale;
+        }
+        .card {
+          background: var(--card);
+          border-radius: var(--radius-lg);
+          border: 1px solid var(--border-color);
+          box-shadow: var(--shadow);
+        }
+        .nav-link {
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+        .nav-link:hover {
+            color: var(--accent);
+            background-color: rgba(187, 134, 252, 0.1);
+        }
+        canvas {
+            max-height: 400px;
+        }
+    </style>
+</head>
+<body class="p-6 md:p-10">
+
+    <header class="flex flex-col md:flex-row justify-between items-center mb-10 pb-6 border-b border-[var(--border-color)]">
+        <div class="flex items-center gap-4 mb-4 md:mb-0">
+            <h1 class="text-3xl font-bold">إحصائيات المبيعات</h1>
+            <p class="text-[var(--muted)]">تحليل بيانات المبيعات</p>
+        </div>
+        <div class="flex items-center gap-4">
+            <a href="index.html" class="nav-link text-white"><i class="fas fa-home"></i> لوحة التحكم</a>
+            <a href="users.html" class="nav-link text-white"><i class="fas fa-user-circle"></i> حسابي</a>
+        </div>
+    </header>
+
+    <section class="mb-10">
+        <div class="flex flex-col md:flex-row items-center justify-between mb-6">
+            <h2 class="text-2xl font-bold">ملخص الإحصائيات</h2>
+            <div class="flex gap-4 mt-4 md:mt-0">
+                <button onclick="downloadPDF()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg transition-colors duration-200">
+                    <i class="fas fa-file-pdf ml-2"></i> تحميل PDF
+                </button>
+                <button onclick="downloadExcel()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition-colors duration-200">
+                    <i class="fas fa-file-excel ml-2"></i> تحميل Excel
+                </button>
+            </div>
+        </div>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div class="card p-6">
+                <h3 class="text-xl font-semibold mb-4 text-center">الإيرادات اليومية</h3>
+                <canvas id="dailyRevenueChart"></canvas>
+            </div>
+            <div class="card p-6">
+                <h3 class="text-xl font-semibold mb-4 text-center">الطلبات الشهرية</h3>
+                <canvas id="monthlyOrdersChart"></canvas>
+            </div>
+            <div class="card p-6 lg:col-span-2">
+                <h3 class="text-xl font-semibold mb-4 text-center">الأصناف الأكثر مبيعًا</h3>
+                <canvas id="popularItemsChart"></canvas>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+          apiKey: "AIzaSyCyPOzsEzdrRd9o7iHASzFoLyJQhpTW83E",
+          authDomain: "imandou-food.firebaseapp.com",
+          databaseURL: "https://imandou-food-default-rtdb.firebaseio.com",
+          projectId: "imandou-food"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        let allOrdersData = [];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchOrders();
+        });
+
+        // Function to fetch data from Firebase
+        function fetchOrders() {
+            database.ref('orders').once('value').then(snapshot => {
+                allOrdersData = [];
+                snapshot.forEach(childSnapshot => {
+                    allOrdersData.push({ id: childSnapshot.key, ...childSnapshot.val() });
+                });
+                renderCharts(allOrdersData);
+            }).catch(error => console.error("Error fetching orders:", error));
+        }
+
+        // Function to process data and render charts
+        function renderCharts(orders) {
+            const completedOrders = orders.filter(o => o.status === 'completed');
+            
+            // Daily Revenue Data
+            const dailyRevenue = completedOrders.reduce((acc, order) => {
+                const date = new Date(order.timestamp).toISOString().split('T')[0];
+                acc[date] = (acc[date] || 0) + order.totalPrice;
+                return acc;
+            }, {});
+            renderBarChart('dailyRevenueChart', Object.keys(dailyRevenue), Object.values(dailyRevenue), 'الإيرادات اليومية', '#bb86fc');
+
+            // Monthly Orders Data
+            const monthlyOrders = completedOrders.reduce((acc, order) => {
+                const month = new Date(order.timestamp).toLocaleString('ar-MA', { month: 'long', year: 'numeric' });
+                acc[month] = (acc[month] || 0) + 1;
+                return acc;
+            }, {});
+            renderLineChart('monthlyOrdersChart', Object.keys(monthlyOrders), Object.values(monthlyOrders), 'عدد الطلبات', '#66bb6a');
+
+            // Popular Items Data
+            const itemCounts = completedOrders.reduce((acc, order) => {
+                order.items.forEach(item => {
+                    acc[item.name_ar] = (acc[item.name_ar] || 0) + item.quantity;
+                });
+                return acc;
+            }, {});
+            const sortedItems = Object.entries(itemCounts).sort(([,a], [,b]) => b - a).slice(0, 10);
+            renderPieChart('popularItemsChart', sortedItems.map(i => i[0]), sortedItems.map(i => i[1]));
+        }
+
+        // Bar Chart Renderer
+        function renderBarChart(canvasId, labels, data, label, color) {
+            const ctx = document.getElementById(canvasId).getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: label,
+                        data: data,
+                        backgroundColor: color,
+                        borderColor: color,
+                        borderWidth: 1,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { ticks: { color: 'var(--muted)' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+                        y: { beginAtZero: true, ticks: { color: 'var(--muted)' }, grid: { color: 'rgba(255,255,255,0.05)' } }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+        
+        // Line Chart Renderer
+        function renderLineChart(canvasId, labels, data, label, color) {
+            const ctx = document.getElementById(canvasId).getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: label,
+                        data: data,
+                        borderColor: color,
+                        backgroundColor: 'rgba(102, 187, 106, 0.2)',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { ticks: { color: 'var(--muted)' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+                        y: { beginAtZero: true, ticks: { color: 'var(--muted)' }, grid: { color: 'rgba(255,255,255,0.05)' } }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        // Pie Chart Renderer
+        function renderPieChart(canvasId, labels, data) {
+            const ctx = document.getElementById(canvasId).getContext('2d');
+            const backgroundColors = ['#bb86fc', '#66bb6a', '#42a5f5', '#ef5350', '#ffc107', '#26c6da', '#7e57c2', '#ffa726', '#bdbdbd', '#8d6e63'];
+            new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: backgroundColors,
+                        hoverOffset: 4,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: { color: 'var(--text)' }
+                        },
+                        title: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        }
+
+        // PDF and Excel export functions
+        // Note: For Arabic fonts in jsPDF, you need to include a font file. This is a placeholder.
+        async function downloadPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            doc.setFont('Amiri', 'normal');
+            doc.text("تقرير إحصائيات المبيعات", 100, 20, null, null, "center");
+            
+            const chartImage1 = await document.getElementById('dailyRevenueChart').toDataURL('image/png');
+            doc.addImage(chartImage1, 'PNG', 15, 30, 180, 80);
+            doc.addPage();
+
+            const chartImage2 = await document.getElementById('monthlyOrdersChart').toDataURL('image/png');
+            doc.addImage(chartImage2, 'PNG', 15, 30, 180, 80);
+            doc.addPage();
+            
+            const chartImage3 = await document.getElementById('popularItemsChart').toDataURL('image/png');
+            doc.addImage(chartImage3, 'PNG', 15, 30, 180, 80);
+
+            doc.save('تقرير-الإحصائيات.pdf');
+        }
+
+        function downloadExcel() {
+            const data = allOrdersData.map(order => ({
+                'معرف الطلب': order.id,
+                'رقم الطاولة': order.tableNumber,
+                'التاريخ': new Date(order.timestamp).toLocaleString('ar-MA'),
+                'الحالة': order.status,
+                'الإجمالي': order.totalPrice,
+                'الأصناف': order.items.map(item => `${item.name_ar} (x${item.quantity})`).join(', '),
+                'ملاحظات': order.notes || ''
+            }));
+            
+            const ws = XLSX.utils.json_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "تقرير الطلبات");
+            XLSX.writeFile(wb, "تقرير-الطلبات.xlsx");
+        }
+    </script>
+</body>
+</html>
