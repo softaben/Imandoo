@@ -88,10 +88,10 @@
         <div class="flex flex-col md:flex-row items-center justify-between mb-4">
             <h2 class="text-2xl font-bold">ملخص الإحصائيات</h2>
             <div class="flex gap-4 mt-4 md:mt-0">
-                <button onclick="downloadPDF(allOrdersData, 'rapport-de-statistiques')" class="pill text-white bg-red-600 hover:bg-red-700 transition">
+                <button onclick="downloadPDF(allOrdersData, 'تقرير-الإحصائيات')" class="pill text-white bg-red-600 hover:bg-red-700 transition">
                     <i class="fas fa-file-pdf"></i> تحميل PDF
                 </button>
-                <button onclick="downloadExcel(allOrdersData, 'rapport-des-commandes')" class="pill text-white bg-green-600 hover:bg-green-700 transition">
+                <button onclick="downloadExcel(allOrdersData, 'تقرير-الطلبات')" class="pill text-white bg-green-600 hover:bg-green-700 transition">
                     <i class="fas fa-file-excel"></i> تحميل Excel
                 </button>
             </div>
@@ -140,6 +140,25 @@
         </div>
     </section>
 
+    <section class="mb-8">
+        <div class="flex flex-col md:flex-row items-center justify-between mb-4">
+            <h2 class="text-2xl font-bold">حصيلة المبيعات اليومية</h2>
+        </div>
+        <div class="card p-6 overflow-x-auto">
+            <table class="w-full text-right table-auto">
+                <thead>
+                    <tr class="border-b border-slate-700">
+                        <th class="p-4 text-sm font-semibold text-[var(--muted)]">التاريخ</th>
+                        <th class="p-4 text-sm font-semibold text-[var(--muted)]">إجمالي الإيرادات</th>
+                        <th class="p-4 text-sm font-semibold text-[var(--muted)]">الكميات المباعة</th>
+                    </tr>
+                </thead>
+                <tbody id="daily-items-table">
+                    </tbody>
+            </table>
+        </div>
+    </section>
+
     <script>
         const firebaseConfig = {
           apiKey: "AIzaSyCyPOzsEzdrRd9o7iHASzFoLyJQhpTW83E",
@@ -183,6 +202,7 @@
                 });
                 renderCharts(allOrdersData);
                 loadMonthlySummaries();
+                renderDailyItemsTable(allOrdersData);
             }).catch(error => console.error("Error fetching orders:", error));
         }
 
@@ -195,7 +215,7 @@
                 acc[date] = (acc[date] || 0) + order.totalPrice;
                 return acc;
             }, {});
-            renderChart('dailyRevenueChart', Object.keys(dailyRevenue), Object.values(dailyRevenue), 'bar', 'Revenus Quotidiens', 'rgba(251, 191, 36, 0.6)');
+            renderChart('dailyRevenueChart', Object.keys(dailyRevenue), Object.values(dailyRevenue), 'bar', 'الإيرادات اليومية', 'rgba(251, 191, 36, 0.6)');
 
             // Monthly Orders Data
             const monthlyOrders = completedOrders.reduce((acc, order) => {
@@ -273,43 +293,60 @@
         
         async function downloadPDF(orders, filename) {
             const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
+            const doc = new jsPDF({ orientation: 'landscape' });
             
             doc.setFont('Amiri', 'normal');
-            doc.text("Rapport de Statistiques des Ventes", 100, 20, null, null, "center");
-            
-            const chartImage1 = await document.getElementById('dailyRevenueChart').toDataURL('image/png');
-            doc.addImage(chartImage1, 'PNG', 15, 30, 180, 80);
-            doc.addPage();
+            doc.setFontSize(16);
+            doc.text("تقرير الإحصائيات", 148, 20, null, null, "center");
 
-            const chartImage2 = await document.getElementById('monthlyOrdersChart').toDataURL('image/png');
-            doc.addImage(chartImage2, 'PNG', 15, 30, 180, 80);
-            doc.addPage();
+            const data = orders.map(order => [
+                order.id,
+                order.tableNumber,
+                new Date(order.timestamp).toLocaleString('ar-MA', {dateStyle: 'short', timeStyle: 'short'}),
+                order.status,
+                order.totalPrice,
+                order.items.map(item => `${item.name_ar} (x${item.quantity})`).join(', '),
+                order.notes || ''
+            ]);
             
-            const chartImage3 = await document.getElementById('popularItemsChart').toDataURL('image/png');
-            doc.addImage(chartImage3, 'PNG', 15, 30, 180, 80);
+            const headers = [['ID الطلب', 'رقم الطاولة', 'التاريخ', 'الحالة', 'الإجمالي', 'الأصناف', 'ملاحظات']];
 
+            doc.autoTable({
+                startY: 30,
+                head: headers,
+                body: data,
+                styles: { font: 'Amiri', fontStyle: 'normal' },
+                headStyles: { fillColor: [30, 41, 59] },
+                alternateRowStyles: { fillColor: [15, 23, 42] },
+                bodyStyles: { textColor: [226, 232, 240] },
+                theme: 'striped',
+                didDrawPage: function(data) {
+                    let str = `صفحة ${doc.internal.getNumberOfPages()}`;
+                    doc.setFontSize(10);
+                    doc.text(str, data.settings.margin.left, doc.internal.pageSize.height - 10);
+                }
+            });
+            
             doc.save(`${filename}.pdf`);
         }
 
         function downloadExcel(orders, filename) {
             const data = orders.map(order => ({
-                'ID de la commande': order.id,
-                'Numéro de table': order.tableNumber,
-                'Date': new Date(order.timestamp).toLocaleString('fr-FR'),
-                'Statut': order.status,
-                'Total': order.totalPrice,
-                'Articles': order.items.map(item => `${item.name_ar} (x${item.quantity})`).join(', '),
-                'Remarques': order.notes || ''
+                'ID الطلب': order.id,
+                'رقم الطاولة': order.tableNumber,
+                'التاريخ': new Date(order.timestamp).toLocaleString('ar-MA', {dateStyle: 'short', timeStyle: 'short'}),
+                'الحالة': order.status,
+                'الإجمالي': order.totalPrice,
+                'الأصناف': order.items.map(item => `${item.name_ar} (x${item.quantity})`).join(', '),
+                'ملاحظات': order.notes || ''
             }));
             
             const ws = XLSX.utils.json_to_sheet(data);
             const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Rapport des Commandes");
+            XLSX.utils.book_append_sheet(wb, ws, "تقرير الطلبات");
             XLSX.writeFile(wb, `${filename}.xlsx`);
         }
-
-        // New functions for monthly archiving
+        
         async function loadMonthlySummaries() {
             const tableBody = document.getElementById('monthly-summary-table');
             tableBody.innerHTML = '';
@@ -330,6 +367,45 @@
                     <td class="p-4">${summary.totalRevenue.toFixed(2)} د.م</td>
                     <td class="p-4">${summary.totalOrders}</td>
                     <td class="p-4">${summary.topItem}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+        
+        async function renderDailyItemsTable(orders) {
+            const tableBody = document.getElementById('daily-items-table');
+            tableBody.innerHTML = '';
+            
+            const dailyData = {};
+
+            orders.filter(o => o.status === 'completed').forEach(order => {
+                const date = new Date(order.timestamp).toLocaleDateString('ar-MA');
+                if (!dailyData[date]) {
+                    dailyData[date] = { totalRevenue: 0, itemsSold: {} };
+                }
+                dailyData[date].totalRevenue += order.totalPrice;
+                order.items.forEach(item => {
+                    dailyData[date].itemsSold[item.name_ar] = (dailyData[date].itemsSold[item.name_ar] || 0) + item.quantity;
+                });
+            });
+
+            const sortedDates = Object.keys(dailyData).sort((a, b) => new Date(b) - new Date(a));
+            
+            if (sortedDates.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="3" class="p-4 text-center text-[var(--muted)]">لا توجد مبيعات مكتملة بعد.</td></tr>`;
+                return;
+            }
+
+            sortedDates.forEach(date => {
+                const data = dailyData[date];
+                const itemsList = Object.entries(data.itemsSold).map(([name, quantity]) => `${name} (x${quantity})`).join(', ');
+
+                const row = document.createElement('tr');
+                row.className = 'border-b border-slate-800 last:border-b-0';
+                row.innerHTML = `
+                    <td class="p-4">${date}</td>
+                    <td class="p-4">${data.totalRevenue.toFixed(2)} د.م</td>
+                    <td class="p-4">${itemsList}</td>
                 `;
                 tableBody.appendChild(row);
             });
@@ -370,8 +446,8 @@
             summary.topItem = topItem ? topItem[0] : 'لا يوجد';
 
             // Generate downloads
-            await downloadExcel(ordersToArchive, `archive-${lastMonthName}`);
-            await downloadPDF(ordersToArchive, `archive-${lastMonthName}`);
+            await downloadExcel(ordersToArchive, `أرشيف-${lastMonthName}`);
+            await downloadPDF(ordersToArchive, `أرشيف-${lastMonthName}`);
             
             // Save summary and delete orders
             const summaryKey = `${lastMonth.getFullYear()}-${(lastMonth.getMonth() + 1).toString().padStart(2, '0')}`;
@@ -393,63 +469,6 @@
                     console.error("Archiving failed:", error);
                 });
         }
-        
-        function downloadExcel(orders, filename) {
-            const data = orders.map(order => ({
-                'ID de la commande': order.id,
-                'Numéro de table': order.tableNumber,
-                'Date': new Date(order.timestamp).toLocaleString('fr-FR'),
-                'Statut': order.status,
-                'Total': order.totalPrice,
-                'Articles': order.items.map(item => `${item.name_ar} (x${item.quantity})`).join(', '),
-                'Remarques': order.notes || ''
-            }));
-            
-            const ws = XLSX.utils.json_to_sheet(data);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Rapport des Commandes");
-            XLSX.writeFile(wb, `${filename}.xlsx`);
-        }
-
-        function downloadPDF(orders, filename) {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF({ orientation: 'landscape' });
-            
-            doc.setFont('Amiri', 'normal');
-            doc.setFontSize(16);
-            doc.text("Rapport des Commandes", 148, 20, null, null, "center");
-
-            const data = orders.map(order => [
-                order.id,
-                order.tableNumber,
-                new Date(order.timestamp).toLocaleString('fr-FR'),
-                order.status,
-                order.totalPrice,
-                order.items.map(item => `${item.name_ar} (x${item.quantity})`).join(', '),
-                order.notes || ''
-            ]);
-            
-            const headers = [['ID de la commande', 'Numéro de table', 'Date', 'Statut', 'Total', 'Articles', 'Remarques']];
-
-            doc.autoTable({
-                startY: 30,
-                head: headers,
-                body: data,
-                styles: { font: 'Amiri', fontStyle: 'normal' },
-                headStyles: { fillColor: [30, 41, 59] },
-                alternateRowStyles: { fillColor: [15, 23, 42] },
-                bodyStyles: { textColor: [226, 232, 240] },
-                theme: 'striped',
-                didDrawPage: function(data) {
-                    let str = "Page " + doc.internal.getNumberOfPages()
-                    doc.setFontSize(10)
-                    doc.text(str, data.settings.margin.left, doc.internal.pageSize.height - 10)
-                }
-            });
-            
-            doc.save(`${filename}.pdf`);
-        }
-
     </script>
 </body>
 </html>
