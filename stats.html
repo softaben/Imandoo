@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title data-lang-key="pageTitle"></title>
+    <title>Statistiques des ventes - Imandou Food</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -32,7 +32,7 @@
         }
         
         body {
-          font-family: 'Inter', 'Cairo', sans-serif;
+          font-family: 'Inter', sans-serif;
           background: var(--bg);
           color: var(--text);
         }
@@ -46,7 +46,6 @@
           transition: background-image 0.5s ease-in-out;
         }
         h1, h2, h3 { font-family: 'Playfair Display', serif; font-weight: 700; }
-        [dir="rtl"] h1, [dir="rtl"] h2, [dir="rtl"] h3 { font-family: 'Cairo', sans-serif; }
 
         .card {
           background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.04));
@@ -94,59 +93,49 @@
 
     <div id="loading-overlay" class="loading-overlay">
       <div class="spinner"></div>
-      <p id="loading-text" class="text-white mt-4 text-lg" data-lang-key="loadingText"></p>
+      <p class="text-white mt-4 text-lg">Chargement des données...</p>
     </div>
 
-    <header class="flex flex-col md:flex-row justify-between items-center mb-8 pb-4 border-b border-slate-800">
-        <div class="flex items-center gap-4 mb-4 md:mb-0">
-            <h1 class="text-3xl font-bold" data-lang-key="headerTitle"></h1>
-            <p class="text-[var(--muted)]" data-lang-key="headerSubtitle"></p>
+    <header class="flex justify-between items-center mb-8 pb-4 border-b border-slate-800">
+        <div class="flex items-center gap-4">
+            <h1 class="text-3xl font-bold">Statistiques des ventes</h1>
+            <p class="text-[var(--muted)]">Analyse des données de vente</p>
         </div>
         <div class="flex items-center gap-4">
-            <div class="relative inline-block text-white">
-                <select id="language-select" class="bg-slate-800 text-white rounded-full py-2 px-4 appearance-none cursor-pointer">
-                    <option value="fr">Français</option>
-                    <option value="ar">العربية</option>
-                    <option value="en">English</option>
-                </select>
-                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                    <i class="fas fa-caret-down text-white"></i>
-                </div>
-            </div>
-            <a href="Dashboard.html" class="pill text-white hover:bg-slate-700 transition" data-lang-key="dashboardLink"><i class="fas fa-home"></i> <span></span></a>
-            <a href="modification.html" class="pill text-white hover:bg-slate-700 transition" data-lang-key="menuLink"><i class="fas fa-edit"></i> <span></span></a>
-            <a href="users.html" class="pill text-white hover:bg-slate-700 transition" data-lang-key="accountLink"><i class="fas fa-user-circle"></i> <span></span></a>
+            <a href="Dashboard.html" class="pill text-white hover:bg-slate-700 transition"><i class="fas fa-home"></i> Tableau de bord</a>
+            <a href="modification.html" class="pill text-white hover:bg-slate-700 transition"><i class="fas fa-edit"></i> Modifier le menu</a>
+            <a href="users.html" class="pill text-white hover:bg-slate-700 transition"><i class="fas fa-user-circle"></i> Mon compte</a>
         </div>
     </header>
 
     <section class="mb-8">
         <div class="flex flex-col md:flex-row items-center justify-between mb-4">
-            <h2 class="text-2xl font-bold" data-lang-key="summaryTitle"></h2>
+            <h2 class="text-2xl font-bold">Résumé des statistiques</h2>
             <div class="flex gap-4 mt-4 md:mt-0">
-                <button onclick="downloadPDF(allOrdersData)" class="pill text-white bg-red-600 hover:bg-red-700 transition">
-                    <i class="fas fa-file-pdf"></i> <span data-lang-key="downloadPdfBtn"></span>
+                <button onclick="downloadPDF(allOrdersData, 'rapport-statistiques')" class="pill text-white bg-red-600 hover:bg-red-700 transition">
+                    <i class="fas fa-file-pdf"></i> Télécharger PDF
                 </button>
-                <button onclick="downloadExcel(allOrdersData)" class="pill text-white bg-green-600 hover:bg-green-700 transition">
-                    <i class="fas fa-file-excel"></i> <span data-lang-key="downloadExcelBtn"></span>
+                <button onclick="downloadExcel(allOrdersData, 'rapport-commandes')" class="pill text-white bg-green-600 hover:bg-green-700 transition">
+                    <i class="fas fa-file-excel"></i> Télécharger Excel
                 </button>
             </div>
         </div>
         
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div class="card p-6">
-                <h3 class="text-xl font-semibold mb-4 text-center" data-lang-key="dailyRevenueChartTitle"></h3>
+                <h3 class="text-xl font-semibold mb-4 text-center">Revenus quotidiens</h3>
                 <canvas id="dailyRevenueChart"></canvas>
             </div>
             <div class="card p-6">
-                <h3 class="text-xl font-semibold mb-4 text-center" data-lang-key="monthlyOrdersChartTitle"></h3>
+                <h3 class="text-xl font-semibold mb-4 text-center">Commandes mensuelles</h3>
                 <canvas id="monthlyOrdersChart"></canvas>
             </div>
             <div class="card p-6">
-                <h3 class="text-xl font-semibold mb-4 text-center" data-lang-key="weeklyRevenueChartTitle"></h3>
+                <h3 class="text-xl font-semibold mb-4 text-center">Revenus par jour de la semaine</h3>
                 <canvas id="weeklyRevenueChart"></canvas>
             </div>
             <div class="card p-6">
-                <h3 class="text-xl font-semibold mb-4 text-center" data-lang-key="popularItemsChartTitle"></h3>
+                <h3 class="text-xl font-semibold mb-4 text-center">Articles les plus vendus</h3>
                 <canvas id="popularItemsChart"></canvas>
             </div>
         </div>
@@ -154,19 +143,19 @@
 
     <section class="mb-8">
         <div class="flex flex-col md:flex-row items-center justify-between mb-4">
-            <h2 class="text-2xl font-bold" data-lang-key="monthlySummaryTitle"></h2>
-            <button onclick="archiveAndDownloadLastMonth()" class="pill text-white bg-blue-600 hover:bg-blue-700 transition mt-4 md:mt-0" data-lang-key="archiveBtn">
-                <i class="fas fa-cloud-download-alt"></i> <span data-lang-key="archiveBtnText"></span>
+            <h2 class="text-2xl font-bold">Résumé mensuel</h2>
+            <button onclick="archiveAndDownloadLastMonth()" class="pill text-white bg-blue-600 hover:bg-blue-700 transition mt-4 md:mt-0">
+                <i class="fas fa-cloud-download-alt"></i> Archiver & télécharger le mois dernier
             </button>
         </div>
         <div class="card p-6 overflow-x-auto">
             <table class="w-full text-right table-auto">
                 <thead>
                     <tr class="border-b border-slate-700">
-                        <th class="p-4 text-sm font-semibold text-[var(--muted)]" data-lang-key="tableHeaderMonth"></th>
-                        <th class="p-4 text-sm font-semibold text-[var(--muted)]" data-lang-key="tableHeaderRevenue"></th>
-                        <th class="p-4 text-sm font-semibold text-[var(--muted)]" data-lang-key="tableHeaderOrders"></th>
-                        <th class="p-4 text-sm font-semibold text-[var(--muted)]" data-lang-key="tableHeaderTopItem"></th>
+                        <th class="p-4 text-sm font-semibold text-[var(--muted)]">Mois</th>
+                        <th class="p-4 text-sm font-semibold text-[var(--muted)]">Revenu total</th>
+                        <th class="p-4 text-sm font-semibold text-[var(--muted)]">Nombre de commandes</th>
+                        <th class="p-4 text-sm font-semibold text-[var(--muted)]">Article le plus vendu</th>
                     </tr>
                 </thead>
                 <tbody id="monthly-summary-table">
@@ -177,15 +166,15 @@
 
     <section class="mb-8">
         <div class="flex flex-col md:flex-row items-center justify-between mb-4">
-            <h2 class="text-2xl font-bold" data-lang-key="dailySalesTitle"></h2>
+            <h2 class="text-2xl font-bold">Résumé des ventes quotidiennes</h2>
         </div>
         <div class="card p-6 overflow-x-auto">
             <table class="w-full text-right table-auto">
                 <thead>
                     <tr class="border-b border-slate-700">
-                        <th class="p-4 text-sm font-semibold text-[var(--muted)]" data-lang-key="tableHeaderDate"></th>
-                        <th class="p-4 text-sm font-semibold text-[var(--muted)]" data-lang-key="tableHeaderRevenue"></th>
-                        <th class="p-4 text-sm font-semibold text-[var(--muted)]" data-lang-key="tableHeaderItemsSold"></th>
+                        <th class="p-4 text-sm font-semibold text-[var(--muted)]">Date</th>
+                        <th class="p-4 text-sm font-semibold text-[var(--muted)]">Revenu total</th>
+                        <th class="p-4 text-sm font-semibold text-[var(--muted)]">Articles vendus</th>
                     </tr>
                 </thead>
                 <tbody id="daily-items-table">
@@ -205,201 +194,18 @@
         const database = firebase.database();
 
         let allOrdersData = [];
-        let currentLang = 'fr';
-        
-        const translations = {
-            'fr': {
-                // UI
-                'pageTitle': 'Statistiques des ventes - Imandou Food',
-                'loadingText': 'Chargement des données...',
-                'headerTitle': 'Statistiques des ventes',
-                'headerSubtitle': 'Analyse des données de vente',
-                'dashboardLink': 'Tableau de bord',
-                'menuLink': 'Modifier le menu',
-                'accountLink': 'Mon compte',
-                'summaryTitle': 'Résumé des statistiques',
-                'downloadPdfBtn': 'Télécharger PDF',
-                'downloadExcelBtn': 'Télécharger Excel',
-                'monthlySummaryTitle': 'Résumé mensuel',
-                'archiveBtn': 'Archiver & télécharger le mois dernier',
-                'archiveBtnText': 'Archiver & télécharger le mois dernier',
-                'dailySalesTitle': 'Résumé des ventes quotidiennes',
-                // Chart Labels
-                'dailyRevenueChartTitle': 'Revenus quotidiens',
-                'monthlyOrdersChartTitle': 'Commandes mensuelles',
-                'weeklyRevenueChartTitle': 'Revenus par jour de la semaine',
-                'popularItemsChartTitle': 'Articles les plus vendus',
-                // Table Headers
-                'tableHeaderMonth': 'Mois',
-                'tableHeaderRevenue': 'Revenu total',
-                'tableHeaderOrders': 'Nombre de commandes',
-                'tableHeaderTopItem': 'Article le plus vendu',
-                'tableHeaderDate': 'Date',
-                'tableHeaderItemsSold': 'Articles vendus',
-                // Messages & Alerts
-                'archiveConfirm': 'Êtes-vous sûr de vouloir archiver les données du mois dernier ?',
-                'noOrdersToArchive': "Il n'y a pas de commandes terminées ou annulées du mois dernier à archiver.",
-                'archiveSuccess': 'Archivage réussi ! Les rapports ont été téléchargés et les données du mois dernier ont été supprimées du système.',
-                'archiveFailed': 'L\'archivage ou la suppression a échoué. Veuillez réessayer.',
-                'noMonthlySummary': 'Aucun résumé mensuel n\'est encore archivé.',
-                'noDailySales': 'Aucune vente n\'a encore été réalisée.',
-                // PDF/Excel
-                'pdfTitle': 'Rapport des statistiques',
-                'excelSheetName': 'Rapport des Commandes',
-                'pdfHeaderId': 'ID Commande',
-                'pdfHeaderTableNo': 'N° de table',
-                'pdfHeaderDate': 'Date',
-                'pdfHeaderStatus': 'Statut',
-                'pdfHeaderTotal': 'Total',
-                'pdfHeaderItems': 'Articles',
-                'pdfHeaderNotes': 'Notes',
-                'page': 'Page',
-                // Placeholders
-                'noItem': 'Aucun'
-            },
-            'en': {
-                // UI
-                'pageTitle': 'Sales Statistics - Imandou Food',
-                'loadingText': 'Loading data...',
-                'headerTitle': 'Sales Statistics',
-                'headerSubtitle': 'Sales Data Analysis',
-                'dashboardLink': 'Dashboard',
-                'menuLink': 'Edit Menu',
-                'accountLink': 'My Account',
-                'summaryTitle': 'Statistics Summary',
-                'downloadPdfBtn': 'Download PDF',
-                'downloadExcelBtn': 'Download Excel',
-                'monthlySummaryTitle': 'Monthly Summary',
-                'archiveBtn': 'Archive & Download Last Month',
-                'archiveBtnText': 'Archive & Download Last Month',
-                'dailySalesTitle': 'Daily Sales Summary',
-                // Chart Labels
-                'dailyRevenueChartTitle': 'Daily Revenue',
-                'monthlyOrdersChartTitle': 'Monthly Orders',
-                'weeklyRevenueChartTitle': 'Weekly Revenue',
-                'popularItemsChartTitle': 'Most Sold Items',
-                // Table Headers
-                'tableHeaderMonth': 'Month',
-                'tableHeaderRevenue': 'Total Revenue',
-                'tableHeaderOrders': 'Number of Orders',
-                'tableHeaderTopItem': 'Top Sold Item',
-                'tableHeaderDate': 'Date',
-                'tableHeaderItemsSold': 'Items Sold',
-                // Messages & Alerts
-                'archiveConfirm': 'Are you sure you want to archive last month\'s data?',
-                'noOrdersToArchive': 'There are no completed or canceled orders from last month to archive.',
-                'archiveSuccess': 'Archiving successful! Reports have been downloaded and last month\'s data has been removed from the system.',
-                'archiveFailed': 'Archiving or deletion failed. Please try again.',
-                'noMonthlySummary': 'No monthly summary has been archived yet.',
-                'noDailySales': 'No sales have been made yet.',
-                // PDF/Excel
-                'pdfTitle': 'Statistics Report',
-                'excelSheetName': 'Orders Report',
-                'pdfHeaderId': 'Order ID',
-                'pdfHeaderTableNo': 'Table No.',
-                'pdfHeaderDate': 'Date',
-                'pdfHeaderStatus': 'Status',
-                'pdfHeaderTotal': 'Total',
-                'pdfHeaderItems': 'Items',
-                'pdfHeaderNotes': 'Notes',
-                'page': 'Page',
-                // Placeholders
-                'noItem': 'None'
-            },
-            'ar': {
-                // UI
-                'pageTitle': 'إحصائيات المبيعات - Imandou Food',
-                'loadingText': 'جاري تحميل البيانات...',
-                'headerTitle': 'إحصائيات المبيعات',
-                'headerSubtitle': 'تحليل بيانات المبيعات',
-                'dashboardLink': 'لوحة التحكم',
-                'menuLink': 'تعديل القائمة',
-                'accountLink': 'حسابي',
-                'summaryTitle': 'ملخص الإحصائيات',
-                'downloadPdfBtn': 'تحميل PDF',
-                'downloadExcelBtn': 'تحميل Excel',
-                'monthlySummaryTitle': 'الحصيلة الشهرية',
-                'archiveBtn': 'أرشفة وتحميل الشهر الماضي',
-                'archiveBtnText': 'أرشفة وتحميل الشهر الماضي',
-                'dailySalesTitle': 'حصيلة المبيعات اليومية',
-                // Chart Labels
-                'dailyRevenueChartTitle': 'الإيرادات اليومية',
-                'monthlyOrdersChartTitle': 'الطلبات الشهرية',
-                'weeklyRevenueChartTitle': 'إيرادات أيام الأسبوع',
-                'popularItemsChartTitle': 'الأصناف الأكثر مبيعًا',
-                // Table Headers
-                'tableHeaderMonth': 'الشهر',
-                'tableHeaderRevenue': 'إجمالي الإيرادات',
-                'tableHeaderOrders': 'عدد الطلبات',
-                'tableHeaderTopItem': 'أعلى صنف مبيعًا',
-                'tableHeaderDate': 'التاريخ',
-                'tableHeaderItemsSold': 'الكميات المباعة',
-                // Messages & Alerts
-                'archiveConfirm': 'هل أنت متأكد من أرشفة بيانات الشهر الماضي؟',
-                'noOrdersToArchive': 'لا توجد طلبات مكتملة أو ملغاة من الشهر الماضي لأرشفتها.',
-                'archiveSuccess': 'تمت الأرشفة بنجاح! تم تحميل التقارير وحذف بيانات الشهر الماضي من النظام.',
-                'archiveFailed': 'فشل في الأرشفة أو الحذف. يرجى المحاولة مرة أخرى.',
-                'noMonthlySummary': 'لا توجد حصيلة شهرية مؤرشفة بعد.',
-                'noDailySales': 'لا توجد مبيعات مكتملة بعد.',
-                // PDF/Excel
-                'pdfTitle': 'تقرير الإحصائيات',
-                'excelSheetName': 'تقرير الطلبات',
-                'pdfHeaderId': 'معرف الطلب',
-                'pdfHeaderTableNo': 'رقم الطاولة',
-                'pdfHeaderDate': 'التاريخ',
-                'pdfHeaderStatus': 'الحالة',
-                'pdfHeaderTotal': 'الإجمالي',
-                'pdfHeaderItems': 'الأصناف',
-                'pdfHeaderNotes': 'ملاحظات',
-                'page': 'صفحة',
-                // Placeholders
-                'noItem': 'لا يوجد'
-            }
-        };
 
         document.addEventListener('DOMContentLoaded', () => {
-            const savedLang = localStorage.getItem('lang') || 'fr';
-            document.getElementById('language-select').value = savedLang;
-            setLanguage(savedLang);
             loadSettingsAndOrders();
         });
-
-        document.getElementById('language-select').addEventListener('change', (e) => {
-            setLanguage(e.target.value);
-            loadSettingsAndOrders();
-        });
-
-        function setLanguage(lang) {
-            currentLang = lang;
-            const t = translations[lang];
-
-            // Set text direction
-            document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
-            
-            // Update static content
-            document.title = t.pageTitle;
-            document.querySelectorAll('[data-lang-key]').forEach(el => {
-                const key = el.dataset.langKey;
-                if (key.includes('Link')) {
-                    el.querySelector('span').textContent = t[key];
-                } else {
-                    el.textContent = t[key];
-                }
-            });
-            localStorage.setItem('lang', lang);
-        }
 
         async function loadSettingsAndOrders() {
-            const loadingOverlay = document.getElementById('loading-overlay');
-            loadingOverlay.style.display = 'flex';
-            
             try {
                 const settingsSnap = await database.ref('settings').once('value');
                 applySettings(settingsSnap.val() || {});
                 fetchOrders();
             } catch(error) {
                 console.error("Error loading settings:", error);
-                loadingOverlay.style.display = 'none';
             }
         }
         
@@ -413,6 +219,9 @@
         }
 
         function fetchOrders() {
+            const loadingOverlay = document.getElementById('loading-overlay');
+            loadingOverlay.style.display = 'flex';
+            
             database.ref('orders').once('value').then(snapshot => {
                 allOrdersData = [];
                 snapshot.forEach(childSnapshot => {
@@ -421,15 +230,14 @@
                 renderCharts(allOrdersData);
                 loadMonthlySummaries();
                 renderDailyItemsTable(allOrdersData);
-                document.getElementById('loading-overlay').style.display = 'none';
+                loadingOverlay.style.display = 'none';
             }).catch(error => {
                 console.error("Error fetching orders:", error);
-                document.getElementById('loading-overlay').style.display = 'none';
+                loadingOverlay.style.display = 'none';
             });
         }
 
         function renderCharts(orders) {
-            const t = translations[currentLang];
             const completedOrders = orders.filter(o => o.status === 'completed');
             
             // Daily Revenue Data
@@ -438,39 +246,35 @@
                 acc[date] = (acc[date] || 0) + order.totalPrice;
                 return acc;
             }, {});
-            renderChart('dailyRevenueChart', Object.keys(dailyRevenue), Object.values(dailyRevenue), 'bar', t.dailyRevenueChartTitle, 'rgba(251, 191, 36, 0.6)');
+            renderChart('dailyRevenueChart', Object.keys(dailyRevenue), Object.values(dailyRevenue), 'bar', 'Revenus quotidiens', 'rgba(251, 191, 36, 0.6)');
 
             // Monthly Orders Data
             const monthlyOrders = completedOrders.reduce((acc, order) => {
-                const month = new Date(order.timestamp).toLocaleString(currentLang === 'ar' ? 'ar-MA' : 'fr-FR', { month: 'long', year: 'numeric' });
+                const month = new Date(order.timestamp).toLocaleString('fr-FR', { month: 'long', year: 'numeric' });
                 acc[month] = (acc[month] || 0) + 1;
                 return acc;
             }, {});
-            renderChart('monthlyOrdersChart', Object.keys(monthlyOrders), Object.values(monthlyOrders), 'line', t.monthlyOrdersChartTitle, 'rgba(16, 185, 129, 0.8)');
+            renderChart('monthlyOrdersChart', Object.keys(monthlyOrders), Object.values(monthlyOrders), 'line', 'Nombre de commandes', 'rgba(16, 185, 129, 0.8)');
             
             // Weekly Revenue Data
             const weeklyRevenue = completedOrders.reduce((acc, order) => {
-                const day = new Date(order.timestamp).toLocaleString(currentLang === 'ar' ? 'ar-MA' : 'fr-FR', { weekday: 'long' });
+                const day = new Date(order.timestamp).toLocaleString('fr-FR', { weekday: 'long' });
                 acc[day] = (acc[day] || 0) + order.totalPrice;
                 return acc;
             }, {});
-            const daysOrder_fr = ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'];
-            const daysOrder_ar = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
-            const daysOrder_en = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-            const daysOrder = currentLang === 'ar' ? daysOrder_ar : (currentLang === 'en' ? daysOrder_en : daysOrder_fr);
+            const daysOrder = ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'];
             const sortedWeeklyData = daysOrder.map(day => weeklyRevenue[day] || 0);
-            renderChart('weeklyRevenueChart', daysOrder, sortedWeeklyData, 'bar', t.weeklyRevenueChartTitle, '#3b82f6');
+            renderChart('weeklyRevenueChart', daysOrder, sortedWeeklyData, 'bar', 'Revenus par jour de la semaine', '#3b82f6');
 
             // Popular Items Data
             const itemCounts = completedOrders.reduce((acc, order) => {
                 order.items.forEach(item => {
-                    const itemName = item[`name_${currentLang}`] || item.name_fr;
-                    acc[itemName] = (acc[itemName] || 0) + item.quantity;
+                    acc[item.name_fr] = (acc[item.name_fr] || 0) + item.quantity;
                 });
                 return acc;
             }, {});
             const sortedItems = Object.entries(itemCounts).sort(([,a], [,b]) => b - a).slice(0, 10);
-            renderChart('popularItemsChart', sortedItems.map(i => i[0]), sortedItems.map(i => i[1]), 'pie', t.popularItemsChartTitle, ['#fbbf24', '#10b981', '#3b82f6', '#ef4444', '#f59e0b', '#06b6d4', '#6366f1', '#a855f7', '#ec4899', '#f43f5e']);
+            renderChart('popularItemsChart', sortedItems.map(i => i[0]), sortedItems.map(i => i[1]), 'pie', 'Quantité vendue', ['#fbbf24', '#10b981', '#3b82f6', '#ef4444', '#f59e0b', '#06b6d4', '#6366f1', '#a855f7', '#ec4899', '#f43f5e']);
         }
 
         function renderChart(canvasId, labels, data, type, label, color) {
@@ -516,29 +320,25 @@
             window.myCharts[canvasId] = new Chart(ctx, chartConfig);
         }
         
-        async function downloadPDF(orders) {
+        async function downloadPDF(orders, filename) {
             const { jsPDF } = window.jspdf;
-            const t = translations[currentLang];
             const doc = new jsPDF({ orientation: 'landscape' });
             
-            doc.setFont('Helvetica', 'normal'); // Default font for English/French
-            if (currentLang === 'ar') {
-                doc.setFont('Amiri', 'normal'); // Arabic font
-            }
+            doc.setFont('Helvetica', 'normal');
             doc.setFontSize(16);
-            doc.text(t.pdfTitle, 148, 20, null, null, "center");
+            doc.text("Rapport des Statistiques", 148, 20, null, null, "center");
 
             const data = orders.map(order => [
                 order.id,
                 order.tableNumber,
-                new Date(order.timestamp).toLocaleString(currentLang === 'ar' ? 'ar-MA' : 'fr-FR', {dateStyle: 'short', timeStyle: 'short'}),
+                new Date(order.timestamp).toLocaleString('fr-FR', {dateStyle: 'short', timeStyle: 'short'}),
                 order.status,
                 order.totalPrice,
-                order.items.map(item => `${item[`name_${currentLang}`] || item.name_fr} (x${item.quantity})`).join(', '),
+                order.items.map(item => `${item.name_fr} (x${item.quantity})`).join(', '),
                 order.notes || ''
             ]);
             
-            const headers = [[t.pdfHeaderId, t.pdfHeaderTableNo, t.pdfHeaderDate, t.pdfHeaderStatus, t.pdfHeaderTotal, t.pdfHeaderItems, t.pdfHeaderNotes]];
+            const headers = [['ID Commande', 'N° de table', 'Date', 'Statut', 'Total', 'Articles', 'Notes']];
 
             doc.autoTable({
                 startY: 30,
@@ -550,42 +350,40 @@
                 bodyStyles: { textColor: [226, 232, 240] },
                 theme: 'striped',
                 didDrawPage: function(data) {
-                    let str = `${t.page} ${doc.internal.getNumberOfPages()}`;
+                    let str = `Page ${doc.internal.getNumberOfPages()}`;
                     doc.setFontSize(10);
                     doc.text(str, data.settings.margin.left, doc.internal.pageSize.height - 10);
                 }
             });
             
-            doc.save(`${t.pdfTitle.replace(/\s/g, '-')}.pdf`);
+            doc.save(`${filename}.pdf`);
         }
 
-        function downloadExcel(orders) {
-            const t = translations[currentLang];
+        function downloadExcel(orders, filename) {
             const data = orders.map(order => ({
-                [t.pdfHeaderId]: order.id,
-                [t.pdfHeaderTableNo]: order.tableNumber,
-                [t.pdfHeaderDate]: new Date(order.timestamp).toLocaleString(currentLang === 'ar' ? 'ar-MA' : 'fr-FR', {dateStyle: 'short', timeStyle: 'short'}),
-                [t.pdfHeaderStatus]: order.status,
-                [t.pdfHeaderTotal]: order.totalPrice,
-                [t.pdfHeaderItems]: order.items.map(item => `${item[`name_${currentLang}`] || item.name_fr} (x${item.quantity})`).join(', '),
-                [t.pdfHeaderNotes]: order.notes || ''
+                'ID Commande': order.id,
+                'N° de table': order.tableNumber,
+                'Date': new Date(order.timestamp).toLocaleString('fr-FR', {dateStyle: 'short', timeStyle: 'short'}),
+                'Statut': order.status,
+                'Total': order.totalPrice,
+                'Articles': order.items.map(item => `${item.name_fr} (x${item.quantity})`).join(', '),
+                'Notes': order.notes || ''
             }));
             
             const ws = XLSX.utils.json_to_sheet(data);
             const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, t.excelSheetName);
-            XLSX.writeFile(wb, `${t.excelSheetName.replace(/\s/g, '-')}.xlsx`);
+            XLSX.utils.book_append_sheet(wb, ws, "Rapport des Commandes");
+            XLSX.writeFile(wb, `${filename}.xlsx`);
         }
         
         async function loadMonthlySummaries() {
             const tableBody = document.getElementById('monthly-summary-table');
             tableBody.innerHTML = '';
-            const t = translations[currentLang];
             const summariesRef = database.ref('monthly_summaries').orderByKey();
             const snapshot = await summariesRef.once('value');
 
             if (!snapshot.exists()) {
-                tableBody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-[var(--muted)]">${t.noMonthlySummary}</td></tr>`;
+                tableBody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-[var(--muted)]">Aucun résumé mensuel n'est encore archivé.</td></tr>`;
                 return;
             }
 
@@ -597,7 +395,7 @@
                     <td class="p-4">${summary.month}</td>
                     <td class="p-4">${summary.totalRevenue.toFixed(2)} MAD</td>
                     <td class="p-4">${summary.totalOrders}</td>
-                    <td class="p-4">${summary.topItem || t.noItem}</td>
+                    <td class="p-4">${summary.topItem || 'Aucun'}</td>
                 `;
                 tableBody.appendChild(row);
             });
@@ -606,26 +404,24 @@
         async function renderDailyItemsTable(orders) {
             const tableBody = document.getElementById('daily-items-table');
             tableBody.innerHTML = '';
-            const t = translations[currentLang];
             
             const dailyData = {};
 
             orders.filter(o => o.status === 'completed').forEach(order => {
-                const date = new Date(order.timestamp).toLocaleDateString(currentLang === 'ar' ? 'ar-MA' : 'fr-FR');
+                const date = new Date(order.timestamp).toLocaleDateString('fr-FR');
                 if (!dailyData[date]) {
                     dailyData[date] = { totalRevenue: 0, itemsSold: {} };
                 }
                 dailyData[date].totalRevenue += order.totalPrice;
                 order.items.forEach(item => {
-                    const itemName = item[`name_${currentLang}`] || item.name_fr;
-                    dailyData[date].itemsSold[itemName] = (dailyData[date].itemsSold[itemName] || 0) + item.quantity;
+                    dailyData[date].itemsSold[item.name_fr] = (dailyData[date].itemsSold[item.name_fr] || 0) + item.quantity;
                 });
             });
 
             const sortedDates = Object.keys(dailyData).sort((a, b) => new Date(b) - new Date(a));
             
             if (sortedDates.length === 0) {
-                tableBody.innerHTML = `<tr><td colspan="3" class="p-4 text-center text-[var(--muted)]">${t.noDailySales}</td></tr>`;
+                tableBody.innerHTML = `<tr><td colspan="3" class="p-4 text-center text-[var(--muted)]">Aucune vente n'a encore été réalisée.</td></tr>`;
                 return;
             }
 
@@ -645,15 +441,14 @@
         }
         
         async function archiveAndDownloadLastMonth() {
-            const t = translations[currentLang];
-            const confirmation = confirm(t.archiveConfirm);
+            const confirmation = confirm("Êtes-vous sûr de vouloir archiver les données du mois dernier ? Toutes les commandes de ce mois seront supprimées après le téléchargement.");
             if (!confirmation) return;
 
             const now = new Date();
             const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
             const thisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
-            const lastMonthName = lastMonth.toLocaleString(currentLang === 'ar' ? 'ar-MA' : 'fr-FR', { month: 'long', year: 'numeric' });
+            const lastMonthName = lastMonth.toLocaleString('fr-FR', { month: 'long', year: 'numeric' });
             
             const ordersToArchive = allOrdersData.filter(order => {
                 const orderDate = new Date(order.timestamp);
@@ -661,7 +456,7 @@
             });
 
             if (ordersToArchive.length === 0) {
-                alert(t.noOrdersToArchive);
+                alert("Il n'y a pas de commandes terminées ou annulées du mois dernier à archiver.");
                 return;
             }
 
@@ -672,14 +467,14 @@
             };
             
             const itemCounts = ordersToArchive.filter(o => o.status === 'completed').reduce((acc, order) => {
-                order.items.forEach(item => { const itemName = item[`name_${currentLang}`] || item.name_fr; acc[itemName] = (acc[itemName] || 0) + item.quantity; });
+                order.items.forEach(item => { acc[item.name_fr] = (acc[item.name_fr] || 0) + item.quantity; });
                 return acc;
             }, {});
             const topItem = Object.entries(itemCounts).sort(([,a],[,b]) => b - a)[0];
-            summary.topItem = topItem ? topItem[0] : t.noItem;
+            summary.topItem = topItem ? topItem[0] : 'Aucun';
 
-            await downloadExcel(ordersToArchive, `${t.excelSheetName.replace(/\s/g, '-')}-${lastMonthName.replace(/\s/g, '-')}`);
-            await downloadPDF(ordersToArchive, `${t.pdfTitle.replace(/\s/g, '-')}-${lastMonthName.replace(/\s/g, '-')}`);
+            await downloadExcel(ordersToArchive, `archive-${lastMonthName}`);
+            await downloadPDF(ordersToArchive, `archive-${lastMonthName}`);
             
             const summaryKey = `${lastMonth.getFullYear()}-${(lastMonth.getMonth() + 1).toString().padStart(2, '0')}`;
             await database.ref(`monthly_summaries/${summaryKey}`).set(summary)
@@ -692,11 +487,11 @@
                     return database.ref().update(updates);
                 })
                 .then(() => {
-                    alert(t.archiveSuccess);
+                    alert("Archivage réussi ! Les rapports ont été téléchargés et les données du mois dernier ont été supprimées du système.");
                     window.location.reload();
                 })
                 .catch(error => {
-                    alert(t.archiveFailed);
+                    alert("L'archivage ou la suppression a échoué. Veuillez réessayer.");
                     console.error("Archiving failed:", error);
                 });
         }
