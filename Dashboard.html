@@ -11,6 +11,8 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
   <style>
     /* Same CSS variables as the menu page */
@@ -175,13 +177,27 @@
   
   <section id="system-management" class="mb-8">
     <h2 class="text-2xl font-bold mb-4">إدارة النظام</h2>
-    <div class="card p-5 flex flex-col md:flex-row items-center justify-between gap-4">
-      <div class="flex items-center gap-4 w-full md:w-auto">
+    <div class="card p-5 flex flex-wrap items-center justify-between gap-4">
+      <div class="flex flex-wrap gap-4">
         <button onclick="window.location.reload()" class="pill text-white bg-blue-600 hover:bg-blue-700 transition w-full md:w-auto">
             <i class="fas fa-sync-alt"></i> تحديث الصفحة
         </button>
         <button onclick="deleteAllOrders()" class="pill text-white bg-red-600 hover:bg-red-700 transition w-full md:w-auto">
             <i class="fas fa-trash-alt"></i> حذف جميع الطلبات
+        </button>
+      </div>
+      <div class="flex flex-wrap gap-4">
+        <button onclick="downloadCompletedOrders('xlsx')" class="pill text-white bg-green-600 hover:bg-green-700 transition w-full md:w-auto">
+            <i class="fas fa-file-excel"></i> مكتمل (Excel)
+        </button>
+        <button onclick="downloadCompletedOrders('pdf')" class="pill text-white bg-red-600 hover:bg-red-700 transition w-full md:w-auto">
+            <i class="fas fa-file-pdf"></i> مكتمل (PDF)
+        </button>
+        <button onclick="downloadCancelledOrders('xlsx')" class="pill text-white bg-orange-600 hover:bg-orange-700 transition w-full md:w-auto">
+            <i class="fas fa-file-excel"></i> ملغى (Excel)
+        </button>
+        <button onclick="downloadCancelledOrders('pdf')" class="pill text-white bg-red-600 hover:bg-red-700 transition w-full md:w-auto">
+            <i class="fas fa-file-pdf"></i> ملغى (PDF)
         </button>
       </div>
     </div>
@@ -441,6 +457,89 @@
         statElements.totalRevenue.textContent = `${totalRevenue.toFixed(2)} درهم`;
         statElements.totalOrders.textContent = totalOrders;
         statElements.avgOrderValue.textContent = `${avgOrderValue.toFixed(2)} درهم`;
+    }
+
+    // New functions for downloading data
+    function downloadCompletedOrders(format) {
+        const completedOrders = allOrdersData.filter(o => o.status === 'completed');
+        if (completedOrders.length === 0) {
+            alert("لا توجد طلبات مكتملة لتحميلها.");
+            return;
+        }
+        if (format === 'xlsx') {
+            downloadExcel(completedOrders, 'تقرير-الطلبات-المكتملة');
+        } else if (format === 'pdf') {
+            downloadPDF(completedOrders, 'تقرير-الطلبات-المكتملة');
+        }
+    }
+    
+    function downloadCancelledOrders(format) {
+        const cancelledOrders = allOrdersData.filter(o => o.status === 'cancelled');
+        if (cancelledOrders.length === 0) {
+            alert("لا توجد طلبات ملغاة لتحميلها.");
+            return;
+        }
+        if (format === 'xlsx') {
+            downloadExcel(cancelledOrders, 'تقرير-الطلبات-الملغاة');
+        } else if (format === 'pdf') {
+            downloadPDF(cancelledOrders, 'تقرير-الطلبات-الملغاة');
+        }
+    }
+    
+    function downloadExcel(orders, filename) {
+        const data = orders.map(order => ({
+            'معرف الطلب': order.id,
+            'رقم الطاولة': order.tableNumber,
+            'التاريخ': new Date(order.timestamp).toLocaleString('ar-MA'),
+            'الحالة': order.status,
+            'الإجمالي': order.totalPrice,
+            'الأصناف': order.items.map(item => `${item.name_ar} (x${item.quantity})`).join(', '),
+            'ملاحظات': order.notes || ''
+        }));
+        
+        const ws = XLSX.utils.json_to_sheet(data);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "الطلبات");
+        XLSX.writeFile(wb, `${filename}.xlsx`);
+    }
+
+    function downloadPDF(orders, filename) {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        
+        doc.setFont('Amiri', 'normal');
+        doc.setFontSize(16);
+        doc.text(filename, 100, 20, null, null, "center");
+
+        const data = orders.map(order => [
+            order.id,
+            order.tableNumber,
+            new Date(order.timestamp).toLocaleString('ar-MA'),
+            order.totalPrice,
+            order.items.map(item => `${item.name_ar} (x${item.quantity})`).join(', '),
+            order.notes || ''
+        ]);
+        
+        const headers = [['معرف الطلب', 'رقم الطاولة', 'التاريخ', 'الإجمالي', 'الأصناف', 'ملاحظات']];
+
+        doc.autoTable({
+            startY: 30,
+            head: headers,
+            body: data,
+            styles: { font: 'Amiri', fontStyle: 'normal' },
+            headStyles: { fillColor: [30, 41, 59] },
+            alternateRowStyles: { fillColor: [15, 23, 42] },
+            bodyStyles: { textColor: [226, 232, 240] },
+            theme: 'striped',
+            didDrawPage: function(data) {
+                // Footer
+                let str = "الصفحة " + doc.internal.getNumberOfPages()
+                doc.setFontSize(10)
+                doc.text(str, data.settings.margin.left, doc.internal.pageSize.height - 10)
+            }
+        });
+        
+        doc.save(`${filename}.pdf`);
     }
 
 </script>
