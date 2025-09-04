@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="fr" dir="ltr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>إحصائيات المبيعات - Imandou Food</title>
+    <title>Statistiques des ventes - Imandou Food</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -32,7 +32,7 @@
         }
         
         body {
-          font-family: 'Cairo', 'Inter', sans-serif;
+          font-family: 'Inter', sans-serif;
           background: var(--bg);
           color: var(--text);
         }
@@ -68,50 +68,74 @@
         canvas {
             max-height: 400px;
         }
+        .loading-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.9); display: flex;
+            justify-content: center; align-items: center; z-index: 50;
+            flex-direction: column;
+            text-align: center;
+        }
+        .spinner {
+          border: 4px solid rgba(255, 255, 255, 0.1);
+          border-top: 4px solid var(--accent);
+          border-radius: 50%;
+          width: 40px;
+          height: 40px;
+          animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body class="p-4 md:p-8">
 
+    <div id="loading-overlay" class="loading-overlay">
+      <div class="spinner"></div>
+      <p class="text-white mt-4 text-lg">Chargement des données...</p>
+    </div>
+
     <header class="flex justify-between items-center mb-8 pb-4 border-b border-slate-800">
         <div class="flex items-center gap-4">
-            <h1 class="text-3xl font-bold">إحصائيات المبيعات</h1>
-            <p class="text-[var(--muted)]">تحليل بيانات المبيعات</p>
+            <h1 class="text-3xl font-bold">Statistiques des ventes</h1>
+            <p class="text-[var(--muted)]">Analyse des données de vente</p>
         </div>
         <div class="flex items-center gap-4">
-            <a href="Dashboard.html" class="pill text-white hover:bg-slate-700 transition"><i class="fas fa-home"></i> لوحة التحكم</a>
-            <a href="modification.html" class="pill text-white hover:bg-slate-700 transition"><i class="fas fa-edit"></i> تعديل القائمة</a>
-            <a href="users.html" class="pill text-white hover:bg-slate-700 transition"><i class="fas fa-user-circle"></i> حسابي</a>
+            <a href="Dashboard.html" class="pill text-white hover:bg-slate-700 transition"><i class="fas fa-home"></i> Tableau de bord</a>
+            <a href="modification.html" class="pill text-white hover:bg-slate-700 transition"><i class="fas fa-edit"></i> Modifier le menu</a>
+            <a href="users.html" class="pill text-white hover:bg-slate-700 transition"><i class="fas fa-user-circle"></i> Mon compte</a>
         </div>
     </header>
 
     <section class="mb-8">
         <div class="flex flex-col md:flex-row items-center justify-between mb-4">
-            <h2 class="text-2xl font-bold">ملخص الإحصائيات</h2>
+            <h2 class="text-2xl font-bold">Résumé des statistiques</h2>
             <div class="flex gap-4 mt-4 md:mt-0">
-                <button onclick="downloadPDF(allOrdersData, 'تقرير-الإحصائيات')" class="pill text-white bg-red-600 hover:bg-red-700 transition">
-                    <i class="fas fa-file-pdf"></i> تحميل PDF
+                <button onclick="downloadPDF(allOrdersData, 'rapport-statistiques')" class="pill text-white bg-red-600 hover:bg-red-700 transition">
+                    <i class="fas fa-file-pdf"></i> Télécharger PDF
                 </button>
-                <button onclick="downloadExcel(allOrdersData, 'تقرير-الطلبات')" class="pill text-white bg-green-600 hover:bg-green-700 transition">
-                    <i class="fas fa-file-excel"></i> تحميل Excel
+                <button onclick="downloadExcel(allOrdersData, 'rapport-commandes')" class="pill text-white bg-green-600 hover:bg-green-700 transition">
+                    <i class="fas fa-file-excel"></i> Télécharger Excel
                 </button>
             </div>
         </div>
         
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div class="card p-6">
-                <h3 class="text-xl font-semibold mb-4 text-center">الإيرادات اليومية</h3>
+                <h3 class="text-xl font-semibold mb-4 text-center">Revenus quotidiens</h3>
                 <canvas id="dailyRevenueChart"></canvas>
             </div>
             <div class="card p-6">
-                <h3 class="text-xl font-semibold mb-4 text-center">الطلبات الشهرية</h3>
+                <h3 class="text-xl font-semibold mb-4 text-center">Commandes mensuelles</h3>
                 <canvas id="monthlyOrdersChart"></canvas>
             </div>
             <div class="card p-6">
-                <h3 class="text-xl font-semibold mb-4 text-center">إيرادات أيام الأسبوع</h3>
+                <h3 class="text-xl font-semibold mb-4 text-center">Revenus par jour de la semaine</h3>
                 <canvas id="weeklyRevenueChart"></canvas>
             </div>
             <div class="card p-6">
-                <h3 class="text-xl font-semibold mb-4 text-center">الأصناف الأكثر مبيعًا</h3>
+                <h3 class="text-xl font-semibold mb-4 text-center">Articles les plus vendus</h3>
                 <canvas id="popularItemsChart"></canvas>
             </div>
         </div>
@@ -119,19 +143,19 @@
 
     <section class="mb-8">
         <div class="flex flex-col md:flex-row items-center justify-between mb-4">
-            <h2 class="text-2xl font-bold">الحصيلة الشهرية</h2>
+            <h2 class="text-2xl font-bold">Résumé mensuel</h2>
             <button onclick="archiveAndDownloadLastMonth()" class="pill text-white bg-blue-600 hover:bg-blue-700 transition mt-4 md:mt-0">
-                <i class="fas fa-cloud-download-alt"></i> تحميل وأرشفة بيانات الشهر الماضي
+                <i class="fas fa-cloud-download-alt"></i> Archiver & télécharger le mois dernier
             </button>
         </div>
         <div class="card p-6 overflow-x-auto">
             <table class="w-full text-right table-auto">
                 <thead>
                     <tr class="border-b border-slate-700">
-                        <th class="p-4 text-sm font-semibold text-[var(--muted)]">الشهر</th>
-                        <th class="p-4 text-sm font-semibold text-[var(--muted)]">إجمالي الإيرادات</th>
-                        <th class="p-4 text-sm font-semibold text-[var(--muted)]">عدد الطلبات</th>
-                        <th class="p-4 text-sm font-semibold text-[var(--muted)]">أعلى صنف مبيعًا</th>
+                        <th class="p-4 text-sm font-semibold text-[var(--muted)]">Mois</th>
+                        <th class="p-4 text-sm font-semibold text-[var(--muted)]">Revenu total</th>
+                        <th class="p-4 text-sm font-semibold text-[var(--muted)]">Nombre de commandes</th>
+                        <th class="p-4 text-sm font-semibold text-[var(--muted)]">Article le plus vendu</th>
                     </tr>
                 </thead>
                 <tbody id="monthly-summary-table">
@@ -142,15 +166,15 @@
 
     <section class="mb-8">
         <div class="flex flex-col md:flex-row items-center justify-between mb-4">
-            <h2 class="text-2xl font-bold">حصيلة المبيعات اليومية</h2>
+            <h2 class="text-2xl font-bold">Résumé des ventes quotidiennes</h2>
         </div>
         <div class="card p-6 overflow-x-auto">
             <table class="w-full text-right table-auto">
                 <thead>
                     <tr class="border-b border-slate-700">
-                        <th class="p-4 text-sm font-semibold text-[var(--muted)]">التاريخ</th>
-                        <th class="p-4 text-sm font-semibold text-[var(--muted)]">إجمالي الإيرادات</th>
-                        <th class="p-4 text-sm font-semibold text-[var(--muted)]">الكميات المباعة</th>
+                        <th class="p-4 text-sm font-semibold text-[var(--muted)]">Date</th>
+                        <th class="p-4 text-sm font-semibold text-[var(--muted)]">Revenu total</th>
+                        <th class="p-4 text-sm font-semibold text-[var(--muted)]">Articles vendus</th>
                     </tr>
                 </thead>
                 <tbody id="daily-items-table">
@@ -195,6 +219,9 @@
         }
 
         function fetchOrders() {
+            const loadingOverlay = document.getElementById('loading-overlay');
+            loadingOverlay.style.display = 'flex';
+            
             database.ref('orders').once('value').then(snapshot => {
                 allOrdersData = [];
                 snapshot.forEach(childSnapshot => {
@@ -203,7 +230,11 @@
                 renderCharts(allOrdersData);
                 loadMonthlySummaries();
                 renderDailyItemsTable(allOrdersData);
-            }).catch(error => console.error("Error fetching orders:", error));
+                loadingOverlay.style.display = 'none';
+            }).catch(error => {
+                console.error("Error fetching orders:", error);
+                loadingOverlay.style.display = 'none';
+            });
         }
 
         function renderCharts(orders) {
@@ -215,42 +246,40 @@
                 acc[date] = (acc[date] || 0) + order.totalPrice;
                 return acc;
             }, {});
-            renderChart('dailyRevenueChart', Object.keys(dailyRevenue), Object.values(dailyRevenue), 'bar', 'الإيرادات اليومية', 'rgba(251, 191, 36, 0.6)');
+            renderChart('dailyRevenueChart', Object.keys(dailyRevenue), Object.values(dailyRevenue), 'bar', 'Revenus quotidiens', 'rgba(251, 191, 36, 0.6)');
 
             // Monthly Orders Data
             const monthlyOrders = completedOrders.reduce((acc, order) => {
-                const month = new Date(order.timestamp).toLocaleString('ar-MA', { month: 'long', year: 'numeric' });
+                const month = new Date(order.timestamp).toLocaleString('fr-FR', { month: 'long', year: 'numeric' });
                 acc[month] = (acc[month] || 0) + 1;
                 return acc;
             }, {});
-            renderChart('monthlyOrdersChart', Object.keys(monthlyOrders), Object.values(monthlyOrders), 'line', 'عدد الطلبات', 'rgba(16, 185, 129, 0.8)');
+            renderChart('monthlyOrdersChart', Object.keys(monthlyOrders), Object.values(monthlyOrders), 'line', 'Nombre de commandes', 'rgba(16, 185, 129, 0.8)');
             
             // Weekly Revenue Data
             const weeklyRevenue = completedOrders.reduce((acc, order) => {
-                const day = new Date(order.timestamp).toLocaleString('ar-MA', { weekday: 'long' });
+                const day = new Date(order.timestamp).toLocaleString('fr-FR', { weekday: 'long' });
                 acc[day] = (acc[day] || 0) + order.totalPrice;
                 return acc;
             }, {});
-            const daysOrder = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+            const daysOrder = ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'];
             const sortedWeeklyData = daysOrder.map(day => weeklyRevenue[day] || 0);
-            renderChart('weeklyRevenueChart', daysOrder, sortedWeeklyData, 'bar', 'الإيرادات اليومية', '#3b82f6');
-
+            renderChart('weeklyRevenueChart', daysOrder, sortedWeeklyData, 'bar', 'Revenus par jour de la semaine', '#3b82f6');
 
             // Popular Items Data
             const itemCounts = completedOrders.reduce((acc, order) => {
                 order.items.forEach(item => {
-                    acc[item.name_ar] = (acc[item.name_ar] || 0) + item.quantity;
+                    acc[item.name_fr] = (acc[item.name_fr] || 0) + item.quantity;
                 });
                 return acc;
             }, {});
             const sortedItems = Object.entries(itemCounts).sort(([,a], [,b]) => b - a).slice(0, 10);
-            renderChart('popularItemsChart', sortedItems.map(i => i[0]), sortedItems.map(i => i[1]), 'pie', 'الكمية المباعة', ['#fbbf24', '#10b981', '#3b82f6', '#ef4444', '#f59e0b', '#06b6d4', '#6366f1', '#a855f7', '#ec4899', '#f43f5e']);
+            renderChart('popularItemsChart', sortedItems.map(i => i[0]), sortedItems.map(i => i[1]), 'pie', 'Quantité vendue', ['#fbbf24', '#10b981', '#3b82f6', '#ef4444', '#f59e0b', '#06b6d4', '#6366f1', '#a855f7', '#ec4899', '#f43f5e']);
         }
 
         function renderChart(canvasId, labels, data, type, label, color) {
             const ctx = document.getElementById(canvasId).getContext('2d');
             
-            // Destroy previous chart instance if it exists
             if (window.myCharts && window.myCharts[canvasId]) {
                 window.myCharts[canvasId].destroy();
             }
@@ -295,33 +324,33 @@
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF({ orientation: 'landscape' });
             
-            doc.setFont('Amiri', 'normal');
+            doc.setFont('Helvetica', 'normal');
             doc.setFontSize(16);
-            doc.text("تقرير الإحصائيات", 148, 20, null, null, "center");
+            doc.text("Rapport des Statistiques", 148, 20, null, null, "center");
 
             const data = orders.map(order => [
                 order.id,
                 order.tableNumber,
-                new Date(order.timestamp).toLocaleString('ar-MA', {dateStyle: 'short', timeStyle: 'short'}),
+                new Date(order.timestamp).toLocaleString('fr-FR', {dateStyle: 'short', timeStyle: 'short'}),
                 order.status,
                 order.totalPrice,
-                order.items.map(item => `${item.name_ar} (x${item.quantity})`).join(', '),
+                order.items.map(item => `${item.name_fr} (x${item.quantity})`).join(', '),
                 order.notes || ''
             ]);
             
-            const headers = [['ID الطلب', 'رقم الطاولة', 'التاريخ', 'الحالة', 'الإجمالي', 'الأصناف', 'ملاحظات']];
+            const headers = [['ID Commande', 'N° de table', 'Date', 'Statut', 'Total', 'Articles', 'Notes']];
 
             doc.autoTable({
                 startY: 30,
                 head: headers,
                 body: data,
-                styles: { font: 'Amiri', fontStyle: 'normal' },
+                styles: { font: 'Helvetica', fontStyle: 'normal' },
                 headStyles: { fillColor: [30, 41, 59] },
                 alternateRowStyles: { fillColor: [15, 23, 42] },
                 bodyStyles: { textColor: [226, 232, 240] },
                 theme: 'striped',
                 didDrawPage: function(data) {
-                    let str = `صفحة ${doc.internal.getNumberOfPages()}`;
+                    let str = `Page ${doc.internal.getNumberOfPages()}`;
                     doc.setFontSize(10);
                     doc.text(str, data.settings.margin.left, doc.internal.pageSize.height - 10);
                 }
@@ -332,18 +361,18 @@
 
         function downloadExcel(orders, filename) {
             const data = orders.map(order => ({
-                'ID الطلب': order.id,
-                'رقم الطاولة': order.tableNumber,
-                'التاريخ': new Date(order.timestamp).toLocaleString('ar-MA', {dateStyle: 'short', timeStyle: 'short'}),
-                'الحالة': order.status,
-                'الإجمالي': order.totalPrice,
-                'الأصناف': order.items.map(item => `${item.name_ar} (x${item.quantity})`).join(', '),
-                'ملاحظات': order.notes || ''
+                'ID Commande': order.id,
+                'N° de table': order.tableNumber,
+                'Date': new Date(order.timestamp).toLocaleString('fr-FR', {dateStyle: 'short', timeStyle: 'short'}),
+                'Statut': order.status,
+                'Total': order.totalPrice,
+                'Articles': order.items.map(item => `${item.name_fr} (x${item.quantity})`).join(', '),
+                'Notes': order.notes || ''
             }));
             
             const ws = XLSX.utils.json_to_sheet(data);
             const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "تقرير الطلبات");
+            XLSX.utils.book_append_sheet(wb, ws, "Rapport des Commandes");
             XLSX.writeFile(wb, `${filename}.xlsx`);
         }
         
@@ -354,7 +383,7 @@
             const snapshot = await summariesRef.once('value');
 
             if (!snapshot.exists()) {
-                tableBody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-[var(--muted)]">لا توجد حصيلة شهرية مؤرشفة بعد.</td></tr>`;
+                tableBody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-[var(--muted)]">Aucun résumé mensuel n'est encore archivé.</td></tr>`;
                 return;
             }
 
@@ -364,9 +393,9 @@
                 row.className = 'border-b border-slate-800 last:border-b-0';
                 row.innerHTML = `
                     <td class="p-4">${summary.month}</td>
-                    <td class="p-4">${summary.totalRevenue.toFixed(2)} د.م</td>
+                    <td class="p-4">${summary.totalRevenue.toFixed(2)} MAD</td>
                     <td class="p-4">${summary.totalOrders}</td>
-                    <td class="p-4">${summary.topItem}</td>
+                    <td class="p-4">${summary.topItem || 'Aucun'}</td>
                 `;
                 tableBody.appendChild(row);
             });
@@ -379,20 +408,20 @@
             const dailyData = {};
 
             orders.filter(o => o.status === 'completed').forEach(order => {
-                const date = new Date(order.timestamp).toLocaleDateString('ar-MA');
+                const date = new Date(order.timestamp).toLocaleDateString('fr-FR');
                 if (!dailyData[date]) {
                     dailyData[date] = { totalRevenue: 0, itemsSold: {} };
                 }
                 dailyData[date].totalRevenue += order.totalPrice;
                 order.items.forEach(item => {
-                    dailyData[date].itemsSold[item.name_ar] = (dailyData[date].itemsSold[item.name_ar] || 0) + item.quantity;
+                    dailyData[date].itemsSold[item.name_fr] = (dailyData[date].itemsSold[item.name_fr] || 0) + item.quantity;
                 });
             });
 
             const sortedDates = Object.keys(dailyData).sort((a, b) => new Date(b) - new Date(a));
             
             if (sortedDates.length === 0) {
-                tableBody.innerHTML = `<tr><td colspan="3" class="p-4 text-center text-[var(--muted)]">لا توجد مبيعات مكتملة بعد.</td></tr>`;
+                tableBody.innerHTML = `<tr><td colspan="3" class="p-4 text-center text-[var(--muted)]">Aucune vente n'a encore été réalisée.</td></tr>`;
                 return;
             }
 
@@ -404,7 +433,7 @@
                 row.className = 'border-b border-slate-800 last:border-b-0';
                 row.innerHTML = `
                     <td class="p-4">${date}</td>
-                    <td class="p-4">${data.totalRevenue.toFixed(2)} د.م</td>
+                    <td class="p-4">${data.totalRevenue.toFixed(2)} MAD</td>
                     <td class="p-4">${itemsList}</td>
                 `;
                 tableBody.appendChild(row);
@@ -412,14 +441,14 @@
         }
         
         async function archiveAndDownloadLastMonth() {
-            const confirmation = confirm("هل أنت متأكد من أرشفة بيانات الشهر الماضي؟ سيتم حذف جميع الطلبات من هذا الشهر بعد تحميلها.");
+            const confirmation = confirm("Êtes-vous sûr de vouloir archiver les données du mois dernier ? Toutes les commandes de ce mois seront supprimées après le téléchargement.");
             if (!confirmation) return;
 
             const now = new Date();
             const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
             const thisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
-            const lastMonthName = lastMonth.toLocaleString('ar-MA', { month: 'long', year: 'numeric' });
+            const lastMonthName = lastMonth.toLocaleString('fr-FR', { month: 'long', year: 'numeric' });
             
             const ordersToArchive = allOrdersData.filter(order => {
                 const orderDate = new Date(order.timestamp);
@@ -427,11 +456,10 @@
             });
 
             if (ordersToArchive.length === 0) {
-                alert("لا توجد طلبات مكتملة أو ملغاة من الشهر الماضي لأرشفتها.");
+                alert("Il n'y a pas de commandes terminées ou annulées du mois dernier à archiver.");
                 return;
             }
 
-            // Calculate summary
             const summary = {
                 month: lastMonthName,
                 totalRevenue: ordersToArchive.filter(o => o.status === 'completed').reduce((sum, order) => sum + order.totalPrice, 0),
@@ -439,33 +467,31 @@
             };
             
             const itemCounts = ordersToArchive.filter(o => o.status === 'completed').reduce((acc, order) => {
-                order.items.forEach(item => { acc[item.name_ar] = (acc[item.name_ar] || 0) + item.quantity; });
+                order.items.forEach(item => { acc[item.name_fr] = (acc[item.name_fr] || 0) + item.quantity; });
                 return acc;
             }, {});
             const topItem = Object.entries(itemCounts).sort(([,a],[,b]) => b - a)[0];
-            summary.topItem = topItem ? topItem[0] : 'لا يوجد';
+            summary.topItem = topItem ? topItem[0] : 'Aucun';
 
-            // Generate downloads
-            await downloadExcel(ordersToArchive, `أرشيف-${lastMonthName}`);
-            await downloadPDF(ordersToArchive, `أرشيف-${lastMonthName}`);
+            await downloadExcel(ordersToArchive, `archive-${lastMonthName}`);
+            await downloadPDF(ordersToArchive, `archive-${lastMonthName}`);
             
-            // Save summary and delete orders
             const summaryKey = `${lastMonth.getFullYear()}-${(lastMonth.getMonth() + 1).toString().padStart(2, '0')}`;
             await database.ref(`monthly_summaries/${summaryKey}`).set(summary)
                 .then(() => {
                     console.log("Monthly summary saved successfully.");
                     const updates = {};
                     ordersToArchive.forEach(order => {
-                        updates[`/orders/${order.id}`] = null; // Set to null to remove
+                        updates[`/orders/${order.id}`] = null;
                     });
                     return database.ref().update(updates);
                 })
                 .then(() => {
-                    alert("تمت الأرشفة بنجاح! تم تحميل التقارير وحذف بيانات الشهر الماضي من النظام.");
+                    alert("Archivage réussi ! Les rapports ont été téléchargés et les données du mois dernier ont été supprimées du système.");
                     window.location.reload();
                 })
                 .catch(error => {
-                    alert("فشل في الأرشفة أو الحذف. يرجى المحاولة مرة أخرى.");
+                    alert("L'archivage ou la suppression a échoué. Veuillez réessayer.");
                     console.error("Archiving failed:", error);
                 });
         }
