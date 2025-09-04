@@ -251,10 +251,6 @@
             cartTotalEl: document.getElementById('cartTotal'),
             confirmOrderModal: document.getElementById('confirmOrderModal'),
         },
-        translations: {
-            'added_to_cart': { 'ar': 'تمت الإضافة!', 'en': 'Added!', 'fr': 'Ajouté!' },
-             // ... Add all other translations here ...
-        }
     };
     
     // --- Translations ---
@@ -500,7 +496,17 @@
         const order = {
             tableNumber: tableNumber,
             notes: document.getElementById('orderNotes').value,
-            items: appState.cart.map(item => ({ id: item.id, name_ar: item.name_ar, quantity: item.quantity, price: item.price })),
+            // Modified part: Send names in all languages
+            items: appState.cart.map(item => ({ 
+                id: item.id, 
+                quantity: item.quantity, 
+                price: item.price,
+                names: {
+                    ar: item.name_ar,
+                    en: item.name_en,
+                    fr: item.name_fr
+                }
+            })),
             totalPrice: appState.cart.reduce((sum, item) => sum + item.price * item.quantity, 0),
             timestamp: firebase.database.ServerValue.TIMESTAMP,
             status: 'new'
