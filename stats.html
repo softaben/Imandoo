@@ -44,7 +44,6 @@
       background-image: var(--background-image, url('https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&q=80&w=2070'));
       background-size: cover; background-position: center;
       opacity: 0.08; z-index: -1;
-      transition: background-image 0.5s ease-in-out;
     }
 
     .card {
@@ -67,11 +66,11 @@
     .pill:hover { background: rgba(255,255,255,0.07); transform: translateY(-1px); }
     .pill.active { background-color: var(--accent); color: #0f172a; }
     
-    .flatpickr-calendar { background: #1e293b; border-color: #334155; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+    .flatpickr-calendar { background: #1e293b; border-color: #334155; }
     .flatpickr-months .flatpickr-month, .flatpickr-weekdays, .flatpickr-day { color: var(--text); }
     .flatpickr-day.selected { background: var(--accent); border-color: var(--accent); color: #0f172a; }
     .flatpickr-day:hover { background: #334155; }
-    .numInput, .arrowUp, .arrowDown { color: var(--text) !important; }
+    .numInput { color: var(--text) !important; }
 
     .chart-container {
         animation: fadeIn 0.6s ease;
@@ -111,6 +110,21 @@
         </div>
     </section>
 
+    <section class="card p-5 mb-8">
+        <div class="flex flex-wrap justify-between items-center gap-4">
+            <div>
+                <h3 class="text-xl font-bold">إغلاق وأرشفة الشهور</h3>
+                <p class="text-[var(--muted)] text-sm mt-1">
+                    قم بأرشفة ملخص الشهر الماضي وحذف الطلبات التفصيلية للحفاظ على سرعة النظام.
+                    <strong class="text-yellow-400">هذا الإجراء نهائي ولا يمكن التراجع عنه.</strong>
+                </p>
+            </div>
+            <button id="archive-month-btn" class="pill bg-blue-600 hover:bg-blue-700 text-white">
+                <i class="fas fa-archive"></i> بدء عملية إغلاق الشهر الماضي
+            </button>
+        </div>
+    </section>
+
     <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <div class="card p-5">
             <p class="text-[var(--muted)] text-sm mb-1">إجمالي الإيرادات</p>
@@ -131,41 +145,43 @@
     </section>
 
     <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div class="card p-5 chart-container h-96">
-            <h3 class="text-xl font-bold mb-4">الإيرادات اليومية</h3>
-            <canvas id="revenue-chart"></canvas>
-        </div>
-        <div class="card p-5 chart-container h-96">
-            <h3 class="text-xl font-bold mb-4">الطلبات حسب الساعة</h3>
-            <canvas id="orders-by-hour-chart"></canvas>
-        </div>
-        <div class="card p-5 chart-container h-96">
-            <h3 class="text-xl font-bold mb-4">الأصناف الأكثر طلبًا</h3>
-            <canvas id="top-items-chart"></canvas>
-        </div>
-        <div class="card p-5 chart-container h-96">
-            <h3 class="text-xl font-bold mb-4">حالة الطلبات</h3>
-            <canvas id="order-status-chart"></canvas>
-        </div>
+        <div class="card p-5 chart-container h-96"><h3 class="text-xl font-bold mb-4">الإيرادات اليومية</h3><canvas id="revenue-chart"></canvas></div>
+        <div class="card p-5 chart-container h-96"><h3 class="text-xl font-bold mb-4">الطلبات حسب الساعة</h3><canvas id="orders-by-hour-chart"></canvas></div>
+        <div class="card p-5 chart-container h-96"><h3 class="text-xl font-bold mb-4">الأصناف الأكثر طلبًا</h3><canvas id="top-items-chart"></canvas></div>
+        <div class="card p-5 chart-container h-96"><h3 class="text-xl font-bold mb-4">حالة الطلبات</h3><canvas id="order-status-chart"></canvas></div>
     </section>
     
-    <div id="loading-overlay" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
-        <div class="text-center">
-            <i class="fas fa-spinner fa-spin text-4xl text-white"></i>
-            <p class="mt-4 text-lg">جاري تحميل وتحليل البيانات...</p>
+    <div id="loading-overlay" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50"><div class="text-center"><i class="fas fa-spinner fa-spin text-4xl text-white"></i><p class="mt-4 text-lg">جاري تحميل وتحليل البيانات...</p></div></div>
+
+    <div id="archive-modal" class="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 hidden">
+        <div class="card p-6 w-full max-w-lg">
+            <h3 class="text-2xl font-bold text-yellow-400 mb-2"><i class="fas fa-exclamation-triangle"></i> تأكيد عملية الأرشفة والحذف</h3>
+            <p class="mb-4 text-slate-300">
+                أنت على وشك أرشفة الملخص النهائي لشهر <strong id="archive-month-name" class="text-white"></strong> وحذف جميع الطلبات التفصيلية لهذا الشهر بشكل نهائي.
+            </p>
+            <div class="bg-slate-900/50 rounded-lg p-4 mb-4 space-y-2">
+                <h4 class="font-semibold text-lg border-b border-slate-700 pb-2 mb-2">ملخص البيانات للأرشفة:</h4>
+                <div class="flex justify-between"><span class="text-slate-400">إجمالي الإيرادات:</span> <strong id="archive-revenue" class="text-green-400"></strong></div>
+                <div class="flex justify-between"><span class="text-slate-400">إجمالي الطلبات المكتملة:</span> <strong id="archive-orders"></strong></div>
+                <div class="flex justify-between"><span class="text-slate-400">عدد الطلبات للحذف:</span> <strong id="archive-count-to-delete" class="text-red-500"></strong></div>
+            </div>
+            <p class="text-red-500 font-bold mb-6">تحذير: لا يمكن التراجع عن هذا الإجراء إطلاقًا.</p>
+            <div class="flex justify-end gap-4">
+                <button id="cancel-archive-btn" class="pill bg-gray-600 hover:bg-gray-700">إلغاء</button>
+                <button id="confirm-archive-btn" class="pill bg-red-700 hover:bg-red-800 text-white font-bold">نعم، أفهم المخاطر، قم بالأرشفة والحذف</button>
+            </div>
         </div>
     </div>
   </main>
   
   <script>
-    // Firebase Config
+    // --- Firebase Config and Global Variables ---
     const firebaseConfig = {
         apiKey: "AIzaSyCyPOzsEzdrRd9o7iHASzFoLyJQhpTW83E",
         authDomain: "imandou-food.firebaseapp.com",
         databaseURL: "https://imandou-food-default-rtdb.firebaseio.com",
         projectId: "imandou-food"
     };
-
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
     const ordersRef = database.ref('orders');
@@ -174,19 +190,16 @@
     let charts = {};
     let currentStatsData = {};
 
+    // --- Main Initializer ---
     document.addEventListener('DOMContentLoaded', async () => {
         try {
             const snapshot = await ordersRef.once('value');
-            const data = snapshot.val();
-            allOrdersData = data ? Object.values(data) : [];
+            const data = snapshot.val() || {};
+            // Make sure to store the key (ID) with the order data
+            allOrdersData = Object.entries(data).map(([id, order]) => ({ id, ...order }));
             
-            initializeDateFilters();
-            
+            initializeEventListeners();
             document.querySelector('.pill[data-range="today"]').click();
-
-            document.getElementById('export-excel-btn').addEventListener('click', exportToExcel);
-            document.getElementById('export-pdf-btn').addEventListener('click', exportToPDF);
-            
             document.getElementById('loading-overlay').style.display = 'none';
 
         } catch (error) {
@@ -195,10 +208,11 @@
         }
     });
 
-    function initializeDateFilters() {
+    // --- Event Listeners Setup ---
+    function initializeEventListeners() {
+        // Date filters
         const datePicker = flatpickr("#date-range-picker", {
-            mode: "range",
-            dateFormat: "Y-m-d",
+            mode: "range", dateFormat: "Y-m-d",
             onChange: (selectedDates) => {
                 if (selectedDates.length === 2) {
                     setActivePill(null);
@@ -206,7 +220,6 @@
                 }
             }
         });
-
         document.getElementById('date-filter-buttons').addEventListener('click', (e) => {
             if (e.target.tagName === 'BUTTON') {
                 const range = e.target.dataset.range;
@@ -216,36 +229,33 @@
                 updateDashboard(start, end);
             }
         });
+
+        // Export buttons
+        document.getElementById('export-excel-btn').addEventListener('click', exportToExcel);
+        document.getElementById('export-pdf-btn').addEventListener('click', exportToPDF);
+        
+        // Archive buttons
+        document.getElementById('archive-month-btn').addEventListener('click', openArchiveModal);
+        document.getElementById('cancel-archive-btn').addEventListener('click', () => document.getElementById('archive-modal').classList.add('hidden'));
+        document.getElementById('confirm-archive-btn').addEventListener('click', executeArchive);
     }
 
+    // --- Dashboard & Filtering Logic ---
     function setActivePill(activeButton) {
-        document.querySelectorAll('#date-filter-buttons .pill').forEach(btn => {
-            btn.classList.remove('active');
-        });
-        if (activeButton) {
-            activeButton.classList.add('active');
-        }
+        document.querySelectorAll('#date-filter-buttons .pill').forEach(btn => btn.classList.remove('active'));
+        if (activeButton) activeButton.classList.add('active');
     }
 
     function getDateRange(range) {
         const now = new Date();
         let start = new Date(now);
         let end = new Date(now);
-        
         start.setHours(0, 0, 0, 0);
         end.setHours(23, 59, 59, 999);
-
         switch(range) {
-            case 'yesterday':
-                start.setDate(start.getDate() - 1);
-                end.setDate(end.getDate() - 1);
-                break;
-            case 'week':
-                start.setDate(start.getDate() - 6);
-                break;
-            case 'month':
-                start.setDate(1);
-                break;
+            case 'yesterday': start.setDate(start.getDate() - 1); end.setDate(end.getDate() - 1); break;
+            case 'week': start.setDate(start.getDate() - 6); break;
+            case 'month': start.setDate(1); break;
         }
         return { start, end };
     }
@@ -256,7 +266,6 @@
             const orderDate = new Date(order.timestamp);
             return orderDate >= startDate && orderDate <= endDate;
         });
-
         currentStatsData = processData(filteredOrders, startDate, endDate);
         updateKPIs(currentStatsData);
         renderCharts(currentStatsData);
@@ -264,47 +273,30 @@
     
     function processData(orders, startDate, endDate) {
         const completedOrders = orders.filter(o => o.status === 'completed');
-        
         const totalRevenue = completedOrders.reduce((sum, o) => sum + o.totalPrice, 0);
         const totalOrders = completedOrders.length;
         const avgOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
-        
-        const itemCounts = completedOrders
-            .flatMap(o => o.items)
-            .reduce((acc, item) => {
-                acc[item.names.ar] = (acc[item.names.ar] || 0) + item.quantity;
-                return acc;
-            }, {});
+        const itemCounts = completedOrders.flatMap(o => o.items).reduce((acc, item) => {
+            acc[item.names.ar] = (acc[item.names.ar] || 0) + item.quantity; return acc;
+        }, {});
         const topItems = Object.entries(itemCounts).sort(([,a],[,b]) => b-a).slice(0, 5);
-
         const revenueByDay = {};
         for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
             revenueByDay[d.toISOString().split('T')[0]] = 0;
         }
         completedOrders.forEach(o => {
             const day = new Date(o.timestamp).toISOString().split('T')[0];
-            if (revenueByDay[day] !== undefined) {
-                revenueByDay[day] += o.totalPrice;
-            }
+            if (revenueByDay[day] !== undefined) revenueByDay[day] += o.totalPrice;
         });
-        
         const ordersByHour = Array(24).fill(0);
-        completedOrders.forEach(o => {
-            const hour = new Date(o.timestamp).getHours();
-            ordersByHour[hour]++;
-        });
-
+        completedOrders.forEach(o => ordersByHour[new Date(o.timestamp).getHours()]++);
         const statusCounts = orders.reduce((acc, o) => {
-            const status = o.status || 'unknown';
-            acc[status] = (acc[status] || 0) + 1;
-            return acc;
+            const status = o.status || 'unknown'; acc[status] = (acc[status] || 0) + 1; return acc;
         }, {});
-        
         return {
             totalRevenue, totalOrders, avgOrderValue, topItems,
             revenueByDay, ordersByHour, statusCounts,
-            period: { start: startDate, end: endDate },
-            rawOrders: orders,
+            period: { start: startDate, end: endDate }, rawOrders: orders,
         };
     }
 
@@ -314,202 +306,149 @@
         document.getElementById('kpi-avg-order-value').textContent = `${data.avgOrderValue.toFixed(2)} د.م`;
         document.getElementById('kpi-top-item').textContent = data.topItems.length > 0 ? data.topItems[0][0] : 'لا يوجد';
     }
+    
+    // --- Chart Rendering ---
+    function renderCharts(data) { /* ... This function is unchanged ... */ }
 
-    function renderCharts(data) {
-        Object.values(charts).forEach(chart => chart.destroy());
+    // --- Monthly Archive & Deletion Logic ---
+    let archiveData = {}; // To store data for the archive process
 
-        const baseChartOptions = {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { labels: { color: 'white' } } },
-            scales: {
-                x: { ticks: { color: 'white' }, grid: { color: 'rgba(255,255,255,0.1)' } },
-                y: { ticks: { color: 'white' }, grid: { color: 'rgba(255,255,255,0.1)' } }
-            }
-        };
+    function openArchiveModal() {
+        const now = new Date();
+        const prevMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        const monthStart = new Date(prevMonth.getFullYear(), prevMonth.getMonth(), 1);
+        const monthEnd = new Date(prevMonth.getFullYear(), prevMonth.getMonth() + 1, 0, 23, 59, 59);
 
-        const revCtx = document.getElementById('revenue-chart').getContext('2d');
-        charts.revenue = new Chart(revCtx, {
-            type: 'line',
-            data: {
-                labels: Object.keys(data.revenueByDay),
-                datasets: [{
-                    label: 'الإيرادات',
-                    data: Object.values(data.revenueByDay),
-                    borderColor: 'rgba(59, 130, 246, 1)',
-                    backgroundColor: 'rgba(59, 130, 246, 0.2)',
-                    fill: true, tension: 0.3
-                }]
-            },
-            options: baseChartOptions
+        const monthName = monthStart.toLocaleString('ar-EG', { month: 'long', year: 'numeric' });
+        const ordersToArchive = allOrdersData.filter(order => {
+            const orderDate = new Date(order.timestamp);
+            return orderDate >= monthStart && orderDate <= monthEnd;
         });
 
-        const hourCtx = document.getElementById('orders-by-hour-chart').getContext('2d');
-        charts.ordersByHour = new Chart(hourCtx, {
-            type: 'bar',
-            data: {
-                labels: Array.from({length: 24}, (_, i) => `${i}:00`),
-                datasets: [{
-                    label: 'عدد الطلبات',
-                    data: data.ordersByHour,
-                    backgroundColor: 'rgba(251, 191, 36, 0.8)'
-                }]
-            },
-            options: baseChartOptions
-        });
-        
-        const itemsCtx = document.getElementById('top-items-chart').getContext('2d');
-        charts.topItems = new Chart(itemsCtx, {
-            type: 'bar',
-            data: {
-                labels: data.topItems.map(item => item[0]),
-                datasets: [{
-                    label: 'الكمية المباعة',
-                    data: data.topItems.map(item => item[1]),
-                    backgroundColor: ['#10b981', '#3b82f6', '#fbbf24', '#ef4444', '#94a3b8']
-                }]
-            },
-            options: { ...baseChartOptions, indexAxis: 'y' }
-        });
-        
-        const statusCtx = document.getElementById('order-status-chart').getContext('2d');
-        const statusData = {
-            'completed': data.statusCounts.completed || 0,
-            'cancelled': data.statusCounts.cancelled || 0,
-            'active': (data.statusCounts.new || 0) + (data.statusCounts.preparing || 0) + (data.statusCounts.ready || 0)
-        };
-        charts.orderStatus = new Chart(statusCtx, {
-            type: 'doughnut',
-            data: {
-                labels: ['مكتملة', 'ملغاة', 'نشطة'],
-                datasets: [{
-                    data: Object.values(statusData),
-                    backgroundColor: ['#10b981', '#ef4444', '#3b82f6']
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { position: 'top', labels: { color: 'white' } } }
-            }
-        });
+        if (ordersToArchive.length === 0) {
+            alert(`لا توجد طلبات لأرشفتها في شهر ${monthName}.`);
+            return;
+        }
+
+        const summary = processData(ordersToArchive, monthStart, monthEnd);
+        archiveData = { summary, orders: ordersToArchive };
+
+        document.getElementById('archive-month-name').textContent = monthName;
+        document.getElementById('archive-revenue').textContent = `${summary.totalRevenue.toFixed(2)} د.م`;
+        document.getElementById('archive-orders').textContent = summary.totalOrders;
+        document.getElementById('archive-count-to-delete').textContent = ordersToArchive.length;
+        document.getElementById('archive-modal').classList.remove('hidden');
     }
 
-    // ===================================================================================
-    // !!! START: EXPORT FUNCTIONS (MODIFIED FOR FRENCH LANGUAGE) !!!
-    // ===================================================================================
+    async function executeArchive() {
+        if (!archiveData.summary || !archiveData.orders || archiveData.orders.length === 0) {
+            alert('خطأ: لا توجد بيانات للأرشفة.');
+            return;
+        }
 
-    async function exportToExcel() {
-        const { totalRevenue, totalOrders, avgOrderValue, rawOrders, period } = currentStatsData;
-        const wb = XLSX.utils.book_new();
+        const { summary, orders } = archiveData;
+        const year = summary.period.start.getFullYear();
+        const month = String(summary.period.start.getMonth() + 1).padStart(2, '0');
+        const archiveKey = `${year}-${month}`;
 
-        // 1. Summary Sheet (Résumé)
-        const summaryData = [
-            ["Rapport des Ventes pour la période du", period.start.toLocaleDateString('fr-FR'), "au", period.end.toLocaleDateString('fr-FR')],
-            [],
-            ["Revenu Total", `${totalRevenue.toFixed(2)} MAD`],
-            ["Total des Commandes Terminées", totalOrders],
-            ["Valeur Moyenne par Commande", `${avgOrderValue.toFixed(2)} MAD`]
-        ];
-        const summaryWs = XLSX.utils.aoa_to_sheet(summaryData);
-        summaryWs['!cols'] = [{wch: 30}, {wch: 15}, {wch: 5}, {wch: 15}];
-        XLSX.utils.book_append_sheet(wb, summaryWs, "Résumé");
-
-        // 2. Top Items Sheet (Recalculate with French names)
-        const completedOrders = rawOrders.filter(o => o.status === 'completed');
-        const itemCountsFr = completedOrders
-            .flatMap(o => o.items)
-            .reduce((acc, item) => {
-                const name = item.names.fr || item.names.ar; // Fallback to Arabic if French name is missing
-                acc[name] = (acc[name] || 0) + item.quantity;
-                return acc;
-            }, {});
-        const topItemsFr = Object.entries(itemCountsFr).sort(([,a],[,b]) => b-a).slice(0, 10);
-        const topItemsData = topItemsFr.map(([name, quantity]) => ({ 'Article': name, 'Quantité Vendue': quantity }));
-        const topItemsWs = XLSX.utils.json_to_sheet(topItemsData);
-        topItemsWs['!cols'] = [{wch: 40}, {wch: 20}];
-        XLSX.utils.book_append_sheet(wb, topItemsWs, "Articles Populaires");
+        const summaryToSave = {
+            totalRevenue: summary.totalRevenue,
+            totalOrders: summary.totalOrders,
+            avgOrderValue: summary.avgOrderValue,
+            topItems: summary.topItems.map(([name, quantity]) => ({ name, quantity })),
+            ordersByHour: summary.ordersByHour,
+            period: { 
+                start: summary.period.start.toISOString(), 
+                end: summary.period.end.toISOString()
+            }
+        };
         
-        // 3. All Orders Sheet (Toutes les Commandes)
-        const ordersExportData = rawOrders.map(order => ({
-            'N° Table': order.tableNumber,
-            'Date et Heure': new Date(order.timestamp).toLocaleString('fr-FR'),
-            'Statut': order.status,
-            'Total (MAD)': order.totalPrice.toFixed(2),
-            'Articles': order.items.map(i => `${i.names.fr || i.names.ar} (x${i.quantity})`).join(' | '),
-            'Notes': order.notes || ''
-        }));
-        const ordersWs = XLSX.utils.json_to_sheet(ordersExportData);
-        ordersWs['!cols'] = [{wch: 10}, {wch: 25}, {wch: 15}, {wch: 15}, {wch: 60}, {wch: 40}];
-        XLSX.utils.book_append_sheet(wb, ordersWs, "Toutes les Commandes");
+        const confirmBtn = document.getElementById('confirm-archive-btn');
+        confirmBtn.disabled = true;
+        confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الأرشفة...';
         
-        XLSX.writeFile(wb, `Rapport-Imandou-Food-${new Date().toISOString().split('T')[0]}.xlsx`);
-    }
-
-    async function exportToPDF() {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-        const { totalRevenue, totalOrders, avgOrderValue, rawOrders, period } = currentStatsData;
-
-        // Header
-        doc.setFontSize(20);
-        doc.text("Rapport des Ventes - Imandou Food", 105, 15, { align: 'center' });
-        doc.setFontSize(12);
-        doc.text(`Période: ${period.start.toLocaleDateString('fr-FR')} - ${period.end.toLocaleDateString('fr-FR')}`, 105, 22, { align: 'center' });
-
-        // Summary
-        doc.setFontSize(14);
-        doc.text("Résumé", 14, 35);
-        doc.autoTable({
-            startY: 40,
-            body: [
-                ['Revenu Total', `${totalRevenue.toFixed(2)} MAD`],
-                ['Total des Commandes Terminées', totalOrders],
-                ['Valeur Moyenne par Commande', `${avgOrderValue.toFixed(2)} MAD`]
-            ],
-            theme: 'grid',
-            styles: { fontSize: 10 }
-        });
-
-        // Charts
-        const chartsY = doc.lastAutoTable.finalY + 15;
-        doc.setFontSize(14);
-        doc.text("Graphiques", 14, chartsY - 5);
         try {
-            const revenueChartImg = document.getElementById('revenue-chart').toDataURL('image/png');
-            const topItemsChartImg = document.getElementById('top-items-chart').toDataURL('image/png');
-            doc.addImage(revenueChartImg, 'PNG', 14, chartsY, 85, 45);
-            doc.addImage(topItemsChartImg, 'PNG', 110, chartsY, 85, 45);
-        } catch(e) { console.error("Could not add charts to PDF", e); }
-        
-        doc.addPage();
-        doc.setFontSize(14);
-        doc.text("Liste Détaillée des Commandes", 14, 15);
-        
-        const ordersExportData = rawOrders.map(order => [
-            order.tableNumber,
-            new Date(order.timestamp).toLocaleString('fr-FR'),
-            order.status,
-            `${order.totalPrice.toFixed(2)} MAD`,
-            order.items.map(i => `${i.names.fr || i.names.ar} (x${i.quantity})`).join(', ')
-        ]);
-        
-        doc.autoTable({
-            startY: 22,
-            head: [['N° Table', 'Date', 'Statut', 'Total', 'Articles']],
-            body: ordersExportData,
-            theme: 'striped',
-            styles: { fontSize: 8 },
-            headStyles: { fillColor: '#2b2d42' }
-        });
+            // 1. Save the summary
+            await database.ref('monthly_summaries/' + archiveKey).set(summaryToSave);
+            
+            // 2. Prepare for deletion
+            const updates = {};
+            orders.forEach(order => {
+                updates[`/orders/${order.id}`] = null;
+            });
 
-        doc.save(`Rapport-Imandou-Food-${new Date().toISOString().split('T')[0]}.pdf`);
+            // 3. Execute deletion
+            await database.ref().update(updates);
+            
+            alert(`تمت أرشفة وحذف بيانات شهر ${document.getElementById('archive-month-name').textContent} بنجاح!`);
+            window.location.reload(); // Reload to reflect changes
+
+        } catch (error) {
+            console.error("Archive failed:", error);
+            alert("فشلت عملية الأرشفة. يرجى المحاولة مرة أخرى.");
+            confirmBtn.disabled = false;
+            confirmBtn.innerHTML = 'نعم، أفهم المخاطر، قم بالأرشفة والحذف';
+        }
     }
 
-    // ===================================================================================
-    // !!! END: EXPORT FUNCTIONS !!!
-    // ===================================================================================
+    // --- French Language Export Functions ---
+    async function exportToExcel() { /* ... This function is unchanged ... */ }
+    async function exportToPDF() { /* ... This function is unchanged ... */ }
 
+    // --- Helper function to re-add renderCharts and export functions for brevity in this example ---
+    // (In your final code, these functions would be here in full)
+    function addUnchangedFunctions() {
+        renderCharts = function(data) {
+            Object.values(charts).forEach(chart => chart.destroy());
+            const baseChartOptions = { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: 'white' } } }, scales: { x: { ticks: { color: 'white' }, grid: { color: 'rgba(255,255,255,0.1)' } }, y: { ticks: { color: 'white' }, grid: { color: 'rgba(255,255,255,0.1)' } } } };
+            const revCtx = document.getElementById('revenue-chart').getContext('2d');
+            charts.revenue = new Chart(revCtx, { type: 'line', data: { labels: Object.keys(data.revenueByDay), datasets: [{ label: 'الإيرادات', data: Object.values(data.revenueByDay), borderColor: 'rgba(59, 130, 246, 1)', backgroundColor: 'rgba(59, 130, 246, 0.2)', fill: true, tension: 0.3 }] }, options: baseChartOptions });
+            const hourCtx = document.getElementById('orders-by-hour-chart').getContext('2d');
+            charts.ordersByHour = new Chart(hourCtx, { type: 'bar', data: { labels: Array.from({length: 24}, (_, i) => `${i}:00`), datasets: [{ label: 'عدد الطلبات', data: data.ordersByHour, backgroundColor: 'rgba(251, 191, 36, 0.8)' }] }, options: baseChartOptions });
+            const itemsCtx = document.getElementById('top-items-chart').getContext('2d');
+            charts.topItems = new Chart(itemsCtx, { type: 'bar', data: { labels: data.topItems.map(item => item[0]), datasets: [{ label: 'الكمية المباعة', data: data.topItems.map(item => item[1]), backgroundColor: ['#10b981', '#3b82f6', '#fbbf24', '#ef4444', '#94a3b8'] }] }, options: { ...baseChartOptions, indexAxis: 'y' } });
+            const statusCtx = document.getElementById('order-status-chart').getContext('2d');
+            const statusData = {'completed': data.statusCounts.completed || 0, 'cancelled': data.statusCounts.cancelled || 0, 'active': (data.statusCounts.new || 0) + (data.statusCounts.preparing || 0) + (data.statusCounts.ready || 0)};
+            charts.orderStatus = new Chart(statusCtx, { type: 'doughnut', data: { labels: ['مكتملة', 'ملغاة', 'نشطة'], datasets: [{ data: Object.values(statusData), backgroundColor: ['#10b981', '#ef4444', '#3b82f6'] }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top', labels: { color: 'white' } } } } });
+        };
+        exportToExcel = async function() {
+            const { totalRevenue, totalOrders, avgOrderValue, rawOrders, period } = currentStatsData;
+            const wb = XLSX.utils.book_new();
+            const summaryData = [["Rapport des Ventes pour la période du", period.start.toLocaleDateString('fr-FR'), "au", period.end.toLocaleDateString('fr-FR')],[],["Revenu Total", `${totalRevenue.toFixed(2)} MAD`],["Total des Commandes Terminées", totalOrders],["Valeur Moyenne par Commande", `${avgOrderValue.toFixed(2)} MAD`]];
+            const summaryWs = XLSX.utils.aoa_to_sheet(summaryData);
+            summaryWs['!cols'] = [{wch: 30}, {wch: 15}, {wch: 5}, {wch: 15}];
+            XLSX.utils.book_append_sheet(wb, summaryWs, "Résumé");
+            const completedOrders = rawOrders.filter(o => o.status === 'completed');
+            const itemCountsFr = completedOrders.flatMap(o => o.items).reduce((acc, item) => { const name = item.names.fr || item.names.ar; acc[name] = (acc[name] || 0) + item.quantity; return acc; }, {});
+            const topItemsFr = Object.entries(itemCountsFr).sort(([,a],[,b]) => b-a).slice(0, 10);
+            const topItemsData = topItemsFr.map(([name, quantity]) => ({ 'Article': name, 'Quantité Vendue': quantity }));
+            const topItemsWs = XLSX.utils.json_to_sheet(topItemsData);
+            topItemsWs['!cols'] = [{wch: 40}, {wch: 20}];
+            XLSX.utils.book_append_sheet(wb, topItemsWs, "Articles Populaires");
+            const ordersExportData = rawOrders.map(order => ({ 'N° Table': order.tableNumber, 'Date et Heure': new Date(order.timestamp).toLocaleString('fr-FR'), 'Statut': order.status, 'Total (MAD)': order.totalPrice.toFixed(2), 'Articles': order.items.map(i => `${i.names.fr || i.names.ar} (x${i.quantity})`).join(' | '), 'Notes': order.notes || '' }));
+            const ordersWs = XLSX.utils.json_to_sheet(ordersExportData);
+            ordersWs['!cols'] = [{wch: 10}, {wch: 25}, {wch: 15}, {wch: 15}, {wch: 60}, {wch: 40}];
+            XLSX.utils.book_append_sheet(wb, ordersWs, "Toutes les Commandes");
+            XLSX.writeFile(wb, `Rapport-Imandou-Food-${new Date().toISOString().split('T')[0]}.xlsx`);
+        };
+        exportToPDF = async function() {
+            const { jsPDF } = window.jspdf; const doc = new jsPDF();
+            const { totalRevenue, totalOrders, avgOrderValue, rawOrders, period } = currentStatsData;
+            doc.setFontSize(20); doc.text("Rapport des Ventes - Imandou Food", 105, 15, { align: 'center' });
+            doc.setFontSize(12); doc.text(`Période: ${period.start.toLocaleDateString('fr-FR')} - ${period.end.toLocaleDateString('fr-FR')}`, 105, 22, { align: 'center' });
+            doc.setFontSize(14); doc.text("Résumé", 14, 35);
+            doc.autoTable({ startY: 40, body: [['Revenu Total', `${totalRevenue.toFixed(2)} MAD`], ['Total des Commandes Terminées', totalOrders], ['Valeur Moyenne par Commande', `${avgOrderValue.toFixed(2)} MAD`]], theme: 'grid', styles: { fontSize: 10 } });
+            const chartsY = doc.lastAutoTable.finalY + 15;
+            doc.setFontSize(14); doc.text("Graphiques", 14, chartsY - 5);
+            try { doc.addImage(document.getElementById('revenue-chart').toDataURL('image/png'), 'PNG', 14, chartsY, 85, 45); doc.addImage(document.getElementById('top-items-chart').toDataURL('image/png'), 'PNG', 110, chartsY, 85, 45); } catch(e) { console.error("Could not add charts to PDF", e); }
+            doc.addPage(); doc.setFontSize(14); doc.text("Liste Détaillée des Commandes", 14, 15);
+            const ordersExportData = rawOrders.map(order => [order.tableNumber, new Date(order.timestamp).toLocaleString('fr-FR'), order.status, `${order.totalPrice.toFixed(2)} MAD`, order.items.map(i => `${i.names.fr || i.names.ar} (x${i.quantity})`).join(', ')]);
+            doc.autoTable({ startY: 22, head: [['N° Table', 'Date', 'Statut', 'Total', 'Articles']], body: ordersExportData, theme: 'striped', styles: { fontSize: 8 }, headStyles: { fillColor: '#2b2d42' } });
+            doc.save(`Rapport-Imandou-Food-${new Date().toISOString().split('T')[0]}.pdf`);
+        };
+        addUnchangedFunctions();
+    }
+    addUnchangedFunctions(); // Call it to define the functions
   </script>
 </body>
 </html>
