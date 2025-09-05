@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تحميل الصور على Firebase</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f2f5;
+            margin: 0;
+            direction: rtl;
+            text-align: right;
+        }
+
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 90%;
+            max-width: 500px;
+            border: 1px solid #e0e0e0;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 25px;
+            font-size: 1.8rem;
+        }
+
+        input[type="file"] {
+            display: block;
+            margin: 0 auto 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            width: 100%;
+            box-sizing: border-box;
+            background-color: #f9f9f9;
+        }
+
+        #upload-button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: bold;
+            transition: background-color 0.3s, transform 0.1s;
+        }
+
+        #upload-button:hover {
+            background-color: #45a049;
+            transform: translateY(-2px);
+        }
+
+        .result-box {
+            margin-top: 25px;
+            padding: 20px;
+            background-color: #e9f5e9;
+            border-radius: 8px;
+            border: 1px solid #c8e6c9;
+            word-wrap: break-word;
+            display: none;
+        }
+
+        .result-box p {
+            margin: 0 0 10px 0;
+            color: #2e7d32;
+            font-weight: bold;
+        }
+
+        #result-link {
+            display: block;
+            color: #1976D2;
+            text-decoration: none;
+            font-size: 1rem;
+            direction: ltr; /* Ensure LTR for the link */
+            text-align: left;
+            padding: 8px;
+            background-color: #e3f2fd;
+            border-radius: 4px;
+        }
+
+        #result-link:hover {
+            text-decoration: underline;
+        }
+
+        #image-preview {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin-top: 15px;
+            border: 2px solid #ddd;
+        }
+
+        .error-message {
+            color: #D32F2F;
+            margin-top: 20px;
+            font-weight: bold;
+            display: none;
+        }
+
+        .copy-button {
+            background-color: #1976D2;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            margin-top: 15px;
+        }
+
+        .copy-button:hover {
+            background-color: #1565C0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>تحميل صورة إلى Firebase Storage</h1>
+        <input type="file" id="image-upload" accept="image/*">
+        <button id="upload-button">رفع الصورة</button>
+        <div class="result-box">
+            <p>تم الرفع بنجاح! الرابط:</p>
+            <a id="result-link" href="#" target="_blank"></a>
+            <button class="copy-button" onclick="copyLink()">نسخ الرابط</button>
+            <img id="image-preview" src="#" alt="Image Preview" style="display:none;"/>
+        </div>
+        <p class="error-message"></p>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-storage.js"></script>
+    
+    <script>
+        // Your Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCyPOzsEzdrRd9o7iHASzFoLyJQhpTW83E",
+            authDomain: "imandou-food.firebaseapp.com",
+            databaseURL: "https://imandou-food-default-rtdb.firebaseio.com",
+            projectId: "imandou-food",
+            storageBucket: "imandou-food.firebasestorage.app",
+            messagingSenderId: "839302179988",
+            appId: "1:839302179988:web:92636c32e1b00b587ad881",
+            measurementId: "G-7LE4J4XL9T"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+
+        // Get a reference to the Firebase Storage service
+        const storage = firebase.storage();
+
+        // Get DOM elements
+        const fileInput = document.getElementById('image-upload');
+        const uploadButton = document.getElementById('upload-button');
+        const resultBox = document.querySelector('.result-box');
+        const resultLink = document.getElementById('result-link');
+        const imagePreview = document.getElementById('image-preview');
+        const errorMessage = document.querySelector('.error-message');
+
+        uploadButton.addEventListener('click', () => {
+            const file = fileInput.files[0];
+
+            // Hide previous messages and preview
+            resultBox.style.display = 'none';
+            errorMessage.style.display = 'none';
+            imagePreview.style.display = 'none';
+
+            if (file) {
+                // Create a storage reference with a unique name for the file
+                const uniqueFileName = `${Date.now()}_${file.name}`;
+                const storageRef = storage.ref(`images/${uniqueFileName}`);
+
+                // Upload the file
+                const uploadTask = storageRef.put(file);
+
+                uploadTask.on('state_changed',
+                    (snapshot) => {
+                        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                        uploadButton.textContent = `جاري الرفع... ${Math.round(progress)}%`;
+                    },
+                    (error) => {
+                        console.error("Upload failed", error);
+                        errorMessage.textContent = `فشل في الرفع: ${error.message}`;
+                        errorMessage.style.display = 'block';
+                        uploadButton.textContent = "رفع الصورة";
+                    },
+                    () => {
+                        // Handle successful uploads on complete
+                        uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
+                            resultLink.href = downloadURL;
+                            resultLink.textContent = downloadURL;
+                            imagePreview.src = downloadURL;
+                            imagePreview.style.display = 'block';
+                            resultBox.style.display = 'block';
+                            uploadButton.textContent = "تم الرفع!";
+                            setTimeout(() => uploadButton.textContent = "رفع صورة أخرى", 3000);
+                        });
+                    }
+                );
+            } else {
+                errorMessage.textContent = "الرجاء اختيار صورة أولا.";
+                errorMessage.style.display = 'block';
+            }
+        });
+
+        // Function to copy the link to the clipboard
+        function copyLink() {
+            const linkText = resultLink.textContent;
+            navigator.clipboard.writeText(linkText).then(() => {
+                alert("تم نسخ الرابط!");
+            }).catch(err => {
+                console.error('Failed to copy text: ', err);
+            });
+        }
+    </script>
+</body>
+</html>
