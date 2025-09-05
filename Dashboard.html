@@ -117,6 +117,16 @@
 </head>
 <body class="p-4 md:p-8">
 
+  <div id="system-down-overlay" class="hidden fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-[100] p-4 text-center">
+    <div class="card p-8 max-w-lg w-full">
+        <i class="fas fa-power-off text-danger text-6xl mb-4 animate-pulse"></i>
+        <h2 class="text-3xl font-bold mb-3">النظام متوقف مؤقتاً</h2>
+        <p id="systemDownMessageContent" class="text-[var(--muted)] text-lg leading-relaxed">
+            يتم الآن إجراء بعض التحديثات، نعتذر عن استقبال الطلبات في الوقت الحالي.
+        </p>
+    </div>
+  </div>
+
   <header class="flex justify-between items-center mb-8 pb-4 border-b border-slate-800">
     <div class="flex items-center gap-4">
         <h1 class="text-3xl font-bold">لوحة تحكم الطلبات</h1>
@@ -132,6 +142,17 @@
         </div>
     </div>
   </header>
+  
+  <div id="adminMessageContainer" class="hidden card bg-yellow-500/20 border-yellow-500/30 text-yellow-200 p-4 mb-6" role="alert">
+    <div class="flex items-center">
+      <i class="fas fa-exclamation-triangle mr-3 text-2xl"></i>
+      <div>
+        <p class="font-bold">رسالة من الإدارة</p>
+        <p id="adminMessageContent"></p>
+      </div>
+    </div>
+  </div>
+
 
   <section id="stats" class="mb-8">
     <h2 class="text-2xl font-bold mb-4">نظرة عامة</h2>
@@ -274,14 +295,6 @@
   <audio id="notification-sound" src="https://assets.mixkit.co/sfx/preview/mixkit-positive-notification-951.mp3" preload="auto"></audio>
   
   <script>
-    // ===================================================================================
-    // !!! تحذير أمني هام !!!
-    // هذا الكود يكشف إعدادات الاتصال بقاعدة بيانات Firebase الخاصة بك.
-    // يجب عليك *فورًا* الذهاب إلى لوحة تحكم Firebase وتأمين قاعدة بياناتك
-    // باستخدام "قواعد الأمان" (Security Rules).
-    // تأكد من أن القواعد تمنع أي شخص غير مصرح له من قراءة أو تعديل بياناتك.
-    // لا تعتمد على إخفاء الكود في جانب العميل، فالحماية الحقيقية تأتي من الخادم.
-    // ===================================================================================
     const firebaseConfig = {
         apiKey: "AIzaSyCyPOzsEzdrRd9o7iHASzFoLyJQhpTW83E",
         authDomain: "imandou-food.firebaseapp.com",
@@ -292,6 +305,8 @@
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
     const ordersRef = database.ref('orders');
+    // ==================== الإضافة الجديدة ====================
+    const settingsRef = database.ref('settings');
 
     const columns = {
         new: document.getElementById('new-orders'),
@@ -314,31 +329,61 @@
 
     const notificationSound = document.getElementById('notification-sound');
     const exportModal = document.getElementById('export-modal');
+    
+    // ==================== الإضافة الجديدة ====================
+    const adminMessageContainer = document.getElementById('adminMessageContainer');
+    const adminMessageContent = document.getElementById('adminMessageContent');
+    const systemDownOverlay = document.getElementById('system-down-overlay');
+    const systemDownMessageContent = document.getElementById('systemDownMessageContent');
+
 
     let allOrdersData = {};
     let currentExportCategory = '';
 
     document.addEventListener('DOMContentLoaded', () => {
-        loadSettings();
+        // ==================== تم دمج الدالة القديمة مع الجديدة ====================
+        listenForSettingsChanges(); 
         initializeEventListeners();
         listenForOrderChanges();
-        showOrdersByStatus('active'); // ابدأ بالواجهة النشطة
+        showOrdersByStatus('active');
     });
 
-    async function loadSettings() {
-        try {
-            const settingsSnap = await database.ref('settings').once('value');
-            const settings = settingsSnap.val() || {};
+    // ==================== دالة جديدة ومدمجة (تحل محل loadSettings القديمة) ====================
+    function listenForSettingsChanges() {
+        settingsRef.on('value', (snapshot) => {
+            const settings = snapshot.val() || {};
+            
+            // 1. التحكم في إيقاف وتشغيل النظام
+            if (settings.isSystemActive === false) {
+                if (settings.systemDownMessage) {
+                    systemDownMessageContent.innerText = settings.systemDownMessage;
+                }
+                systemDownOverlay.classList.remove('hidden');
+            } else {
+                systemDownOverlay.classList.add('hidden');
+            }
+
+            // 2. عرض رسالة الإدارة العادية (الشريط الأصفر)
+            if (settings.adminMessage && settings.adminMessage.trim() !== '') {
+                adminMessageContent.innerText = settings.adminMessage;
+                adminMessageContainer.classList.remove('hidden');
+            } else {
+                adminMessageContainer.classList.add('hidden');
+            }
+            
+            // 3. تحميل الإعدادات الأصلية (الخلفية واللون)
             if (settings.backgroundImage) {
                 document.body.style.setProperty('--background-image', `url('${settings.backgroundImage}')`);
             }
             if (settings.accentColor) {
                 document.documentElement.style.setProperty('--accent', settings.accentColor);
             }
-        } catch (error) {
+
+        }, (error) => {
             console.error("Error loading settings:", error);
-        }
+        });
     }
+
 
     function initializeEventListeners() {
         document.getElementById('deleteAllBtn').addEventListener('click', deleteAllOrders);
