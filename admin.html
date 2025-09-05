@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>لوحة تحكم المسؤول - Imandou Food</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #0b1220;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --accent: #fbbf24;
+      --radius-lg: 14px;
+      --success: #10b981;
+      --danger: #ef4444;
+    }
+    body {
+      font-family: 'Cairo', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 16px;
+    }
+    .card {
+      background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.04));
+      border-radius: var(--radius-lg);
+      box-shadow: 0 8px 25px rgba(2,6,23,0.7);
+      border: 1px solid rgba(255,255,255,0.04);
+      backdrop-filter: blur(12px);
+    }
+    h1, h2 { font-family: 'Playfair Display', serif; }
+    .form-input {
+      background: rgba(0,0,0,0.2);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px;
+      padding: 10px 15px;
+      width: 100%;
+      color: var(--text);
+      transition: border-color 0.2s;
+    }
+    .form-input:focus { outline: none; border-color: var(--accent); }
+    .btn { padding: 12px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.2s; border: none; }
+    .btn-primary { background-color: var(--accent); color: var(--bg); }
+    .btn-primary:hover { background-color: #f59e0b; }
+    .toggle-switch { position: relative; display: inline-block; width: 60px; height: 34px; }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #374151; transition: .4s; border-radius: 34px; }
+    .slider:before { position: absolute; content: ""; height: 26px; width: 26px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
+    input:checked + .slider { background-color: var(--success); }
+    input:checked + .slider:before { transform: translateX(26px); }
+  </style>
+</head>
+<body>
+
+  <main id="admin-panel" class="w-full max-w-2xl space-y-8 hidden">
+    <header class="text-center">
+      <h1 class="text-4xl font-bold mb-2">لوحة تحكم المسؤول</h1>
+      <p class="text-[var(--muted)]">إدارة إعدادات النظام والمستخدمين</p>
+    </header>
+
+    <section class="card p-6">
+        <h2 class="text-2xl font-bold mb-4 flex items-center gap-3"><i class="fas fa-power-off text-[var(--accent)]"></i> حالة النظام</h2>
+        <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-3">
+                <span id="systemStatusIndicator" class="w-4 h-4 rounded-full bg-gray-500"></span>
+                <span id="systemStatusText" class="font-bold text-lg">النظام متوقف</span>
+            </div>
+            <label class="toggle-switch">
+                <input type="checkbox" id="systemToggle">
+                <span class="slider"></span>
+            </label>
+        </div>
+        <p class="text-sm text-[var(--muted)] mb-4">
+            عند "إيقاف" النظام، ستظهر رسالة تغطي الشاشة ولن يتمكن أحد من رؤية الطلبات. استخدم هذه الرسالة لتوضيح السبب.
+        </p>
+        <div class="space-y-4">
+            <textarea id="systemDownMessageInput" class="form-input h-24 resize-none" placeholder="مثال: نعتذر، المطعم مغلق اليوم. أو: نجري تحديثات على النظام وسنعود قريباً."></textarea>
+            <button id="saveSystemStatusBtn" class="btn btn-primary w-full">حفظ حالة النظام</button>
+        </div>
+    </section>
+
+    <section class="card p-6">
+      <h2 class="text-2xl font-bold mb-4 flex items-center gap-3"><i class="fas fa-bullhorn text-[var(--accent)]"></i> إرسال رسالة عامة</h2>
+      <p class="text-sm text-[var(--muted)] mb-4">
+        هذه الرسالة ستظهر كشريط تنبيه في أعلى لوحة التحكم (فقط إذا كان النظام يعمل).
+      </p>
+      <div class="space-y-4">
+        <textarea id="messageInput" class="form-input h-24 resize-none" placeholder="مثال: سينتهي اشتراككم بعد 3 أيام."></textarea>
+        <button id="sendMessageBtn" class="btn btn-primary w-full">حفظ الرسالة</button>
+      </div>
+    </section>
+
+    <section class="card p-6">
+      <h2 class="text-2xl font-bold mb-4 flex items-center gap-3"><i class="fas fa-user-plus text-[var(--accent)]"></i> إضافة بيانات دخول جديدة</h2>
+      <div class="space-y-4">
+        <input type="text" id="newUsernameInput" class="form-input" placeholder="اسم المستخدم الجديد">
+        <input type="password" id="newPasswordInput" class="form-input" placeholder="كلمة المرور">
+        <button id="addUserBtn" class="btn btn-primary w-full">إضافة مستخدم</button>
+      </div>
+    </section>
+  </main>
+  
+  <script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyCyPOzsEzdrRd9o7iHASzFoLyJQhpTW83E",
+        authDomain: "imandou-food.firebaseapp.com",
+        databaseURL: "https://imandou-food-default-rtdb.firebaseio.com",
+        projectId: "imandou-food"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+    
+    const settingsRef = database.ref('settings');
+    const usersRef = database.ref('users');
+
+    const adminPanel = document.getElementById('admin-panel');
+    
+    const systemToggle = document.getElementById('systemToggle');
+    const systemDownMessageInput = document.getElementById('systemDownMessageInput');
+    const saveSystemStatusBtn = document.getElementById('saveSystemStatusBtn');
+    const systemStatusIndicator = document.getElementById('systemStatusIndicator');
+    const systemStatusText = document.getElementById('systemStatusText');
+
+    const messageInput = document.getElementById('messageInput');
+    const sendMessageBtn = document.getElementById('sendMessageBtn');
+    const newUsernameInput = document.getElementById('newUsernameInput');
+    const newPasswordInput = document.getElementById('newPasswordInput');
+    const addUserBtn = document.getElementById('addUserBtn');
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const masterPassword = "admin"; // <-- يمكنك تغيير كلمة المرور الرئيسية هنا
+        const enteredPassword = prompt("الرجاء إدخال كلمة مرور المسؤول:");
+        
+        if (enteredPassword === masterPassword) {
+            adminPanel.classList.remove('hidden');
+            loadCurrentSettings();
+        } else {
+            alert("كلمة المرور غير صحيحة!");
+        }
+    });
+
+    function loadCurrentSettings() {
+        settingsRef.once('value', (snapshot) => {
+            const settings = snapshot.val() || {};
+            
+            if (settings.adminMessage) {
+                messageInput.value = settings.adminMessage;
+            }
+            
+            const isActive = settings.isSystemActive !== false;
+            systemToggle.checked = isActive;
+            if (settings.systemDownMessage) {
+                systemDownMessageInput.value = settings.systemDownMessage;
+            }
+            updateStatusUI(isActive);
+        });
+    }
+
+    function updateStatusUI(isActive) {
+        if (isActive) {
+            systemStatusIndicator.style.backgroundColor = 'var(--success)';
+            systemStatusText.textContent = 'النظام يعمل';
+            systemDownMessageInput.disabled = true;
+            systemDownMessageInput.style.opacity = '0.5';
+        } else {
+            systemStatusIndicator.style.backgroundColor = 'var(--danger)';
+            systemStatusText.textContent = 'النظام متوقف';
+            systemDownMessageInput.disabled = false;
+            systemDownMessageInput.style.opacity = '1';
+        }
+    }
+
+    systemToggle.addEventListener('change', () => {
+        updateStatusUI(systemToggle.checked);
+    });
+
+    saveSystemStatusBtn.addEventListener('click', () => {
+        const isSystemActive = systemToggle.checked;
+        const systemDownMessage = systemDownMessageInput.value.trim();
+
+        if (!isSystemActive && !systemDownMessage) {
+            alert('يجب كتابة رسالة توضيحية عند إيقاف النظام.');
+            return;
+        }
+
+        settingsRef.update({ 
+            isSystemActive: isSystemActive,
+            systemDownMessage: systemDownMessage
+         })
+        .then(() => alert("تم حفظ حالة النظام بنجاح!"))
+        .catch((error) => alert("حدث خطأ: " + error.message));
+    });
+
+    sendMessageBtn.addEventListener('click', () => {
+        settingsRef.update({ adminMessage: messageInput.value.trim() })
+            .then(() => alert("تم حفظ الرسالة بنجاح!"));
+    });
+
+    addUserBtn.addEventListener('click', () => {
+        const username = newUsernameInput.value.trim();
+        const password = newPasswordInput.value.trim();
+
+        if (!username || !password) {
+            alert("الرجاء إدخال اسم المستخدم وكلمة المرور.");
+            return;
+        }
+
+        usersRef.child(username).set(password)
+            .then(() => {
+                alert(`تمت إضافة المستخدم "${username}" بنجاح!`);
+                newUsernameInput.value = '';
+                newPasswordInput.value = '';
+            });
+    });
+  </script>
+
+</body>
+</html>
