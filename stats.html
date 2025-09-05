@@ -238,7 +238,7 @@
             const endOfToday = new Date(today.setHours(23, 59, 59, 999));
             updateDashboard(startOfToday, endOfToday);
             
-            setLanguage(currentLang); // Définir la langue initiale
+            setLanguage(currentLang);
 
             document.getElementById('loading-overlay').style.display = 'none';
 
@@ -253,7 +253,7 @@
         const datePicker = flatpickr("#date-range-picker", {
             mode: "range", 
             dateFormat: "Y-m-d",
-            locale: "ar", // Langue par défaut pour flatpickr
+            locale: "ar",
             onChange: (selectedDates) => {
                 if (selectedDates.length === 2) {
                     updateDashboard(selectedDates[0], selectedDates[1]);
