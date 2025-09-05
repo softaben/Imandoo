@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="fr" dir="ltr">
+<html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Statistiques et Rapports - Imandou Food</title>
+  <title>الإحصائيات والتقارير - Imandou Food</title>
   
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
@@ -83,54 +83,58 @@
 
   <header class="flex flex-wrap justify-between items-center mb-8 pb-4 border-b border-slate-800 gap-4">
     <div class="flex items-center gap-4">
-        <h1 class="text-3xl font-bold">Statistiques et Rapports</h1>
+        <h1 class="text-3xl font-bold" data-key="pageTitle">الإحصائيات والتقارير</h1>
     </div>
     <div class="flex items-center gap-4">
-        <a href="index.html" class="pill text-white hover:bg-slate-700 transition"><i class="fas fa-tachometer-alt"></i> Tableau de bord</a>
-        <a href="modification.html" class="pill text-white hover:bg-slate-700 transition"><i class="fas fa-edit"></i> Modifier le menu</a>
-        <a href="users.html" class="pill text-white hover:bg-slate-700 transition"><i class="fas fa-user-circle"></i> Mon compte</a>
+        <div class="flex gap-2">
+            <button id="lang-ar-btn" class="pill active" data-lang="ar">العربية</button>
+            <button id="lang-fr-btn" class="pill" data-lang="fr">Français</button>
+        </div>
+        <a href="index.html" class="pill text-white hover:bg-slate-700 transition"><i class="fas fa-tachometer-alt"></i> <span data-key="navDashboard">لوحة التحكم</span></a>
+        <a href="modification.html" class="pill text-white hover:bg-slate-700 transition"><i class="fas fa-edit"></i> <span data-key="navMenu">تعديل القائمة</span></a>
+        <a href="users.html" class="pill text-white hover:bg-slate-700 transition"><i class="fas fa-user-circle"></i> <span data-key="navAccount">حسابي</span></a>
     </div>
   </header>
 
   <main>
     <section class="card p-5 mb-8 flex flex-wrap justify-between items-center gap-4">
         <div class="flex items-center gap-3">
-            <h3 class="text-lg font-semibold">Filtrer par période:</h3>
-            <input type="text" id="date-range-picker" class="bg-slate-800 border border-slate-700 rounded-full py-2 px-4 w-64 text-center" placeholder="Sélectionner une plage personnalisée">
+            <h3 class="text-lg font-semibold" data-key="filterTitle">تصفية حسب الفترة:</h3>
+            <input type="text" id="date-range-picker" class="bg-slate-800 border border-slate-700 rounded-full py-2 px-4 w-64 text-center" data-key="customPlaceholder" placeholder="تحديد نطاق مخصص">
         </div>
         <div class="flex gap-3">
-            <button id="export-excel-btn" class="pill bg-green-600 hover:bg-green-700 text-white"><i class="fas fa-file-excel"></i> Exporter en Excel</button>
-            <button id="export-pdf-btn" class="pill bg-red-600 hover:bg-red-700 text-white"><i class="fas fa-file-pdf"></i> Exporter en PDF</button>
+            <button id="export-excel-btn" class="pill bg-green-600 hover:bg-green-700 text-white"><i class="fas fa-file-excel"></i> <span data-key="exportExcel">تصدير Excel</span></button>
+            <button id="export-pdf-btn" class="pill bg-red-600 hover:bg-red-700 text-white"><i class="fas fa-file-pdf"></i> <span data-key="exportPDF">تصدير PDF</span></button>
         </div>
     </section>
 
     <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <div class="card p-5">
-            <p class="text-[var(--muted)] text-sm mb-1">Revenu total</p>
-            <p id="kpi-total-revenue" class="text-3xl font-bold text-[var(--accent)]">0.00 MAD</p>
+            <p class="text-[var(--muted)] text-sm mb-1" data-key="kpiTotalRevenue">إجمالي الإيرادات</p>
+            <p id="kpi-total-revenue" class="text-3xl font-bold text-[var(--accent)]">0.00 د.م</p>
         </div>
         <div class="card p-5">
-            <p class="text-[var(--muted)] text-sm mb-1">Total des commandes</p>
+            <p class="text-[var(--muted)] text-sm mb-1" data-key="kpiTotalOrders">إجمالي الطلبات</p>
             <p id="kpi-total-orders" class="text-3xl font-bold">0</p>
         </div>
         <div class="card p-5">
-            <p class="text-[var(--muted)] text-sm mb-1">Valeur moyenne de commande</p>
-            <p id="kpi-avg-order-value" class="text-3xl font-bold">0.00 MAD</p>
+            <p class="text-[var(--muted)] text-sm mb-1" data-key="kpiAvgOrderValue">متوسط قيمة الطلب</p>
+            <p id="kpi-avg-order-value" class="text-3xl font-bold">0.00 د.م</p>
         </div>
         <div class="card p-5">
-            <p class="text-[var(--muted)] text-sm mb-1">Articles les plus vendus</p>
+            <p class="text-[var(--muted)] text-sm mb-1" data-key="kpiTopItem">الأصناف الأكثر مبيعًا</p>
             <p id="kpi-top-item" class="text-xl font-bold truncate">...</p>
         </div>
     </section>
 
     <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div class="card p-5 chart-container h-96"><h3 class="text-xl font-bold mb-4">Revenus quotidiens</h3><canvas id="revenue-chart"></canvas></div>
-        <div class="card p-5 chart-container h-96"><h3 class="text-xl font-bold mb-4">Commandes par heure</h3><canvas id="orders-by-hour-chart"></canvas></div>
-        <div class="card p-5 chart-container h-96"><h3 class="text-xl font-bold mb-4">Articles les plus demandés</h3><canvas id="top-items-chart"></canvas></div>
-        <div class="card p-5 chart-container h-96"><h3 class="text-xl font-bold mb-4">Statut des commandes</h3><canvas id="order-status-chart"></canvas></div>
+        <div class="card p-5 chart-container h-96"><h3 class="text-xl font-bold mb-4" data-key="chartTitleRevenue">الإيرادات اليومية</h3><canvas id="revenue-chart"></canvas></div>
+        <div class="card p-5 chart-container h-96"><h3 class="text-xl font-bold mb-4" data-key="chartTitleOrders">الطلبات حسب الساعة</h3><canvas id="orders-by-hour-chart"></canvas></div>
+        <div class="card p-5 chart-container h-96"><h3 class="text-xl font-bold mb-4" data-key="chartTitleItems">الأصناف الأكثر طلبًا</h3><canvas id="top-items-chart"></canvas></div>
+        <div class="card p-5 chart-container h-96"><h3 class="text-xl font-bold mb-4" data-key="chartTitleStatus">حالة الطلبات</h3><canvas id="order-status-chart"></canvas></div>
     </section>
     
-    <div id="loading-overlay" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50"><div class="text-center"><i class="fas fa-spinner fa-spin text-4xl text-white"></i><p class="mt-4 text-lg">Chargement et analyse des données...</p></div></div>
+    <div id="loading-overlay" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50"><div class="text-center"><i class="fas fa-spinner fa-spin text-4xl text-white"></i><p class="mt-4 text-lg" data-key="loading">جاري تحميل وتحليل البيانات...</p></div></div>
     
   </main>
   
@@ -150,6 +154,76 @@
     let charts = {};
     let currentStatsData = {};
 
+    // --- Dictionnaire de langues ---
+    const translations = {
+        ar: {
+            pageTitle: "الإحصائيات والتقارير",
+            filterTitle: "تصفية حسب الفترة:",
+            customPlaceholder: "تحديد نطاق مخصص",
+            exportExcel: "تصدير Excel",
+            exportPDF: "تصدير PDF",
+            kpiTotalRevenue: "إجمالي الإيرادات",
+            kpiTotalOrders: "إجمالي الطلبات",
+            kpiAvgOrderValue: "متوسط قيمة الطلب",
+            kpiTopItem: "الأصناف الأكثر مبيعًا",
+            chartTitleRevenue: "الإيرادات اليومية",
+            chartTitleOrders: "الطلبات حسب الساعة",
+            chartTitleItems: "الأصناف الأكثر طلبًا",
+            chartTitleStatus: "حالة الطلبات",
+            statusCompleted: "مكتملة",
+            statusCancelled: "ملغاة",
+            statusActive: "نشطة",
+            labelRevenue: "الإيرادات",
+            labelOrders: "عدد الطلبات",
+            labelItems: "الكمية المباعة",
+            unitRevenue: "الإيرادات (د.م)",
+            unitOrders: "عدد الطلبات",
+            unitItems: "الكمية",
+            loading: "جاري تحميل وتحليل البيانات...",
+            noData: "لا يوجد",
+            navDashboard: "لوحة التحكم",
+            navMenu: "تعديل القائمة",
+            navAccount: "حسابي",
+            orderStatusCompleted: "مكتملة",
+            orderStatusCancelled: "ملغاة",
+            orderStatusActive: "قيد التقدم"
+        },
+        fr: {
+            pageTitle: "Statistiques et Rapports",
+            filterTitle: "Filtrer par période:",
+            customPlaceholder: "Sélectionner une plage personnalisée",
+            exportExcel: "Exporter en Excel",
+            exportPDF: "Exporter en PDF",
+            kpiTotalRevenue: "Revenu total",
+            kpiTotalOrders: "Total des commandes",
+            kpiAvgOrderValue: "Valeur moyenne de commande",
+            kpiTopItem: "Articles les plus vendus",
+            chartTitleRevenue: "Revenus quotidiens",
+            chartTitleOrders: "Commandes par heure",
+            chartTitleItems: "Articles les plus demandés",
+            chartTitleStatus: "Statut des commandes",
+            statusCompleted: "Terminé",
+            statusCancelled: "Annulé",
+            statusActive: "En cours",
+            labelRevenue: "Revenus",
+            labelOrders: "Nombre de commandes",
+            labelItems: "Quantité vendue",
+            unitRevenue: "Revenus (MAD)",
+            unitOrders: "Nombre de commandes",
+            unitItems: "Quantité",
+            loading: "Chargement et analyse des données...",
+            noData: "Aucun",
+            navDashboard: "Tableau de bord",
+            navMenu: "Modifier le menu",
+            navAccount: "Mon compte",
+            orderStatusCompleted: "Terminée",
+            orderStatusCancelled: "Annulée",
+            orderStatusActive: "En cours"
+        }
+    };
+
+    let currentLang = 'ar'; // Langue par défaut
+    
     // --- Main Initializer ---
     document.addEventListener('DOMContentLoaded', async () => {
         try {
@@ -163,32 +237,78 @@
             const startOfToday = new Date(today.setHours(0, 0, 0, 0));
             const endOfToday = new Date(today.setHours(23, 59, 59, 999));
             updateDashboard(startOfToday, endOfToday);
+            
+            setLanguage(currentLang); // Définir la langue initiale
 
             document.getElementById('loading-overlay').style.display = 'none';
 
         } catch (error) {
             console.error("Error fetching initial data:", error);
-            document.getElementById('loading-overlay').innerHTML = '<p class="text-red-500">Échec du chargement des données. Veuillez actualiser la page.</p>';
+            document.getElementById('loading-overlay').innerHTML = '<p class="text-red-500">فشل تحميل البيانات. يرجى تحديث الصفحة.</p>';
         }
     });
 
     // --- Event Listeners Setup ---
     function initializeEventListeners() {
-        // Initialize the date picker
         const datePicker = flatpickr("#date-range-picker", {
             mode: "range", 
             dateFormat: "Y-m-d",
-            locale: "fr", // Set locale to French for the calendar
+            locale: "ar", // Langue par défaut pour flatpickr
             onChange: (selectedDates) => {
                 if (selectedDates.length === 2) {
                     updateDashboard(selectedDates[0], selectedDates[1]);
                 }
             }
         });
+        
+        document.getElementById('lang-ar-btn').addEventListener('click', () => {
+            setLanguage('ar');
+            datePicker.set('locale', 'ar');
+        });
+        document.getElementById('lang-fr-btn').addEventListener('click', () => {
+            setLanguage('fr');
+            datePicker.set('locale', 'fr');
+        });
 
-        // Export buttons
         document.getElementById('export-excel-btn').addEventListener('click', exportToExcel);
         document.getElementById('export-pdf-btn').addEventListener('click', exportToPDF);
+    }
+    
+    function setLanguage(lang) {
+        currentLang = lang;
+        const t = translations[lang];
+        
+        document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+
+        document.title = t.pageTitle;
+        document.querySelector('[data-key="pageTitle"]').textContent = t.pageTitle;
+        document.querySelector('[data-key="filterTitle"]').textContent = t.filterTitle;
+        document.getElementById('date-range-picker').placeholder = t.customPlaceholder;
+        document.querySelector('[data-key="exportExcel"]').textContent = t.exportExcel;
+        document.querySelector('[data-key="exportPDF"]').textContent = t.exportPDF;
+        document.querySelector('#loading-overlay p').textContent = t.loading;
+        
+        document.querySelector('[data-key="kpiTotalRevenue"]').textContent = t.kpiTotalRevenue;
+        document.querySelector('[data-key="kpiTotalOrders"]').textContent = t.kpiTotalOrders;
+        document.querySelector('[data-key="kpiAvgOrderValue"]').textContent = t.kpiAvgOrderValue;
+        document.querySelector('[data-key="kpiTopItem"]').textContent = t.kpiTopItem;
+
+        document.querySelector('[data-key="chartTitleRevenue"]').textContent = t.chartTitleRevenue;
+        document.querySelector('[data-key="chartTitleOrders"]').textContent = t.chartTitleOrders;
+        document.querySelector('[data-key="chartTitleItems"]').textContent = t.chartTitleItems;
+        document.querySelector('[data-key="chartTitleStatus"]').textContent = t.chartTitleStatus;
+        
+        document.querySelector('[data-key="navDashboard"]').textContent = t.navDashboard;
+        document.querySelector('[data-key="navMenu"]').textContent = t.navMenu;
+        document.querySelector('[data-key="navAccount"]').textContent = t.navAccount;
+
+        document.querySelectorAll('.pill[data-lang]').forEach(btn => btn.classList.remove('active'));
+        document.querySelector(`#lang-${lang}-btn`).classList.add('active');
+
+        if(Object.keys(currentStatsData).length > 0) {
+          updateKPIs(currentStatsData);
+          renderCharts(currentStatsData);
+        }
     }
 
     // --- Dashboard & Filtering Logic ---
@@ -206,14 +326,13 @@
         renderCharts(currentStatsData);
     }
     
-    // Processes an array of orders to calculate statistics
     function processData(orders, startDate, endDate) {
         const completedOrders = orders.filter(o => o.status === 'completed');
         const totalRevenue = completedOrders.reduce((sum, o) => sum + o.totalPrice, 0);
         const totalOrders = completedOrders.length;
         const avgOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
         const itemCounts = completedOrders.flatMap(o => o.items).reduce((acc, item) => {
-            acc[item.names.fr] = (acc[item.names.fr] || 0) + item.quantity; return acc;
+            acc[item.names[currentLang]] = (acc[item.names[currentLang]] || 0) + item.quantity; return acc;
         }, {});
         const topItems = Object.entries(itemCounts).sort(([,a],[,b]) => b-a).slice(0, 5);
         const revenueByDay = {};
@@ -236,20 +355,20 @@
         };
     }
 
-    // Updates the key performance indicators (KPIs) at the top
     function updateKPIs(data) {
-        document.getElementById('kpi-total-revenue').textContent = `${data.totalRevenue.toFixed(2)} MAD`;
+        const t = translations[currentLang];
+        document.getElementById('kpi-total-revenue').textContent = `${data.totalRevenue.toFixed(2)} ${currentLang === 'ar' ? 'د.م' : 'MAD'}`;
         document.getElementById('kpi-total-orders').textContent = data.totalOrders;
-        document.getElementById('kpi-avg-order-value').textContent = `${data.avgOrderValue.toFixed(2)} MAD`;
-        document.getElementById('kpi-top-item').textContent = data.topItems.length > 0 ? data.topItems[0][0] : 'Aucun';
+        document.getElementById('kpi-avg-order-value').textContent = `${data.avgOrderValue.toFixed(2)} ${currentLang === 'ar' ? 'د.م' : 'MAD'}`;
+        document.getElementById('kpi-top-item').textContent = data.topItems.length > 0 ? data.topItems[0][0] : t.noData;
     }
     
-    // --- Chart Rendering ---
     function renderCharts(data) {
         Object.values(charts).forEach(chart => chart.destroy());
+        const t = translations[currentLang];
         const textMutedColor = '#94a3b8';
         const gridColor = 'rgba(255, 255, 255, 0.1)';
-        const formatCurrency = (value) => new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'MAD' }).format(value);
+        const formatCurrency = (value) => new Intl.NumberFormat(currentLang === 'ar' ? 'ar-MA' : 'fr-FR', { style: 'currency', currency: 'MAD' }).format(value);
 
         const revCtx = document.getElementById('revenue-chart').getContext('2d');
         const gradient = revCtx.createLinearGradient(0, 0, 0, revCtx.canvas.clientHeight);
@@ -259,14 +378,14 @@
             type: 'line',
             data: {
                 labels: Object.keys(data.revenueByDay),
-                datasets: [{ label: 'Revenus', data: Object.values(data.revenueByDay), borderColor: '#3b82f6', backgroundColor: gradient, fill: true, tension: 0.4 }]
+                datasets: [{ label: t.labelRevenue, data: Object.values(data.revenueByDay), borderColor: '#3b82f6', backgroundColor: gradient, fill: true, tension: 0.4 }]
             },
             options: {
                 responsive: true, maintainAspectRatio: false,
                 plugins: { legend: { labels: { color: textMutedColor } }, tooltip: { callbacks: { label: (ctx) => `${ctx.dataset.label}: ${formatCurrency(ctx.raw)}` } } },
                 scales: {
                     x: { ticks: { color: textMutedColor }, grid: { color: gridColor } },
-                    y: { ticks: { color: textMutedColor }, grid: { color: gridColor }, title: { display: true, text: 'Revenus (MAD)', color: textMutedColor } }
+                    y: { ticks: { color: textMutedColor }, grid: { color: gridColor }, title: { display: true, text: t.unitRevenue, color: textMutedColor } }
                 }
             }
         });
@@ -276,14 +395,14 @@
             type: 'bar',
             data: {
                 labels: Array.from({length: 24}, (_, i) => `${i}`.padStart(2,'0')),
-                datasets: [{ label: 'Nombre de commandes', data: data.ordersByHour, backgroundColor: 'rgba(251, 191, 36, 0.8)' }]
+                datasets: [{ label: t.labelOrders, data: data.ordersByHour, backgroundColor: 'rgba(251, 191, 36, 0.8)' }]
             },
             options: {
                 responsive: true, maintainAspectRatio: false,
                 plugins: { legend: { labels: { color: textMutedColor } }, tooltip: { callbacks: { label: (ctx) => `${ctx.dataset.label}: ${ctx.raw}` } } },
                 scales: {
-                    x: { ticks: { color: textMutedColor }, grid: { color: gridColor }, title: { display: true, text: 'Heure', color: textMutedColor } },
-                    y: { ticks: { color: textMutedColor }, grid: { color: gridColor }, title: { display: true, text: 'Nombre de commandes', color: textMutedColor } }
+                    x: { ticks: { color: textMutedColor }, grid: { color: gridColor }, title: { display: true, text: currentLang === 'ar' ? 'الساعة' : 'Heure', color: textMutedColor } },
+                    y: { ticks: { color: textMutedColor }, grid: { color: gridColor }, title: { display: true, text: t.unitOrders, color: textMutedColor } }
                 }
             }
         });
@@ -293,21 +412,26 @@
             type: 'bar',
             data: {
                 labels: data.topItems.map(item => item[0]),
-                datasets: [{ label: 'Quantité vendue', data: data.topItems.map(item => item[1]), backgroundColor: ['#10b981', '#3b82f6', '#fbbf24', '#ef4444', '#a855f7'] }]
+                datasets: [{ label: t.labelItems, data: data.topItems.map(item => item[1]), backgroundColor: ['#10b981', '#3b82f6', '#fbbf24', '#ef4444', '#a855f7'] }]
             },
             options: {
                 indexAxis: 'y', responsive: true, maintainAspectRatio: false,
                 plugins: { legend: { display: false }, tooltip: { callbacks: { label: (ctx) => `${ctx.dataset.label}: ${ctx.raw}` } } },
                 scales: {
-                    x: { ticks: { color: textMutedColor }, grid: { color: gridColor }, title: { display: true, text: 'Quantité', color: textMutedColor } },
+                    x: { ticks: { color: textMutedColor }, grid: { color: gridColor }, title: { display: true, text: t.unitItems, color: textMutedColor } },
                     y: { ticks: { color: textMutedColor }, grid: { display: false } }
                 }
             }
         });
 
         const statusCtx = document.getElementById('order-status-chart').getContext('2d');
-        const statusData = { 'Terminée': data.statusCounts.completed || 0, 'Annulée': data.statusCounts.cancelled || 0, 'En cours': (data.statusCounts.new || 0) + (data.statusCounts.preparing || 0) + (data.statusCounts.ready || 0) };
+        const statusData = {};
+        statusData[t.statusCompleted] = data.statusCounts.completed || 0;
+        statusData[t.statusCancelled] = data.statusCounts.cancelled || 0;
+        statusData[t.statusActive] = (data.statusCounts.new || 0) + (data.statusCounts.preparing || 0) + (data.statusCounts.ready || 0);
+        
         const totalStatuses = Object.values(statusData).reduce((a, b) => a + b, 0);
+
         charts.orderStatus = new Chart(statusCtx, {
             type: 'doughnut',
             data: {
@@ -328,36 +452,36 @@
         });
     }
 
-    // --- Export Functions ---
     async function exportToExcel() {
+        const t = translations[currentLang];
         const dataToExport = currentStatsData.rawOrders.map(order => ({
             'ID Commande': order.id,
-            'Date': new Date(order.timestamp).toLocaleString('fr-FR'),
-            'Statut': (order.status === 'completed' ? 'Terminée' : order.status === 'cancelled' ? 'Annulée' : 'En cours'),
-            'Articles': order.items.map(item => `${item.names.fr} (x${item.quantity})`).join(', '),
-            'Prix Total (MAD)': order.totalPrice,
+            [t.navMenu]: new Date(order.timestamp).toLocaleString(currentLang === 'ar' ? 'ar-MA' : 'fr-FR'),
+            [t.statusCompleted]: (order.status === 'completed' ? t.orderStatusCompleted : order.status === 'cancelled' ? t.orderStatusCancelled : t.orderStatusActive),
+            [t.kpiTopItem]: order.items.map(item => `${item.names[currentLang]} (x${item.quantity})`).join(', '),
+            [t.unitRevenue]: order.totalPrice,
         }));
 
         const ws = XLSX.utils.json_to_sheet(dataToExport);
         const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Rapport des Commandes");
-
-        XLSX.writeFile(wb, `Rapport_Commandes_${new Date().toISOString().slice(0, 10)}.xlsx`);
+        XLSX.utils.book_append_sheet(wb, ws, t.pageTitle);
+        XLSX.writeFile(wb, `${t.pageTitle}_${new Date().toISOString().slice(0, 10)}.xlsx`);
     }
 
     async function exportToPDF() {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
+        const t = translations[currentLang];
 
         doc.setFontSize(18);
-        doc.text("Rapport des Commandes", 14, 22);
+        doc.text(t.pageTitle, 14, 22);
 
-        const columns = ["ID Commande", "Date", "Statut", "Articles", "Prix Total (MAD)"];
+        const columns = ['ID Commande', t.navMenu, t.statusCompleted, t.kpiTopItem, t.unitRevenue];
         const rows = currentStatsData.rawOrders.map(order => [
             order.id,
-            new Date(order.timestamp).toLocaleString('fr-FR'),
-            (order.status === 'completed' ? 'Terminée' : order.status === 'cancelled' ? 'Annulée' : 'En cours'),
-            order.items.map(item => `${item.names.fr} (x${item.quantity})`).join(', '),
+            new Date(order.timestamp).toLocaleString(currentLang === 'ar' ? 'ar-MA' : 'fr-FR'),
+            (order.status === 'completed' ? t.orderStatusCompleted : order.status === 'cancelled' ? t.orderStatusCancelled : t.orderStatusActive),
+            order.items.map(item => `${item.names[currentLang]} (x${item.quantity})`).join(', '),
             order.totalPrice.toFixed(2)
         ]);
 
@@ -367,7 +491,7 @@
             body: rows,
         });
 
-        doc.save(`Rapport_Commandes_${new Date().toISOString().slice(0, 10)}.pdf`);
+        doc.save(`${t.pageTitle}_${new Date().toISOString().slice(0, 10)}.pdf`);
     }
   </script>
 </body>
