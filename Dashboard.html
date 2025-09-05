@@ -134,9 +134,39 @@
         display: none !important;
       }
     }
+
+    #loading-screen {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      color: var(--accent);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      transition: opacity 0.5s ease;
+      font-family: 'Playfair Display', serif;
+    }
+    .spinner {
+      border: 4px solid rgba(255,255,255,0.1);
+      border-left-color: var(--accent);
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
   </style>
 </head>
 <body class="p-4 md:p-8">
+
+  <div id="loading-screen" class="flex flex-col items-center justify-center gap-4">
+      <div class="spinner"></div>
+      <p class="text-xl mt-4">جاري تحميل البيانات...</p>
+  </div>
 
   <header class="flex justify-between items-center mb-8 pb-4 border-b border-slate-800">
     <div class="flex items-center gap-4">
@@ -303,6 +333,9 @@
   <audio id="notification-sound" src="https://assets.mixkit.co/sfx/preview/mixkit-positive-notification-951.mp3" preload="auto"></audio>
   
   <script>
+    /**
+     * إعدادات Firebase - يتم تخزينها هنا بشكل آمن. في التطبيقات الحقيقية، يفضل استخدام متغيرات البيئة.
+     */
     const firebaseConfig = {
         apiKey: "AIzaSyCyPOzsEzdrRd9o7iHASzFoLyJQhpTW83E",
         authDomain: "imandou-food.firebaseapp.com",
@@ -310,64 +343,93 @@
         projectId: "imandou-food"
     };
 
+    // تهيئة Firebase
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
     const ordersRef = database.ref('orders');
 
-    const columns = {
-        new: document.getElementById('new-orders'),
-        preparing: document.getElementById('preparing-orders'),
-        ready: document.getElementById('ready-orders')
-    };
-
-    const statElements = {
+    // عناصر DOM الرئيسية
+    const elements = {
+      loadingScreen: document.getElementById('loading-screen'),
+      newOrders: document.getElementById('new-orders'),
+      preparingOrders: document.getElementById('preparing-orders'),
+      readyOrders: document.getElementById('ready-orders'),
+      completedOrdersSection: document.getElementById('completed-orders-section'),
+      cancelledOrdersSection: document.getElementById('cancelled-orders-section'),
+      activeOrdersSection: document.getElementById('active-orders-section'),
+      deleteAllBtn: document.getElementById('deleteAllBtn'),
+      notificationSound: document.getElementById('notification-sound'),
+      stats: {
         totalRevenue: document.getElementById('totalRevenue'),
         totalOrders: document.getElementById('totalOrders'),
         avgOrderValue: document.getElementById('avgOrderValue'),
         activeOrders: document.getElementById('activeOrders'),
+      }
     };
-
-    const completedOrdersSection = document.getElementById('completed-orders-section');
-    const cancelledOrdersSection = document.getElementById('cancelled-orders-section');
-    const activeOrdersSection = document.getElementById('active-orders-section');
-    const deleteAllBtn = document.getElementById('deleteAllBtn');
-    const notificationSound = document.getElementById('notification-sound');
-
+    
     let allOrdersData = {};
     let currentExportType = '';
 
+    /**
+     * نقطة دخول التطبيق
+     * تهيئة المستمعين وتحميل الإعدادات
+     */
     document.addEventListener('DOMContentLoaded', () => {
-        loadSettings();
-        listenForChildEvents();
-        deleteAllBtn.addEventListener('click', deleteAllOrders);
-        showOrdersByStatus('active');
+        setupEventListeners();
+        loadInitialData();
     });
-
-    async function loadSettings() {
-        try {
-            const settingsSnap = await database.ref('settings').once('value');
-            applySettings(settingsSnap.val() || {});
-        } catch (error) {
-            console.error("Error loading settings:", error);
-        }
+    
+    /**
+     * إعداد مستمعي الأحداث للعناصر الرئيسية
+     */
+    function setupEventListeners() {
+        elements.deleteAllBtn.addEventListener('click', handleDeleteAllOrders);
+        listenForChildEvents();
     }
-
-    function applySettings(settings) {
-        if (settings.backgroundImage) {
-            document.body.style.setProperty('--background-image', `url('${settings.backgroundImage}')`);
-        }
-        if (settings.accentColor) {
-            document.documentElement.style.setProperty('--accent', settings.accentColor);
-        }
+    
+    /**
+     * إخفاء شاشة التحميل بعد انتهاء التحميل
+     */
+    function hideLoadingScreen() {
+      elements.loadingScreen.style.opacity = '0';
+      setTimeout(() => {
+        elements.loadingScreen.style.display = 'none';
+      }, 500);
     }
-
+    
+    /**
+     * تحميل البيانات الأولية عند بدء التشغيل
+     */
+    function loadInitialData() {
+        ordersRef.once('value').then(snapshot => {
+            snapshot.forEach(childSnapshot => {
+                const order = { id: childSnapshot.key, ...childSnapshot.val() };
+                allOrdersData[order.id] = order;
+                renderOrder(order);
+            });
+            calculateAndDisplayStats();
+            hideLoadingScreen();
+        }).catch(err => {
+            console.error("Failed to load initial data:", err);
+            hideLoadingScreen();
+        });
+        
+        loadSettings();
+    }
+    
+    /**
+     * الاستماع لتغييرات قاعدة البيانات في الوقت الفعلي
+     */
     function listenForChildEvents() {
         ordersRef.on('child_added', (snapshot) => {
             const order = { id: snapshot.key, ...snapshot.val() };
+            // تجنب تشغيل الصوت عند التحميل الأولي
+            if (Object.keys(allOrdersData).length > 0) {
+                elements.notificationSound.play().catch(e => console.log("Audio play failed:", e));
+            }
             allOrdersData[order.id] = order;
             renderOrder(order);
             calculateAndDisplayStats();
-            notificationSound.play().catch(e => console.log("Audio play failed:", e));
         });
 
         ordersRef.on('child_changed', (snapshot) => {
@@ -388,27 +450,35 @@
         });
     }
 
-    function renderOrder(order) {
-        const oldCard = document.getElementById(`order-${order.id}`);
-        if (oldCard) {
-            oldCard.remove();
-        }
-
-        const orderCard = createOrderCard(order);
-        const status = order.status || 'new';
-
-        if (['new', 'preparing', 'ready'].includes(status)) {
-            columns[status].appendChild(orderCard);
-            updateEmptyMessage(columns[status]);
-            completedOrdersSection.classList.add('hidden');
-            cancelledOrdersSection.classList.add('hidden');
-        } else if (status === 'completed' && !completedOrdersSection.classList.contains('hidden')) {
-            completedOrdersSection.appendChild(orderCard);
-        } else if (status === 'cancelled' && !cancelledOrdersSection.classList.contains('hidden')) {
-            cancelledOrdersSection.appendChild(orderCard);
+    /**
+     * تحميل الإعدادات من قاعدة البيانات
+     */
+    async function loadSettings() {
+        try {
+            const settingsSnap = await database.ref('settings').once('value');
+            applySettings(settingsSnap.val() || {});
+        } catch (error) {
+            console.error("Error loading settings:", error);
         }
     }
 
+    /**
+     * تطبيق الإعدادات على واجهة المستخدم
+     */
+    function applySettings(settings) {
+        if (settings.backgroundImage) {
+            document.body.style.setProperty('--background-image', `url('${settings.backgroundImage}')`);
+        }
+        if (settings.accentColor) {
+            document.documentElement.style.setProperty('--accent', settings.accentColor);
+        }
+    }
+
+    /**
+     * إنشاء عنصر بطاقة الطلب (Order Card)
+     * @param {Object} order - بيانات الطلب
+     * @returns {HTMLElement} - عنصر بطاقة الطلب
+     */
     function createOrderCard(order) {
         const card = document.createElement('div');
         card.className = `order-card card p-4 space-y-3 ${order.status === 'completed' || order.status === 'cancelled' ? 'opacity-80' : ''}`;
@@ -421,15 +491,7 @@
             </li>
         `).join('');
 
-        let actionButtonsHtml = '';
-        if (order.status === 'new') {
-            actionButtonsHtml = `<button class="pill status-preparing" onclick="updateOrderStatus('${order.id}', 'preparing')"><i class="fas fa-play"></i> بدء التحضير</button>`;
-        } else if (order.status === 'preparing') {
-            actionButtonsHtml = `<button class="pill status-ready" onclick="updateOrderStatus('${order.id}', 'ready')"><i class="fas fa-check"></i> تم التجهيز</button>`;
-        } else if (order.status === 'ready') {
-            actionButtonsHtml = `<button class="pill status-completed" onclick="updateOrderStatus('${order.id}', 'completed')"><i class="fas fa-check-double"></i> إكمال الطلب</button>`;
-        }
-
+        const actionButtons = generateActionButtons(order);
         const cancelDeleteButtons = `<button class="pill status-cancelled" onclick="updateOrderStatus('${order.id}', 'cancelled')"><i class="fas fa-times-circle"></i> إلغاء الطلب</button>`;
 
         card.innerHTML = `
@@ -444,19 +506,44 @@
             ${order.notes ? `<div class="pt-2 text-sm italic text-yellow-300/80"><i class="fas fa-sticky-note ml-2"></i><strong>ملاحظة:</strong> ${order.notes}</div>` : ''}
             <div class="pt-3 flex justify-between">
                 ${cancelDeleteButtons}
-                ${actionButtonsHtml}
+                ${actionButtons}
             </div>
         `;
         return card;
     }
 
+    /**
+     * إنشاء أزرار الإجراءات بناءً على حالة الطلب
+     */
+    function generateActionButtons(order) {
+        switch (order.status) {
+            case 'new':
+                return `<button class="pill status-preparing" onclick="updateOrderStatus('${order.id}', 'preparing')"><i class="fas fa-play"></i> بدء التحضير</button>`;
+            case 'preparing':
+                return `<button class="pill status-ready" onclick="updateOrderStatus('${order.id}', 'ready')"><i class="fas fa-check"></i> تم التجهيز</button>`;
+            case 'ready':
+                return `<button class="pill status-completed" onclick="updateOrderStatus('${order.id}', 'completed')"><i class="fas fa-check-double"></i> إكمال الطلب</button>`;
+            default:
+                return '';
+        }
+    }
+
+    /**
+     * تحديث حالة الطلب في قاعدة البيانات
+     */
     function updateOrderStatus(orderId, newStatus) {
         database.ref('orders/' + orderId).update({
             status: newStatus
-        }).catch(err => console.error("Update failed:", err));
+        }).catch(err => {
+            console.error("Update failed:", err);
+            alert("فشل تحديث حالة الطلب. يرجى المحاولة مرة أخرى.");
+        });
     }
 
-    function deleteAllOrders() {
+    /**
+     * معالجة حذف جميع الطلبات
+     */
+    function handleDeleteAllOrders() {
         const confirmation = confirm("هل أنت متأكد؟ سيؤدي هذا الإجراء إلى حذف جميع الطلبات نهائيًا.");
         if (confirmation) {
             ordersRef.remove()
@@ -470,60 +557,97 @@
         }
     }
 
+    /**
+     * عرض الطلبات بناءً على حالتها المحددة (نشطة، مكتملة، ملغاة)
+     */
     function showOrdersByStatus(status) {
         document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
         document.querySelector(`.tab-button[onclick="showOrdersByStatus('${status}')"]`).classList.add('active');
+        
+        // إخفاء جميع الأقسام
+        elements.activeOrdersSection.classList.add('hidden');
+        elements.completedOrdersSection.classList.add('hidden');
+        elements.cancelledOrdersSection.classList.add('hidden');
 
-        activeOrdersSection.classList.add('hidden');
-        completedOrdersSection.classList.add('hidden');
-        cancelledOrdersSection.classList.add('hidden');
-
+        // عرض القسم المطلوب
         if (status === 'active') {
-            activeOrdersSection.classList.remove('hidden');
-            Object.values(columns).forEach(col => col.innerHTML = '');
-            const activeOrders = Object.values(allOrdersData).filter(o => ['new', 'preparing', 'ready'].includes(o.status));
-            activeOrders.forEach(renderOrder);
-            Object.values(columns).forEach(col => updateEmptyMessage(col));
+            elements.activeOrdersSection.classList.remove('hidden');
+            renderActiveOrders();
         } else if (status === 'completed') {
-            completedOrdersSection.classList.remove('hidden');
-            completedOrdersSection.innerHTML = '';
-            const completedOrders = Object.values(allOrdersData).filter(o => o.status === 'completed');
-            completedOrders.forEach(order => completedOrdersSection.appendChild(createOrderCard(order)));
-            updateEmptyMessage(completedOrdersSection);
+            elements.completedOrdersSection.classList.remove('hidden');
+            renderFilteredOrders(elements.completedOrdersSection, 'completed');
         } else if (status === 'cancelled') {
-            cancelledOrdersSection.classList.remove('hidden');
-            cancelledOrdersSection.innerHTML = '';
-            const cancelledOrders = Object.values(allOrdersData).filter(o => o.status === 'cancelled');
-            cancelledOrders.forEach(order => cancelledOrdersSection.appendChild(createOrderCard(order)));
-            updateEmptyMessage(cancelledOrdersSection);
+            elements.cancelledOrdersSection.classList.remove('hidden');
+            renderFilteredOrders(elements.cancelledOrdersSection, 'cancelled');
         }
     }
 
+    /**
+     * عرض الطلبات النشطة في أقسامها الخاصة
+     */
+    function renderActiveOrders() {
+        elements.newOrders.innerHTML = '';
+        elements.preparingOrders.innerHTML = '';
+        elements.readyOrders.innerHTML = '';
+        
+        Object.values(allOrdersData).forEach(order => {
+            if (['new', 'preparing', 'ready'].includes(order.status)) {
+                const column = elements[`${order.status}Orders`];
+                column.appendChild(createOrderCard(order));
+            }
+        });
+        
+        // تحديث رسائل الأقسام الفارغة
+        updateEmptyMessage(elements.newOrders);
+        updateEmptyMessage(elements.preparingOrders);
+        updateEmptyMessage(elements.readyOrders);
+    }
+    
+    /**
+     * عرض الطلبات المفلترة في قسم واحد
+     */
+    function renderFilteredOrders(container, status) {
+        container.innerHTML = '';
+        const filteredOrders = Object.values(allOrdersData).filter(o => o.status === status);
+        filteredOrders.forEach(order => container.appendChild(createOrderCard(order)));
+        updateEmptyMessage(container);
+    }
+
+    /**
+     * تحديث رسائل "لا توجد طلبات"
+     */
     function updateEmptyMessage(container) {
         if (container.children.length === 0) {
-            container.innerHTML = `<p class="text-[var(--muted)] text-center pt-8">لا توجد طلبات في هذا القسم حالياً...</p>`;
-        } else if (container.children.length > 0 && container.querySelector('.text-center')) {
+            const message = container.id.includes('active') ? "لا توجد طلبات في هذا القسم حالياً..." : "لا توجد طلبات في هذا القسم حالياً...";
+            container.innerHTML = `<p class="text-[var(--muted)] text-center pt-8">${message}</p>`;
+        } else if (container.children.length > 0) {
             const emptyMessage = container.querySelector('.text-center');
             if (emptyMessage) emptyMessage.remove();
         }
     }
 
+    /**
+     * حساب وعرض الإحصائيات الحالية
+     */
     function calculateAndDisplayStats() {
         const ordersArray = Object.values(allOrdersData);
         const today = new Date().setHours(0, 0, 0, 0);
-        const todaysOrders = ordersArray.filter(o => new Date(o.timestamp) >= today && o.status === 'completed');
+        const todaysCompletedOrders = ordersArray.filter(o => new Date(o.timestamp) >= today && o.status === 'completed');
 
-        const totalRevenue = todaysOrders.reduce((sum, order) => sum + order.totalPrice, 0);
-        const totalOrders = todaysOrders.length;
+        const totalRevenue = todaysCompletedOrders.reduce((sum, order) => sum + order.totalPrice, 0);
+        const totalOrders = todaysCompletedOrders.length;
         const avgOrderValue = totalOrders > 0 ? (totalRevenue / totalOrders) : 0;
         const activeOrdersCount = ordersArray.filter(o => ['new', 'preparing', 'ready'].includes(o.status)).length;
 
-        statElements.totalRevenue.textContent = `${totalRevenue.toFixed(2)} درهم`;
-        statElements.totalOrders.textContent = totalOrders;
-        statElements.avgOrderValue.textContent = `${avgOrderValue.toFixed(2)} درهم`;
-        statElements.activeOrders.textContent = activeOrdersCount;
+        elements.stats.totalRevenue.textContent = `${totalRevenue.toFixed(2)} درهم`;
+        elements.stats.totalOrders.textContent = totalOrders;
+        elements.stats.avgOrderValue.textContent = `${avgOrderValue.toFixed(2)} درهم`;
+        elements.stats.activeOrders.textContent = activeOrdersCount;
     }
 
+    /**
+     * عرض النافذة المنبثقة للتصدير
+     */
     function showExportModal(type) {
         currentExportType = type;
         const modal = document.getElementById('export-modal');
@@ -538,6 +662,9 @@
         modal.classList.remove('hidden');
     }
 
+    /**
+     * معالجة عملية التصدير
+     */
     function processExport() {
         const exportType = document.getElementById('export-type').value;
         const period = document.getElementById('export-period').value;
@@ -572,6 +699,9 @@
         document.getElementById('export-modal').classList.add('hidden');
     }
 
+    /**
+     * تصفية الطلبات حسب الفترة الزمنية
+     */
     function filterOrdersByPeriod(orders, period) {
         const now = new Date();
         let startDate;
@@ -597,6 +727,9 @@
         return orders.filter(order => new Date(order.timestamp) >= startDate);
     }
 
+    /**
+     * تصدير البيانات إلى ملف Excel
+     */
     function downloadExcel(orders, filename) {
         const data = orders.map(order => ({
             'ID de la commande': order.id,
@@ -610,16 +743,16 @@
         
         const ws = XLSX.utils.json_to_sheet(data);
         
-        // حساب أقصى طول للنصوص في عمود "Articles" لضبط العرض تلقائيًا
+        // ضبط عرض الأعمدة تلقائيًا
         const articleColumnWidth = data.reduce((w, r) => Math.max(w, r['Articles'].length), 10);
         ws['!cols'] = [
-            { width: 15 }, // ID
-            { width: 15 }, // Numéro de table
-            { width: 25 }, // Date
-            { width: 15 }, // Statut
-            { width: 10 }, // Total
-            { width: articleColumnWidth + 5 }, // Articles
-            { width: 20 }  // Notes
+            { width: 15 }, 
+            { width: 15 }, 
+            { width: 25 }, 
+            { width: 15 }, 
+            { width: 10 }, 
+            { width: articleColumnWidth + 5 }, 
+            { width: 20 }
         ];
 
         const wb = XLSX.utils.book_new();
@@ -627,6 +760,9 @@
         XLSX.writeFile(wb, `${filename}.xlsx`);
     }
 
+    /**
+     * تصدير البيانات إلى ملف PDF احترافي
+     */
     function downloadPDF(orders, filename) {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF({ orientation: 'landscape' });
@@ -677,6 +813,9 @@
         doc.save(`${filename}.pdf`);
     }
 
+    /**
+     * طباعة التقرير مباشرة
+     */
     function printOrders(orders, type) {
         const printSection = document.getElementById('print-section');
         let title = 'Rapport des commandes';
