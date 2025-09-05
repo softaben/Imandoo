@@ -113,16 +113,6 @@
         background-color: var(--accent);
         box-shadow: 0 2px 8px rgba(0,0,0,0.2);
     }
-    
-    @media print {
-      body * { visibility: hidden; }
-      #print-section, #print-section * { visibility: visible; }
-      #print-section {
-        position: absolute; left: 0; top: 0;
-        width: 100%; background: white; color: black; padding: 20px;
-      }
-      .no-print { display: none !important; }
-    }
   </style>
 </head>
 <body class="p-4 md:p-8">
@@ -260,7 +250,6 @@
         <select id="export-type" class="w-full bg-slate-800 rounded-lg p-2 border border-slate-700">
           <option value="xlsx">Excel (.xlsx)</option>
           <option value="pdf">PDF (.pdf)</option>
-          <option value="print">طباعة مباشرة</option>
         </select>
       </div>
       
@@ -282,7 +271,6 @@
     </div>
   </div>
 
-  <div id="print-section" class="hidden"></div>
   <audio id="notification-sound" src="https://assets.mixkit.co/sfx/preview/mixkit-positive-notification-951.mp3" preload="auto"></audio>
   
   <script>
@@ -548,7 +536,6 @@
         
         if (exportFormat === 'xlsx') downloadExcel(ordersToExport, filename);
         else if (exportFormat === 'pdf') downloadPDF(ordersToExport, filename);
-        else if (exportFormat === 'print') printOrders(ordersToExport, currentExportCategory);
         
         exportModal.classList.add('hidden');
     }
@@ -572,7 +559,7 @@
                 lastWeek.setDate(lastWeek.getDate() - 7);
                 startDate = new Date(lastWeek.getFullYear(), lastWeek.getMonth(), lastWeek.getDate());
                 break;
-            case 'month': // <-- تم إصلاح الخطأ هنا
+            case 'month': 
                 startDate = new Date(now.getFullYear(), now.getMonth(), 1);
                 break;
         }
@@ -587,15 +574,14 @@
             'Date': new Date(order.timestamp).toLocaleString('fr-FR'),
             'Statut': order.status,
             'Total': order.totalPrice,
-            'Articles': order.items.map(item => `${item.names.fr} (x${item.quantity})`).join(', '),
-            'Notes': order.notes || ''
+            'Articles': order.items.map(item => `${item.names.fr} (x${item.quantity})`).join(', ')
         }));
         
         const ws = XLSX.utils.json_to_sheet(data);
         const articleColWidth = data.reduce((w, r) => Math.max(w, r.Articles.length), 10);
         ws['!cols'] = [
             { width: 20 }, { width: 15 }, { width: 25 }, { width: 15 }, 
-            { width: 10 }, { width: articleColWidth + 5 }, { width: 30 }
+            { width: 10 }, { width: articleColWidth + 5 }
         ];
 
         const wb = XLSX.utils.book_new();
@@ -615,13 +601,12 @@
             new Date(order.timestamp).toLocaleString('fr-FR'),
             order.status,
             `${order.totalPrice.toFixed(2)} D.H`,
-            order.items.map(item => `${item.names.fr} (x${item.quantity})`).join(', '),
-            order.notes || ''
+            order.items.map(item => `${item.names.fr} (x${item.quantity})`).join(', ')
         ]);
         
         doc.autoTable({
             startY: 30,
-            head: [['N° Table', 'Date', 'Statut', 'Total', 'Articles', 'Notes']],
+            head: [['N° Table', 'Date', 'Statut', 'Total', 'Articles']],
             body: data,
             theme: 'striped',
             styles: { font: 'sans-serif', fontSize: 9, cellPadding: 2.5 },
@@ -635,52 +620,6 @@
         doc.save(`${filename}.pdf`);
     }
 
-    function printOrders(orders, type) {
-        const printSection = document.getElementById('print-section');
-        const titleMap = {
-            completed: 'Rapport des commandes terminées',
-            cancelled: 'Rapport des commandes annulées',
-            all: 'Rapport de toutes les commandes'
-        };
-        const title = titleMap[type] || 'Rapport des commandes';
-        
-        let html = `
-            <div style="padding: 20px; font-family: 'sans-serif'; direction: ltr;">
-                <h1 style="text-align: center; margin-bottom: 20px;">${title}</h1>
-                <p style="text-align: center;">Date du rapport: ${new Date().toLocaleString('fr-FR')}</p>
-                <p style="text-align: center; margin-bottom: 20px;">Nombre de commandes: ${orders.length}</p>
-                <table style="width: 100%; border-collapse: collapse;">
-                    <thead>
-                        <tr style="background-color: #f3f4f6;">
-                            <th style="border: 1px solid #ddd; padding: 8px;">N° Table</th>
-                            <th style="border: 1px solid #ddd; padding: 8px;">Date</th>
-                            <th style="border: 1px solid #ddd; padding: 8px;">Statut</th>
-                            <th style="border: 1px solid #ddd; padding: 8px;">Total</th>
-                            <th style="border: 1px solid #ddd; padding: 8px;">Articles</th>
-                            <th style="border: 1px solid #ddd; padding: 8px;">Notes</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-        `;
-        
-        orders.forEach(order => {
-            html += `
-                <tr>
-                    <td style="border: 1px solid #ddd; padding: 8px;">${order.tableNumber}</td>
-                    <td style="border: 1px solid #ddd; padding: 8px;">${new Date(order.timestamp).toLocaleString('fr-FR')}</td>
-                    <td style="border: 1px solid #ddd; padding: 8px;">${order.status}</td>
-                    <td style="border: 1px solid #ddd; padding: 8px;">${order.totalPrice.toFixed(2)} D.H</td>
-                    <td style="border: 1px solid #ddd; padding: 8px;">${order.items.map(item => `${item.names.fr} (x${item.quantity})`).join(', ')}</td>
-                    <td style="border: 1px solid #ddd; padding: 8px;">${order.notes || ''}</td>
-                </tr>
-            `;
-        });
-        
-        html += `</tbody></table></div>`;
-        
-        printSection.innerHTML = html;
-        window.print();
-    }
   </script>
 </body>
 </html>
