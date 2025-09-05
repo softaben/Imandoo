@@ -609,6 +609,19 @@
         }));
         
         const ws = XLSX.utils.json_to_sheet(data);
+        
+        // حساب أقصى طول للنصوص في عمود "Articles" لضبط العرض تلقائيًا
+        const articleColumnWidth = data.reduce((w, r) => Math.max(w, r['Articles'].length), 10);
+        ws['!cols'] = [
+            { width: 15 }, // ID
+            { width: 15 }, // Numéro de table
+            { width: 25 }, // Date
+            { width: 15 }, // Statut
+            { width: 10 }, // Total
+            { width: articleColumnWidth + 5 }, // Articles
+            { width: 20 }  // Notes
+        ];
+
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "Commandes");
         XLSX.writeFile(wb, `${filename}.xlsx`);
@@ -618,15 +631,15 @@
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF({ orientation: 'landscape' });
         
-        doc.setFontSize(16);
-        doc.text(filename, 148, 20, null, null, "center");
+        doc.setFontSize(18);
+        doc.text(filename.replace(/-/g, ' ').toUpperCase(), 148, 20, null, null, "center");
 
         const data = orders.map(order => [
             order.id,
             order.tableNumber,
             new Date(order.timestamp).toLocaleString('fr-FR'),
             order.status,
-            order.totalPrice,
+            `${order.totalPrice} D.H`,
             order.items.map(item => `${item.names.fr} (x${item.quantity})`).join(', '),
             order.notes || ''
         ]);
@@ -637,13 +650,27 @@
             startY: 30,
             head: headers,
             body: data,
-            headStyles: { fillColor: [30, 41, 59] },
-            alternateRowStyles: { fillColor: [15, 23, 42] },
             theme: 'striped',
+            styles: {
+                font: 'sans-serif',
+                fontSize: 10,
+                cellPadding: 3
+            },
+            headStyles: {
+                fillColor: '#2b2d42',
+                textColor: '#ffffff',
+                halign: 'center'
+            },
+            alternateRowStyles: {
+                fillColor: '#f8f9fa'
+            },
+            columnStyles: {
+                4: { fontStyle: 'bold' }
+            },
             didDrawPage: function(data) {
                 let str = "Page " + doc.internal.getNumberOfPages()
                 doc.setFontSize(10)
-                doc.text(str, doc.internal.pageSize.width - data.settings.margin.left, doc.internal.pageSize.height - 10, null, null, "right")
+                doc.text(str, doc.internal.pageSize.width - data.settings.margin.right, doc.internal.pageSize.height - 10, null, null, "right")
             }
         });
         
