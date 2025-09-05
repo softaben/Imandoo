@@ -115,58 +115,17 @@
     }
     
     @media print {
-      body * {
-        visibility: hidden;
-      }
-      #print-section, #print-section * {
-        visibility: visible;
-      }
+      body * { visibility: hidden; }
+      #print-section, #print-section * { visibility: visible; }
       #print-section {
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 100%;
-        background: white;
-        color: black;
-        padding: 20px;
+        position: absolute; left: 0; top: 0;
+        width: 100%; background: white; color: black; padding: 20px;
       }
-      .no-print {
-        display: none !important;
-      }
-    }
-
-    #loading-screen {
-      position: fixed;
-      inset: 0;
-      background: var(--bg);
-      color: var(--accent);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      z-index: 100;
-      transition: opacity 0.5s ease;
-      font-family: 'Playfair Display', serif;
-    }
-    .spinner {
-      border: 4px solid rgba(255,255,255,0.1);
-      border-left-color: var(--accent);
-      border-radius: 50%;
-      width: 50px;
-      height: 50px;
-      animation: spin 1s linear infinite;
-    }
-    @keyframes spin {
-      to { transform: rotate(360deg); }
+      .no-print { display: none !important; }
     }
   </style>
 </head>
 <body class="p-4 md:p-8">
-
-  <div id="loading-screen" class="flex flex-col items-center justify-center gap-4">
-      <div class="spinner"></div>
-      <p class="text-xl mt-4">جاري تحميل البيانات...</p>
-  </div>
 
   <header class="flex justify-between items-center mb-8 pb-4 border-b border-slate-800">
     <div class="flex items-center gap-4">
@@ -230,7 +189,7 @@
     <h2 class="text-2xl font-bold mb-4">إدارة النظام</h2>
     <div class="card p-5 flex flex-wrap items-center justify-between gap-4">
       <div class="flex flex-wrap gap-4">
-        <button onclick="window.location.reload()" class="pill text-white bg-blue-600 hover:bg-blue-700 transition w-full md:w-auto">
+        <button id="reloadBtn" class="pill text-white bg-blue-600 hover:bg-blue-700 transition w-full md:w-auto">
             <i class="fas fa-sync-alt"></i> تحديث الصفحة
         </button>
         <button id="deleteAllBtn" class="pill text-white bg-red-600 hover:bg-red-700 transition w-full md:w-auto">
@@ -238,13 +197,13 @@
         </button>
       </div>
       <div class="flex flex-wrap gap-4">
-        <button onclick="showExportModal('completed')" class="pill text-white bg-green-600 hover:bg-green-700 transition w-full md:w-auto">
+        <button data-export-type="completed" class="pill export-btn text-white bg-green-600 hover:bg-green-700 transition w-full md:w-auto">
             <i class="fas fa-download"></i> تصدير المكتمل
         </button>
-        <button onclick="showExportModal('cancelled')" class="pill text-white bg-red-600 hover:bg-red-700 transition w-full md:w-auto">
+        <button data-export-type="cancelled" class="pill export-btn text-white bg-red-600 hover:bg-red-700 transition w-full md:w-auto">
             <i class="fas fa-download"></i> تصدير الملغى
         </button>
-        <button onclick="showExportModal('all')" class="pill text-white bg-purple-600 hover:bg-purple-700 transition w-full md:w-auto">
+        <button data-export-type="all" class="pill export-btn text-white bg-purple-600 hover:bg-purple-700 transition w-full md:w-auto">
             <i class="fas fa-download"></i> تصدير الكل
         </button>
       </div>
@@ -255,13 +214,13 @@
     <h2 class="text-2xl font-bold mb-4">الطلبات الحالية</h2>
     
     <div class="tabs mb-4">
-      <button class="tab-button active" onclick="showOrdersByStatus('active')">
+      <button class="tab-button active" data-tab="active">
         <i class="fas fa-tachometer-alt ml-2"></i> الطلبات النشطة
       </button>
-      <button class="tab-button" onclick="showOrdersByStatus('completed')">
+      <button class="tab-button" data-tab="completed">
         <i class="fas fa-check-double ml-2"></i> الطلبات المكتملة
       </button>
-      <button class="tab-button" onclick="showOrdersByStatus('cancelled')">
+      <button class="tab-button" data-tab="cancelled">
         <i class="fas fa-times-circle ml-2"></i> الطلبات الملغاة
       </button>
     </div>
@@ -271,9 +230,7 @@
         <h3 class="text-lg font-bold mb-4 border-b-2 border-info pb-2 flex items-center gap-2">
             <i class="fas fa-bell text-info"></i> طلبات جديدة
         </h3>
-        <div id="new-orders" class="space-y-4">
-            <p class="text-[var(--muted)] text-center pt-8">لا توجد طلبات جديدة حالياً...</p>
-        </div>
+        <div id="new-orders" class="space-y-4"></div>
       </div>
       <div class="kanban-column">
         <h3 class="text-lg font-bold mb-4 border-b-2 border-accent pb-2 flex items-center gap-2">
@@ -319,12 +276,8 @@
       </div>
       
       <div class="flex justify-end gap-3 mt-6">
-        <button onclick="document.getElementById('export-modal').classList.add('hidden')" class="pill bg-gray-600 hover:bg-gray-700">
-          إلغاء
-        </button>
-        <button onclick="processExport()" class="pill bg-green-600 hover:bg-green-700">
-          تصدير
-        </button>
+        <button id="cancelExportBtn" class="pill bg-gray-600 hover:bg-gray-700">إلغاء</button>
+        <button id="confirmExportBtn" class="pill bg-green-600 hover:bg-green-700">تصدير</button>
       </div>
     </div>
   </div>
@@ -333,9 +286,14 @@
   <audio id="notification-sound" src="https://assets.mixkit.co/sfx/preview/mixkit-positive-notification-951.mp3" preload="auto"></audio>
   
   <script>
-    /**
-     * إعدادات Firebase - يتم تخزينها هنا بشكل آمن. في التطبيقات الحقيقية، يفضل استخدام متغيرات البيئة.
-     */
+    // ===================================================================================
+    // !!! تحذير أمني هام !!!
+    // هذا الكود يكشف إعدادات الاتصال بقاعدة بيانات Firebase الخاصة بك.
+    // يجب عليك *فورًا* الذهاب إلى لوحة تحكم Firebase وتأمين قاعدة بياناتك
+    // باستخدام "قواعد الأمان" (Security Rules).
+    // تأكد من أن القواعد تمنع أي شخص غير مصرح له من قراءة أو تعديل بياناتك.
+    // لا تعتمد على إخفاء الكود في جانب العميل، فالحماية الحقيقية تأتي من الخادم.
+    // ===================================================================================
     const firebaseConfig = {
         apiKey: "AIzaSyCyPOzsEzdrRd9o7iHASzFoLyJQhpTW83E",
         authDomain: "imandou-food.firebaseapp.com",
@@ -343,142 +301,116 @@
         projectId: "imandou-food"
     };
 
-    // تهيئة Firebase
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
     const ordersRef = database.ref('orders');
 
-    // عناصر DOM الرئيسية
-    const elements = {
-      loadingScreen: document.getElementById('loading-screen'),
-      newOrders: document.getElementById('new-orders'),
-      preparingOrders: document.getElementById('preparing-orders'),
-      readyOrders: document.getElementById('ready-orders'),
-      completedOrdersSection: document.getElementById('completed-orders-section'),
-      cancelledOrdersSection: document.getElementById('cancelled-orders-section'),
-      activeOrdersSection: document.getElementById('active-orders-section'),
-      deleteAllBtn: document.getElementById('deleteAllBtn'),
-      notificationSound: document.getElementById('notification-sound'),
-      stats: {
+    const columns = {
+        new: document.getElementById('new-orders'),
+        preparing: document.getElementById('preparing-orders'),
+        ready: document.getElementById('ready-orders')
+    };
+    
+    const sections = {
+        active: document.getElementById('active-orders-section'),
+        completed: document.getElementById('completed-orders-section'),
+        cancelled: document.getElementById('cancelled-orders-section')
+    };
+
+    const statElements = {
         totalRevenue: document.getElementById('totalRevenue'),
         totalOrders: document.getElementById('totalOrders'),
         avgOrderValue: document.getElementById('avgOrderValue'),
         activeOrders: document.getElementById('activeOrders'),
-      }
     };
-    
+
+    const notificationSound = document.getElementById('notification-sound');
+    const exportModal = document.getElementById('export-modal');
+
     let allOrdersData = {};
-    let currentExportType = '';
+    let currentExportCategory = '';
 
-    /**
-     * نقطة دخول التطبيق
-     * تهيئة المستمعين وتحميل الإعدادات
-     */
     document.addEventListener('DOMContentLoaded', () => {
-        setupEventListeners();
-        loadInitialData();
-    });
-    
-    /**
-     * إعداد مستمعي الأحداث للعناصر الرئيسية
-     */
-    function setupEventListeners() {
-        elements.deleteAllBtn.addEventListener('click', handleDeleteAllOrders);
-        listenForChildEvents();
-    }
-    
-    /**
-     * إخفاء شاشة التحميل بعد انتهاء التحميل
-     */
-    function hideLoadingScreen() {
-      elements.loadingScreen.style.opacity = '0';
-      setTimeout(() => {
-        elements.loadingScreen.style.display = 'none';
-      }, 500);
-    }
-    
-    /**
-     * تحميل البيانات الأولية عند بدء التشغيل
-     */
-    function loadInitialData() {
-        ordersRef.once('value').then(snapshot => {
-            snapshot.forEach(childSnapshot => {
-                const order = { id: childSnapshot.key, ...childSnapshot.val() };
-                allOrdersData[order.id] = order;
-                renderOrder(order);
-            });
-            calculateAndDisplayStats();
-            hideLoadingScreen();
-        }).catch(err => {
-            console.error("Failed to load initial data:", err);
-            hideLoadingScreen();
-        });
-        
         loadSettings();
-    }
-    
-    /**
-     * الاستماع لتغييرات قاعدة البيانات في الوقت الفعلي
-     */
-    function listenForChildEvents() {
-        ordersRef.on('child_added', (snapshot) => {
-            const order = { id: snapshot.key, ...snapshot.val() };
-            // تجنب تشغيل الصوت عند التحميل الأولي
-            if (Object.keys(allOrdersData).length > 0) {
-                elements.notificationSound.play().catch(e => console.log("Audio play failed:", e));
-            }
-            allOrdersData[order.id] = order;
-            renderOrder(order);
-            calculateAndDisplayStats();
-        });
+        initializeEventListeners();
+        listenForOrderChanges();
+        showOrdersByStatus('active'); // ابدأ بالواجهة النشطة
+    });
 
-        ordersRef.on('child_changed', (snapshot) => {
-            const order = { id: snapshot.key, ...snapshot.val() };
-            allOrdersData[order.id] = order;
-            renderOrder(order);
-            calculateAndDisplayStats();
-        });
-
-        ordersRef.on('child_removed', (snapshot) => {
-            const orderId = snapshot.key;
-            delete allOrdersData[orderId];
-            const card = document.getElementById(`order-${orderId}`);
-            if (card) {
-                card.remove();
-            }
-            calculateAndDisplayStats();
-        });
-    }
-
-    /**
-     * تحميل الإعدادات من قاعدة البيانات
-     */
     async function loadSettings() {
         try {
             const settingsSnap = await database.ref('settings').once('value');
-            applySettings(settingsSnap.val() || {});
+            const settings = settingsSnap.val() || {};
+            if (settings.backgroundImage) {
+                document.body.style.setProperty('--background-image', `url('${settings.backgroundImage}')`);
+            }
+            if (settings.accentColor) {
+                document.documentElement.style.setProperty('--accent', settings.accentColor);
+            }
         } catch (error) {
             console.error("Error loading settings:", error);
         }
     }
 
-    /**
-     * تطبيق الإعدادات على واجهة المستخدم
-     */
-    function applySettings(settings) {
-        if (settings.backgroundImage) {
-            document.body.style.setProperty('--background-image', `url('${settings.backgroundImage}')`);
-        }
-        if (settings.accentColor) {
-            document.documentElement.style.setProperty('--accent', settings.accentColor);
-        }
+    function initializeEventListeners() {
+        document.getElementById('deleteAllBtn').addEventListener('click', deleteAllOrders);
+        document.getElementById('reloadBtn').addEventListener('click', () => window.location.reload());
+        
+        document.querySelectorAll('.tab-button').forEach(btn => {
+            btn.addEventListener('click', () => showOrdersByStatus(btn.dataset.tab));
+        });
+
+        document.querySelectorAll('.export-btn').forEach(btn => {
+            btn.addEventListener('click', () => showExportModal(btn.dataset.exportType));
+        });
+        
+        document.getElementById('cancelExportBtn').addEventListener('click', () => exportModal.classList.add('hidden'));
+        document.getElementById('confirmExportBtn').addEventListener('click', processExport);
     }
 
-    /**
-     * إنشاء عنصر بطاقة الطلب (Order Card)
-     * @param {Object} order - بيانات الطلب
-     * @returns {HTMLElement} - عنصر بطاقة الطلب
-     */
+    function listenForOrderChanges() {
+        ordersRef.on('child_added', snapshot => {
+            const order = { id: snapshot.key, ...snapshot.val() };
+            allOrdersData[order.id] = order;
+            renderOrder(order);
+            calculateAndDisplayStats();
+            notificationSound.play().catch(e => console.log("Audio play failed, user interaction needed."));
+        });
+
+        ordersRef.on('child_changed', snapshot => {
+            const order = { id: snapshot.key, ...snapshot.val() };
+            allOrdersData[order.id] = order;
+            renderOrder(order);
+            calculateAndDisplayStats();
+        });
+
+        ordersRef.on('child_removed', snapshot => {
+            const orderId = snapshot.key;
+            delete allOrdersData[orderId];
+            const card = document.getElementById(`order-${orderId}`);
+            if (card) card.remove();
+            calculateAndDisplayStats();
+            updateAllEmptyMessages();
+        });
+    }
+
+    function renderOrder(order) {
+        const oldCard = document.getElementById(`order-${order.id}`);
+        if (oldCard) oldCard.remove();
+
+        const orderCard = createOrderCard(order);
+        const status = order.status || 'new';
+
+        if (['new', 'preparing', 'ready'].includes(status)) {
+            columns[status].appendChild(orderCard);
+        } else if (status === 'completed') {
+            sections.completed.appendChild(orderCard);
+        } else if (status === 'cancelled') {
+            sections.cancelled.appendChild(orderCard);
+        }
+        updateAllEmptyMessages();
+    }
+
     function createOrderCard(order) {
         const card = document.createElement('div');
         card.className = `order-card card p-4 space-y-3 ${order.status === 'completed' || order.status === 'cancelled' ? 'opacity-80' : ''}`;
@@ -487,11 +419,19 @@
         const itemsHtml = order.items.map(item => `
             <li class="flex justify-between items-center text-sm">
                 <span>${item.names.ar} <span class="text-xs text-[var(--muted)]">x${item.quantity}</span></span>
-                <span class="font-semibold">${item.price * item.quantity} د.م</span>
+                <span class="font-semibold">${(item.price * item.quantity).toFixed(2)} د.م</span>
             </li>
         `).join('');
 
-        const actionButtons = generateActionButtons(order);
+        let actionButtonsHtml = '';
+        if (order.status === 'new') {
+            actionButtonsHtml = `<button class="pill status-preparing" onclick="updateOrderStatus('${order.id}', 'preparing')"><i class="fas fa-play"></i> بدء التحضير</button>`;
+        } else if (order.status === 'preparing') {
+            actionButtonsHtml = `<button class="pill status-ready" onclick="updateOrderStatus('${order.id}', 'ready')"><i class="fas fa-check"></i> تم التجهيز</button>`;
+        } else if (order.status === 'ready') {
+            actionButtonsHtml = `<button class="pill status-completed" onclick="updateOrderStatus('${order.id}', 'completed')"><i class="fas fa-check-double"></i> إكمال الطلب</button>`;
+        }
+
         const cancelDeleteButtons = `<button class="pill status-cancelled" onclick="updateOrderStatus('${order.id}', 'cancelled')"><i class="fas fa-times-circle"></i> إلغاء الطلب</button>`;
 
         card.innerHTML = `
@@ -500,236 +440,146 @@
                     <h4 class="font-bold text-lg">طاولة رقم ${order.tableNumber}</h4>
                     <p class="text-xs text-[var(--muted)]">${new Date(order.timestamp).toLocaleString('ar-MA')}</p>
                 </div>
-                <div class="font-bold text-lg text-[var(--accent)]">${order.totalPrice} د.م</div>
+                <div class="font-bold text-lg text-[var(--accent)]">${order.totalPrice.toFixed(2)} د.م</div>
             </div>
             <ul class="space-y-1">${itemsHtml}</ul>
             ${order.notes ? `<div class="pt-2 text-sm italic text-yellow-300/80"><i class="fas fa-sticky-note ml-2"></i><strong>ملاحظة:</strong> ${order.notes}</div>` : ''}
             <div class="pt-3 flex justify-between">
                 ${cancelDeleteButtons}
-                ${actionButtons}
+                ${actionButtonsHtml}
             </div>
         `;
         return card;
     }
 
-    /**
-     * إنشاء أزرار الإجراءات بناءً على حالة الطلب
-     */
-    function generateActionButtons(order) {
-        switch (order.status) {
-            case 'new':
-                return `<button class="pill status-preparing" onclick="updateOrderStatus('${order.id}', 'preparing')"><i class="fas fa-play"></i> بدء التحضير</button>`;
-            case 'preparing':
-                return `<button class="pill status-ready" onclick="updateOrderStatus('${order.id}', 'ready')"><i class="fas fa-check"></i> تم التجهيز</button>`;
-            case 'ready':
-                return `<button class="pill status-completed" onclick="updateOrderStatus('${order.id}', 'completed')"><i class="fas fa-check-double"></i> إكمال الطلب</button>`;
-            default:
-                return '';
-        }
-    }
-
-    /**
-     * تحديث حالة الطلب في قاعدة البيانات
-     */
     function updateOrderStatus(orderId, newStatus) {
-        database.ref('orders/' + orderId).update({
-            status: newStatus
-        }).catch(err => {
-            console.error("Update failed:", err);
-            alert("فشل تحديث حالة الطلب. يرجى المحاولة مرة أخرى.");
-        });
+        database.ref('orders/' + orderId).update({ status: newStatus })
+            .catch(err => console.error("Update failed:", err));
     }
 
-    /**
-     * معالجة حذف جميع الطلبات
-     */
-    function handleDeleteAllOrders() {
-        const confirmation = confirm("هل أنت متأكد؟ سيؤدي هذا الإجراء إلى حذف جميع الطلبات نهائيًا.");
-        if (confirmation) {
+    function deleteAllOrders() {
+        if (confirm("هل أنت متأكد من رغبتك في حذف جميع الطلبات؟ هذا الإجراء لا يمكن التراجع عنه وسيزيل كل الطلبات (النشطة والمكتملة والملغاة) نهائيًا.")) {
             ordersRef.remove()
-                .then(() => {
-                    alert("تم حذف جميع الطلبات بنجاح!");
-                })
-                .catch((error) => {
+                .then(() => alert("تم حذف جميع الطلبات بنجاح!"))
+                .catch(error => {
                     alert("فشل في حذف الطلبات. يرجى المحاولة مرة أخرى.");
                     console.error("Error deleting orders:", error);
                 });
         }
     }
 
-    /**
-     * عرض الطلبات بناءً على حالتها المحددة (نشطة، مكتملة، ملغاة)
-     */
     function showOrdersByStatus(status) {
-        document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
-        document.querySelector(`.tab-button[onclick="showOrdersByStatus('${status}')"]`).classList.add('active');
-        
-        // إخفاء جميع الأقسام
-        elements.activeOrdersSection.classList.add('hidden');
-        elements.completedOrdersSection.classList.add('hidden');
-        elements.cancelledOrdersSection.classList.add('hidden');
+        document.querySelectorAll('.tab-button').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.tab === status);
+        });
 
-        // عرض القسم المطلوب
-        if (status === 'active') {
-            elements.activeOrdersSection.classList.remove('hidden');
-            renderActiveOrders();
-        } else if (status === 'completed') {
-            elements.completedOrdersSection.classList.remove('hidden');
-            renderFilteredOrders(elements.completedOrdersSection, 'completed');
-        } else if (status === 'cancelled') {
-            elements.cancelledOrdersSection.classList.remove('hidden');
-            renderFilteredOrders(elements.cancelledOrdersSection, 'cancelled');
+        Object.values(sections).forEach(section => section.classList.add('hidden'));
+        if (sections[status]) {
+            sections[status].classList.remove('hidden');
         }
     }
 
-    /**
-     * عرض الطلبات النشطة في أقسامها الخاصة
-     */
-    function renderActiveOrders() {
-        elements.newOrders.innerHTML = '';
-        elements.preparingOrders.innerHTML = '';
-        elements.readyOrders.innerHTML = '';
-        
-        Object.values(allOrdersData).forEach(order => {
-            if (['new', 'preparing', 'ready'].includes(order.status)) {
-                const column = elements[`${order.status}Orders`];
-                column.appendChild(createOrderCard(order));
+    function updateEmptyMessage(container) {
+        const messageExists = container.querySelector('.empty-message');
+        if (container.children.length === 0 || (container.children.length === 1 && messageExists)) {
+            if (!messageExists) {
+                container.innerHTML = `<p class="empty-message text-[var(--muted)] text-center pt-8">لا توجد طلبات في هذا القسم حالياً...</p>`;
             }
-        });
-        
-        // تحديث رسائل الأقسام الفارغة
-        updateEmptyMessage(elements.newOrders);
-        updateEmptyMessage(elements.preparingOrders);
-        updateEmptyMessage(elements.readyOrders);
+        } else if (messageExists) {
+            messageExists.remove();
+        }
+    }
+
+    function updateAllEmptyMessages() {
+        Object.values(columns).forEach(updateEmptyMessage);
+        Object.values(sections).forEach(updateEmptyMessage);
     }
     
-    /**
-     * عرض الطلبات المفلترة في قسم واحد
-     */
-    function renderFilteredOrders(container, status) {
-        container.innerHTML = '';
-        const filteredOrders = Object.values(allOrdersData).filter(o => o.status === status);
-        filteredOrders.forEach(order => container.appendChild(createOrderCard(order)));
-        updateEmptyMessage(container);
-    }
-
-    /**
-     * تحديث رسائل "لا توجد طلبات"
-     */
-    function updateEmptyMessage(container) {
-        if (container.children.length === 0) {
-            const message = container.id.includes('active') ? "لا توجد طلبات في هذا القسم حالياً..." : "لا توجد طلبات في هذا القسم حالياً...";
-            container.innerHTML = `<p class="text-[var(--muted)] text-center pt-8">${message}</p>`;
-        } else if (container.children.length > 0) {
-            const emptyMessage = container.querySelector('.text-center');
-            if (emptyMessage) emptyMessage.remove();
-        }
-    }
-
-    /**
-     * حساب وعرض الإحصائيات الحالية
-     */
     function calculateAndDisplayStats() {
         const ordersArray = Object.values(allOrdersData);
-        const today = new Date().setHours(0, 0, 0, 0);
-        const todaysCompletedOrders = ordersArray.filter(o => new Date(o.timestamp) >= today && o.status === 'completed');
-
+        const todayStart = new Date().setHours(0, 0, 0, 0);
+        
+        const todaysCompletedOrders = ordersArray.filter(o => o.status === 'completed' && o.timestamp >= todayStart);
+        
         const totalRevenue = todaysCompletedOrders.reduce((sum, order) => sum + order.totalPrice, 0);
         const totalOrders = todaysCompletedOrders.length;
         const avgOrderValue = totalOrders > 0 ? (totalRevenue / totalOrders) : 0;
         const activeOrdersCount = ordersArray.filter(o => ['new', 'preparing', 'ready'].includes(o.status)).length;
 
-        elements.stats.totalRevenue.textContent = `${totalRevenue.toFixed(2)} درهم`;
-        elements.stats.totalOrders.textContent = totalOrders;
-        elements.stats.avgOrderValue.textContent = `${avgOrderValue.toFixed(2)} درهم`;
-        elements.stats.activeOrders.textContent = activeOrdersCount;
+        statElements.totalRevenue.textContent = `${totalRevenue.toFixed(2)} درهم`;
+        statElements.totalOrders.textContent = totalOrders;
+        statElements.avgOrderValue.textContent = `${avgOrderValue.toFixed(2)} درهم`;
+        statElements.activeOrders.textContent = activeOrdersCount;
     }
 
-    /**
-     * عرض النافذة المنبثقة للتصدير
-     */
     function showExportModal(type) {
-        currentExportType = type;
-        const modal = document.getElementById('export-modal');
+        currentExportCategory = type;
         const title = document.getElementById('export-modal-title');
-        
-        let titleText = 'تصدير البيانات';
-        if (type === 'completed') titleText = 'تصدير الطلبات المكتملة';
-        else if (type === 'cancelled') titleText = 'تصدير الطلبات الملغاة';
-        else if (type === 'all') titleText = 'تصدير جميع الطلبات';
-        
-        title.textContent = titleText;
-        modal.classList.remove('hidden');
+        const titleMap = {
+            completed: 'تصدير الطلبات المكتملة',
+            cancelled: 'تصدير الطلبات الملغاة',
+            all: 'تصدير جميع الطلبات'
+        };
+        title.textContent = titleMap[type] || 'تصدير البيانات';
+        exportModal.classList.remove('hidden');
     }
 
-    /**
-     * معالجة عملية التصدير
-     */
     function processExport() {
-        const exportType = document.getElementById('export-type').value;
+        const exportFormat = document.getElementById('export-type').value;
         const period = document.getElementById('export-period').value;
         
-        let ordersToExport = [];
-        const ordersArray = Object.values(allOrdersData);
+        let ordersToExport = Object.values(allOrdersData);
         
-        if (currentExportType === 'completed') {
-            ordersToExport = ordersArray.filter(o => o.status === 'completed');
-        } else if (currentExportType === 'cancelled') {
-            ordersToExport = ordersArray.filter(o => o.status === 'cancelled');
-        } else if (currentExportType === 'all') {
-            ordersToExport = ordersArray;
+        if (currentExportCategory === 'completed') {
+            ordersToExport = ordersToExport.filter(o => o.status === 'completed');
+        } else if (currentExportCategory === 'cancelled') {
+            ordersToExport = ordersToExport.filter(o => o.status === 'cancelled');
         }
         
         ordersToExport = filterOrdersByPeriod(ordersToExport, period);
         
         if (ordersToExport.length === 0) {
             alert("لا توجد طلبات لتصديرها بناءً على المعايير المحددة.");
-            document.getElementById('export-modal').classList.add('hidden');
+            exportModal.classList.add('hidden');
             return;
         }
         
-        if (exportType === 'xlsx') {
-            downloadExcel(ordersToExport, `rapport-des-commandes-${currentExportType}`);
-        } else if (exportType === 'pdf') {
-            downloadPDF(ordersToExport, `rapport-des-commandes-${currentExportType}`);
-        } else if (exportType === 'print') {
-            printOrders(ordersToExport, currentExportType);
-        }
+        const filename = `rapport-commandes-${currentExportCategory}-${period}`;
         
-        document.getElementById('export-modal').classList.add('hidden');
+        if (exportFormat === 'xlsx') downloadExcel(ordersToExport, filename);
+        else if (exportFormat === 'pdf') downloadPDF(ordersToExport, filename);
+        else if (exportFormat === 'print') printOrders(ordersToExport, currentExportCategory);
+        
+        exportModal.classList.add('hidden');
     }
 
-    /**
-     * تصفية الطلبات حسب الفترة الزمنية
-     */
     function filterOrdersByPeriod(orders, period) {
         const now = new Date();
+        if (period === 'all') return orders;
+
         let startDate;
-        
         switch(period) {
             case 'today':
                 startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
                 break;
             case 'yesterday':
-                startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
+                const yesterday = new Date();
+                yesterday.setDate(yesterday.getDate() - 1);
+                startDate = new Date(yesterday.getFullYear(), yesterday.getMonth(), yesterday.getDate());
                 break;
             case 'week':
-                startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7);
+                const lastWeek = new Date();
+                lastWeek.setDate(lastWeek.getDate() - 7);
+                startDate = new Date(lastWeek.getFullYear(), lastWeek.getMonth(), lastWeek.getDate());
                 break;
-            case 'month':
-                startDate = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
+            case 'month': // <-- تم إصلاح الخطأ هنا
+                startDate = new Date(now.getFullYear(), now.getMonth(), 1);
                 break;
-            case 'all':
-            default:
-                return orders;
         }
         
-        return orders.filter(order => new Date(order.timestamp) >= startDate);
+        return orders.filter(order => order.timestamp >= startDate.getTime());
     }
 
-    /**
-     * تصدير البيانات إلى ملف Excel
-     */
     function downloadExcel(orders, filename) {
         const data = orders.map(order => ({
             'ID de la commande': order.id,
@@ -742,17 +592,10 @@
         }));
         
         const ws = XLSX.utils.json_to_sheet(data);
-        
-        // ضبط عرض الأعمدة تلقائيًا
-        const articleColumnWidth = data.reduce((w, r) => Math.max(w, r['Articles'].length), 10);
+        const articleColWidth = data.reduce((w, r) => Math.max(w, r.Articles.length), 10);
         ws['!cols'] = [
-            { width: 15 }, 
-            { width: 15 }, 
-            { width: 25 }, 
-            { width: 15 }, 
-            { width: 10 }, 
-            { width: articleColumnWidth + 5 }, 
-            { width: 20 }
+            { width: 20 }, { width: 15 }, { width: 25 }, { width: 15 }, 
+            { width: 10 }, { width: articleColWidth + 5 }, { width: 30 }
         ];
 
         const wb = XLSX.utils.book_new();
@@ -760,80 +603,56 @@
         XLSX.writeFile(wb, `${filename}.xlsx`);
     }
 
-    /**
-     * تصدير البيانات إلى ملف PDF احترافي
-     */
     function downloadPDF(orders, filename) {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF({ orientation: 'landscape' });
         
         doc.setFontSize(18);
-        doc.text(filename.replace(/-/g, ' ').toUpperCase(), 148, 20, null, null, "center");
+        doc.text(filename.replace(/-/g, ' ').toUpperCase(), 148, 20, { align: "center" });
 
         const data = orders.map(order => [
-            order.id,
             order.tableNumber,
             new Date(order.timestamp).toLocaleString('fr-FR'),
             order.status,
-            `${order.totalPrice} D.H`,
+            `${order.totalPrice.toFixed(2)} D.H`,
             order.items.map(item => `${item.names.fr} (x${item.quantity})`).join(', '),
             order.notes || ''
         ]);
         
-        const headers = [['ID de la commande', 'Numéro de table', 'Date', 'Statut', 'Total', 'Articles', 'Notes']];
-
         doc.autoTable({
             startY: 30,
-            head: headers,
+            head: [['N° Table', 'Date', 'Statut', 'Total', 'Articles', 'Notes']],
             body: data,
             theme: 'striped',
-            styles: {
-                font: 'sans-serif',
-                fontSize: 10,
-                cellPadding: 3
-            },
-            headStyles: {
-                fillColor: '#2b2d42',
-                textColor: '#ffffff',
-                halign: 'center'
-            },
-            alternateRowStyles: {
-                fillColor: '#f8f9fa'
-            },
-            columnStyles: {
-                4: { fontStyle: 'bold' }
-            },
-            didDrawPage: function(data) {
-                let str = "Page " + doc.internal.getNumberOfPages()
-                doc.setFontSize(10)
-                doc.text(str, doc.internal.pageSize.width - data.settings.margin.right, doc.internal.pageSize.height - 10, null, null, "right")
+            styles: { font: 'sans-serif', fontSize: 9, cellPadding: 2.5 },
+            headStyles: { fillColor: '#2b2d42', textColor: '#ffffff', halign: 'center' },
+            didDrawPage: (data) => {
+                doc.setFontSize(10);
+                doc.text(`Page ${doc.internal.getNumberOfPages()}`, doc.internal.pageSize.width - data.settings.margin.right, doc.internal.pageSize.height - 10, { align: 'right' });
             }
         });
         
         doc.save(`${filename}.pdf`);
     }
 
-    /**
-     * طباعة التقرير مباشرة
-     */
     function printOrders(orders, type) {
         const printSection = document.getElementById('print-section');
-        let title = 'Rapport des commandes';
-        
-        if (type === 'completed') title = 'Rapport des commandes terminées';
-        else if (type === 'cancelled') title = 'Rapport des commandes annulées';
-        else if (type === 'all') title = 'Rapport de toutes les commandes';
+        const titleMap = {
+            completed: 'Rapport des commandes terminées',
+            cancelled: 'Rapport des commandes annulées',
+            all: 'Rapport de toutes les commandes'
+        };
+        const title = titleMap[type] || 'Rapport des commandes';
         
         let html = `
             <div style="padding: 20px; font-family: 'sans-serif'; direction: ltr;">
                 <h1 style="text-align: center; margin-bottom: 20px;">${title}</h1>
                 <p style="text-align: center;">Date du rapport: ${new Date().toLocaleString('fr-FR')}</p>
-                <p style="text-align: center;">Nombre de commandes: ${orders.length}</p>
-                <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+                <p style="text-align: center; margin-bottom: 20px;">Nombre de commandes: ${orders.length}</p>
+                <table style="width: 100%; border-collapse: collapse;">
                     <thead>
                         <tr style="background-color: #f3f4f6;">
-                            <th style="border: 1px solid #ddd; padding: 8px;">ID de la commande</th>
-                            <th style="border: 1px solid #ddd; padding: 8px;">Numéro de table</th>
+                            <th style="border: 1px solid #ddd; padding: 8px;">N° Table</th>
                             <th style="border: 1px solid #ddd; padding: 8px;">Date</th>
                             <th style="border: 1px solid #ddd; padding: 8px;">Statut</th>
                             <th style="border: 1px solid #ddd; padding: 8px;">Total</th>
@@ -847,22 +666,17 @@
         orders.forEach(order => {
             html += `
                 <tr>
-                    <td style="border: 1px solid #ddd; padding: 8px;">${order.id}</td>
                     <td style="border: 1px solid #ddd; padding: 8px;">${order.tableNumber}</td>
                     <td style="border: 1px solid #ddd; padding: 8px;">${new Date(order.timestamp).toLocaleString('fr-FR')}</td>
                     <td style="border: 1px solid #ddd; padding: 8px;">${order.status}</td>
-                    <td style="border: 1px solid #ddd; padding: 8px;">${order.totalPrice} D.H</td>
+                    <td style="border: 1px solid #ddd; padding: 8px;">${order.totalPrice.toFixed(2)} D.H</td>
                     <td style="border: 1px solid #ddd; padding: 8px;">${order.items.map(item => `${item.names.fr} (x${item.quantity})`).join(', ')}</td>
                     <td style="border: 1px solid #ddd; padding: 8px;">${order.notes || ''}</td>
                 </tr>
             `;
         });
         
-        html += `
-                    </tbody>
-                </table>
-            </div>
-        `;
+        html += `</tbody></table></div>`;
         
         printSection.innerHTML = html;
         window.print();
