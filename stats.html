@@ -86,10 +86,6 @@
         <h1 class="text-3xl font-bold" data-key="pageTitle">الإحصائيات والتقارير</h1>
     </div>
     <div class="flex items-center gap-4">
-        <div class="flex gap-2">
-            <button id="lang-ar-btn" class="pill active" data-lang="ar">العربية</button>
-            <button id="lang-fr-btn" class="pill" data-lang="fr">Français</button>
-        </div>
         <a href="index.html" class="pill text-white hover:bg-slate-700 transition"><i class="fas fa-tachometer-alt"></i> <span data-key="navDashboard">لوحة التحكم</span></a>
         <a href="modification.html" class="pill text-white hover:bg-slate-700 transition"><i class="fas fa-edit"></i> <span data-key="navMenu">تعديل القائمة</span></a>
         <a href="users.html" class="pill text-white hover:bg-slate-700 transition"><i class="fas fa-user-circle"></i> <span data-key="navAccount">حسابي</span></a>
@@ -153,6 +149,7 @@
     let allOrdersData = [];
     let charts = {};
     let currentStatsData = {};
+    const currentLang = 'ar'; // Langue fixe pour l'interface
 
     // --- Dictionnaire de langues ---
     const translations = {
@@ -222,8 +219,6 @@
         }
     };
 
-    let currentLang = 'ar'; // Langue par défaut
-    
     // --- Main Initializer ---
     document.addEventListener('DOMContentLoaded', async () => {
         try {
@@ -238,8 +233,6 @@
             const endOfToday = new Date(today.setHours(23, 59, 59, 999));
             updateDashboard(startOfToday, endOfToday);
             
-            setLanguage(currentLang);
-
             document.getElementById('loading-overlay').style.display = 'none';
 
         } catch (error) {
@@ -261,56 +254,10 @@
             }
         });
         
-        document.getElementById('lang-ar-btn').addEventListener('click', () => {
-            setLanguage('ar');
-            datePicker.set('locale', 'ar');
-        });
-        document.getElementById('lang-fr-btn').addEventListener('click', () => {
-            setLanguage('fr');
-            datePicker.set('locale', 'fr');
-        });
-
         document.getElementById('export-excel-btn').addEventListener('click', exportToExcel);
         document.getElementById('export-pdf-btn').addEventListener('click', exportToPDF);
     }
     
-    function setLanguage(lang) {
-        currentLang = lang;
-        const t = translations[lang];
-        
-        document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
-
-        document.title = t.pageTitle;
-        document.querySelector('[data-key="pageTitle"]').textContent = t.pageTitle;
-        document.querySelector('[data-key="filterTitle"]').textContent = t.filterTitle;
-        document.getElementById('date-range-picker').placeholder = t.customPlaceholder;
-        document.querySelector('[data-key="exportExcel"]').textContent = t.exportExcel;
-        document.querySelector('[data-key="exportPDF"]').textContent = t.exportPDF;
-        document.querySelector('#loading-overlay p').textContent = t.loading;
-        
-        document.querySelector('[data-key="kpiTotalRevenue"]').textContent = t.kpiTotalRevenue;
-        document.querySelector('[data-key="kpiTotalOrders"]').textContent = t.kpiTotalOrders;
-        document.querySelector('[data-key="kpiAvgOrderValue"]').textContent = t.kpiAvgOrderValue;
-        document.querySelector('[data-key="kpiTopItem"]').textContent = t.kpiTopItem;
-
-        document.querySelector('[data-key="chartTitleRevenue"]').textContent = t.chartTitleRevenue;
-        document.querySelector('[data-key="chartTitleOrders"]').textContent = t.chartTitleOrders;
-        document.querySelector('[data-key="chartTitleItems"]').textContent = t.chartTitleItems;
-        document.querySelector('[data-key="chartTitleStatus"]').textContent = t.chartTitleStatus;
-        
-        document.querySelector('[data-key="navDashboard"]').textContent = t.navDashboard;
-        document.querySelector('[data-key="navMenu"]').textContent = t.navMenu;
-        document.querySelector('[data-key="navAccount"]').textContent = t.navAccount;
-
-        document.querySelectorAll('.pill[data-lang]').forEach(btn => btn.classList.remove('active'));
-        document.querySelector(`#lang-${lang}-btn`).classList.add('active');
-
-        if(Object.keys(currentStatsData).length > 0) {
-          updateKPIs(currentStatsData);
-          renderCharts(currentStatsData);
-        }
-    }
-
     // --- Dashboard & Filtering Logic ---
     function updateDashboard(startDate, endDate) {
         endDate.setHours(23, 59, 59, 999);
@@ -356,19 +303,19 @@
     }
 
     function updateKPIs(data) {
-        const t = translations[currentLang];
-        document.getElementById('kpi-total-revenue').textContent = `${data.totalRevenue.toFixed(2)} ${currentLang === 'ar' ? 'د.م' : 'MAD'}`;
+        const t = translations.ar;
+        document.getElementById('kpi-total-revenue').textContent = `${data.totalRevenue.toFixed(2)} د.م`;
         document.getElementById('kpi-total-orders').textContent = data.totalOrders;
-        document.getElementById('kpi-avg-order-value').textContent = `${data.avgOrderValue.toFixed(2)} ${currentLang === 'ar' ? 'د.م' : 'MAD'}`;
+        document.getElementById('kpi-avg-order-value').textContent = `${data.avgOrderValue.toFixed(2)} د.م`;
         document.getElementById('kpi-top-item').textContent = data.topItems.length > 0 ? data.topItems[0][0] : t.noData;
     }
     
     function renderCharts(data) {
         Object.values(charts).forEach(chart => chart.destroy());
-        const t = translations[currentLang];
+        const t = translations.ar;
         const textMutedColor = '#94a3b8';
         const gridColor = 'rgba(255, 255, 255, 0.1)';
-        const formatCurrency = (value) => new Intl.NumberFormat(currentLang === 'ar' ? 'ar-MA' : 'fr-FR', { style: 'currency', currency: 'MAD' }).format(value);
+        const formatCurrency = (value) => new Intl.NumberFormat('ar-MA', { style: 'currency', currency: 'MAD' }).format(value);
 
         const revCtx = document.getElementById('revenue-chart').getContext('2d');
         const gradient = revCtx.createLinearGradient(0, 0, 0, revCtx.canvas.clientHeight);
@@ -401,7 +348,7 @@
                 responsive: true, maintainAspectRatio: false,
                 plugins: { legend: { labels: { color: textMutedColor } }, tooltip: { callbacks: { label: (ctx) => `${ctx.dataset.label}: ${ctx.raw}` } } },
                 scales: {
-                    x: { ticks: { color: textMutedColor }, grid: { color: gridColor }, title: { display: true, text: currentLang === 'ar' ? 'الساعة' : 'Heure', color: textMutedColor } },
+                    x: { ticks: { color: textMutedColor }, grid: { color: gridColor }, title: { display: true, text: 'الساعة', color: textMutedColor } },
                     y: { ticks: { color: textMutedColor }, grid: { color: gridColor }, title: { display: true, text: t.unitOrders, color: textMutedColor } }
                 }
             }
@@ -453,35 +400,35 @@
     }
 
     async function exportToExcel() {
-        const t = translations[currentLang];
+        const tFr = translations.fr;
         const dataToExport = currentStatsData.rawOrders.map(order => ({
             'ID Commande': order.id,
-            [t.navMenu]: new Date(order.timestamp).toLocaleString(currentLang === 'ar' ? 'ar-MA' : 'fr-FR'),
-            [t.statusCompleted]: (order.status === 'completed' ? t.orderStatusCompleted : order.status === 'cancelled' ? t.orderStatusCancelled : t.orderStatusActive),
-            [t.kpiTopItem]: order.items.map(item => `${item.names[currentLang]} (x${item.quantity})`).join(', '),
-            [t.unitRevenue]: order.totalPrice,
+            [tFr.navMenu]: new Date(order.timestamp).toLocaleString('fr-FR'),
+            [tFr.statusCompleted]: (order.status === 'completed' ? tFr.orderStatusCompleted : order.status === 'cancelled' ? tFr.orderStatusCancelled : tFr.orderStatusActive),
+            [tFr.kpiTopItem]: order.items.map(item => `${item.names.fr} (x${item.quantity})`).join(', '),
+            [tFr.unitRevenue]: order.totalPrice,
         }));
 
         const ws = XLSX.utils.json_to_sheet(dataToExport);
         const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, t.pageTitle);
-        XLSX.writeFile(wb, `${t.pageTitle}_${new Date().toISOString().slice(0, 10)}.xlsx`);
+        XLSX.utils.book_append_sheet(wb, ws, tFr.pageTitle);
+        XLSX.writeFile(wb, `${tFr.pageTitle}_${new Date().toISOString().slice(0, 10)}.xlsx`);
     }
 
     async function exportToPDF() {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
-        const t = translations[currentLang];
+        const tFr = translations.fr;
 
         doc.setFontSize(18);
-        doc.text(t.pageTitle, 14, 22);
+        doc.text(tFr.pageTitle, 14, 22);
 
-        const columns = ['ID Commande', t.navMenu, t.statusCompleted, t.kpiTopItem, t.unitRevenue];
+        const columns = ['ID Commande', tFr.navMenu, tFr.statusCompleted, tFr.kpiTopItem, tFr.unitRevenue];
         const rows = currentStatsData.rawOrders.map(order => [
             order.id,
-            new Date(order.timestamp).toLocaleString(currentLang === 'ar' ? 'ar-MA' : 'fr-FR'),
-            (order.status === 'completed' ? t.orderStatusCompleted : order.status === 'cancelled' ? t.orderStatusCancelled : t.orderStatusActive),
-            order.items.map(item => `${item.names[currentLang]} (x${item.quantity})`).join(', '),
+            new Date(order.timestamp).toLocaleString('fr-FR'),
+            (order.status === 'completed' ? tFr.orderStatusCompleted : order.status === 'cancelled' ? tFr.orderStatusCancelled : tFr.orderStatusActive),
+            order.items.map(item => `${item.names.fr} (x${item.quantity})`).join(', '),
             order.totalPrice.toFixed(2)
         ]);
 
@@ -491,7 +438,7 @@
             body: rows,
         });
 
-        doc.save(`${t.pageTitle}_${new Date().toISOString().slice(0, 10)}.pdf`);
+        doc.save(`${tFr.pageTitle}_${new Date().toISOString().slice(0, 10)}.pdf`);
     }
   </script>
 </body>
