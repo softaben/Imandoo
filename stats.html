@@ -67,7 +67,6 @@
     .pill:hover { background: rgba(255,255,255,0.07); transform: translateY(-1px); }
     .pill.active { background-color: var(--accent); color: #0f172a; }
     
-    /* Flatpickr Dark Theme */
     .flatpickr-calendar { background: #1e293b; border-color: #334155; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
     .flatpickr-months .flatpickr-month, .flatpickr-weekdays, .flatpickr-day { color: var(--text); }
     .flatpickr-day.selected { background: var(--accent); border-color: var(--accent); color: #0f172a; }
@@ -76,6 +75,7 @@
 
     .chart-container {
         animation: fadeIn 0.6s ease;
+        position: relative;
     }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
   </style>
@@ -131,19 +131,19 @@
     </section>
 
     <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div class="card p-5 chart-container">
+        <div class="card p-5 chart-container h-96">
             <h3 class="text-xl font-bold mb-4">الإيرادات اليومية</h3>
             <canvas id="revenue-chart"></canvas>
         </div>
-        <div class="card p-5 chart-container">
+        <div class="card p-5 chart-container h-96">
             <h3 class="text-xl font-bold mb-4">الطلبات حسب الساعة</h3>
             <canvas id="orders-by-hour-chart"></canvas>
         </div>
-        <div class="card p-5 chart-container">
+        <div class="card p-5 chart-container h-96">
             <h3 class="text-xl font-bold mb-4">الأصناف الأكثر طلبًا</h3>
             <canvas id="top-items-chart"></canvas>
         </div>
-        <div class="card p-5 chart-container">
+        <div class="card p-5 chart-container h-96">
             <h3 class="text-xl font-bold mb-4">حالة الطلبات</h3>
             <canvas id="order-status-chart"></canvas>
         </div>
@@ -265,12 +265,10 @@
     function processData(orders, startDate, endDate) {
         const completedOrders = orders.filter(o => o.status === 'completed');
         
-        // KPIs
         const totalRevenue = completedOrders.reduce((sum, o) => sum + o.totalPrice, 0);
         const totalOrders = completedOrders.length;
         const avgOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
         
-        // Top Items
         const itemCounts = completedOrders
             .flatMap(o => o.items)
             .reduce((acc, item) => {
@@ -279,7 +277,6 @@
             }, {});
         const topItems = Object.entries(itemCounts).sort(([,a],[,b]) => b-a).slice(0, 5);
 
-        // Revenue by Day
         const revenueByDay = {};
         for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
             revenueByDay[d.toISOString().split('T')[0]] = 0;
@@ -291,14 +288,12 @@
             }
         });
         
-        // Orders by Hour
         const ordersByHour = Array(24).fill(0);
         completedOrders.forEach(o => {
             const hour = new Date(o.timestamp).getHours();
             ordersByHour[hour]++;
         });
 
-        // Order Status
         const statusCounts = orders.reduce((acc, o) => {
             const status = o.status || 'unknown';
             acc[status] = (acc[status] || 0) + 1;
@@ -321,11 +316,11 @@
     }
 
     function renderCharts(data) {
-        // Destroy existing charts before creating new ones
         Object.values(charts).forEach(chart => chart.destroy());
 
-        const chartOptions = {
-            responsive: true, maintainAspectRatio: false,
+        const baseChartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
             plugins: { legend: { labels: { color: 'white' } } },
             scales: {
                 x: { ticks: { color: 'white' }, grid: { color: 'rgba(255,255,255,0.1)' } },
@@ -333,7 +328,6 @@
             }
         };
 
-        // Revenue Chart
         const revCtx = document.getElementById('revenue-chart').getContext('2d');
         charts.revenue = new Chart(revCtx, {
             type: 'line',
@@ -347,10 +341,9 @@
                     fill: true, tension: 0.3
                 }]
             },
-            options: chartOptions
+            options: baseChartOptions
         });
 
-        // Orders by Hour Chart
         const hourCtx = document.getElementById('orders-by-hour-chart').getContext('2d');
         charts.ordersByHour = new Chart(hourCtx, {
             type: 'bar',
@@ -362,10 +355,9 @@
                     backgroundColor: 'rgba(251, 191, 36, 0.8)'
                 }]
             },
-            options: chartOptions
+            options: baseChartOptions
         });
         
-        // Top Items Chart
         const itemsCtx = document.getElementById('top-items-chart').getContext('2d');
         charts.topItems = new Chart(itemsCtx, {
             type: 'bar',
@@ -377,10 +369,9 @@
                     backgroundColor: ['#10b981', '#3b82f6', '#fbbf24', '#ef4444', '#94a3b8']
                 }]
             },
-            options: { ...chartOptions, indexAxis: 'y' }
+            options: { ...baseChartOptions, indexAxis: 'y' }
         });
         
-        // Order Status Chart
         const statusCtx = document.getElementById('order-status-chart').getContext('2d');
         const statusData = {
             'completed': data.statusCounts.completed || 0,
@@ -396,111 +387,128 @@
                     backgroundColor: ['#10b981', '#ef4444', '#3b82f6']
                 }]
             },
-            options: { responsive: true, plugins: { legend: { position: 'top', labels: { color: 'white' } } } }
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'top', labels: { color: 'white' } } }
+            }
         });
     }
 
+    // ===================================================================================
+    // !!! START: EXPORT FUNCTIONS (MODIFIED FOR FRENCH LANGUAGE) !!!
+    // ===================================================================================
+
     async function exportToExcel() {
-        const { totalRevenue, totalOrders, avgOrderValue, topItems, rawOrders, period } = currentStatsData;
+        const { totalRevenue, totalOrders, avgOrderValue, rawOrders, period } = currentStatsData;
         const wb = XLSX.utils.book_new();
 
-        // 1. Summary Sheet
+        // 1. Summary Sheet (Résumé)
         const summaryData = [
-            ["تقرير المبيعات للفترة من", period.start.toLocaleDateString(), "إلى", period.end.toLocaleDateString()],
+            ["Rapport des Ventes pour la période du", period.start.toLocaleDateString('fr-FR'), "au", period.end.toLocaleDateString('fr-FR')],
             [],
-            ["إجمالي الإيرادات", `${totalRevenue.toFixed(2)} د.م`],
-            ["إجمالي الطلبات المكتملة", totalOrders],
-            ["متوسط قيمة الطلب", `${avgOrderValue.toFixed(2)} د.م`]
+            ["Revenu Total", `${totalRevenue.toFixed(2)} MAD`],
+            ["Total des Commandes Terminées", totalOrders],
+            ["Valeur Moyenne par Commande", `${avgOrderValue.toFixed(2)} MAD`]
         ];
         const summaryWs = XLSX.utils.aoa_to_sheet(summaryData);
-        summaryWs['!cols'] = [{wch: 25}, {wch: 20}];
-        XLSX.utils.book_append_sheet(wb, summaryWs, "ملخص");
+        summaryWs['!cols'] = [{wch: 30}, {wch: 15}, {wch: 5}, {wch: 15}];
+        XLSX.utils.book_append_sheet(wb, summaryWs, "Résumé");
 
-        // 2. Top Items Sheet
-        const topItemsData = topItems.map(([name, quantity]) => ({ 'الصنف': name, 'الكمية المباعة': quantity }));
+        // 2. Top Items Sheet (Recalculate with French names)
+        const completedOrders = rawOrders.filter(o => o.status === 'completed');
+        const itemCountsFr = completedOrders
+            .flatMap(o => o.items)
+            .reduce((acc, item) => {
+                const name = item.names.fr || item.names.ar; // Fallback to Arabic if French name is missing
+                acc[name] = (acc[name] || 0) + item.quantity;
+                return acc;
+            }, {});
+        const topItemsFr = Object.entries(itemCountsFr).sort(([,a],[,b]) => b-a).slice(0, 10);
+        const topItemsData = topItemsFr.map(([name, quantity]) => ({ 'Article': name, 'Quantité Vendue': quantity }));
         const topItemsWs = XLSX.utils.json_to_sheet(topItemsData);
-        topItemsWs['!cols'] = [{wch: 40}, {wch: 15}];
-        XLSX.utils.book_append_sheet(wb, topItemsWs, "الأصناف الأكثر مبيعًا");
+        topItemsWs['!cols'] = [{wch: 40}, {wch: 20}];
+        XLSX.utils.book_append_sheet(wb, topItemsWs, "Articles Populaires");
         
-        // 3. All Orders Sheet
+        // 3. All Orders Sheet (Toutes les Commandes)
         const ordersExportData = rawOrders.map(order => ({
-            'رقم الطاولة': order.tableNumber,
-            'التاريخ والوقت': new Date(order.timestamp).toLocaleString('ar-MA'),
-            'الحالة': order.status,
-            'الإجمالي (د.م)': order.totalPrice.toFixed(2),
-            'الأصناف': order.items.map(i => `${i.names.ar} (x${i.quantity})`).join(' | '),
-            'ملاحظات': order.notes || ''
+            'N° Table': order.tableNumber,
+            'Date et Heure': new Date(order.timestamp).toLocaleString('fr-FR'),
+            'Statut': order.status,
+            'Total (MAD)': order.totalPrice.toFixed(2),
+            'Articles': order.items.map(i => `${i.names.fr || i.names.ar} (x${i.quantity})`).join(' | '),
+            'Notes': order.notes || ''
         }));
         const ordersWs = XLSX.utils.json_to_sheet(ordersExportData);
         ordersWs['!cols'] = [{wch: 10}, {wch: 25}, {wch: 15}, {wch: 15}, {wch: 60}, {wch: 40}];
-        XLSX.utils.book_append_sheet(wb, ordersWs, "جميع الطلبات");
+        XLSX.utils.book_append_sheet(wb, ordersWs, "Toutes les Commandes");
         
-        XLSX.writeFile(wb, `Report-Imandou-Food-${new Date().toISOString().split('T')[0]}.xlsx`);
+        XLSX.writeFile(wb, `Rapport-Imandou-Food-${new Date().toISOString().split('T')[0]}.xlsx`);
     }
 
     async function exportToPDF() {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
-        const { totalRevenue, totalOrders, avgOrderValue, topItems, rawOrders, period } = currentStatsData;
+        const { totalRevenue, totalOrders, avgOrderValue, rawOrders, period } = currentStatsData;
 
-        // Add Arabic font support (jsPDF doesn't support it by default)
-        // This is a complex topic. For simplicity, we'll use English headers in the PDF.
-        // For full Arabic support, a library like `jspdf-arabic` or custom font embedding is needed.
-        
         // Header
         doc.setFontSize(20);
-        doc.text("Imandou Food - Sales Report", 105, 15, { align: 'center' });
+        doc.text("Rapport des Ventes - Imandou Food", 105, 15, { align: 'center' });
         doc.setFontSize(12);
-        doc.text(`Period: ${period.start.toLocaleDateString()} - ${period.end.toLocaleDateString()}`, 105, 22, { align: 'center' });
+        doc.text(`Période: ${period.start.toLocaleDateString('fr-FR')} - ${period.end.toLocaleDateString('fr-FR')}`, 105, 22, { align: 'center' });
 
         // Summary
         doc.setFontSize(14);
-        doc.text("Summary", 14, 35);
+        doc.text("Résumé", 14, 35);
         doc.autoTable({
             startY: 40,
             body: [
-                ['Total Revenue', `${totalRevenue.toFixed(2)} MAD`],
-                ['Total Completed Orders', totalOrders],
-                ['Average Order Value', `${avgOrderValue.toFixed(2)} MAD`]
+                ['Revenu Total', `${totalRevenue.toFixed(2)} MAD`],
+                ['Total des Commandes Terminées', totalOrders],
+                ['Valeur Moyenne par Commande', `${avgOrderValue.toFixed(2)} MAD`]
             ],
             theme: 'grid',
             styles: { fontSize: 10 }
         });
 
-        // Add Charts as Images
+        // Charts
         const chartsY = doc.lastAutoTable.finalY + 15;
         doc.setFontSize(14);
-        doc.text("Charts", 14, chartsY - 5);
+        doc.text("Graphiques", 14, chartsY - 5);
         try {
             const revenueChartImg = document.getElementById('revenue-chart').toDataURL('image/png');
             const topItemsChartImg = document.getElementById('top-items-chart').toDataURL('image/png');
-            doc.addImage(revenueChartImg, 'PNG', 14, chartsY, 85, 50);
-            doc.addImage(topItemsChartImg, 'PNG', 110, chartsY, 85, 50);
+            doc.addImage(revenueChartImg, 'PNG', 14, chartsY, 85, 45);
+            doc.addImage(topItemsChartImg, 'PNG', 110, chartsY, 85, 45);
         } catch(e) { console.error("Could not add charts to PDF", e); }
         
-        // Detailed Orders Table
         doc.addPage();
         doc.setFontSize(14);
-        doc.text("Detailed Orders List", 14, 15);
+        doc.text("Liste Détaillée des Commandes", 14, 15);
         
         const ordersExportData = rawOrders.map(order => [
             order.tableNumber,
-            new Date(order.timestamp).toLocaleString(),
+            new Date(order.timestamp).toLocaleString('fr-FR'),
             order.status,
-            order.totalPrice.toFixed(2),
-            order.items.map(i => `${i.names.ar} (x${i.quantity})`).join(', ')
+            `${order.totalPrice.toFixed(2)} MAD`,
+            order.items.map(i => `${i.names.fr || i.names.ar} (x${i.quantity})`).join(', ')
         ]);
         
         doc.autoTable({
             startY: 22,
-            head: [['Table', 'Date', 'Status', 'Total (MAD)', 'Items']],
+            head: [['N° Table', 'Date', 'Statut', 'Total', 'Articles']],
             body: ordersExportData,
             theme: 'striped',
-            styles: { fontSize: 8 }
+            styles: { fontSize: 8 },
+            headStyles: { fillColor: '#2b2d42' }
         });
 
-        doc.save(`Report-Imandou-Food-${new Date().toISOString().split('T')[0]}.pdf`);
+        doc.save(`Rapport-Imandou-Food-${new Date().toISOString().split('T')[0]}.pdf`);
     }
+
+    // ===================================================================================
+    // !!! END: EXPORT FUNCTIONS !!!
+    // ===================================================================================
 
   </script>
 </body>
