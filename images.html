@@ -11,7 +11,8 @@
     <!-- Firebase Libraries -->
     <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js" type="module"></script>
     <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js" type="module"></script>
-    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js" type="module"></script>
+    <!-- تم تغيير المكتبة من Firestore إلى Realtime Database -->
+    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js" type="module"></script>
     
     <style>
         :root{
@@ -237,7 +238,8 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, setLogLevel, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        // استيراد مكتبة Realtime Database
+        import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
         
         // Firebase global variables provided by the environment
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
@@ -267,15 +269,15 @@
             try {
                 const app = initializeApp(firebaseConfig);
                 auth = getAuth(app);
-                db = getFirestore(app);
-                setLogLevel('debug'); // Enable Firestore debug logs
+                // تهيئة Realtime Database
+                db = getDatabase(app);
                 
                 // Sign in the user
                 onAuthStateChanged(auth, async (user) => {
                     if (user) {
                         console.log("User signed in with UID:", user.uid);
                         userId = user.uid;
-                        setupFirestoreListener();
+                        setupDatabaseListener();
                     } else {
                         console.log("No user, signing in anonymously...");
                         try {
@@ -296,59 +298,60 @@
             }
         }
         
-        // Listen to real-time updates from Firestore
-        function setupFirestoreListener() {
+        // الاستماع للتحديثات في الوقت الفعلي من Realtime Database
+        function setupDatabaseListener() {
             if (!userId) {
                 return;
             }
-            const imagesRef = collection(db, `artifacts/${appId}/users/${userId}/uploaded_images`);
-            // We can't use orderBy here due to Firestore index limitations, so we'll sort in the frontend.
-            const q = query(imagesRef);
+            // إنشاء مرجع لمسار الصور
+            const imagesRef = ref(db, `artifacts/${appId}/users/${userId}/uploaded_images`);
 
-            onSnapshot(q, (snapshot) => {
+            onValue(imagesRef, (snapshot) => {
+                const data = snapshot.val();
                 const images = [];
-                snapshot.forEach((doc) => {
-                    images.push({ ...doc.data(), id: doc.id }); // Get document ID as well
-                });
-                // Sort images by timestamp in descending order
+                // التحقق من وجود بيانات وتكرارها
+                if (data) {
+                    Object.entries(data).forEach(([key, value]) => {
+                        images.push({ id: key, url: value.url, timestamp: value.timestamp });
+                    });
+                }
+                // فرز الصور حسب الطابع الزمني
                 images.sort((a, b) => b.timestamp - a.timestamp);
                 renderGallery(images);
             }, (error) => {
-                console.error("Failed to fetch images from Firestore:", error);
+                console.error("Failed to fetch images from Realtime Database:", error);
                 showError("فشل في تحميل الصور السابقة.");
             });
         }
 
-        // Save image URL to Firestore
+        // حفظ رابط الصورة في Realtime Database
         async function saveImageUrl(imageUrl) {
             if (!userId) {
                 console.error("User not authenticated.");
                 return;
             }
             try {
-                const imagesRef = collection(db, `artifacts/${appId}/users/${userId}/uploaded_images`);
-                await addDoc(imagesRef, {
+                const imagesRef = ref(db, `artifacts/${appId}/users/${userId}/uploaded_images`);
+                await push(imagesRef, {
                     url: imageUrl,
-                    timestamp: serverTimestamp()
+                    timestamp: Date.now()
                 });
-                console.log("Image URL saved to Firestore.");
+                console.log("Image URL saved to Realtime Database.");
             } catch (e) {
-                console.error("Error saving image URL to Firestore:", e);
+                console.error("Error saving image URL to Realtime Database:", e);
             }
         }
 
-        // Delete image URL from Firestore
+        // حذف رابط الصورة من Realtime Database
         async function deleteImage(docId) {
             if (!userId || !docId) {
                 console.error("Invalid user or document ID.");
                 return;
             }
             try {
-                const imageDocRef = doc(db, `artifacts/${appId}/users/${userId}/uploaded_images`, docId);
-                await deleteDoc(imageDocRef);
-                console.log("Image document deleted from Firestore.");
-                // NOTE: To delete the actual image file from Cloudinary, a backend call is required.
-                // We cannot expose API keys/secrets on the frontend.
+                const imageRef = ref(db, `artifacts/${appId}/users/${userId}/uploaded_images/${docId}`);
+                await remove(imageRef);
+                console.log("Image document deleted from Realtime Database.");
             } catch (e) {
                 console.error("Error deleting image document:", e);
                 showError("فشل في حذف الصورة.");
@@ -423,7 +426,7 @@
                 resultBox.classList.remove('hidden');
                 imagePreviewBox.classList.remove('hidden');
 
-                // Save to Firestore
+                // Save to Realtime Database
                 await saveImageUrl(imageUrl);
                 
             } catch (error) {
