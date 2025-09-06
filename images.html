@@ -11,7 +11,6 @@
     <!-- Firebase Libraries -->
     <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js" type="module"></script>
     <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js" type="module"></script>
-    <!-- تم تغيير المكتبة من Firestore إلى Realtime Database -->
     <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js" type="module"></script>
     
     <style>
@@ -176,15 +175,31 @@
         .delete-btn:hover {
             background-color: rgba(239, 68, 68, 1);
         }
+        
+        /* Camera-specific styles */
+        #video-preview {
+            display: none;
+            width: 100%;
+            height: auto;
+            border-radius: var(--radius-md);
+            margin-top: 1rem;
+        }
+        #camera-controls {
+            display: none;
+            gap: 1rem;
+            margin-top: 1rem;
+            justify-content: center;
+        }
     </style>
 </head>
 <body class="flex items-center justify-center min-h-screen">
     <div class="app flex items-center justify-center min-h-screen p-4">
         <div class="card p-8 w-full text-center space-y-6">
             <h1 class="text-3xl md:text-4xl font-bold text-[var(--text)]">تحميل صورة</h1>
-            <p class="text-[var(--muted)]">اختر صورة من جهازك لتحميلها إلى الخادم.</p>
+            <p class="text-[var(--muted)]">اختر صورة من جهازك أو التقط واحدة.</p>
 
             <div class="space-y-4">
+                <!-- File Input and Camera Button -->
                 <label class="block">
                     <input type="file" id="image-upload" accept="image/*" class="form-input text-[var(--muted)]
                         file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0
@@ -192,11 +207,27 @@
                         hover:file:bg-gray-600/50 transition-colors duration-200"
                     />
                 </label>
-                <button id="upload-button" class="pill w-full bg-[var(--accent)] text-black font-semibold py-3 shadow-lg hover:bg-[var(--accent)]/80">
-                    <i class="fas fa-cloud-upload-alt"></i> رفع الصورة
-                </button>
+                <div class="flex gap-4">
+                    <button id="camera-button" class="pill flex-1 bg-[var(--warning)] text-black font-semibold py-3 shadow-lg hover:bg-[var(--warning)]/80">
+                        <i class="fas fa-camera"></i> التقط صورة
+                    </button>
+                    <button id="upload-button" class="pill flex-1 bg-[var(--accent)] text-black font-semibold py-3 shadow-lg hover:bg-[var(--accent)]/80">
+                        <i class="fas fa-cloud-upload-alt"></i> رفع الصورة
+                    </button>
+                </div>
             </div>
             
+            <video id="video-preview" autoplay></video>
+            <div id="camera-controls" class="flex">
+                <button id="take-photo-button" class="pill flex-1 bg-[var(--success)] text-black font-semibold py-3 shadow-lg hover:bg-[var(--success)]/80">
+                    التقط صورة
+                </button>
+                <button id="cancel-camera-button" class="pill flex-1 bg-[var(--danger)] text-white font-semibold py-3 shadow-lg hover:bg-[var(--danger)]/80">
+                    إلغاء
+                </button>
+            </div>
+            <canvas id="photo-canvas" style="display:none;"></canvas>
+
             <div id="loading-spinner" class="hidden flex justify-center items-center">
                 <div class="spinner"></div>
             </div>
@@ -215,7 +246,7 @@
             </div>
             
             <button id="view-gallery-button" class="pill w-full mt-6 bg-[var(--muted)]/20 text-[var(--muted)] hover:bg-[var(--muted)]/40 font-semibold py-3 shadow-lg">
-                <i class="fas fa-images"></i> رؤية الصور السابقة
+                <i class="fas fa-images"></i> رؤية الصور
             </button>
         </div>
     </div>
@@ -224,7 +255,7 @@
     <div id="gallery-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 class="modal-title">الصور التي قمت برفعها</h3>
+                <h3 class="modal-title">معرض الصور</h3>
                 <button type="button" class="close" data-modal-close="gallery-modal">&times;</button>
             </div>
             <div class="modal-body">
@@ -238,7 +269,6 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        // استيراد مكتبة Realtime Database
         import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
         
         // Firebase global variables provided by the environment
@@ -251,6 +281,12 @@
     
         const fileInput = document.getElementById('image-upload');
         const uploadButton = document.getElementById('upload-button');
+        const cameraButton = document.getElementById('camera-button');
+        const takePhotoButton = document.getElementById('take-photo-button');
+        const cancelButton = document.getElementById('cancel-camera-button');
+        const videoPreview = document.getElementById('video-preview');
+        const cameraControls = document.getElementById('camera-controls');
+        const photoCanvas = document.getElementById('photo-canvas');
         const viewGalleryButton = document.getElementById('view-gallery-button');
         const galleryModal = document.getElementById('gallery-modal');
         const galleryContainer = document.getElementById('gallery-container');
@@ -263,16 +299,15 @@
         let db;
         let auth;
         let userId = null;
+        let cameraStream = null;
 
-        // Initialize Firebase
+        // تهيئة Firebase
         function initializeFirebase() {
             try {
                 const app = initializeApp(firebaseConfig);
                 auth = getAuth(app);
-                // تهيئة Realtime Database
                 db = getDatabase(app);
                 
-                // Sign in the user
                 onAuthStateChanged(auth, async (user) => {
                     if (user) {
                         console.log("User signed in with UID:", user.uid);
@@ -303,24 +338,22 @@
             if (!userId) {
                 return;
             }
-            // إنشاء مرجع لمسار الصور
-            const imagesRef = ref(db, `artifacts/${appId}/users/${userId}/uploaded_images`);
+            // استخدام مسار عام لمشاركة الصور
+            const imagesRef = ref(db, `artifacts/${appId}/public/data/uploaded_images`);
 
             onValue(imagesRef, (snapshot) => {
                 const data = snapshot.val();
                 const images = [];
-                // التحقق من وجود بيانات وتكرارها
                 if (data) {
                     Object.entries(data).forEach(([key, value]) => {
-                        images.push({ id: key, url: value.url, timestamp: value.timestamp });
+                        images.push({ id: key, url: value.url, timestamp: value.timestamp, userId: value.userId });
                     });
                 }
-                // فرز الصور حسب الطابع الزمني
                 images.sort((a, b) => b.timestamp - a.timestamp);
                 renderGallery(images);
             }, (error) => {
                 console.error("Failed to fetch images from Realtime Database:", error);
-                showError("فشل في تحميل الصور السابقة.");
+                showError("فشل في تحميل الصور.");
             });
         }
 
@@ -331,10 +364,11 @@
                 return;
             }
             try {
-                const imagesRef = ref(db, `artifacts/${appId}/users/${userId}/uploaded_images`);
+                const imagesRef = ref(db, `artifacts/${appId}/public/data/uploaded_images`);
                 await push(imagesRef, {
                     url: imageUrl,
-                    timestamp: Date.now()
+                    timestamp: Date.now(),
+                    userId: userId // حفظ userId للمصادقة على الحذف
                 });
                 console.log("Image URL saved to Realtime Database.");
             } catch (e) {
@@ -343,13 +377,18 @@
         }
 
         // حذف رابط الصورة من Realtime Database
-        async function deleteImage(docId) {
+        async function deleteImage(docId, imageUserId) {
             if (!userId || !docId) {
                 console.error("Invalid user or document ID.");
                 return;
             }
+            // تحقق مما إذا كان المستخدم الحالي هو من قام بتحميل الصورة
+            if (userId !== imageUserId) {
+                showError("لا يمكنك حذف صور المستخدمين الآخرين.");
+                return;
+            }
             try {
-                const imageRef = ref(db, `artifacts/${appId}/users/${userId}/uploaded_images/${docId}`);
+                const imageRef = ref(db, `artifacts/${appId}/public/data/uploaded_images/${docId}`);
                 await remove(imageRef);
                 console.log("Image document deleted from Realtime Database.");
             } catch (e) {
@@ -360,21 +399,22 @@
 
         // Render the image gallery
         function renderGallery(images) {
-            galleryContainer.innerHTML = ''; // Clear previous images
+            galleryContainer.innerHTML = '';
             if (images.length === 0) {
-                galleryContainer.innerHTML = `<div class="text-center text-[var(--muted)]">لا توجد صور سابقة.</div>`;
+                galleryContainer.innerHTML = `<div class="text-center text-[var(--muted)]">لا توجد صور.</div>`;
                 return;
             }
             images.forEach(image => {
                 const imgElement = document.createElement('div');
                 imgElement.classList.add('gallery-item');
                 imgElement.innerHTML = `
-                    <button class="delete-btn" data-doc-id="${image.id}"><i class="fas fa-times"></i></button>
+                    <button class="delete-btn" data-doc-id="${image.id}" data-user-id="${image.userId}" style="display: ${userId === image.userId ? 'flex' : 'none'};"><i class="fas fa-times"></i></button>
                     <img src="${image.url}" alt="Uploaded Image">
                 `;
                 imgElement.querySelector('.delete-btn').addEventListener('click', (e) => {
                     const docId = e.currentTarget.dataset.docId;
-                    deleteImage(docId);
+                    const imageUserId = e.currentTarget.dataset.userId;
+                    deleteImage(docId, imageUserId);
                 });
                 imgElement.querySelector('img').addEventListener('click', () => {
                     window.open(image.url, '_blank');
@@ -385,10 +425,66 @@
     
         // Event listeners
         fileInput.addEventListener('change', () => {
+            const file = fileInput.files[0];
+            if (file) {
+                uploadedImage.src = URL.createObjectURL(file);
+                imagePreviewBox.classList.remove('hidden');
+            } else {
+                imagePreviewBox.classList.add('hidden');
+            }
             resultBox.classList.add('hidden');
-            imagePreviewBox.classList.add('hidden');
             errorMessage.classList.add('hidden');
         });
+
+        // تشغيل الكاميرا
+        cameraButton.addEventListener('click', async () => {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+                videoPreview.srcObject = stream;
+                videoPreview.classList.remove('hidden');
+                cameraControls.style.display = 'flex';
+                uploadButton.disabled = true;
+                fileInput.disabled = true;
+                cameraStream = stream;
+            } catch (err) {
+                console.error("Error accessing camera:", err);
+                showError("فشل الوصول إلى الكاميرا. تأكد من إعطاء الصلاحيات.");
+            }
+        });
+
+        // التقاط الصورة من الكاميرا
+        takePhotoButton.addEventListener('click', () => {
+            const context = photoCanvas.getContext('2d');
+            photoCanvas.width = videoPreview.videoWidth;
+            photoCanvas.height = videoPreview.videoHeight;
+            context.drawImage(videoPreview, 0, 0, photoCanvas.width, photoCanvas.height);
+            
+            // تحويل الصورة إلى Blob
+            photoCanvas.toBlob((blob) => {
+                const photoFile = new File([blob], "camera-photo.png", { type: "image/png" });
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(photoFile);
+                fileInput.files = dataTransfer.files;
+                
+                uploadedImage.src = URL.createObjectURL(photoFile);
+                imagePreviewBox.classList.remove('hidden');
+            }, 'image/png');
+
+            stopCamera();
+        });
+
+        // إلغاء تشغيل الكاميرا
+        cancelButton.addEventListener('click', stopCamera);
+
+        function stopCamera() {
+            if (cameraStream) {
+                cameraStream.getTracks().forEach(track => track.stop());
+            }
+            videoPreview.classList.add('hidden');
+            cameraControls.style.display = 'none';
+            uploadButton.disabled = false;
+            fileInput.disabled = false;
+        }
         
         uploadButton.addEventListener('click', async () => {
             const file = fileInput.files[0];
@@ -398,7 +494,6 @@
             }
             showLoading(true);
             resultBox.classList.add('hidden');
-            imagePreviewBox.classList.add('hidden');
             errorMessage.classList.add('hidden');
     
             const formData = new FormData();
@@ -419,14 +514,10 @@
                 const data = await response.json();
                 const imageUrl = data.secure_url;
                 
-                // Display the result
                 resultLink.href = imageUrl;
                 resultLink.textContent = imageUrl;
-                uploadedImage.src = imageUrl;
                 resultBox.classList.remove('hidden');
-                imagePreviewBox.classList.remove('hidden');
 
-                // Save to Realtime Database
                 await saveImageUrl(imageUrl);
                 
             } catch (error) {
