@@ -1,230 +1,467 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تحميل الصور على Firebase</title>
+    <title>تحميل الصور - Imandou Food</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    
+    <!-- Firebase Libraries -->
+    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js" type="module"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js" type="module"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js" type="module"></script>
+    
     <style>
+        :root{
+            --bg: #0f172a;
+            --card: #0b1220;
+            --text: #e2e8f0;
+            --muted: #94a3b8;
+            --accent: #fbbf24;
+            --radius-lg: 14px;
+            --radius-md: 8px;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+        }
+
+        html,body{ height:100% }
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background-color: #f0f2f5;
-            margin: 0;
-            direction: rtl;
-            text-align: right;
+            font-family: 'Inter', system-ui, -apple-system, "Segoe UI", sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            overflow-x: hidden;
+            position: relative;
+            font-weight: 400;
+            line-height: 1.6;
         }
 
-        .container {
-            background-color: #ffffff;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-            text-align: center;
-            width: 90%;
-            max-width: 500px;
-            border: 1px solid #e0e0e0;
-        }
-
-        h1 {
-            color: #333;
-            margin-bottom: 25px;
-            font-size: 1.8rem;
-        }
-
-        input[type="file"] {
-            display: block;
-            margin: 0 auto 20px;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
             width: 100%;
-            box-sizing: border-box;
-            background-color: #f9f9f9;
+            height: 100%;
+            background-image: url('https://images.unsplash.com/photo-1563245372-f21724e3856d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2064&q=80');
+            background-size: cover;
+            background-position: center;
+            opacity: 0.08;
+            z-index: -1;
+            pointer-events: none;
         }
 
-        #upload-button {
-            background-color: #4CAF50;
-            color: white;
-            padding: 12px 24px;
-            border: none;
-            border-radius: 6px;
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Playfair Display', serif;
+            font-weight: 600;
+            letter-spacing: -0.025em;
+        }
+        [lang="ar"] body, [dir="rtl"] body { font-family: 'Cairo', 'Inter', sans-serif; }
+        [lang="ar"] h1, [lang="ar"] h2, [lang="ar"] h3, [dir="rtl"] h1, [dir="rtl"] h2, [dir="rtl"] h3 { font-family: 'Cairo', 'Playfair Display', serif; }
+
+        .app {
+            max-width: 480px;
+            margin: 0 auto;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            z-index: 1;
+            padding: 1.5rem;
+        }
+        @media(min-width:768px){ .app{max-width:720px} }
+
+        .card {
+            background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.03));
+            border-radius: var(--radius-lg);
+            padding: 12px;
+            box-shadow: 0 6px 18px rgba(2,6,23,0.6);
+            border: 1px solid rgba(255,255,255,0.03);
+            backdrop-filter: blur(10px);
+        }
+
+        .pill {
+            background: rgba(255,255,255,0.02);
+            border-radius: 999px;
+            padding: 8px 12px;
+            font-weight: 500;
+            color: var(--text);
+            display: inline-flex;
+            gap: 8px;
+            align-items: center;
+            border: 1px solid rgba(255,255,255,0.03);
+            transition: all 0.2s ease;
             cursor: pointer;
-            font-size: 1.1rem;
-            font-weight: bold;
-            transition: background-color 0.3s, transform 0.1s;
+            font-size: 0.875rem;
         }
+        .pill:hover:not(:disabled) { background: rgba(255,255,255,0.05); }
+        .pill:disabled { cursor: not-allowed; opacity: 0.6; }
 
-        #upload-button:hover {
-            background-color: #45a049;
-            transform: translateY(-2px);
+        .form-input {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: var(--radius-md);
+            padding: 10px 12px;
+            color: var(--text);
+            width: 100%;
+            margin-bottom: 12px;
+            transition: border-color 0.2s, box-shadow 0.2s;
         }
+        .form-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.1); }
+        .form-input:disabled { background: rgba(255, 255, 255, 0.01); cursor: not-allowed; }
 
-        .result-box {
-            margin-top: 25px;
-            padding: 20px;
-            background-color: #e9f5e9;
-            border-radius: 8px;
-            border: 1px solid #c8e6c9;
-            word-wrap: break-word;
-            display: none;
+        .spinner {
+            border: 3px solid rgba(255,255,255,0.1);
+            border-radius: 50%;
+            border-top: 3px solid var(--accent);
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
         }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        .result-box p {
-            margin: 0 0 10px 0;
-            color: #2e7d32;
-            font-weight: bold;
+        /* Modal styles */
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 20px; backdrop-filter: blur(5px); opacity: 0; transition: opacity 0.3s ease; }
+        .modal.active { display: flex; opacity: 1; }
+        .modal-content { background: var(--card); border-radius: var(--radius-lg); width: 100%; max-width: 90%; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5); border: 1px solid rgba(255,255,255,0.05); transform: scale(0.95); transition: transform 0.3s ease; }
+        .modal.active .modal-content { transform: scale(1); }
+        .modal-header { padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; align-items: center; }
+        .modal-title { font-size: 1.5rem; font-weight: 700; margin: 0; }
+        .close { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text); }
+        .modal-body { padding: 20px; }
+        
+        .image-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 16px;
         }
-
-        #result-link {
-            display: block;
-            color: #1976D2;
-            text-decoration: none;
-            font-size: 1rem;
-            direction: ltr; /* Ensure LTR for the link */
-            text-align: left;
-            padding: 8px;
-            background-color: #e3f2fd;
-            border-radius: 4px;
+        .gallery-item {
+            position: relative;
+            overflow: hidden;
+            border-radius: var(--radius-md);
+            border: 1px solid rgba(255,255,255,0.05);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
-
-        #result-link:hover {
-            text-decoration: underline;
+        .gallery-item:hover {
+            transform: scale(1.03);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
         }
-
-        #image-preview {
-            max-width: 100%;
-            height: auto;
-            border-radius: 8px;
-            margin-top: 15px;
-            border: 2px solid #ddd;
+        .gallery-item img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            cursor: pointer;
         }
-
-        .error-message {
-            color: #D32F2F;
-            margin-top: 20px;
-            font-weight: bold;
-            display: none;
-        }
-
-        .copy-button {
-            background-color: #1976D2;
+        .delete-btn {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            background-color: rgba(239, 68, 68, 0.8);
             color: white;
             border: none;
-            padding: 8px 15px;
-            border-radius: 6px;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             cursor: pointer;
-            font-size: 0.9rem;
-            margin-top: 15px;
+            transition: background-color 0.2s ease;
         }
-
-        .copy-button:hover {
-            background-color: #1565C0;
+        .delete-btn:hover {
+            background-color: rgba(239, 68, 68, 1);
         }
     </style>
 </head>
-<body>
-    <div class="container">
-        <h1>تحميل صورة إلى Firebase Storage</h1>
-        <input type="file" id="image-upload" accept="image/*">
-        <button id="upload-button">رفع الصورة</button>
-        <div class="result-box">
-            <p>تم الرفع بنجاح! الرابط:</p>
-            <a id="result-link" href="#" target="_blank"></a>
-            <button class="copy-button" onclick="copyLink()">نسخ الرابط</button>
-            <img id="image-preview" src="#" alt="Image Preview" style="display:none;"/>
+<body class="flex items-center justify-center min-h-screen">
+    <div class="app flex items-center justify-center min-h-screen p-4">
+        <div class="card p-8 w-full text-center space-y-6">
+            <h1 class="text-3xl md:text-4xl font-bold text-[var(--text)]">تحميل صورة</h1>
+            <p class="text-[var(--muted)]">اختر صورة من جهازك لتحميلها إلى الخادم.</p>
+
+            <div class="space-y-4">
+                <label class="block">
+                    <input type="file" id="image-upload" accept="image/*" class="form-input text-[var(--muted)]
+                        file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0
+                        file:text-sm file:font-semibold file:bg-gray-700/50 file:text-white
+                        hover:file:bg-gray-600/50 transition-colors duration-200"
+                    />
+                </label>
+                <button id="upload-button" class="pill w-full bg-[var(--accent)] text-black font-semibold py-3 shadow-lg hover:bg-[var(--accent)]/80">
+                    <i class="fas fa-cloud-upload-alt"></i> رفع الصورة
+                </button>
+            </div>
+            
+            <div id="loading-spinner" class="hidden flex justify-center items-center">
+                <div class="spinner"></div>
+            </div>
+
+            <div id="result-box" class="hidden mt-6 p-4 rounded-xl border border-[var(--success)] bg-[var(--success)]/20 text-[var(--success)] text-sm break-words text-left space-y-2">
+                <p class="font-bold flex items-center gap-2"><i class="fas fa-check-circle"></i> تم الرفع بنجاح!</p>
+                <a id="result-link" href="#" target="_blank" class="block text-[var(--success)] hover:underline"></a>
+            </div>
+
+            <div id="image-preview-box" class="hidden mt-4 rounded-xl overflow-hidden shadow-xl">
+                <img id="uploaded-image" src="" alt="Uploaded Image Preview" class="w-full h-auto object-cover">
+            </div>
+
+            <div id="error-message" class="hidden mt-6 p-4 rounded-xl border border-[var(--danger)] bg-[var(--danger)]/20 text-[var(--danger)] text-sm space-y-2">
+                <p class="flex items-center gap-2"><i class="fas fa-exclamation-triangle"></i></p>
+            </div>
+            
+            <button id="view-gallery-button" class="pill w-full mt-6 bg-[var(--muted)]/20 text-[var(--muted)] hover:bg-[var(--muted)]/40 font-semibold py-3 shadow-lg">
+                <i class="fas fa-images"></i> رؤية الصور السابقة
+            </button>
         </div>
-        <p class="error-message"></p>
     </div>
-
-    <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-storage.js"></script>
     
-    <script>
-        // Your Firebase configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyCyPOzsEzdrRd9o7iHASzFoLyJQhpTW83E",
-            authDomain: "imandou-food.firebaseapp.com",
-            databaseURL: "https://imandou-food-default-rtdb.firebaseio.com",
-            projectId: "imandou-food",
-            storageBucket: "imandou-food.firebasestorage.app",
-            messagingSenderId: "839302179988",
-            appId: "1:839302179988:web:92636c32e1b00b587ad881",
-            measurementId: "G-7LE4J4XL9T"
-        };
+    <!-- Gallery Modal -->
+    <div id="gallery-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">الصور التي قمت برفعها</h3>
+                <button type="button" class="close" data-modal-close="gallery-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="gallery-container" class="image-gallery">
+                    <!-- Images will be injected here -->
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, setLogLevel, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        
+        // Firebase global variables provided by the environment
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
-        // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-
-        // Get a reference to the Firebase Storage service
-        const storage = firebase.storage();
-
-        // Get DOM elements
+        const cloudName = "dzc99hze9";
+        const uploadPreset = "testaben";
+    
         const fileInput = document.getElementById('image-upload');
         const uploadButton = document.getElementById('upload-button');
-        const resultBox = document.querySelector('.result-box');
+        const viewGalleryButton = document.getElementById('view-gallery-button');
+        const galleryModal = document.getElementById('gallery-modal');
+        const galleryContainer = document.getElementById('gallery-container');
+        const resultBox = document.getElementById('result-box');
         const resultLink = document.getElementById('result-link');
-        const imagePreview = document.getElementById('image-preview');
-        const errorMessage = document.querySelector('.error-message');
+        const imagePreviewBox = document.getElementById('image-preview-box');
+        const uploadedImage = document.getElementById('uploaded-image');
+        const errorMessage = document.getElementById('error-message');
 
-        uploadButton.addEventListener('click', () => {
-            const file = fileInput.files[0];
+        let db;
+        let auth;
+        let userId = null;
 
-            // Hide previous messages and preview
-            resultBox.style.display = 'none';
-            errorMessage.style.display = 'none';
-            imagePreview.style.display = 'none';
-
-            if (file) {
-                // Create a storage reference with a unique name for the file
-                const uniqueFileName = `${Date.now()}_${file.name}`;
-                const storageRef = storage.ref(`images/${uniqueFileName}`);
-
-                // Upload the file
-                const uploadTask = storageRef.put(file);
-
-                uploadTask.on('state_changed',
-                    (snapshot) => {
-                        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                        uploadButton.textContent = `جاري الرفع... ${Math.round(progress)}%`;
-                    },
-                    (error) => {
-                        console.error("Upload failed", error);
-                        errorMessage.textContent = `فشل في الرفع: ${error.message}`;
-                        errorMessage.style.display = 'block';
-                        uploadButton.textContent = "رفع الصورة";
-                    },
-                    () => {
-                        // Handle successful uploads on complete
-                        uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
-                            resultLink.href = downloadURL;
-                            resultLink.textContent = downloadURL;
-                            imagePreview.src = downloadURL;
-                            imagePreview.style.display = 'block';
-                            resultBox.style.display = 'block';
-                            uploadButton.textContent = "تم الرفع!";
-                            setTimeout(() => uploadButton.textContent = "رفع صورة أخرى", 3000);
-                        });
+        // Initialize Firebase
+        function initializeFirebase() {
+            try {
+                const app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+                setLogLevel('debug'); // Enable Firestore debug logs
+                
+                // Sign in the user
+                onAuthStateChanged(auth, async (user) => {
+                    if (user) {
+                        console.log("User signed in with UID:", user.uid);
+                        userId = user.uid;
+                        setupFirestoreListener();
+                    } else {
+                        console.log("No user, signing in anonymously...");
+                        try {
+                            if (initialAuthToken) {
+                                await signInWithCustomToken(auth, initialAuthToken);
+                            } else {
+                                await signInAnonymously(auth);
+                            }
+                        } catch (e) {
+                            console.error("Authentication failed:", e);
+                            showError("فشل في تسجيل الدخول. يرجى إعادة المحاولة.");
+                        }
                     }
-                );
-            } else {
-                errorMessage.textContent = "الرجاء اختيار صورة أولا.";
-                errorMessage.style.display = 'block';
+                });
+            } catch (e) {
+                console.error("Firebase initialization failed:", e);
+                showError("فشل في تهيئة Firebase. يرجى التحقق من الإعدادات.");
+            }
+        }
+        
+        // Listen to real-time updates from Firestore
+        function setupFirestoreListener() {
+            if (!userId) {
+                return;
+            }
+            const imagesRef = collection(db, `artifacts/${appId}/users/${userId}/uploaded_images`);
+            // We can't use orderBy here due to Firestore index limitations, so we'll sort in the frontend.
+            const q = query(imagesRef);
+
+            onSnapshot(q, (snapshot) => {
+                const images = [];
+                snapshot.forEach((doc) => {
+                    images.push({ ...doc.data(), id: doc.id }); // Get document ID as well
+                });
+                // Sort images by timestamp in descending order
+                images.sort((a, b) => b.timestamp - a.timestamp);
+                renderGallery(images);
+            }, (error) => {
+                console.error("Failed to fetch images from Firestore:", error);
+                showError("فشل في تحميل الصور السابقة.");
+            });
+        }
+
+        // Save image URL to Firestore
+        async function saveImageUrl(imageUrl) {
+            if (!userId) {
+                console.error("User not authenticated.");
+                return;
+            }
+            try {
+                const imagesRef = collection(db, `artifacts/${appId}/users/${userId}/uploaded_images`);
+                await addDoc(imagesRef, {
+                    url: imageUrl,
+                    timestamp: serverTimestamp()
+                });
+                console.log("Image URL saved to Firestore.");
+            } catch (e) {
+                console.error("Error saving image URL to Firestore:", e);
+            }
+        }
+
+        // Delete image URL from Firestore
+        async function deleteImage(docId) {
+            if (!userId || !docId) {
+                console.error("Invalid user or document ID.");
+                return;
+            }
+            try {
+                const imageDocRef = doc(db, `artifacts/${appId}/users/${userId}/uploaded_images`, docId);
+                await deleteDoc(imageDocRef);
+                console.log("Image document deleted from Firestore.");
+                // NOTE: To delete the actual image file from Cloudinary, a backend call is required.
+                // We cannot expose API keys/secrets on the frontend.
+            } catch (e) {
+                console.error("Error deleting image document:", e);
+                showError("فشل في حذف الصورة.");
+            }
+        }
+
+        // Render the image gallery
+        function renderGallery(images) {
+            galleryContainer.innerHTML = ''; // Clear previous images
+            if (images.length === 0) {
+                galleryContainer.innerHTML = `<div class="text-center text-[var(--muted)]">لا توجد صور سابقة.</div>`;
+                return;
+            }
+            images.forEach(image => {
+                const imgElement = document.createElement('div');
+                imgElement.classList.add('gallery-item');
+                imgElement.innerHTML = `
+                    <button class="delete-btn" data-doc-id="${image.id}"><i class="fas fa-times"></i></button>
+                    <img src="${image.url}" alt="Uploaded Image">
+                `;
+                imgElement.querySelector('.delete-btn').addEventListener('click', (e) => {
+                    const docId = e.currentTarget.dataset.docId;
+                    deleteImage(docId);
+                });
+                imgElement.querySelector('img').addEventListener('click', () => {
+                    window.open(image.url, '_blank');
+                });
+                galleryContainer.appendChild(imgElement);
+            });
+        }
+    
+        // Event listeners
+        fileInput.addEventListener('change', () => {
+            resultBox.classList.add('hidden');
+            imagePreviewBox.classList.add('hidden');
+            errorMessage.classList.add('hidden');
+        });
+        
+        uploadButton.addEventListener('click', async () => {
+            const file = fileInput.files[0];
+            if (!file) {
+                showError("الرجاء اختيار صورة أولاً.");
+                return;
+            }
+            showLoading(true);
+            resultBox.classList.add('hidden');
+            imagePreviewBox.classList.add('hidden');
+            errorMessage.classList.add('hidden');
+    
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('upload_preset', uploadPreset);
+    
+            try {
+                const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+                    method: 'POST',
+                    body: formData
+                });
+    
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error.message || 'فشل في رفع الصورة.');
+                }
+    
+                const data = await response.json();
+                const imageUrl = data.secure_url;
+                
+                // Display the result
+                resultLink.href = imageUrl;
+                resultLink.textContent = imageUrl;
+                uploadedImage.src = imageUrl;
+                resultBox.classList.remove('hidden');
+                imagePreviewBox.classList.remove('hidden');
+
+                // Save to Firestore
+                await saveImageUrl(imageUrl);
+                
+            } catch (error) {
+                console.error("خطأ في التحميل:", error);
+                showError(`فشل في الرفع: ${error.message}`);
+            } finally {
+                showLoading(false);
             }
         });
 
-        // Function to copy the link to the clipboard
-        function copyLink() {
-            const linkText = resultLink.textContent;
-            navigator.clipboard.writeText(linkText).then(() => {
-                alert("تم نسخ الرابط!");
-            }).catch(err => {
-                console.error('Failed to copy text: ', err);
-            });
+        viewGalleryButton.addEventListener('click', () => {
+            galleryModal.classList.add('active');
+        });
+
+        document.addEventListener('click', (e) => {
+            if (e.target.dataset.modalClose) {
+                document.getElementById(e.target.dataset.modalClose).classList.remove('active');
+            }
+        });
+    
+        function showLoading(isLoading) {
+            if (isLoading) {
+                uploadButton.innerHTML = `<div class="spinner mx-auto w-5 h-5"></div>`;
+                uploadButton.disabled = true;
+            } else {
+                uploadButton.innerHTML = `<i class="fas fa-cloud-upload-alt"></i> رفع الصورة`;
+                uploadButton.disabled = false;
+            }
         }
+    
+        function showError(message) {
+            errorMessage.querySelector('p').innerHTML = `<i class="fas fa-exclamation-triangle"></i> ${message}`;
+            errorMessage.classList.remove('hidden');
+        }
+
+        // Initialize the application
+        initializeFirebase();
     </script>
 </body>
 </html>
+
