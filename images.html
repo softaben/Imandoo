@@ -8,11 +8,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     
-    <!-- Firebase Libraries -->
-    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js" type="module"></script>
-    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js" type="module"></script>
-    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js" type="module"></script>
-    
     <style>
         :root{
             --bg: #0f172a;
@@ -124,7 +119,6 @@
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* Modal styles */
         .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 20px; backdrop-filter: blur(5px); opacity: 0; transition: opacity 0.3s ease; }
         .modal.active { display: flex; opacity: 1; }
         .modal-content { background: var(--card); border-radius: var(--radius-lg); width: 100%; max-width: 90%; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5); border: 1px solid rgba(255,255,255,0.05); transform: scale(0.95); transition: transform 0.3s ease; }
@@ -176,7 +170,6 @@
             background-color: rgba(239, 68, 68, 1);
         }
         
-        /* Camera-specific styles */
         #video-preview {
             display: none;
             width: 100%;
@@ -199,7 +192,6 @@
             <p class="text-[var(--muted)]">اختر صورة من جهازك أو التقط واحدة.</p>
 
             <div class="space-y-4">
-                <!-- File Input and Camera Button -->
                 <label class="block">
                     <input type="file" id="image-upload" accept="image/*" class="form-input text-[var(--muted)]
                         file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0
@@ -228,17 +220,9 @@
             </div>
             <canvas id="photo-canvas" style="display:none;"></canvas>
 
-            <div id="loading-spinner" class="hidden flex justify-center items-center">
-                <div class="spinner"></div>
-            </div>
-
             <div id="result-box" class="hidden mt-6 p-4 rounded-xl border border-[var(--success)] bg-[var(--success)]/20 text-[var(--success)] text-sm break-words text-left space-y-2">
                 <p class="font-bold flex items-center gap-2"><i class="fas fa-check-circle"></i> تم الرفع بنجاح!</p>
                 <a id="result-link" href="#" target="_blank" class="block text-[var(--success)] hover:underline"></a>
-            </div>
-
-            <div id="image-preview-box" class="hidden mt-4 rounded-xl overflow-hidden shadow-xl">
-                <img id="uploaded-image" src="" alt="Uploaded Image Preview" class="w-full h-auto object-cover">
             </div>
 
             <div id="error-message" class="hidden mt-6 p-4 rounded-xl border border-[var(--danger)] bg-[var(--danger)]/20 text-[var(--danger)] text-sm space-y-2">
@@ -251,7 +235,6 @@
         </div>
     </div>
     
-    <!-- Gallery Modal -->
     <div id="gallery-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -260,8 +243,7 @@
             </div>
             <div class="modal-body">
                 <div id="gallery-container" class="image-gallery">
-                    <!-- Images will be injected here -->
-                </div>
+                    </div>
             </div>
         </div>
     </div>
@@ -271,9 +253,8 @@
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
         
-        // Firebase global variables provided by the environment
+        // These global variables are expected to be provided by the runtime environment.
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
         const cloudName = "dzc99hze9";
@@ -292,8 +273,6 @@
         const galleryContainer = document.getElementById('gallery-container');
         const resultBox = document.getElementById('result-box');
         const resultLink = document.getElementById('result-link');
-        const imagePreviewBox = document.getElementById('image-preview-box');
-        const uploadedImage = document.getElementById('uploaded-image');
         const errorMessage = document.getElementById('error-message');
 
         let db;
@@ -301,9 +280,14 @@
         let userId = null;
         let cameraStream = null;
 
-        // تهيئة Firebase
         function initializeFirebase() {
+            if (typeof __firebase_config === 'undefined' || !__firebase_config || __firebase_config === '{}') {
+                console.error("Firebase config is not available.");
+                showError("فشل في تهيئة التطبيق. لم يتم توفير إعدادات Firebase.");
+                return;
+            }
             try {
+                const firebaseConfig = JSON.parse(__firebase_config);
                 const app = initializeApp(firebaseConfig);
                 auth = getAuth(app);
                 db = getDatabase(app);
@@ -314,7 +298,7 @@
                         userId = user.uid;
                         setupDatabaseListener();
                     } else {
-                        console.log("No user, signing in anonymously...");
+                        console.log("No user, attempting to sign in...");
                         try {
                             if (initialAuthToken) {
                                 await signInWithCustomToken(auth, initialAuthToken);
@@ -333,12 +317,8 @@
             }
         }
         
-        // الاستماع للتحديثات في الوقت الفعلي من Realtime Database
         function setupDatabaseListener() {
-            if (!userId) {
-                return;
-            }
-            // استخدام مسار عام لمشاركة الصور
+            if (!userId) return;
             const imagesRef = ref(db, `artifacts/${appId}/public/data/uploaded_images`);
 
             onValue(imagesRef, (snapshot) => {
@@ -352,15 +332,14 @@
                 images.sort((a, b) => b.timestamp - a.timestamp);
                 renderGallery(images);
             }, (error) => {
-                console.error("Failed to fetch images from Realtime Database:", error);
+                console.error("Failed to fetch images:", error);
                 showError("فشل في تحميل الصور.");
             });
         }
 
-        // حفظ رابط الصورة في Realtime Database
         async function saveImageUrl(imageUrl) {
             if (!userId) {
-                console.error("User not authenticated.");
+                showError("المستخدم غير مسجل. لا يمكن حفظ الصورة.");
                 return;
             }
             try {
@@ -368,21 +347,17 @@
                 await push(imagesRef, {
                     url: imageUrl,
                     timestamp: Date.now(),
-                    userId: userId // حفظ userId للمصادقة على الحذف
+                    userId: userId
                 });
                 console.log("Image URL saved to Realtime Database.");
             } catch (e) {
-                console.error("Error saving image URL to Realtime Database:", e);
+                console.error("Error saving image URL:", e);
+                showError("حدث خطأ أثناء حفظ رابط الصورة.");
             }
         }
 
-        // حذف رابط الصورة من Realtime Database
         async function deleteImage(docId, imageUserId) {
-            if (!userId || !docId) {
-                console.error("Invalid user or document ID.");
-                return;
-            }
-            // تحقق مما إذا كان المستخدم الحالي هو من قام بتحميل الصورة
+            if (!userId || !docId) return;
             if (userId !== imageUserId) {
                 showError("لا يمكنك حذف صور المستخدمين الآخرين.");
                 return;
@@ -390,18 +365,17 @@
             try {
                 const imageRef = ref(db, `artifacts/${appId}/public/data/uploaded_images/${docId}`);
                 await remove(imageRef);
-                console.log("Image document deleted from Realtime Database.");
+                console.log("Image document deleted.");
             } catch (e) {
                 console.error("Error deleting image document:", e);
                 showError("فشل في حذف الصورة.");
             }
         }
 
-        // Render the image gallery
         function renderGallery(images) {
             galleryContainer.innerHTML = '';
             if (images.length === 0) {
-                galleryContainer.innerHTML = `<div class="text-center text-[var(--muted)]">لا توجد صور.</div>`;
+                galleryContainer.innerHTML = `<div class="col-span-full text-center text-[var(--muted)]">لا توجد صور.</div>`;
                 return;
             }
             images.forEach(image => {
@@ -412,6 +386,7 @@
                     <img src="${image.url}" alt="Uploaded Image">
                 `;
                 imgElement.querySelector('.delete-btn').addEventListener('click', (e) => {
+                    e.stopPropagation();
                     const docId = e.currentTarget.dataset.docId;
                     const imageUserId = e.currentTarget.dataset.userId;
                     deleteImage(docId, imageUserId);
@@ -423,25 +398,16 @@
             });
         }
     
-        // Event listeners
         fileInput.addEventListener('change', () => {
-            const file = fileInput.files[0];
-            if (file) {
-                uploadedImage.src = URL.createObjectURL(file);
-                imagePreviewBox.classList.remove('hidden');
-            } else {
-                imagePreviewBox.classList.add('hidden');
-            }
             resultBox.classList.add('hidden');
             errorMessage.classList.add('hidden');
         });
 
-        // تشغيل الكاميرا
         cameraButton.addEventListener('click', async () => {
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
                 videoPreview.srcObject = stream;
-                videoPreview.classList.remove('hidden');
+                videoPreview.style.display = 'block';
                 cameraControls.style.display = 'flex';
                 uploadButton.disabled = true;
                 fileInput.disabled = true;
@@ -452,35 +418,29 @@
             }
         });
 
-        // التقاط الصورة من الكاميرا
         takePhotoButton.addEventListener('click', () => {
             const context = photoCanvas.getContext('2d');
             photoCanvas.width = videoPreview.videoWidth;
             photoCanvas.height = videoPreview.videoHeight;
             context.drawImage(videoPreview, 0, 0, photoCanvas.width, photoCanvas.height);
             
-            // تحويل الصورة إلى Blob
             photoCanvas.toBlob((blob) => {
                 const photoFile = new File([blob], "camera-photo.png", { type: "image/png" });
                 const dataTransfer = new DataTransfer();
                 dataTransfer.items.add(photoFile);
                 fileInput.files = dataTransfer.files;
-                
-                uploadedImage.src = URL.createObjectURL(photoFile);
-                imagePreviewBox.classList.remove('hidden');
             }, 'image/png');
 
             stopCamera();
         });
 
-        // إلغاء تشغيل الكاميرا
         cancelButton.addEventListener('click', stopCamera);
 
         function stopCamera() {
             if (cameraStream) {
                 cameraStream.getTracks().forEach(track => track.stop());
             }
-            videoPreview.classList.add('hidden');
+            videoPreview.style.display = 'none';
             cameraControls.style.display = 'none';
             uploadButton.disabled = false;
             fileInput.disabled = false;
@@ -521,7 +481,7 @@
                 await saveImageUrl(imageUrl);
                 
             } catch (error) {
-                console.error("خطأ في التحميل:", error);
+                console.error("Upload error:", error);
                 showError(`فشل في الرفع: ${error.message}`);
             } finally {
                 showLoading(false);
@@ -542,9 +502,11 @@
             if (isLoading) {
                 uploadButton.innerHTML = `<div class="spinner mx-auto w-5 h-5"></div>`;
                 uploadButton.disabled = true;
+                cameraButton.disabled = true;
             } else {
                 uploadButton.innerHTML = `<i class="fas fa-cloud-upload-alt"></i> رفع الصورة`;
                 uploadButton.disabled = false;
+                cameraButton.disabled = false;
             }
         }
     
@@ -553,9 +515,7 @@
             errorMessage.classList.remove('hidden');
         }
 
-        // Initialize the application
         initializeFirebase();
     </script>
 </body>
 </html>
-
