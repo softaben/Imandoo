@@ -181,7 +181,14 @@
       <div class="card mb-4">
         <div class="flex items-center justify-between mb-4">
           <h3 class="text-lg font-semibold">الأصناف</h3>
-          <button type="button" id="addItemBtn" class="pill bg-[var(--accent)] text-black"><i class="fas fa-plus"></i> إضافة صنف</button>
+          <div class="flex items-center gap-2">
+            <a href="images.html" class="pill bg-[var(--accent)] text-black">
+              <i class="fas fa-images"></i> إضافة صورة
+            </a>
+            <button type="button" id="addItemBtn" class="pill bg-[var(--accent)] text-black">
+              <i class="fas fa-plus"></i> إضافة صنف
+            </button>
+          </div>
         </div>
         <div class="flex gap-2 mb-4">
           <input type="text" id="searchItems" placeholder="بحث في الأصناف..." class="form-input flex-1">
@@ -731,7 +738,7 @@
 
           // Optimistic UI update
           this.state.categories.splice(index, 1);
-          this.state.menu = this.state.menu.filter(item => item.category !== categoryToDelete.name_ar);
+          this.state.menu = this.state.menu.filter(item => item.category === categoryToDelete.name_ar);
           this._renderCategories();
           this._renderItems();
 
