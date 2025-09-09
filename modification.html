@@ -24,7 +24,14 @@
     <div class="modal-content"><div class="modal-header"><h3 class="modal-title">تسجيل الدخول</h3></div><form id="loginForm"><div class="modal-body"><label for="email" class="block mb-2 text-sm font-medium">البريد الإلكتروني</label><input type="email" id="email" class="form-input" required><label for="password" class="block mb-2 text-sm font-medium">كلمة المرور</label><input type="password" id="password" class="form-input" required></div><div class="modal-footer"><button type="submit" id="loginBtn" class="pill bg-[var(--accent)] text-black font-semibold"><i class="fas fa-sign-in-alt"></i> تسجيل الدخول</button></div></form></div>
   </div>
   <main id="mainContent" class="app p-4" style="display: none;"><header class="flex items-center justify-between mb-3"><h1 id="appTitle" class="text-xl font-semibold"></h1><div class="flex items-center gap-3"><a href="index.html" class="pill"><i class="fas fa-eye"></i> عرض القائمة</a><button type="button" id="logoutBtn" class="pill bg-red-500/20 text-red-300"><i class="fas fa-sign-out-alt"></i> تسجيل الخروج</button></div></header><section class="card mb-4 flex items-center gap-4"><img src="https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=400&auto=format&fit=crop" alt="hero" class="w-28 h-28 object-cover rounded-lg shadow-md"><div><h2 id="heroTitle" class="text-2xl font-bold"></h2><p id="heroSub" class="text-sm text-[var(--muted)]"></p></div></section><nav class="mb-4"><div class="flex gap-2" id="tabsContainer"><button type="button" class="pill tab-btn active" data-tab="items"><i class="fas fa-utensils"></i> الأصناف</button><button type="button" class="pill tab-btn" data-tab="categories"><i class="fas fa-layer-group"></i> الأقسام</button><button type="button" class="pill tab-btn" data-tab="settings"><i class="fas fa-cog"></i> الإعدادات</button></div></nav><div id="items-tab" class="tab-content"><div class="card mb-4"><div class="flex items-center justify-between mb-4"><h3 class="text-lg font-semibold">الأصناف</h3><div class="flex items-center gap-2"><button id="openImageModalBtn" class="pill bg-[var(--accent)] text-black"><i class="fas fa-images"></i> إدارة الصور</button><button type="button" id="addItemBtn" class="pill bg-[var(--accent)] text-black"><i class="fas fa-plus"></i> إضافة صنف</button></div></div><div class="flex gap-2 mb-4"><input type="text" id="searchItems" placeholder="بحث في الأصناف..." class="form-input flex-1"><select id="filterCategory" class="form-input flex-1"><option value="">جميع الأقسام</option></select></div><div class="overflow-x-auto"><table class="table w-full"><thead><tr><th>الصورة</th><th>الاسم</th><th>القسم</th><th>السعر</th><th>الحالة</th><th>الإجراءات</th></tr></thead><tbody id="itemsList"></tbody></table></div></div></div><div id="categories-tab" class="tab-content" style="display:none;"><div class="card mb-4"><div class="flex items-center justify-between mb-4"><h3 class="text-lg font-semibold">الأقسام</h3><button type="button" id="addCategoryBtn" class="pill bg-[var(--accent)] text-black"><i class="fas fa-plus"></i> إضافة قسم</button></div><table class="table w-full"><thead><tr><th>اسم القسم</th><th>عدد الأصناف</th><th>الحالة</th><th>الإجراءات</th></tr></thead><tbody id="categoriesList"></tbody></table></div></div><div id="settings-tab" class="tab-content" style="display:none;"><div class="card mb-4"><h3 class="text-lg font-semibold mb-4">الإعدادات العامة</h3><form id="settingsForm"><label for="restaurantName">اسم المطعم</label><input type="text" id="restaurantName" class="form-input"><label for="restaurantDescription">وصف المطعم</label><textarea id="restaurantDescription" class="form-input" rows="3"></textarea><label for="backgroundImage">رابط صورة الخلفية</label><input type="url" id="backgroundImage" class="form-input"><div class="image-preview" id="backgroundPreview"><span>معاينة الصورة</span></div><label for="accentColor" class="mt-4">لون التمييز</label><input type="color" id="accentColor" class="form-input p-1 h-10 w-full"><button type="submit" id="saveSettingsBtn" class="pill bg-[var(--accent)] text-black mt-4"><i class="fas fa-save"></i> حفظ الإعدادات</button></form></div></div></main>
-  <div id="itemModal" class="modal"><div class="modal-content"><form id="itemForm" novalidate><div class="modal-header"><h3 id="itemModalTitle" class="modal-title"></h3><button type="button" class="close" data-modal-close="itemModal">&times;</button></div><div class="modal-body"><input type="hidden" name="key"><label for="itemNameAr">اسم الصنف (العربية)</label><input type="text" id="itemNameAr" name="name_ar" class="form-input" required><label for="itemNameEn">اسم الصنف (الإنجليزية)</label><input type="text" id="itemNameEn" name="name_en" class="form-input" required><label for="itemNameFr">اسم الصنف (الفرنسية)</label><input type="text" id="itemNameFr" name="name_fr" class="form-input"><div class="grid grid-cols-2 gap-4"><div><label for="itemCategory">القسم</label><select id="itemCategory" name="category" class="form-input" required><option value="">اختر القسم</option></select></div><div><label for="itemPrice">السعر (درهم)</label><input type="number" id="itemPrice" name="price" class="form-input" min="0" step="0.01" required></div></div><label for="itemDescAr">الوصف (العربية)</label><textarea id="itemDescAr" name="desc_ar" class="form-input" rows="2"></textarea><label for="itemImage">رابط الصورة</label><input type="url" id="itemImage" name="image" class="form-input"><div class="image-preview" id="itemImagePreview"><span>معاينة الصورة</span></div><div class="flex justify-around mt-4"><div class="toggle-container"><label class="switch"><input type="checkbox" name="spicy"><span class="slider"></span></label><span>حار</span></div><div class="toggle-container"><label class="switch"><input type="checkbox" name="popular" checked><span class="slider"></span></label><span>شائع</span></div><div class="toggle-container"><label class="switch"><input type="checkbox" name="status" checked><span class="slider"></span></label><span>مفعل</span></div></div></div><div class="modal-footer"><button type="button" class="pill" data-modal-close="itemModal">إلغاء</button><button type="submit" id="saveItemBtn" class="pill bg-[var(--accent)] text-black">حفظ</button></div></form></div></div>
+  <div id="itemModal" class="modal"><div class="modal-content"><form id="itemForm" novalidate><div class="modal-header"><h3 id="itemModalTitle" class="modal-title"></h3><button type="button" class="close" data-modal-close="itemModal">&times;</button></div><div class="modal-body"><input type="hidden" name="key"><label for="itemNameAr">اسم الصنف (العربية)</label><input type="text" id="itemNameAr" name="name_ar" class="form-input" required><label for="itemNameEn">اسم الصنف (الإنجليزية)</label><input type="text" id="itemNameEn" name="name_en" class="form-input" required><label for="itemNameFr">اسم الصنف (الفرنسية)</label><input type="text" id="itemNameFr" name="name_fr" class="form-input"><div class="grid grid-cols-2 gap-4"><div><label for="itemCategory">القسم</label><select id="itemCategory" name="category" class="form-input" required><option value="">اختر القسم</option></select></div><div><label for="itemPrice">السعر (درهم)</label><input type="number" id="itemPrice" name="price" class="form-input" min="0" step="0.01" required></div></div>
+  <label for="itemDescAr">الوصف (العربية)</label>
+  <textarea id="itemDescAr" name="desc_ar" class="form-input" rows="2"></textarea>
+  <label for="itemDescEn">الوصف (الإنجليزية)</label>
+  <textarea id="itemDescEn" name="desc_en" class="form-input" rows="2"></textarea>
+  <label for="itemDescFr">الوصف (الفرنسية)</label>
+  <textarea id="itemDescFr" name="desc_fr" class="form-input" rows="2"></textarea>
+  <label for="itemImage">رابط الصورة</label><input type="url" id="itemImage" name="image" class="form-input"><div class="image-preview" id="itemImagePreview"><span>معاينة الصورة</span></div><div class="flex justify-around mt-4"><div class="toggle-container"><label class="switch"><input type="checkbox" name="spicy"><span class="slider"></span></label><span>حار</span></div><div class="toggle-container"><label class="switch"><input type="checkbox" name="popular" checked><span class="slider"></span></label><span>شائع</span></div><div class="toggle-container"><label class="switch"><input type="checkbox" name="status" checked><span class="slider"></span></label><span>مفعل</span></div></div></div><div class="modal-footer"><button type="button" class="pill" data-modal-close="itemModal">إلغاء</button><button type="submit" id="saveItemBtn" class="pill bg-[var(--accent)] text-black">حفظ</button></div></form></div></div>
   <div id="categoryModal" class="modal"><div class="modal-content"><form id="categoryForm" novalidate><div class="modal-header"><h3 id="categoryModalTitle" class="modal-title"></h3><button type="button" class="close" data-modal-close="categoryModal">&times;</button></div><div class="modal-body"><input type="hidden" name="key"><label for="categoryNameAr">اسم القسم (العربية)</label><input type="text" id="categoryNameAr" name="name_ar" class="form-input" required><label for="categoryNameEn">اسم القسم (الإنجليزية)</label><input type="text" id="categoryNameEn" name="name_en" class="form-input" required><label for="categoryNameFr">اسم القسم (الفرنسية)</label><input type="text" id="categoryNameFr" name="name_fr" class="form-input"><div class="toggle-container mt-4"><label class="switch"><input type="checkbox" name="status" checked><span class="slider"></span></label><span>مفعل</span></div></div><div class="modal-footer"><button type="button" class="pill" data-modal-close="categoryModal">إلغاء</button><button type="submit" id="saveCategoryBtn" class="pill bg-[var(--accent)] text-black">حفظ</button></div></form></div></div>
   <div id="confirmModal" class="modal"><div class="modal-content"><div class="modal-header"><h3 id="confirmModalTitle" class="modal-title"></h3><button type="button" class="close" data-modal-close="confirmModal">&times;</button></div><div class="modal-body"><p id="confirmMessage"></p></div><div class="modal-footer"><button type="button" class="pill" data-modal-close="confirmModal"><i class="fas fa-times"></i> إلغاء</button><button type="button" id="confirmDeleteBtn" class="pill bg-[var(--danger)] text-white"><i class="fas fa-trash"></i> نعم، احذف</button></div></div></div>
   <div id="imageModal" class="modal"><div class="modal-content"><div class="modal-header"><h3 class="modal-title">إدارة الصور</h3><button type="button" class="close" data-modal-close="imageModal">&times;</button></div><div class="modal-body"><div class="space-y-6"><h4 class="text-xl font-bold">تحميل صورة جديدة</h4><p class="text-[var(--muted)]">اختر صورة من جهازك أو التقط واحدة.</p><div class="space-y-4"><label class="block"><input type="file" id="image-upload" accept="image/*" class="form-input text-[var(--muted)] file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-gray-700/50 file:text-white hover:file:bg-gray-600/50 transition-colors duration-200"></label><div class="flex gap-4"><button id="camera-button" class="pill flex-1 bg-[var(--warning)] text-black font-semibold py-3 shadow-lg hover:bg-[var(--warning)]/80"><i class="fas fa-camera"></i> التقط صورة</button><button id="upload-button" class="pill flex-1 bg-[var(--accent)] text-black font-semibold py-3 shadow-lg hover:bg-[var(--accent)]/80"><i class="fas fa-cloud-upload-alt"></i> رفع الصورة</button></div></div><video id="video-preview" autoplay></video><div id="camera-controls" class="flex"><button id="take-photo-button" class="pill flex-1 bg-[var(--success)] text-black font-semibold py-3 shadow-lg hover:bg-[var(--success)]/80">التقط صورة</button><button id="cancel-camera-button" class="pill flex-1 bg-[var(--danger)] text-white font-semibold py-3 shadow-lg hover:bg-[var(--danger)]/80">إلغاء</button></div><canvas id="photo-canvas" style="display:none;"></canvas><div id="result-box" class="hidden mt-6 p-4 rounded-xl border border-[var(--success)] bg-[var(--success)]/20 text-[var(--success)] text-sm break-words text-left space-y-2"><p class="font-bold flex items-center gap-2"><i class="fas fa-check-circle"></i> تم الرفع بنجاح!</p><a id="result-link" href="#" target="_blank" class="block text-[var(--success)] hover:underline"></a></div><div id="error-message" class="hidden mt-6 p-4 rounded-xl border border-[var(--danger)] bg-[var(--danger)]/20 text-[var(--danger)] text-sm space-y-2"><p class="flex items-center gap-2"><i class="fas fa-exclamation-triangle"></i></p></div></div><h4 class="text-xl font-bold mt-8">معرض الصور</h4><div id="gallery-container" class="image-gallery"></div></div></div></div>
@@ -62,7 +69,6 @@
         elements = {};
         firebaseRefs = {};
         
-        // معلومات Cloudinary لرفع الصور
         imageManagement = {
             cloudName: "dzc99hze9",
             uploadPreset: "testaben",
@@ -97,7 +103,6 @@
           this.firebaseRefs.menu = this.firebaseRefs.db.ref('menu');
           this.firebaseRefs.categories = this.firebaseRefs.db.ref('categories');
           this.firebaseRefs.settings = this.firebaseRefs.db.ref('settings');
-          // تمت إضافة مرجع جديد للصور
           this.firebaseRefs.images = this.firebaseRefs.db.ref('images'); 
         }
 
@@ -124,10 +129,9 @@
                 this.state.settings = snapshot.val() || {};
                 this._applySettings();
             });
-            // تمت إضافة مستمع جديد لمعرض الصور
             this.state.firebaseListeners.images = this.firebaseRefs.images.on('value', snapshot => {
                 const imagesData = this._firebaseObjectToArray(snapshot);
-                this._renderImageGallery(imagesData.reverse()); // عكس الترتيب لعرض الأحدث أولاً
+                this._renderImageGallery(imagesData.reverse());
             });
         }
         
@@ -150,7 +154,11 @@
                 form.elements.name_fr.value = item.name_fr || '';
                 form.elements.category.value = item.category;
                 form.elements.price.value = item.price;
-                form.elements.desc_ar.value = item.desc_ar;
+                // ✨ التغيير: تمت إضافة تحميل بيانات الوصف متعدد اللغات
+                form.elements.desc_ar.value = item.desc_ar || '';
+                form.elements.desc_en.value = item.desc_en || '';
+                form.elements.desc_fr.value = item.desc_fr || '';
+                // نهاية التغيير
                 form.elements.image.value = item.image;
                 form.elements.spicy.checked = item.spicy || false;
                 form.elements.popular.checked = item.popular !== false;
@@ -170,13 +178,16 @@
             this._toggleLoading(this.elements.saveItemBtn, true);
             const formData = this._serializeForm(form);
             const itemKey = formData.key;
+            // ✨ التغيير: تمت إضافة حقول الوصف الجديدة إلى كائن البيانات
             const itemData = {
                 id: this.state.isEditing ? this.state.menu.find(i => i.key === itemKey).id : Date.now(),
                 name_ar: formData.name_ar, name_en: formData.name_en, name_fr: formData.name_fr,
-                category: formData.category, price: parseFloat(formData.price), desc_ar: formData.desc_ar,
+                category: formData.category, price: parseFloat(formData.price), 
+                desc_ar: formData.desc_ar, desc_en: formData.desc_en, desc_fr: formData.desc_fr,
                 image: formData.image, spicy: !!formData.spicy, popular: !!formData.popular,
                 hidden: !formData.status, lastUpdated: new Date().toISOString()
             };
+            // نهاية التغيير
             try {
                 if (this.state.isEditing) await this.firebaseRefs.menu.child(itemKey).update(itemData);
                 else await this.firebaseRefs.menu.push(itemData);
@@ -325,10 +336,8 @@
                 this._uploadToCloudinary(photoFile);
             });
             
-            // حدث لنسخ الرابط عند الضغط على الصورة
             img.galleryContainer.addEventListener('click', e => {
                 const item = e.target.closest('.gallery-item');
-                // تأكد من أن الضغطة ليست على زر الحذف
                 if (item && !e.target.closest('.delete-btn')) {
                     const url = item.dataset.url;
                     navigator.clipboard.writeText(url).then(() => {
@@ -337,10 +346,9 @@
                 }
             });
 
-            // حدث لحذف الصورة
             img.galleryContainer.addEventListener('click', e => {
               if (e.target.closest('.delete-btn')) {
-                  e.stopPropagation(); // منع نسخ الرابط عند الضغط على الحذف
+                  e.stopPropagation();
                   const key = e.target.closest('.gallery-item').dataset.key;
                   this._showConfirmModal('تأكيد الحذف', 'هل أنت متأكد من حذف هذه الصورة من المعرض؟', () => this._deleteImageFromDB(key));
               }
@@ -368,7 +376,6 @@
                     this.imageManagement.resultLink.textContent = imageUrl;
                     this.imageManagement.resultBox.classList.remove('hidden');
                     this._showToast('تم رفع الصورة بنجاح!', 'success');
-                    // استدعاء دالة الحفظ في قاعدة البيانات
                     this._saveImageUrlToDB(imageUrl); 
                 } else {
                     throw new Error(data.error.message);
@@ -378,7 +385,7 @@
                 this.imageManagement.errorMessage.classList.remove('hidden');
             } finally {
                 this._toggleLoading(this.imageManagement.uploadButton, false);
-                this.imageManagement.fileInput.value = ''; // مسح حقل الإدخال
+                this.imageManagement.fileInput.value = '';
             }
         }
 
@@ -415,7 +422,6 @@
         }
 
         _saveImageUrlToDB(url) {
-            // استخدام مرجع الصور الذي تم إنشاؤه ودفع كائن جديد إليه
             this.firebaseRefs.images.push({
                 url: url,
                 createdAt: new Date().toISOString()
@@ -434,7 +440,7 @@
                 const item = document.createElement('div');
                 item.className = 'gallery-item';
                 item.dataset.url = img.url;
-                item.dataset.key = img.key; // حفظ مفتاح Firebase للحذف
+                item.dataset.key = img.key;
                 item.title = "اضغط للنسخ";
                 item.innerHTML = `
                     <button class="delete-btn" title="حذف الصورة"><i class="fas fa-trash"></i></button>
