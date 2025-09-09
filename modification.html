@@ -12,16 +12,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
   
-  <script type="module">
-    // هذه المكتبات ستستخدم فقط في الكود الجديد لرفع الصور
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-    import { getDatabase, ref, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
-    window.firebase_v11 = { initializeApp, getAuth, onAuthStateChanged, getDatabase, ref, push, onValue, remove, update };
-  </script>
-  
   <style>
-    /* الأنماط لم تتغير */
     :root{ --bg: #0f172a; --card: #0b1220; --text: #e2e8f0; --muted: #94a3b8; --accent: #fbbf24; --radius-lg: 14px; --radius-md: 8px; --success: #10b981; --danger: #ef4444; --warning: #f59e0b; }
     html,body{ height:100% } body{ font-family: 'Inter', system-ui, -apple-system, "Segoe UI", sans-serif; background: var(--bg); color: var(--text); -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; overflow-x: hidden; position: relative; font-weight: 400; line-height: 1.6; } body::before { content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-image: url('https://images.unsplash.com/photo-1563245372-f21724e3856d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2064&q=80'); background-size: cover; background-position: center; opacity: 0.08; z-index: -1; pointer-events: none; } h1, h2, h3, h4, h5, h6 { font-family: 'Playfair Display', serif; font-weight: 600; letter-spacing: -0.025em; } [lang="ar"] body, [dir="rtl"] body { font-family: 'Cairo', 'Inter', sans-serif; } [lang="ar"] h1, [lang="ar"] h2, [lang="ar"] h3, [dir="rtl"] h1, [dir="rtl"] h2, [dir="rtl"] h3 { font-family: 'Cairo', 'Playfair Display', serif; } .app { max-width: 480px; margin: 0 auto; min-height:100vh; display:flex; flex-direction:column; position: relative; z-index: 1; } @media(min-width:768px){ .app{max-width:720px} } .card{ background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.03)); border-radius: var(--radius-lg); padding: 12px; box-shadow: 0 6px 18px rgba(2,6,23,0.6); border: 1px solid rgba(255,255,255,0.03); backdrop-filter: blur(10px); } .pill { background: rgba(255,255,255,0.02); border-radius: 999px; padding: 8px 12px; font-weight:500; color:var(--text); display:inline-flex; gap:8px; align-items:center; border: 1px solid rgba(255,255,255,0.03); transition: all 0.2s ease; cursor: pointer; font-size: 0.875rem; } .pill:hover:not(:disabled) { background: rgba(255,255,255,0.05); } .pill:disabled { cursor: not-allowed; opacity: 0.6; } .form-input { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: var(--radius-md); padding: 10px 12px; color: var(--text); width: 100%; margin-bottom: 12px; transition: border-color 0.2s, box-shadow 0.2s; } .form-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.1); } .form-input.is-invalid { border-color: var(--danger); box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1); } .form-input:disabled { background: rgba(255, 255, 255, 0.01); cursor: not-allowed; } .validation-message { color: var(--danger); font-size: 0.8rem; margin-top: -8px; margin-bottom: 8px; display: none; } .is-invalid + .validation-message { display: block; } .image-preview { margin-top: 10px; width: 100%; height: 150px; background-color: rgba(255, 255, 255, 0.03); border: 1px dashed rgba(255, 255, 255, 0.1); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; overflow: hidden; color: var(--muted); } .image-preview img { width: 100%; height: 100%; object-fit: cover; } .empty-state { text-align: center; padding: 2rem; color: var(--muted); } .empty-state .icon { font-size: 2.5rem; margin-bottom: 0.5rem; opacity: 0.5; } .tab-content { transition: opacity 0.3s ease; } .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 20px; backdrop-filter: blur(5px); opacity: 0; transition: opacity 0.3s ease; } .modal.active { display: flex; opacity: 1; } .modal-content { background: var(--card); border-radius: var(--radius-lg); width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5); border: 1px solid rgba(255,255,255,0.05); transform: scale(0.95); transition: transform 0.3s ease; } .modal.active .modal-content { transform: scale(1); } .modal-header { padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; align-items: center; } .modal-title { font-size: 1.5rem; font-weight: 700; margin: 0; } .close { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text); } .modal-body { padding: 20px; } .modal-footer { padding: 20px; border-top: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: flex-end; gap: 10px; } .toggle-container { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; } .switch { position: relative; display: inline-block; width: 50px; height: 24px; } .switch input { opacity: 0; width: 0; height: 0; } .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(255,255,255,0.1); transition: .4s; border-radius: 34px; } .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; } input:checked + .slider { background-color: var(--accent); } input:checked + .slider:before { transform: translateX(26px); } .toast-container { position: fixed; top: 20px; right: 20px; z-index: 1001; display: flex; flex-direction: column; gap: 10px; } .toast { padding: 12px 16px; border-radius: var(--radius-md); display: flex; align-items: center; gap: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); animation: slideIn 0.3s ease; } .toast-success { background: var(--success); color: white; } .toast-error { background: var(--danger); color: white; } @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } } @keyframes slideOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } } .spinner { border: 3px solid rgba(255,255,255,0.1); border-radius: 50%; border-top: 3px solid var(--accent); width: 24px; height: 24px; animation: spin 1s linear infinite; } button .spinner { width: 20px; height: 20px; } @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } } .image-gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 16px; } .gallery-item { position: relative; overflow: hidden; border-radius: var(--radius-md); border: 1px solid rgba(255,255,255,0.05); transition: transform 0.2s ease, box-shadow 0.2s ease; } .gallery-item:hover { transform: scale(1.03); box-shadow: 0 4px 12px rgba(0,0,0,0.3); } .gallery-item img { width: 100%; height: 100px; object-fit: cover; cursor: pointer; } .delete-btn { position: absolute; top: 8px; left: 8px; background-color: rgba(239, 68, 68, 0.8); color: white; border: none; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background-color 0.2s ease; z-index: 10; } .delete-btn:hover { background-color: rgba(239, 68, 68, 1); } #video-preview, #photo-canvas { display: none; width: 100%; height: auto; border-radius: var(--radius-md); margin-top: 1rem; } #camera-controls { display: none; gap: 1rem; margin-top: 1rem; justify-content: center; }
   </style>
@@ -62,7 +53,7 @@
           categories: [],
           settings: {},
           isEditing: false,
-          activeRecordKey: null, // CHANGED: from activeRecordIndex to activeRecordKey
+          activeRecordKey: null,
           deleteCallback: null,
           user: null,
           firebaseListeners: {}
@@ -71,20 +62,19 @@
         elements = {};
         firebaseRefs = {};
         
+        // معلومات Cloudinary لرفع الصور
         imageManagement = {
             cloudName: "dzc99hze9",
             uploadPreset: "testaben",
             fileInput: null, uploadButton: null, cameraButton: null, takePhotoButton: null, cancelButton: null, videoPreview: null, cameraControls: null, photoCanvas: null, resultBox: null, resultLink: null, errorMessage: null, galleryContainer: null, cameraStream: null,
         };
         
-        firebaseV11 = null;
-
         constructor() {
           this._cacheDOMElements();
           this._initFirebase();
           this._setupEventListeners();
           this._monitorAuthState();
-          this._setupImageManagement();
+          this._setupImageManagement(); // تم تفعيل هذه الدالة
         }
 
         _cacheDOMElements() {
@@ -107,31 +97,26 @@
           this.firebaseRefs.menu = this.firebaseRefs.db.ref('menu');
           this.firebaseRefs.categories = this.firebaseRefs.db.ref('categories');
           this.firebaseRefs.settings = this.firebaseRefs.db.ref('settings');
+          // NEW: إضافة مرجع للصور في قاعدة البيانات
+          this.firebaseRefs.images = this.firebaseRefs.db.ref('images'); 
         }
 
-        // NEW: Helper function to convert Firebase object to array for UI rendering
         _firebaseObjectToArray(snapshot) {
             const data = snapshot.val();
             if (!data) return [];
-            return Object.keys(data).map(key => ({
-                key, // Keep the unique Firebase key
-                ...data[key]
-            }));
+            return Object.keys(data).map(key => ({ key, ...data[key] }));
         }
 
         _attachFirebaseListeners() {
             if (this.state.firebaseListeners.menu) return;
             
             this.state.firebaseListeners.menu = this.firebaseRefs.menu.on('value', snapshot => {
-                this.state.menu = this._firebaseObjectToArray(snapshot); // CHANGED
+                this.state.menu = this._firebaseObjectToArray(snapshot);
                 this._renderItems();
-                // When categories are loaded, re-render items to show item counts correctly
-                if (this.state.categories.length > 0) {
-                    this._renderCategories();
-                }
+                if (this.state.categories.length > 0) this._renderCategories();
             });
             this.state.firebaseListeners.categories = this.firebaseRefs.categories.on('value', snapshot => {
-                this.state.categories = this._firebaseObjectToArray(snapshot); // CHANGED
+                this.state.categories = this._firebaseObjectToArray(snapshot);
                 this._renderCategories();
                 this._updateCategoryDropdowns();
             });
@@ -139,9 +124,12 @@
                 this.state.settings = snapshot.val() || {};
                 this._applySettings();
             });
+            // NEW: Listener لمعرض الصور
+            this.state.firebaseListeners.images = this.firebaseRefs.images.on('value', snapshot => {
+                const imagesData = this._firebaseObjectToArray(snapshot);
+                this._renderImageGallery(imagesData.reverse());
+            });
         }
-        
-        // --- START: All CRUD (Create, Read, Update, Delete) functions have been updated ---
         
         _openItemModal(itemKey = null) {
             const form = this.elements.itemForm;
@@ -165,7 +153,7 @@
                 form.elements.desc_ar.value = item.desc_ar;
                 form.elements.image.value = item.image;
                 form.elements.spicy.checked = item.spicy || false;
-                form.elements.popular.checked = item.popular !== false; // Default to true if undefined
+                form.elements.popular.checked = item.popular !== false;
                 form.elements.status.checked = !item.hidden;
                 this._updateImagePreview(form.elements.image, this.elements.itemImagePreview);
             } else {
@@ -179,68 +167,45 @@
         async saveItem() {
             const form = this.elements.itemForm;
             if (!this._validateForm(form)) return;
-            
             this._toggleLoading(this.elements.saveItemBtn, true);
-
             const formData = this._serializeForm(form);
             const itemKey = formData.key;
-
             const itemData = {
                 id: this.state.isEditing ? this.state.menu.find(i => i.key === itemKey).id : Date.now(),
-                name_ar: formData.name_ar,
-                name_en: formData.name_en,
-                name_fr: formData.name_fr,
-                category: formData.category,
-                price: parseFloat(formData.price),
-                desc_ar: formData.desc_ar,
-                image: formData.image,
-                spicy: !!formData.spicy,
-                popular: !!formData.popular,
-                hidden: !formData.status,
-                lastUpdated: new Date().toISOString()
+                name_ar: formData.name_ar, name_en: formData.name_en, name_fr: formData.name_fr,
+                category: formData.category, price: parseFloat(formData.price), desc_ar: formData.desc_ar,
+                image: formData.image, spicy: !!formData.spicy, popular: !!formData.popular,
+                hidden: !formData.status, lastUpdated: new Date().toISOString()
             };
-
             try {
-                if (this.state.isEditing) {
-                    await this.firebaseRefs.menu.child(itemKey).update(itemData);
-                } else {
-                    await this.firebaseRefs.menu.push(itemData);
-                }
+                if (this.state.isEditing) await this.firebaseRefs.menu.child(itemKey).update(itemData);
+                else await this.firebaseRefs.menu.push(itemData);
                 this._showToast(this.state.isEditing ? 'تم تحديث الصنف' : 'تم إضافة الصنف', 'success');
                 this._toggleModal('itemModal', false);
-            } catch (error) {
-                this._showToast(`خطأ في الحفظ: ${error.message}`, 'error');
-            } finally {
-                this._toggleLoading(this.elements.saveItemBtn, false);
-            }
+            } catch (error) { this._showToast(`خطأ: ${error.message}`, 'error'); } 
+            finally { this._toggleLoading(this.elements.saveItemBtn, false); }
         }
         
         async deleteItem(itemKey) {
             try {
                 await this.firebaseRefs.menu.child(itemKey).remove();
                 this._showToast('تم حذف الصنف بنجاح', 'success');
-            } catch (error) {
-                this._showToast(`فشل الحذف: ${error.message}`, 'error');
-            }
+            } catch (error) { this._showToast(`فشل الحذف: ${error.message}`, 'error'); }
         }
 
         _openCategoryModal(categoryKey = null) {
             const form = this.elements.categoryForm;
             form.reset();
             this._clearValidation(form);
-
             this.state.isEditing = categoryKey !== null;
             this.state.activeRecordKey = categoryKey;
-
             if (this.state.isEditing) {
                 const cat = this.state.categories.find(c => c.key === categoryKey);
                  if (!cat) { console.error('Category not found'); return; }
                 this.elements.categoryModalTitle.textContent = 'تعديل القسم';
                 form.elements.key.value = cat.key;
-                form.elements.name_ar.value = cat.name_ar;
-                form.elements.name_en.value = cat.name_en;
-                form.elements.name_fr.value = cat.name_fr || '';
-                form.elements.status.checked = !cat.hidden;
+                form.elements.name_ar.value = cat.name_ar; form.elements.name_en.value = cat.name_en;
+                form.elements.name_fr.value = cat.name_fr || ''; form.elements.status.checked = !cat.hidden;
             } else {
                 this.elements.categoryModalTitle.textContent = 'إضافة قسم جديد';
                 form.elements.status.checked = true;
@@ -252,174 +217,57 @@
             const form = this.elements.categoryForm;
             if (!this._validateForm(form)) return;
             this._toggleLoading(this.elements.saveCategoryBtn, true);
-
             const formData = this._serializeForm(form);
             const categoryKey = formData.key;
-            
             const categoryData = {
                 id: this.state.isEditing ? this.state.categories.find(c => c.key === categoryKey).id : Date.now(),
-                name_ar: formData.name_ar,
-                name_en: formData.name_en,
-                name_fr: formData.name_fr,
-                hidden: !formData.status,
-                lastUpdated: new Date().toISOString()
+                name_ar: formData.name_ar, name_en: formData.name_en, name_fr: formData.name_fr,
+                hidden: !formData.status, lastUpdated: new Date().toISOString()
             };
-
             try {
-                if (this.state.isEditing) {
-                    await this.firebaseRefs.categories.child(categoryKey).update(categoryData);
-                } else {
-                    await this.firebaseRefs.categories.push(categoryData);
-                }
+                if (this.state.isEditing) await this.firebaseRefs.categories.child(categoryKey).update(categoryData);
+                else await this.firebaseRefs.categories.push(categoryData);
                 this._showToast(this.state.isEditing ? 'تم تحديث القسم' : 'تم إضافة القسم', 'success');
                 this._toggleModal('categoryModal', false);
-            } catch (error) {
-                this._showToast(`خطأ في الحفظ: ${error.message}`, 'error');
-            } finally {
-                this._toggleLoading(this.elements.saveCategoryBtn, false);
-            }
+            } catch (error) { this._showToast(`خطأ: ${error.message}`, 'error'); } 
+            finally { this._toggleLoading(this.elements.saveCategoryBtn, false); }
         }
 
         async deleteCategory(categoryKey) {
             const categoryToDelete = this.state.categories.find(c => c.key === categoryKey);
             if (!categoryToDelete) return;
-
-            // Find all items in this category
             const itemsToDelete = this.state.menu.filter(item => item.category === categoryToDelete.name_ar);
-
             try {
                 const updates = {};
-                // Prepare to delete the category
                 updates[`/categories/${categoryKey}`] = null;
-                // Prepare to delete all items in that category
-                itemsToDelete.forEach(item => {
-                    updates[`/menu/${item.key}`] = null;
-                });
-                
-                // Perform a multi-path update to delete everything atomically
+                itemsToDelete.forEach(item => { updates[`/menu/${item.key}`] = null; });
                 await this.firebaseRefs.db.ref().update(updates);
                 this._showToast('تم حذف القسم وجميع أصنافه بنجاح.', 'success');
-            } catch (error) {
-                this._showToast(`فشل الحذف: ${error.message}`, 'error');
-            }
+            } catch (error) { this._showToast(`فشل الحذف: ${error.message}`, 'error'); }
         }
         
-        // --- END: CRUD functions updated ---
-
         _handleItemsListClick(e) {
             const editBtn = e.target.closest('.btn-edit-item');
             if (editBtn) this._openItemModal(editBtn.dataset.key);
-
             const deleteBtn = e.target.closest('.btn-delete-item');
-            if (deleteBtn) {
-                this._showConfirmModal('تأكيد حذف الصنف', 'هل أنت متأكد؟ لا يمكن التراجع عن هذا الإجراء.', () => this.deleteItem(deleteBtn.dataset.key));
-            }
+            if (deleteBtn) this._showConfirmModal('تأكيد حذف الصنف', 'هل أنت متأكد؟ لا يمكن التراجع عن هذا الإجراء.', () => this.deleteItem(deleteBtn.dataset.key));
         }
 
         _handleCategoriesListClick(e) {
             const editBtn = e.target.closest('.btn-edit-category');
             if (editBtn) this._openCategoryModal(editBtn.dataset.key);
-
             const deleteBtn = e.target.closest('.btn-delete-category');
-            if (deleteBtn) {
-                this._showConfirmModal('تأكيد حذف القسم', 'تحذير: سيتم حذف جميع الأصناف في هذا القسم أيضًا!', () => this.deleteCategory(deleteBtn.dataset.key));
-            }
+            if (deleteBtn) this._showConfirmModal('تأكيد حذف القسم', 'تحذير: سيتم حذف جميع الأصناف في هذا القسم أيضًا!', () => this.deleteCategory(deleteBtn.dataset.key));
         }
-
-        _renderItems() {
-            const list = this.elements.itemsList;
-            list.innerHTML = '';
-            
-            const filteredItems = this._getFilteredItems();
-
-            if (filteredItems.length === 0) {
-                list.innerHTML = this._createEmptyStateHTML('<i class="fas fa-utensils icon"></i><p>لا توجد أصناف حاليًا.</p>');
-                return;
-            }
-            
-            const fragment = document.createDocumentFragment();
-            filteredItems.forEach(item => {
-                fragment.appendChild(this._createItemRowElement(item));
-            });
-            list.appendChild(fragment);
-        }
-
-        _createItemRowElement(item) {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td><img src="${item.image || 'https://via.placeholder.com/150'}" alt="${item.name_ar}" class="w-12 h-12 object-cover rounded-md"></td>
-                <td>${item.name_ar}</td>
-                <td>${item.category}</td>
-                <td>${item.price} د.م.</td>
-                <td><span class="pill ${item.hidden ? 'bg-yellow-500/20 text-yellow-300' : 'bg-green-500/20 text-green-300'}">${item.hidden ? 'مخفي' : 'مفعل'}</span></td>
-                <td class="flex gap-2">
-                <button type="button" class="pill btn-edit-item" data-key="${item.key}"><i class="fas fa-edit"></i></button>
-                <button type="button" class="pill bg-[var(--danger)]/20 text-[var(--danger)] btn-delete-item" data-key="${item.key}"><i class="fas fa-trash"></i></button>
-                </td>`;
-            return tr;
-        }
-
-        _renderCategories() {
-            const list = this.elements.categoriesList;
-            list.innerHTML = '';
-
-            if (this.state.categories.length === 0) {
-                list.innerHTML = this._createEmptyStateHTML('<i class="fas fa-layer-group icon"></i><p>لا توجد أقسام حاليًا.</p>');
-                return;
-            }
-
-            const fragment = document.createDocumentFragment();
-            this.state.categories.forEach((cat) => {
-                fragment.appendChild(this._createCategoryRowElement(cat));
-            });
-            list.appendChild(fragment);
-        }
-
-        _createCategoryRowElement(cat) {
-            const tr = document.createElement('tr');
-            const itemCount = this.state.menu.filter(item => item.category === cat.name_ar).length;
-            tr.innerHTML = `
-                <td>${cat.name_ar}</td>
-                <td>${itemCount}</td>
-                <td><span class="pill ${cat.hidden ? 'bg-yellow-500/20 text-yellow-300' : 'bg-green-500/20 text-green-300'}">${cat.hidden ? 'مخفي' : 'مفعل'}</span></td>
-                <td class="flex gap-2">
-                <button type="button" class="pill btn-edit-category" data-key="${cat.key}"><i class="fas fa-edit"></i></button>
-                <button type="button" class="pill bg-[var(--danger)]/20 text-[var(--danger)] btn-delete-category" data-key="${cat.key}"><i class="fas fa-trash"></i></button>
-                </td>`;
-            return tr;
-        }
-
-        // --- Other functions (unchanged unless necessary) ---
-        _setupEventListeners() {
-          this.elements.loginForm.addEventListener('submit', e => { e.preventDefault(); this.loginUser(); });
-          this.elements.itemForm.addEventListener('submit', e => { e.preventDefault(); this.saveItem(); });
-          this.elements.categoryForm.addEventListener('submit', e => { e.preventDefault(); this.saveCategory(); });
-          this.elements.settingsForm.addEventListener('submit', e => { e.preventDefault(); this.saveSettings(); });
-          this.elements.logoutBtn.addEventListener('click', () => this.logoutUser());
-          this.elements.addItemBtn.addEventListener('click', () => this._openItemModal());
-          this.elements.addCategoryBtn.addEventListener('click', () => this._openCategoryModal());
-          this.elements.confirmDeleteBtn.addEventListener('click', () => this._confirmDelete());
-          this.elements.openImageModalBtn.addEventListener('click', () => this._openImageModal());
-          this.elements.tabsContainer.addEventListener('click', e => {
-            const tabBtn = e.target.closest('.tab-btn');
-            if (tabBtn) this._switchTab(tabBtn.dataset.tab);
-          });
-          this.elements.searchItems.addEventListener('input', this._debounce(() => this._renderItems()));
-          this.elements.filterCategory.addEventListener('change', () => this._renderItems());
-          this.elements.itemsList.addEventListener('click', e => this._handleItemsListClick(e));
-          this.elements.categoriesList.addEventListener('click', e => this._handleCategoriesListClick(e));
-          document.addEventListener('click', e => {
-            if (e.target.dataset.modalClose) this._toggleModal(e.target.dataset.modalClose, false);
-          });
-          this.elements.itemImage.addEventListener('input', () => this._updateImagePreview(this.elements.itemImage, this.elements.itemImagePreview));
-          this.elements.backgroundImage.addEventListener('input', () => this._updateImagePreview(this.elements.backgroundImage, this.elements.backgroundPreview));
-        }
-        _monitorAuthState() {
-          this.firebaseRefs.auth.onAuthStateChanged(user => {
-            if (user) { this.state.user = user; this.elements.mainContent.style.display = 'block'; this._toggleModal('loginModal', false); this._attachFirebaseListeners(); /* this._initializeFirebaseV11(); */ } else { this.state.user = null; this.elements.mainContent.style.display = 'none'; this._toggleModal('loginModal', true); this._detachFirebaseListeners(); if (this.imageManagement.cameraStream) this._stopCamera(); }
-          });
-        }
-        _detachFirebaseListeners() { Object.values(this.state.firebaseListeners).forEach(listener => listener.ref.off('value', listener.callback)); this.state.firebaseListeners = {}; }
+        
+        _renderItems() { const list = this.elements.itemsList; list.innerHTML = ''; const filteredItems = this._getFilteredItems(); if (filteredItems.length === 0) { list.innerHTML = this._createEmptyStateHTML('<i class="fas fa-utensils icon"></i><p>لا توجد أصناف حاليًا.</p>'); return; } const fragment = document.createDocumentFragment(); filteredItems.forEach(item => { fragment.appendChild(this._createItemRowElement(item)); }); list.appendChild(fragment); }
+        _createItemRowElement(item) { const tr = document.createElement('tr'); tr.innerHTML = `<td><img src="${item.image || 'https://via.placeholder.com/150'}" alt="${item.name_ar}" class="w-12 h-12 object-cover rounded-md"></td><td>${item.name_ar}</td><td>${item.category}</td><td>${item.price} د.م.</td><td><span class="pill ${item.hidden ? 'bg-yellow-500/20 text-yellow-300' : 'bg-green-500/20 text-green-300'}">${item.hidden ? 'مخفي' : 'مفعل'}</span></td><td class="flex gap-2"><button type="button" class="pill btn-edit-item" data-key="${item.key}"><i class="fas fa-edit"></i></button><button type="button" class="pill bg-[var(--danger)]/20 text-[var(--danger)] btn-delete-item" data-key="${item.key}"><i class="fas fa-trash"></i></button></td>`; return tr; }
+        _renderCategories() { const list = this.elements.categoriesList; list.innerHTML = ''; if (this.state.categories.length === 0) { list.innerHTML = this._createEmptyStateHTML('<i class="fas fa-layer-group icon"></i><p>لا توجد أقسام حاليًا.</p>'); return; } const fragment = document.createDocumentFragment(); this.state.categories.forEach((cat) => { fragment.appendChild(this._createCategoryRowElement(cat)); }); list.appendChild(fragment); }
+        _createCategoryRowElement(cat) { const tr = document.createElement('tr'); const itemCount = this.state.menu.filter(item => item.category === cat.name_ar).length; tr.innerHTML = `<td>${cat.name_ar}</td><td>${itemCount}</td><td><span class="pill ${cat.hidden ? 'bg-yellow-500/20 text-yellow-300' : 'bg-green-500/20 text-green-300'}">${cat.hidden ? 'مخفي' : 'مفعل'}</span></td><td class="flex gap-2"><button type="button" class="pill btn-edit-category" data-key="${cat.key}"><i class="fas fa-edit"></i></button><button type="button" class="pill bg-[var(--danger)]/20 text-[var(--danger)] btn-delete-category" data-key="${cat.key}"><i class="fas fa-trash"></i></button></td>`; return tr; }
+        
+        _setupEventListeners() { this.elements.loginForm.addEventListener('submit', e => { e.preventDefault(); this.loginUser(); }); this.elements.itemForm.addEventListener('submit', e => { e.preventDefault(); this.saveItem(); }); this.elements.categoryForm.addEventListener('submit', e => { e.preventDefault(); this.saveCategory(); }); this.elements.settingsForm.addEventListener('submit', e => { e.preventDefault(); this.saveSettings(); }); this.elements.logoutBtn.addEventListener('click', () => this.logoutUser()); this.elements.addItemBtn.addEventListener('click', () => this._openItemModal()); this.elements.addCategoryBtn.addEventListener('click', () => this._openCategoryModal()); this.elements.confirmDeleteBtn.addEventListener('click', () => this._confirmDelete()); this.elements.openImageModalBtn.addEventListener('click', () => this._toggleModal('imageModal', true)); this.elements.tabsContainer.addEventListener('click', e => { const tabBtn = e.target.closest('.tab-btn'); if (tabBtn) this._switchTab(tabBtn.dataset.tab); }); this.elements.searchItems.addEventListener('input', this._debounce(() => this._renderItems())); this.elements.filterCategory.addEventListener('change', () => this._renderItems()); this.elements.itemsList.addEventListener('click', e => this._handleItemsListClick(e)); this.elements.categoriesList.addEventListener('click', e => this._handleCategoriesListClick(e)); document.addEventListener('click', e => { if (e.target.dataset.modalClose) this._toggleModal(e.target.dataset.modalClose, false); }); this.elements.itemImage.addEventListener('input', () => this._updateImagePreview(this.elements.itemImage, this.elements.itemImagePreview)); this.elements.backgroundImage.addEventListener('input', () => this._updateImagePreview(this.elements.backgroundImage, this.elements.backgroundPreview)); }
+        _monitorAuthState() { this.firebaseRefs.auth.onAuthStateChanged(user => { if (user) { this.state.user = user; this.elements.mainContent.style.display = 'block'; this._toggleModal('loginModal', false); this._attachFirebaseListeners(); } else { this.state.user = null; this.elements.mainContent.style.display = 'none'; this._toggleModal('loginModal', true); this._detachFirebaseListeners(); if (this.imageManagement.cameraStream) this._stopCamera(); } }); }
+        _detachFirebaseListeners() { Object.values(this.state.firebaseListeners).forEach(listenerRef => { if (listenerRef && listenerRef.off) { listenerRef.off(); } }); this.state.firebaseListeners = {}; }
         async loginUser() { this._toggleLoading(this.elements.loginBtn, true); try { const email = this.elements.loginForm.elements.email.value; const password = this.elements.loginForm.elements.password.value; await this.firebaseRefs.auth.signInWithEmailAndPassword(email, password); this._showToast('تم تسجيل الدخول بنجاح!', 'success'); } catch (error) { this._showToast(`خطأ في تسجيل الدخول: ${error.message}`, 'error'); } finally { this._toggleLoading(this.elements.loginBtn, false); } }
         async logoutUser() { try { await this.firebaseRefs.auth.signOut(); this._showToast('تم تسجيل الخروج بنجاح', 'success'); } catch (error) { this._showToast(`خطأ في تسجيل الخروج: ${error.message}`, 'error'); } }
         async saveSettings() { const form = this.elements.settingsForm; this._toggleLoading(this.elements.saveSettingsBtn, true); const settings = { restaurantName: form.elements.restaurantName.value, restaurantDescription: form.elements.restaurantDescription.value, backgroundImage: form.elements.backgroundImage.value, accentColor: form.elements.accentColor.value, lastUpdated: new Date().toISOString() }; try { await this.firebaseRefs.settings.set(settings); this._showToast('تم حفظ الإعدادات بنجاح', 'success'); } catch (error) { this._showToast(`خطأ: ${error.message}`, 'error'); } finally { this._toggleLoading(this.elements.saveSettingsBtn, false); } }
@@ -439,10 +287,165 @@
         _toggleLoading(button, isLoading) { if (isLoading) { button.dataset.originalHtml = button.innerHTML; button.innerHTML = '<div class="spinner mx-auto"></div>'; button.disabled = true; } else { button.innerHTML = button.dataset.originalHtml; button.disabled = false; } }
         _updateImagePreview(input, preview) { preview.innerHTML = input.value ? `<img src="${input.value}" alt="Preview" onerror="this.parentElement.innerHTML='<span>فشل تحميل الصورة</span>'">` : '<span>معاينة الصورة</span>'; }
         
-        // Image Management functions can remain as they are, they don't have the overwrite issue.
-        _openImageModal() { this._toggleModal('imageModal', true); }
-        _setupImageManagement() { /* ... unchanged ... */ }
-        _attachImageEventListeners() { /* ... unchanged ... */ }
+        _setupImageManagement() {
+            const img = this.imageManagement;
+            img.fileInput = document.getElementById('image-upload');
+            img.uploadButton = document.getElementById('upload-button');
+            img.cameraButton = document.getElementById('camera-button');
+            img.takePhotoButton = document.getElementById('take-photo-button');
+            img.cancelButton = document.getElementById('cancel-camera-button');
+            img.videoPreview = document.getElementById('video-preview');
+            img.cameraControls = document.getElementById('camera-controls');
+            img.photoCanvas = document.getElementById('photo-canvas');
+            img.resultBox = document.getElementById('result-box');
+            img.resultLink = document.getElementById('result-link');
+            img.errorMessage = document.getElementById('error-message');
+            img.galleryContainer = document.getElementById('gallery-container');
+            
+            this._attachImageEventListeners();
+        }
+
+        _attachImageEventListeners() {
+            const img = this.imageManagement;
+            img.uploadButton.addEventListener('click', () => {
+                const file = img.fileInput.files[0];
+                if (file) {
+                    this._uploadToCloudinary(file);
+                } else {
+                    this._showToast('الرجاء اختيار ملف أولاً', 'error');
+                }
+            });
+
+            img.cameraButton.addEventListener('click', () => this._startCamera());
+            img.cancelButton.addEventListener('click', () => this._stopCamera());
+            img.takePhotoButton.addEventListener('click', async () => {
+                const photoBlob = await this._takePhoto();
+                this._stopCamera();
+                const photoFile = new File([photoBlob], "camera-photo.jpg", { type: "image/jpeg" });
+                this._uploadToCloudinary(photoFile);
+            });
+            img.galleryContainer.addEventListener('click', e => {
+                const item = e.target.closest('.gallery-item');
+                if (item && !e.target.closest('.delete-btn')) {
+                    const url = item.dataset.url;
+                    navigator.clipboard.writeText(url).then(() => {
+                        this._showToast('تم نسخ الرابط!', 'success');
+                    });
+                }
+            });
+            img.galleryContainer.addEventListener('click', e => {
+              if (e.target.closest('.delete-btn')) {
+                  e.stopPropagation();
+                  const key = e.target.closest('.gallery-item').dataset.key;
+                  this._showConfirmModal('تأكيد الحذف', 'هل أنت متأكد من حذف هذه الصورة من المعرض؟', () => this._deleteImageFromDB(key));
+              }
+            });
+        }
+        
+        async _uploadToCloudinary(file) {
+            this._toggleLoading(this.imageManagement.uploadButton, true);
+            this.imageManagement.resultBox.classList.add('hidden');
+            this.imageManagement.errorMessage.classList.add('hidden');
+
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('upload_preset', this.imageManagement.uploadPreset);
+
+            const url = `https://api.cloudinary.com/v1_1/${this.imageManagement.cloudName}/image/upload`;
+
+            try {
+                const response = await fetch(url, { method: 'POST', body: formData });
+                const data = await response.json();
+
+                if (response.ok) {
+                    const imageUrl = data.secure_url;
+                    this.imageManagement.resultLink.href = imageUrl;
+                    this.imageManagement.resultLink.textContent = imageUrl;
+                    this.imageManagement.resultBox.classList.remove('hidden');
+                    this._showToast('تم رفع الصورة بنجاح!', 'success');
+                    this._saveImageUrlToDB(imageUrl);
+                } else {
+                    throw new Error(data.error.message);
+                }
+            } catch (error) {
+                this.imageManagement.errorMessage.querySelector('p').textContent = `فشل الرفع: ${error.message}`;
+                this.imageManagement.errorMessage.classList.remove('hidden');
+            } finally {
+                this._toggleLoading(this.imageManagement.uploadButton, false);
+                this.imageManagement.fileInput.value = '';
+            }
+        }
+
+        async _startCamera() {
+            try {
+                this.imageManagement.cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+                this.imageManagement.videoPreview.srcObject = this.imageManagement.cameraStream;
+                this.imageManagement.videoPreview.style.display = 'block';
+                this.imageManagement.cameraControls.style.display = 'flex';
+            } catch (err) {
+                this._showToast('لا يمكن الوصول إلى الكاميرا', 'error');
+                console.error("Camera error:", err);
+            }
+        }
+
+        _stopCamera() {
+            if (this.imageManagement.cameraStream) {
+                this.imageManagement.cameraStream.getTracks().forEach(track => track.stop());
+            }
+            this.imageManagement.videoPreview.style.display = 'none';
+            this.imageManagement.cameraControls.style.display = 'none';
+        }
+
+        _takePhoto() {
+            return new Promise(resolve => {
+                const canvas = this.imageManagement.photoCanvas;
+                const video = this.imageManagement.videoPreview;
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                const context = canvas.getContext('2d');
+                context.drawImage(video, 0, 0, canvas.width, canvas.height);
+                canvas.toBlob(resolve, 'image/jpeg');
+            });
+        }
+
+        _saveImageUrlToDB(url) {
+            this.firebaseRefs.images.push({
+                url: url,
+                createdAt: new Date().toISOString()
+            });
+        }
+        
+        _renderImageGallery(images) {
+            const container = this.imageManagement.galleryContainer;
+            if (!container) return;
+            container.innerHTML = '';
+            if (images.length === 0) {
+                container.innerHTML = '<p class="text-[var(--muted)] col-span-full text-center">لا توجد صور في المعرض. قم برفع صورة جديدة.</p>';
+                return;
+            }
+            images.forEach(img => {
+                const item = document.createElement('div');
+                item.className = 'gallery-item';
+                item.dataset.url = img.url;
+                item.dataset.key = img.key;
+                item.title = "اضغط للنسخ";
+                item.innerHTML = `
+                    <button class="delete-btn" title="حذف الصورة"><i class="fas fa-trash"></i></button>
+                    <img src="${img.url}" alt="Uploaded Image" loading="lazy">
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        async _deleteImageFromDB(key) {
+            try {
+                await this.firebaseRefs.images.child(key).remove();
+                this._showToast('تم حذف الصورة من المعرض', 'success');
+                this._toggleModal('confirmModal', false);
+            } catch (error) {
+                this._showToast(`فشل الحذف: ${error.message}`, 'error');
+            }
+        }
       }
 
       new ImandouAdminApp();
