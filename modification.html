@@ -74,7 +74,7 @@
           this._initFirebase();
           this._setupEventListeners();
           this._monitorAuthState();
-          this._setupImageManagement(); // تم تفعيل هذه الدالة
+          this._setupImageManagement();
         }
 
         _cacheDOMElements() {
@@ -97,7 +97,7 @@
           this.firebaseRefs.menu = this.firebaseRefs.db.ref('menu');
           this.firebaseRefs.categories = this.firebaseRefs.db.ref('categories');
           this.firebaseRefs.settings = this.firebaseRefs.db.ref('settings');
-          // NEW: إضافة مرجع للصور في قاعدة البيانات
+          // تمت إضافة مرجع جديد للصور
           this.firebaseRefs.images = this.firebaseRefs.db.ref('images'); 
         }
 
@@ -124,10 +124,10 @@
                 this.state.settings = snapshot.val() || {};
                 this._applySettings();
             });
-            // NEW: Listener لمعرض الصور
+            // تمت إضافة مستمع جديد لمعرض الصور
             this.state.firebaseListeners.images = this.firebaseRefs.images.on('value', snapshot => {
                 const imagesData = this._firebaseObjectToArray(snapshot);
-                this._renderImageGallery(imagesData.reverse());
+                this._renderImageGallery(imagesData.reverse()); // عكس الترتيب لعرض الأحدث أولاً
             });
         }
         
@@ -324,8 +324,11 @@
                 const photoFile = new File([photoBlob], "camera-photo.jpg", { type: "image/jpeg" });
                 this._uploadToCloudinary(photoFile);
             });
+            
+            // حدث لنسخ الرابط عند الضغط على الصورة
             img.galleryContainer.addEventListener('click', e => {
                 const item = e.target.closest('.gallery-item');
+                // تأكد من أن الضغطة ليست على زر الحذف
                 if (item && !e.target.closest('.delete-btn')) {
                     const url = item.dataset.url;
                     navigator.clipboard.writeText(url).then(() => {
@@ -333,9 +336,11 @@
                     });
                 }
             });
+
+            // حدث لحذف الصورة
             img.galleryContainer.addEventListener('click', e => {
               if (e.target.closest('.delete-btn')) {
-                  e.stopPropagation();
+                  e.stopPropagation(); // منع نسخ الرابط عند الضغط على الحذف
                   const key = e.target.closest('.gallery-item').dataset.key;
                   this._showConfirmModal('تأكيد الحذف', 'هل أنت متأكد من حذف هذه الصورة من المعرض؟', () => this._deleteImageFromDB(key));
               }
@@ -363,7 +368,8 @@
                     this.imageManagement.resultLink.textContent = imageUrl;
                     this.imageManagement.resultBox.classList.remove('hidden');
                     this._showToast('تم رفع الصورة بنجاح!', 'success');
-                    this._saveImageUrlToDB(imageUrl);
+                    // استدعاء دالة الحفظ في قاعدة البيانات
+                    this._saveImageUrlToDB(imageUrl); 
                 } else {
                     throw new Error(data.error.message);
                 }
@@ -372,7 +378,7 @@
                 this.imageManagement.errorMessage.classList.remove('hidden');
             } finally {
                 this._toggleLoading(this.imageManagement.uploadButton, false);
-                this.imageManagement.fileInput.value = '';
+                this.imageManagement.fileInput.value = ''; // مسح حقل الإدخال
             }
         }
 
@@ -409,6 +415,7 @@
         }
 
         _saveImageUrlToDB(url) {
+            // استخدام مرجع الصور الذي تم إنشاؤه ودفع كائن جديد إليه
             this.firebaseRefs.images.push({
                 url: url,
                 createdAt: new Date().toISOString()
@@ -427,7 +434,7 @@
                 const item = document.createElement('div');
                 item.className = 'gallery-item';
                 item.dataset.url = img.url;
-                item.dataset.key = img.key;
+                item.dataset.key = img.key; // حفظ مفتاح Firebase للحذف
                 item.title = "اضغط للنسخ";
                 item.innerHTML = `
                     <button class="delete-btn" title="حذف الصورة"><i class="fas fa-trash"></i></button>
