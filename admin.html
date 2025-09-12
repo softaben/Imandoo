@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
   
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
   
   <style>
@@ -67,6 +68,7 @@
     <header class="text-center">
       <h1 class="text-4xl font-bold mb-2">لوحة تحكم المسؤول</h1>
       <p class="text-[var(--muted)]">إدارة إعدادات النظام والمستخدمين</p>
+      <button id="logoutBtn" class="mt-4 text-sm text-[var(--muted)] hover:text-white transition-colors">تسجيل الخروج</button>
     </header>
 
     <section class="card p-6">
@@ -104,8 +106,8 @@
     <section class="card p-6">
       <h2 class="text-2xl font-bold mb-4 flex items-center gap-3"><i class="fas fa-user-plus text-[var(--accent)]"></i> إضافة بيانات دخول جديدة</h2>
       <div class="space-y-4">
-        <input type="text" id="newUsernameInput" class="form-input" placeholder="اسم المستخدم الجديد">
-        <input type="password" id="newPasswordInput" class="form-input" placeholder="كلمة المرور">
+        <input type="email" id="newEmailInput" class="form-input" placeholder="البريد الإلكتروني الجديد" required>
+        <input type="password" id="newPasswordInput" class="form-input" placeholder="كلمة المرور" required>
         <button id="addUserBtn" class="btn btn-primary w-full">إضافة مستخدم</button>
       </div>
     </section>
@@ -120,12 +122,13 @@
     };
 
     firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
     const database = firebase.database();
     
     const settingsRef = database.ref('settings');
-    const usersRef = database.ref('users');
-
+    
     const adminPanel = document.getElementById('admin-panel');
+    const logoutBtn = document.getElementById('logoutBtn');
     
     const systemToggle = document.getElementById('systemToggle');
     const systemDownMessageInput = document.getElementById('systemDownMessageInput');
@@ -135,20 +138,29 @@
 
     const messageInput = document.getElementById('messageInput');
     const sendMessageBtn = document.getElementById('sendMessageBtn');
-    const newUsernameInput = document.getElementById('newUsernameInput');
+    
+    const newEmailInput = document.getElementById('newEmailInput');
     const newPasswordInput = document.getElementById('newPasswordInput');
     const addUserBtn = document.getElementById('addUserBtn');
 
-    document.addEventListener('DOMContentLoaded', () => {
-        const masterPassword = "admin"; // <-- يمكنك تغيير كلمة المرور الرئيسية هنا
-        const enteredPassword = prompt("الرجاء إدخال كلمة مرور المسؤول:");
-        
-        if (enteredPassword === masterPassword) {
-            adminPanel.classList.remove('hidden');
-            loadCurrentSettings();
-        } else {
-            alert("كلمة المرور غير صحيحة!");
-        }
+    auth.onAuthStateChanged((user) => {
+      if (user) {
+        // المستخدم مسجل دخوله
+        adminPanel.classList.remove('hidden');
+        loadCurrentSettings();
+      } else {
+        // المستخدم غير مسجل دخوله
+        window.location.href = 'login.html';
+      }
+    });
+
+    logoutBtn.addEventListener('click', () => {
+      auth.signOut().then(() => {
+        window.location.href = 'login.html';
+      }).catch((error) => {
+        console.error("Logout Error", error);
+        alert("حدث خطأ أثناء تسجيل الخروج.");
+      });
     });
 
     function loadCurrentSettings() {
@@ -209,19 +221,22 @@
     });
 
     addUserBtn.addEventListener('click', () => {
-        const username = newUsernameInput.value.trim();
+        const email = newEmailInput.value.trim();
         const password = newPasswordInput.value.trim();
 
-        if (!username || !password) {
-            alert("الرجاء إدخال اسم المستخدم وكلمة المرور.");
+        if (!email || !password) {
+            alert("الرجاء إدخال البريد الإلكتروني وكلمة المرور.");
             return;
         }
 
-        usersRef.child(username).set(password)
-            .then(() => {
-                alert(`تمت إضافة المستخدم "${username}" بنجاح!`);
-                newUsernameInput.value = '';
+        auth.createUserWithEmailAndPassword(email, password)
+            .then((userCredential) => {
+                alert(`تمت إضافة المستخدم "${email}" بنجاح!`);
+                newEmailInput.value = '';
                 newPasswordInput.value = '';
+            })
+            .catch((error) => {
+                alert("حدث خطأ في إضافة المستخدم: " + error.message);
             });
     });
   </script>
