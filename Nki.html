@@ -10,6 +10,7 @@
   
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  
   <style>
     /* نقل جميع التنسيقات المتعلقة بالتطبيق العام وإدارة الصور هنا */
     :root{ --bg: #0f172a; --card: #0b1220; --text: #e2e8f0; --muted: #94a3b8; --accent: #fbbf24; --radius-lg: 14px; --radius-md: 8px; --success: #10b981; --danger: #ef4444; --warning: #f59e0b; }
@@ -52,6 +53,17 @@
     .delete-btn:hover { background-color: rgba(239, 68, 68, 1); } 
     #video-preview, #photo-canvas { display: none; width: 100%; height: auto; border-radius: var(--radius-md); margin-top: 1rem; } 
     #camera-controls { display: none; gap: 1rem; margin-top: 1rem; justify-content: center; }
+    
+    /* تنسيقات المودال */
+    .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 20px; backdrop-filter: blur(5px); opacity: 0; transition: opacity 0.3s ease; } 
+    .modal.active { display: flex; opacity: 1; } 
+    .modal-content { background: var(--card); border-radius: var(--radius-lg); width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5); border: 1px solid rgba(255,255,255,0.05); transform: scale(0.95); transition: transform 0.3s ease; } 
+    .modal.active .modal-content { transform: scale(1); } 
+    .modal-header { padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; align-items: center; } 
+    .modal-title { font-size: 1.5rem; font-weight: 700; margin: 0; } 
+    .close { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text); } 
+    .modal-body { padding: 20px; } 
+    .modal-footer { padding: 20px; border-top: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: flex-end; gap: 10px; } 
   </style>
 </head>
 <body>
@@ -251,10 +263,13 @@
 
                 if (response.ok) {
                     const imageUrl = data.secure_url;
+                    
                     elements.resultLink.href = imageUrl;
                     elements.resultLink.textContent = imageUrl;
                     elements.resultBox.classList.remove('hidden');
+                    
                     _showToast('تم رفع الصورة بنجاح!', 'success');
+                    
                     _saveImageUrlToDB(imageUrl); 
                 } else {
                     throw new Error(data.error.message);
@@ -265,6 +280,8 @@
             } finally {
                 _toggleLoading(elements.uploadButton, false);
                 elements.fileInput.value = '';
+                // إخفاء شريط النتيجة بعد 5 ثواني
+                setTimeout(() => elements.resultBox.classList.add('hidden'), 5000); 
             }
         }
 
@@ -289,7 +306,8 @@
             elements.cameraControls.style.display = 'none';
             elements.cameraButton.style.display = 'flex'; // إعادة إظهار زر الكاميرا
         }
-
+        
+        // ✨ التصحيح الرئيسي: ضمان أن تكون الصورة الملتقطة صالحة (تجنب الخلفية السوداء)
         function _takePhoto() {
             return new Promise(resolve => {
                 const canvas = elements.photoCanvas;
@@ -297,8 +315,14 @@
                 canvas.width = video.videoWidth;
                 canvas.height = video.videoHeight;
                 const context = canvas.getContext('2d');
+                
+                // ملء الخلفية باللون الأبيض قبل الرسم (مهم لبعض المتصفحات والكاميرات)
+                context.fillStyle = '#ffffff'; 
+                context.fillRect(0, 0, canvas.width, canvas.height);
+
                 context.drawImage(video, 0, 0, canvas.width, canvas.height);
-                canvas.toBlob(resolve, 'image/jpeg');
+                // رفع جودة الصورة الملتقطة قليلاً
+                canvas.toBlob(resolve, 'image/jpeg', 0.9); 
             });
         }
         
