@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>إدارة الصور - Imandou Food</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <style>
+    /* نقل جميع التنسيقات المتعلقة بالتطبيق العام وإدارة الصور هنا */
+    :root{ --bg: #0f172a; --card: #0b1220; --text: #e2e8f0; --muted: #94a3b8; --accent: #fbbf24; --radius-lg: 14px; --radius-md: 8px; --success: #10b981; --danger: #ef4444; --warning: #f59e0b; }
+    html,body{ height:100% } 
+    body{ 
+      font-family: 'Inter', system-ui, -apple-system, "Segoe UI", sans-serif; 
+      background: var(--bg); color: var(--text); -webkit-font-smoothing:antialiased; 
+      -moz-osx-font-smoothing:grayscale; overflow-x: hidden; position: relative; 
+      font-weight: 400; line-height: 1.6; min-height: 100vh;
+    } 
+    body::before { 
+      content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+      background-image: url('https://images.unsplash.com/photo-1563245372-f21724e3856d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2064&q=80'); 
+      background-size: cover; background-position: center; opacity: 0.08; z-index: -1; pointer-events: none; 
+    } 
+    h1, h2, h3, h4, h5, h6 { font-family: 'Playfair Display', serif; font-weight: 600; letter-spacing: -0.025em; } 
+    [lang="ar"] body, [dir="rtl"] body { font-family: 'Cairo', 'Inter', sans-serif; } 
+    [lang="ar"] h1, [lang="ar"] h2, [lang="ar"] h3, [dir="rtl"] h1, [dir="rtl"] h2, [dir="rtl"] h3 { font-family: 'Cairo', 'Playfair Display', serif; } 
+    .app { max-width: 900px; margin: 0 auto; min-height:100vh; display:flex; flex-direction:column; position: relative; z-index: 1; } 
+    .card{ background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.03)); border-radius: var(--radius-lg); padding: 20px; box-shadow: 0 6px 18px rgba(2,6,23,0.6); border: 1px solid rgba(255,255,255,0.03); backdrop-filter: blur(10px); } 
+    .pill { background: rgba(255,255,255,0.02); border-radius: 999px; padding: 8px 12px; font-weight:500; color:var(--text); display:inline-flex; gap:8px; align-items:center; border: 1px solid rgba(255,255,255,0.03); transition: all 0.2s ease; cursor: pointer; font-size: 0.875rem; } 
+    .pill:hover:not(:disabled) { background: rgba(255,255,255,0.05); } 
+    .pill:disabled { cursor: not-allowed; opacity: 0.6; } 
+    .form-input { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: var(--radius-md); padding: 10px 12px; color: var(--text); width: 100%; margin-bottom: 12px; transition: border-color 0.2s, box-shadow 0.2s; } 
+    .toast-container { position: fixed; top: 20px; right: 20px; z-index: 1001; display: flex; flex-direction: column; gap: 10px; } 
+    .toast { padding: 12px 16px; border-radius: var(--radius-md); display: flex; align-items: center; gap: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); animation: slideIn 0.3s ease; } 
+    .toast-success { background: var(--success); color: white; } 
+    .toast-error { background: var(--danger); color: white; } 
+    @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } } 
+    .spinner { border: 3px solid rgba(255,255,255,0.1); border-radius: 50%; border-top: 3px solid var(--accent); width: 24px; height: 24px; animation: spin 1s linear infinite; } 
+    button .spinner { width: 20px; height: 20px; } 
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } } 
+    
+    /* تنسيقات معرض الصور */
+    .image-gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 16px; } 
+    .gallery-item { position: relative; overflow: hidden; border-radius: var(--radius-md); border: 1px solid rgba(255,255,255,0.05); transition: transform 0.2s ease, box-shadow 0.2s ease; cursor: pointer; } 
+    .gallery-item:hover { transform: scale(1.03); box-shadow: 0 4px 12px rgba(0,0,0,0.3); } 
+    .gallery-item img { width: 100%; height: 120px; object-fit: cover; } 
+    .delete-btn { position: absolute; top: 8px; left: 8px; background-color: rgba(239, 68, 68, 0.8); color: white; border: none; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background-color 0.2s ease; z-index: 10; } 
+    .delete-btn:hover { background-color: rgba(239, 68, 68, 1); } 
+    #video-preview, #photo-canvas { display: none; width: 100%; height: auto; border-radius: var(--radius-md); margin-top: 1rem; } 
+    #camera-controls { display: none; gap: 1rem; margin-top: 1rem; justify-content: center; }
+  </style>
+</head>
+<body>
+
+  <div id="toastContainer" class="toast-container"></div>
+  
+  <main class="app p-4">
+    <header class="flex items-center justify-between mb-6">
+      <h1 class="text-3xl font-bold">إدارة الصور</h1>
+      <a href="index.html" class="pill bg-[var(--accent)] text-black font-semibold"><i class="fas fa-arrow-right"></i> العودة للإدارة</a>
+    </header>
+
+    <div class="card mb-6">
+      <div class="space-y-6">
+        <h2 class="text-2xl font-bold">تحميل صورة جديدة</h2>
+        <p class="text-[var(--muted)]">اختر صورة من جهازك أو التقط واحدة لرفعها إلى معرض الصور.</p>
+        
+        <div class="space-y-4">
+          <label class="block">
+            <input type="file" id="image-upload" accept="image/*" class="form-input text-[var(--muted)] file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-gray-700/50 file:text-white hover:file:bg-gray-600/50 transition-colors duration-200">
+          </label>
+          <div class="flex gap-4">
+            <button id="camera-button" class="pill flex-1 bg-[var(--warning)] text-black font-semibold py-3 shadow-lg hover:bg-[var(--warning)]/80">
+              <i class="fas fa-camera"></i> التقط صورة
+            </button>
+            <button id="upload-button" class="pill flex-1 bg-[var(--accent)] text-black font-semibold py-3 shadow-lg hover:bg-[var(--accent)]/80">
+              <i class="fas fa-cloud-upload-alt"></i> رفع الصورة
+            </button>
+          </div>
+        </div>
+        
+        <video id="video-preview" autoplay></video>
+        <div id="camera-controls" class="flex">
+          <button id="take-photo-button" class="pill flex-1 bg-[var(--success)] text-black font-semibold py-3 shadow-lg hover:bg-[var(--success)]/80">التقط صورة</button>
+          <button id="cancel-camera-button" class="pill flex-1 bg-[var(--danger)] text-white font-semibold py-3 shadow-lg hover:bg-[var(--danger)]/80">إلغاء</button>
+        </div>
+        <canvas id="photo-canvas" style="display:none;"></canvas>
+        
+        <div id="result-box" class="hidden mt-6 p-4 rounded-xl border border-[var(--success)] bg-[var(--success)]/20 text-[var(--success)] text-sm break-words text-left space-y-2">
+          <p class="font-bold flex items-center gap-2"><i class="fas fa-check-circle"></i> تم الرفع بنجاح! انقر للنسخ:</p>
+          <a id="result-link" href="#" target="_blank" class="block text-[var(--success)] hover:underline"></a>
+        </div>
+        
+        <div id="error-message" class="hidden mt-6 p-4 rounded-xl border border-[var(--danger)] bg-[var(--danger)]/20 text-[var(--danger)] text-sm space-y-2">
+          <p class="flex items-center gap-2"><i class="fas fa-exclamation-triangle"></i> فشل الرفع:</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 class="text-2xl font-bold mb-4">معرض الصور</h2>
+      <div id="gallery-container" class="image-gallery">
+        </div>
+    </div>
+  </main>
+  
+  <div id="confirmModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="confirmModalTitle" class="modal-title"></h3>
+            <button type="button" class="close" data-modal-close="confirmModal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p id="confirmMessage"></p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="pill" data-modal-close="confirmModal"><i class="fas fa-times"></i> إلغاء</button>
+            <button type="button" id="confirmDeleteBtn" class="pill bg-[var(--danger)] text-white"><i class="fas fa-trash"></i> نعم، احذف</button>
+        </div>
+    </div>
+  </div>
+
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // تعريف ثابت الإعدادات (يجب أن يكون متطابقاً مع الملف الأصلي)
+        const FIREBASE_CONFIG = {
+            apiKey: "AIzaSyCyPOzsEzdrRd9o7iHASzFoLyJQhpTW83E",
+            authDomain: "imandou-food.firebaseapp.com",
+            databaseURL: "https://imandou-food-default-rtdb.firebaseio.com",
+            projectId: "imandou-food",
+            storageBucket: "imandou-food.appspot.com",
+            messagingSenderId: "839302179988",
+            appId: "1:839302179988:web:92636c32e1b00b587ad881",
+        };
+        
+        // متغيرات إدارة الصور
+        const CLOUD_NAME = "dzc99hze9";
+        const UPLOAD_PRESET = "testaben";
+        let cameraStream = null;
+        let deleteCallback = null;
+        
+        // تهيئة Firebase
+        firebase.initializeApp(FIREBASE_CONFIG);
+        const imagesRef = firebase.database().ref('images');
+        
+        // العناصر
+        const elements = {
+            toastContainer: document.getElementById('toastContainer'),
+            fileInput: document.getElementById('image-upload'),
+            uploadButton: document.getElementById('upload-button'),
+            cameraButton: document.getElementById('camera-button'),
+            takePhotoButton: document.getElementById('take-photo-button'),
+            cancelButton: document.getElementById('cancel-camera-button'),
+            videoPreview: document.getElementById('video-preview'),
+            cameraControls: document.getElementById('camera-controls'),
+            photoCanvas: document.getElementById('photo-canvas'),
+            resultBox: document.getElementById('result-box'),
+            resultLink: document.getElementById('result-link'),
+            errorMessage: document.getElementById('error-message'),
+            galleryContainer: document.getElementById('gallery-container'),
+            confirmModal: document.getElementById('confirmModal'),
+            confirmModalTitle: document.getElementById('confirmModalTitle'),
+            confirmMessage: document.getElementById('confirmMessage'),
+            confirmDeleteBtn: document.getElementById('confirmDeleteBtn'),
+        };
+
+        // ------------------------
+        // وظائف مساعدة
+        // ------------------------
+        
+        function _toggleLoading(button, isLoading) {
+            if (isLoading) {
+                button.dataset.originalHtml = button.innerHTML;
+                button.innerHTML = '<div class="spinner mx-auto"></div>';
+                button.disabled = true;
+            } else {
+                button.innerHTML = button.dataset.originalHtml;
+                button.disabled = false;
+            }
+        }
+        
+        function _showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i><span>${message}</span>`;
+            elements.toastContainer.appendChild(toast);
+            setTimeout(() => { 
+                toast.style.animation = 'slideOut 0.3s ease forwards';
+                toast.addEventListener('animationend', () => toast.remove());
+            }, 4000);
+        }
+
+        function _toggleModal(modalId, show) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.toggle('active', show);
+                // لإزالة backdrop-filter عند الإلغاء
+                modal.style.display = show ? 'flex' : 'none';
+                if (!show) {
+                    // للتأكد من إغلاق المودال في حال عدم وجود تنسيق التوهج
+                    modal.classList.remove('active');
+                }
+            }
+        }
+
+        function _showConfirmModal(title, message, callback) {
+            elements.confirmModalTitle.textContent = title;
+            elements.confirmMessage.textContent = message;
+            deleteCallback = callback;
+            _toggleModal('confirmModal', true);
+        }
+
+        function _confirmDelete() {
+            if (typeof deleteCallback === 'function') {
+                _toggleModal('confirmModal', false);
+                deleteCallback();
+                deleteCallback = null;
+            }
+        }
+        
+        // تحويل كائن Firebase إلى مصفوفة
+        function _firebaseObjectToArray(snapshot) {
+            const data = snapshot.val();
+            if (!data) return [];
+            return Object.keys(data).map(key => ({ key, ...data[key] }));
+        }
+
+        // ------------------------
+        // وظائف الكاميرا والرفع
+        // ------------------------
+        
+        async function _uploadToCloudinary(file) {
+            _toggleLoading(elements.uploadButton, true);
+            elements.resultBox.classList.add('hidden');
+            elements.errorMessage.classList.add('hidden');
+
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('upload_preset', UPLOAD_PRESET);
+
+            const url = `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`;
+
+            try {
+                const response = await fetch(url, { method: 'POST', body: formData });
+                const data = await response.json();
+
+                if (response.ok) {
+                    const imageUrl = data.secure_url;
+                    elements.resultLink.href = imageUrl;
+                    elements.resultLink.textContent = imageUrl;
+                    elements.resultBox.classList.remove('hidden');
+                    _showToast('تم رفع الصورة بنجاح!', 'success');
+                    _saveImageUrlToDB(imageUrl); 
+                } else {
+                    throw new Error(data.error.message);
+                }
+            } catch (error) {
+                elements.errorMessage.querySelector('p').innerHTML = `<i class="fas fa-exclamation-triangle"></i> فشل الرفع: ${error.message}`;
+                elements.errorMessage.classList.remove('hidden');
+            } finally {
+                _toggleLoading(elements.uploadButton, false);
+                elements.fileInput.value = '';
+            }
+        }
+
+        async function _startCamera() {
+            try {
+                cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+                elements.videoPreview.srcObject = cameraStream;
+                elements.videoPreview.style.display = 'block';
+                elements.cameraControls.style.display = 'flex';
+                elements.cameraButton.style.display = 'none'; // إخفاء زر الكاميرا عند التشغيل
+            } catch (err) {
+                _showToast('لا يمكن الوصول إلى الكاميرا', 'error');
+                console.error("Camera error:", err);
+            }
+        }
+
+        function _stopCamera() {
+            if (cameraStream) {
+                cameraStream.getTracks().forEach(track => track.stop());
+            }
+            elements.videoPreview.style.display = 'none';
+            elements.cameraControls.style.display = 'none';
+            elements.cameraButton.style.display = 'flex'; // إعادة إظهار زر الكاميرا
+        }
+
+        function _takePhoto() {
+            return new Promise(resolve => {
+                const canvas = elements.photoCanvas;
+                const video = elements.videoPreview;
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                const context = canvas.getContext('2d');
+                context.drawImage(video, 0, 0, canvas.width, canvas.height);
+                canvas.toBlob(resolve, 'image/jpeg');
+            });
+        }
+        
+        // ------------------------
+        // وظائف قاعدة البيانات (Firebase)
+        // ------------------------
+
+        function _saveImageUrlToDB(url) {
+            imagesRef.push({
+                url: url,
+                createdAt: new Date().toISOString()
+            });
+        }
+        
+        async function _deleteImageFromDB(key) {
+            try {
+                await imagesRef.child(key).remove();
+                _showToast('تم حذف الصورة من المعرض', 'success');
+            } catch (error) {
+                _showToast(`فشل الحذف: ${error.message}`, 'error');
+            }
+        }
+        
+        function _renderImageGallery(images) {
+            const container = elements.galleryContainer;
+            container.innerHTML = '';
+            if (images.length === 0) {
+                container.innerHTML = '<p class="text-[var(--muted)] col-span-full text-center">لا توجد صور في المعرض. قم برفع صورة جديدة.</p>';
+                return;
+            }
+            images.forEach(img => {
+                const item = document.createElement('div');
+                item.className = 'gallery-item';
+                item.dataset.url = img.url;
+                item.dataset.key = img.key;
+                item.title = "اضغط لنسخ رابط الصورة";
+                item.innerHTML = `
+                    <button class="delete-btn" title="حذف الصورة"><i class="fas fa-trash"></i></button>
+                    <img src="${img.url}" alt="Uploaded Image" loading="lazy">
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        // ------------------------
+        // تهيئة الأحداث
+        // ------------------------
+        
+        function _setupEventListeners() {
+            elements.uploadButton.addEventListener('click', () => {
+                const file = elements.fileInput.files[0];
+                if (file) {
+                    _uploadToCloudinary(file);
+                } else {
+                    _showToast('الرجاء اختيار ملف أولاً', 'error');
+                }
+            });
+
+            elements.cameraButton.addEventListener('click', () => _startCamera());
+            elements.cancelButton.addEventListener('click', () => _stopCamera());
+            
+            elements.takePhotoButton.addEventListener('click', async () => {
+                _toggleLoading(elements.takePhotoButton, true);
+                const photoBlob = await _takePhoto();
+                _stopCamera();
+                const photoFile = new File([photoBlob], "camera-photo.jpg", { type: "image/jpeg" });
+                _toggleLoading(elements.takePhotoButton, false);
+                _uploadToCloudinary(photoFile);
+            });
+            
+            // نسخ الرابط عند الضغط على الصورة في المعرض
+            elements.galleryContainer.addEventListener('click', e => {
+                const item = e.target.closest('.gallery-item');
+                if (item && !e.target.closest('.delete-btn')) {
+                    const url = item.dataset.url;
+                    navigator.clipboard.writeText(url).then(() => {
+                        _showToast('تم نسخ الرابط!', 'success');
+                    }).catch(err => {
+                        _showToast('فشل نسخ الرابط', 'error');
+                        console.error('Copy failed', err);
+                    });
+                }
+            });
+
+            // طلب تأكيد الحذف
+            elements.galleryContainer.addEventListener('click', e => {
+                if (e.target.closest('.delete-btn')) {
+                    e.stopPropagation();
+                    const key = e.target.closest('.gallery-item').dataset.key;
+                    _showConfirmModal('تأكيد الحذف', 'هل أنت متأكد من حذف هذه الصورة من المعرض؟', () => _deleteImageFromDB(key));
+                }
+            });
+
+            // حدث تأكيد الحذف
+            elements.confirmDeleteBtn.addEventListener('click', () => _confirmDelete());
+            
+            // إغلاق المودال
+            document.addEventListener('click', e => { 
+                if (e.target.dataset.modalClose) {
+                    _toggleModal(e.target.dataset.modalClose, false);
+                }
+            });
+        }
+
+        // ------------------------
+        // البداية
+        // ------------------------
+        
+        _setupEventListeners();
+
+        // الاستماع لتغييرات قاعدة البيانات وعرض الصور
+        imagesRef.on('value', snapshot => {
+            const imagesData = _firebaseObjectToArray(snapshot);
+            _renderImageGallery(imagesData.reverse()); // عرض الأحدث أولاً
+        });
+
+    });
+  </script>
+</body>
+</html>
