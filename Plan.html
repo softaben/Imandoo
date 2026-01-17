@@ -1,0 +1,1177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ICT Trading Plan - Editable</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --notion-bg: #ffffff;
+            --notion-gray: #f7f6f3;
+            --notion-gray-light: #fbfbfa;
+            --notion-gray-dark: #e9e9e7;
+            --notion-text: #37352f;
+            --notion-text-light: #70716e;
+            --notion-blue: #0c8ce9;
+            --notion-blue-light: #e3f2fd;
+            --notion-green: #0f7b6c;
+            --notion-green-light: #e8f5e9;
+            --notion-red: #d1453b;
+            --notion-red-light: #ffebee;
+            --notion-purple: #6940a5;
+            --notion-purple-light: #f3e5f5;
+            --notion-yellow: #ffc800;
+            --notion-yellow-light: #fff8e1;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        body {
+            background-color: var(--notion-bg);
+            color: var(--notion-text);
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+            padding: 30px;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--notion-gray-dark);
+        }
+
+        .header-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--notion-text);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background-color: var(--notion-blue);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #0a7bc8;
+        }
+
+        .btn-success {
+            background-color: var(--notion-green);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #0d695b;
+        }
+
+        .btn-secondary {
+            background-color: var(--notion-gray);
+            color: var(--notion-text);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--notion-gray-dark);
+        }
+
+        /* Plan Tags */
+        .plan-tags {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .tag {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .tag-blue { background: var(--notion-blue-light); color: var(--notion-blue); }
+        .tag-green { background: var(--notion-green-light); color: var(--notion-green); }
+        .tag-red { background: var(--notion-red-light); color: var(--notion-red); }
+        .tag-purple { background: var(--notion-purple-light); color: var(--notion-purple); }
+        .tag-yellow { background: var(--notion-yellow-light); color: var(--notion-yellow); }
+
+        .tag-edit {
+            cursor: pointer;
+            font-size: 10px;
+            opacity: 0.7;
+        }
+
+        .tag-edit:hover {
+            opacity: 1;
+        }
+
+        /* Sections */
+        .section {
+            background: var(--notion-gray-light);
+            border: 1px solid var(--notion-gray-dark);
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .section:hover {
+            border-color: var(--notion-blue);
+            box-shadow: 0 2px 8px rgba(12, 140, 233, 0.1);
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--notion-gray-dark);
+        }
+
+        .section-icon {
+            width: 36px;
+            height: 36px;
+            background: var(--notion-blue);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 16px;
+            margin-right: 15px;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--notion-text);
+            border: 2px solid transparent;
+            padding: 6px 12px;
+            border-radius: 6px;
+            flex: 1;
+            outline: none;
+        }
+
+        .section-title:focus {
+            border-color: var(--notion-blue);
+            background: white;
+        }
+
+        .section-actions {
+            display: flex;
+            gap: 6px;
+        }
+
+        .section-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--notion-text-light);
+            padding: 6px;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .section-btn:hover {
+            background: rgba(0,0,0,0.05);
+            color: var(--notion-blue);
+        }
+
+        .section-btn-delete:hover {
+            color: var(--notion-red);
+        }
+
+        /* Content */
+        .content-area {
+            min-height: 100px;
+            padding: 15px;
+            border: 2px solid transparent;
+            border-radius: 6px;
+            outline: none;
+            line-height: 1.7;
+        }
+
+        .content-area:focus {
+            border-color: var(--notion-blue);
+            background: white;
+        }
+
+        .content-area ul,
+        .content-area ol {
+            margin-left: 20px;
+            margin-bottom: 15px;
+        }
+
+        .content-area li {
+            margin-bottom: 8px;
+        }
+
+        /* Callouts */
+        .callout {
+            background: var(--notion-blue-light);
+            border: 1px solid var(--notion-blue);
+            border-radius: 6px;
+            padding: 20px;
+            margin: 20px 0;
+            position: relative;
+        }
+
+        .callout.warning {
+            background: var(--notion-yellow-light);
+            border-color: var(--notion-yellow);
+        }
+
+        .callout.danger {
+            background: var(--notion-red-light);
+            border-color: var(--notion-red);
+        }
+
+        .callout.success {
+            background: var(--notion-green-light);
+            border-color: var(--notion-green);
+        }
+
+        .callout-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            gap: 10px;
+        }
+
+        .callout-icon {
+            font-size: 18px;
+        }
+
+        .callout-title {
+            font-weight: 600;
+            font-size: 16px;
+            border: 2px solid transparent;
+            padding: 4px 8px;
+            border-radius: 4px;
+            outline: none;
+            flex: 1;
+        }
+
+        .callout-title:focus {
+            border-color: var(--notion-blue);
+            background: white;
+        }
+
+        .callout-content {
+            border: 2px solid transparent;
+            padding: 8px;
+            border-radius: 4px;
+            outline: none;
+            min-height: 60px;
+        }
+
+        .callout-content:focus {
+            border-color: var(--notion-blue);
+            background: white;
+        }
+
+        /* Add Section Button */
+        .add-section {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .add-section-btn {
+            background: none;
+            border: 2px dashed var(--notion-gray-dark);
+            color: var(--notion-text-light);
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.2s;
+        }
+
+        .add-section-btn:hover {
+            border-color: var(--notion-blue);
+            color: var(--notion-blue);
+            background: var(--notion-blue-light);
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+
+        .modal-header {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--notion-gray-dark);
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .modal-body {
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--notion-text);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--notion-gray-dark);
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--notion-blue);
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            padding-top: 20px;
+            border-top: 1px solid var(--notion-gray-dark);
+        }
+
+        /* Toggle Switch */
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: var(--notion-gray-light);
+            border-radius: 8px;
+        }
+
+        .toggle-label {
+            font-weight: 500;
+            color: var(--notion-text);
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 50px;
+            height: 26px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .toggle-slider {
+            background-color: var(--notion-green);
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(24px);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .container {
+                padding: 20px;
+            }
+            
+            .header {
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
+            }
+            
+            .header-actions {
+                width: 100%;
+                justify-content: flex-start;
+            }
+            
+            .section {
+                padding: 15px;
+            }
+            
+            .section-header {
+                flex-wrap: wrap;
+            }
+            
+            .section-actions {
+                margin-top: 10px;
+                width: 100%;
+                justify-content: flex-end;
+            }
+        }
+
+        /* Loading */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+            color: var(--notion-text-light);
+        }
+
+        .loading i {
+            margin-right: 10px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div>
+                <h1 class="header-title" id="planTitle" contenteditable="true">📋 ICT Scalping Trading Plan</h1>
+                <div class="plan-tags" id="planTags">
+                    <span class="tag tag-blue">ICT Strategy <i class="fas fa-edit tag-edit" onclick="editTag(this)"></i></span>
+                    <span class="tag tag-green">London Session <i class="fas fa-edit tag-edit" onclick="editTag(this)"></i></span>
+                    <span class="tag tag-red">Strict Rules <i class="fas fa-edit tag-edit" onclick="editTag(this)"></i></span>
+                    <span class="tag tag-purple">Daily Review <i class="fas fa-edit tag-edit" onclick="editTag(this)"></i></span>
+                    <button class="btn btn-secondary" onclick="addTag()" style="padding: 4px 12px; font-size: 12px;">
+                        <i class="fas fa-plus"></i> Add Tag
+                    </button>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button class="btn btn-secondary" onclick="toggleEditMode()" id="editModeBtn">
+                    <i class="fas fa-edit"></i> Edit Mode
+                </button>
+                <button class="btn btn-success" onclick="newPlan()">
+                    <i class="fas fa-plus"></i> New Plan
+                </button>
+                <button class="btn btn-primary" onclick="savePlan()">
+                    <i class="fas fa-save"></i> Save Plan
+                </button>
+            </div>
+        </div>
+
+        <!-- Edit Mode Toggle -->
+        <div class="toggle-container">
+            <span class="toggle-label">Edit Mode:</span>
+            <label class="toggle-switch">
+                <input type="checkbox" id="editModeToggle" checked onchange="toggleEditMode()">
+                <span class="toggle-slider"></span>
+            </label>
+            <span id="editModeStatus" style="font-size: 14px; color: var(--notion-green);">ON</span>
+        </div>
+
+        <!-- Loading Indicator -->
+        <div class="loading" id="loadingIndicator">
+            <i class="fas fa-spinner"></i> Loading...
+        </div>
+
+        <!-- Plan Content -->
+        <div id="planContent">
+            <!-- Sections will be loaded here -->
+        </div>
+
+        <!-- Add Section Button -->
+        <div class="add-section">
+            <button class="add-section-btn" onclick="addSection()">
+                <i class="fas fa-plus"></i> Add New Section
+            </button>
+        </div>
+
+        <!-- Status Bar -->
+        <div style="margin-top: 30px; padding: 15px; background: var(--notion-gray-light); border-radius: 6px; font-size: 14px; color: var(--notion-text-light);">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span id="saveStatus">Ready to save</span>
+                <span id="lastSaved">Never saved</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- New Plan Modal -->
+    <div class="modal" id="newPlanModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Create New Trading Plan</h3>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Plan Name</label>
+                    <input type="text" class="form-control" id="newPlanName" placeholder="e.g., London Session Plan" value="New Trading Plan">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Plan Type</label>
+                    <select class="form-control" id="newPlanType">
+                        <option value="ict-scalping">ICT Scalping</option>
+                        <option value="day-trading">Day Trading</option>
+                        <option value="swing-trading">Swing Trading</option>
+                        <option value="news-trading">News Trading</option>
+                        <option value="blank">Blank Template</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('newPlanModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="createNewPlan()">Create</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Tag Modal -->
+    <div class="modal" id="editTagModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Edit Tag</h3>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Tag Text</label>
+                    <input type="text" class="form-control" id="editTagText" value="">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Tag Color</label>
+                    <div style="display: flex; gap: 10px; margin-top: 10px;">
+                        <button class="btn btn-secondary" onclick="setTagColor('blue')" style="background: var(--notion-blue-light); color: var(--notion-blue);">Blue</button>
+                        <button class="btn btn-secondary" onclick="setTagColor('green')" style="background: var(--notion-green-light); color: var(--notion-green);">Green</button>
+                        <button class="btn btn-secondary" onclick="setTagColor('red')" style="background: var(--notion-red-light); color: var(--notion-red);">Red</button>
+                        <button class="btn btn-secondary" onclick="setTagColor('purple')" style="background: var(--notion-purple-light); color: var(--notion-purple);">Purple</button>
+                        <button class="btn btn-secondary" onclick="setTagColor('yellow')" style="background: var(--notion-yellow-light); color: var(--notion-yellow);">Yellow</button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-danger" onclick="deleteCurrentTag()">Delete</button>
+                <button class="btn btn-secondary" onclick="closeModal('editTagModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="saveTag()">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // State Management
+        let currentPlan = {
+            id: 'plan-1',
+            name: 'ICT Scalping Trading Plan',
+            tags: ['ICT Strategy', 'London Session', 'Strict Rules', 'Daily Review'],
+            sections: [],
+            lastSaved: null
+        };
+
+        let isEditMode = true;
+        let currentEditingTag = null;
+        let currentTagColor = 'blue';
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            loadPlan();
+            setupEventListeners();
+            updateSaveStatus('Ready');
+        });
+
+        // Load plan data
+        function loadPlan() {
+            const savedPlan = localStorage.getItem('currentPlan');
+            if (savedPlan) {
+                currentPlan = JSON.parse(savedPlan);
+            } else {
+                // Load default plan
+                currentPlan.sections = getDefaultSections();
+            }
+            
+            renderPlan();
+        }
+
+        // Get default sections
+        function getDefaultSections() {
+            return [
+                {
+                    id: 'section-1',
+                    title: '🎯 Trading Philosophy',
+                    icon: 'brain',
+                    content: '<p><strong>Core Belief:</strong> Price moves from one area of liquidity to another. My edge comes from identifying these areas before they\'re taken.</p>' +
+                            '<p><strong>Mindset Rules:</strong></p>' +
+                            '<ul>' +
+                            '<li>I am a <strong>risk manager</strong> first, trader second</li>' +
+                            '<li>No revenge trading - after a loss, step away for 30 minutes minimum</li>' +
+                            '<li>Focus on <strong>process</strong> over profits</li>' +
+                            '<li>Emotion is my biggest enemy</li>' +
+                            '</ul>'
+                },
+                {
+                    id: 'section-2',
+                    title: '⚖️ Trading Rules',
+                    icon: 'gavel',
+                    content: '<div class="callout danger">' +
+                            '<div class="callout-header">' +
+                            '<i class="fas fa-ban callout-icon"></i>' +
+                            '<div class="callout-title" contenteditable="true">❌ STRICT RULES</div>' +
+                            '</div>' +
+                            '<div class="callout-content" contenteditable="true">Violating any rules stops trading for the day + mandatory review.</div>' +
+                            '</div>' +
+                            '<ol>' +
+                            '<li><strong>Maximum 3 trades per day</strong> - Quality over quantity</li>' +
+                            '<li><strong>1% maximum risk per trade</strong> - No exceptions</li>' +
+                            '<li><strong>Only London Session (07:00-10:00 GMT)</strong></li>' +
+                            '<li><strong>Only EURUSD & GBPUSD</strong></li>' +
+                            '<li><strong>Minimum 1:1.5 Risk/Reward</strong></li>' +
+                            '</ol>'
+                },
+                {
+                    id: 'section-3',
+                    title: '📊 Entry Setup',
+                    icon: 'search',
+                    content: '<p>All entries must satisfy ALL conditions:</p>' +
+                            '<ul>' +
+                            '<li>Clear Market Structure on H4/H1</li>' +
+                            '<li>Price in Premium/Discount zone</li>' +
+                            '<li>ICT Model confirmed (FVG/Order Block)</li>' +
+                            '<li>London Kill Zone timing</li>' +
+                            '<li>Minimum 2 confluence factors</li>' +
+                            '</ul>'
+                },
+                {
+                    id: 'section-4',
+                    title: '🛡️ Risk Management',
+                    icon: 'shield-alt',
+                    content: '<div class="callout success">' +
+                            '<div class="callout-header">' +
+                            '<i class="fas fa-chart-line callout-icon"></i>' +
+                            '<div class="callout-title" contenteditable="true">💰 RISK PARAMETERS</div>' +
+                            '</div>' +
+                            '<div class="callout-content" contenteditable="true">Account: $10,000 | Max Daily Loss: 3% | Max Monthly: 10% | Target: 5-10% monthly</div>' +
+                            '</div>' +
+                            '<p><strong>Position Size Formula:</strong></p>' +
+                            '<p>Size = (Account × Risk%) ÷ (Stop Loss Pips × Pip Value)</p>' +
+                            '<p><strong>Risk Levels:</strong></p>' +
+                            '<ul>' +
+                            '<li>Normal: 1% risk per trade</li>' +
+                            '<li>Reduced: 0.5% after 2 losses</li>' +
+                            '<li>Stop Trading: After 3% daily loss</li>' +
+                            '</ul>'
+                }
+            ];
+        }
+
+        // Render plan
+        function renderPlan() {
+            // Update title
+            document.getElementById('planTitle').textContent = currentPlan.name;
+            
+            // Update tags
+            renderTags();
+            
+            // Render sections
+            const planContent = document.getElementById('planContent');
+            planContent.innerHTML = '';
+            
+            currentPlan.sections.forEach(section => {
+                const sectionElement = createSectionElement(section);
+                planContent.appendChild(sectionElement);
+            });
+            
+            // Update last saved
+            if (currentPlan.lastSaved) {
+                const date = new Date(currentPlan.lastSaved);
+                document.getElementById('lastSaved').textContent = `Last saved: ${date.toLocaleString()}`;
+            }
+            
+            // Toggle edit mode
+            toggleEditModeUI();
+        }
+
+        // Create section element
+        function createSectionElement(section) {
+            const div = document.createElement('div');
+            div.className = 'section';
+            div.dataset.id = section.id;
+            
+            div.innerHTML = `
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="fas fa-${section.icon}"></i>
+                    </div>
+                    <div class="section-title" contenteditable="true">${section.title}</div>
+                    <div class="section-actions">
+                        <button class="section-btn" onclick="moveSectionUp('${section.id}')" title="Move Up">
+                            <i class="fas fa-arrow-up"></i>
+                        </button>
+                        <button class="section-btn" onclick="moveSectionDown('${section.id}')" title="Move Down">
+                            <i class="fas fa-arrow-down"></i>
+                        </button>
+                        <button class="section-btn section-btn-delete" onclick="deleteSection('${section.id}')" title="Delete">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="content-area" contenteditable="true">${section.content}</div>
+            `;
+            
+            return div;
+        }
+
+        // Render tags
+        function renderTags() {
+            const tagsContainer = document.getElementById('planTags');
+            const tagsHtml = currentPlan.tags.map(tag => {
+                const color = getTagColor(tag);
+                return `<span class="tag tag-${color}">${tag} <i class="fas fa-edit tag-edit" onclick="editTag(this)"></i></span>`;
+            }).join('');
+            
+            tagsContainer.innerHTML = tagsHtml + 
+                `<button class="btn btn-secondary" onclick="addTag()" style="padding: 4px 12px; font-size: 12px;">
+                    <i class="fas fa-plus"></i> Add Tag
+                </button>`;
+        }
+
+        // Get tag color
+        function getTagColor(tag) {
+            const colors = ['blue', 'green', 'red', 'purple', 'yellow'];
+            const hash = tag.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+            return colors[hash % colors.length];
+        }
+
+        // Add new section
+        function addSection() {
+            const newSection = {
+                id: 'section-' + Date.now(),
+                title: 'New Section',
+                icon: 'file-alt',
+                content: '<p>Start typing your content here...</p>'
+            };
+            
+            currentPlan.sections.push(newSection);
+            renderPlan();
+            updateSaveStatus('Unsaved changes');
+            
+            // Scroll to new section
+            setTimeout(() => {
+                const newSectionElement = document.querySelector(`[data-id="${newSection.id}"]`);
+                if (newSectionElement) {
+                    newSectionElement.scrollIntoView({ behavior: 'smooth' });
+                    newSectionElement.querySelector('.section-title').focus();
+                }
+            }, 100);
+        }
+
+        // Delete section
+        function deleteSection(sectionId) {
+            if (confirm('Are you sure you want to delete this section?')) {
+                currentPlan.sections = currentPlan.sections.filter(s => s.id !== sectionId);
+                renderPlan();
+                updateSaveStatus('Unsaved changes');
+            }
+        }
+
+        // Move section up
+        function moveSectionUp(sectionId) {
+            const index = currentPlan.sections.findIndex(s => s.id === sectionId);
+            if (index > 0) {
+                [currentPlan.sections[index - 1], currentPlan.sections[index]] = 
+                [currentPlan.sections[index], currentPlan.sections[index - 1]];
+                renderPlan();
+                updateSaveStatus('Unsaved changes');
+            }
+        }
+
+        // Move section down
+        function moveSectionDown(sectionId) {
+            const index = currentPlan.sections.findIndex(s => s.id === sectionId);
+            if (index < currentPlan.sections.length - 1) {
+                [currentPlan.sections[index], currentPlan.sections[index + 1]] = 
+                [currentPlan.sections[index + 1], currentPlan.sections[index]];
+                renderPlan();
+                updateSaveStatus('Unsaved changes');
+            }
+        }
+
+        // Toggle edit mode
+        function toggleEditMode() {
+            isEditMode = !isEditMode;
+            toggleEditModeUI();
+        }
+
+        function toggleEditModeUI() {
+            const toggle = document.getElementById('editModeToggle');
+            const status = document.getElementById('editModeStatus');
+            const btn = document.getElementById('editModeBtn');
+            
+            toggle.checked = isEditMode;
+            status.textContent = isEditMode ? 'ON' : 'OFF';
+            status.style.color = isEditMode ? 'var(--notion-green)' : 'var(--notion-red)';
+            btn.innerHTML = isEditMode ? '<i class="fas fa-eye"></i> View Mode' : '<i class="fas fa-edit"></i> Edit Mode';
+            
+            // Toggle contenteditable
+            const editableElements = document.querySelectorAll('[contenteditable="true"]');
+            editableElements.forEach(el => {
+                el.contentEditable = isEditMode;
+                el.style.cursor = isEditMode ? 'text' : 'default';
+                if (!isEditMode) {
+                    el.style.borderColor = 'transparent';
+                    el.style.backgroundColor = 'transparent';
+                }
+            });
+            
+            // Toggle buttons
+            const actionButtons = document.querySelectorAll('.section-actions, .add-section-btn');
+            actionButtons.forEach(btn => {
+                btn.style.display = isEditMode ? 'flex' : 'none';
+            });
+        }
+
+        // Edit tag
+        function editTag(icon) {
+            const tagElement = icon.parentElement;
+            const tagText = tagElement.textContent.trim().replace('A', '').trim();
+            const tagColor = tagElement.className.split(' ').find(c => c.startsWith('tag-'))?.replace('tag-', '');
+            
+            currentEditingTag = tagElement;
+            currentTagColor = tagColor || 'blue';
+            
+            document.getElementById('editTagText').value = tagText;
+            showModal('editTagModal');
+        }
+
+        // Set tag color
+        function setTagColor(color) {
+            currentTagColor = color;
+        }
+
+        // Save tag
+        function saveTag() {
+            const newText = document.getElementById('editTagText').value.trim();
+            if (newText && currentEditingTag) {
+                // Update in current plan
+                const oldText = currentEditingTag.textContent.trim().replace('A', '').trim();
+                const index = currentPlan.tags.indexOf(oldText);
+                
+                if (index !== -1) {
+                    currentPlan.tags[index] = newText;
+                }
+                
+                // Update UI
+                renderTags();
+                updateSaveStatus('Unsaved changes');
+                closeModal('editTagModal');
+            }
+        }
+
+        // Delete current tag
+        function deleteCurrentTag() {
+            if (currentEditingTag && confirm('Delete this tag?')) {
+                const tagText = currentEditingTag.textContent.trim().replace('A', '').trim();
+                currentPlan.tags = currentPlan.tags.filter(t => t !== tagText);
+                renderTags();
+                updateSaveStatus('Unsaved changes');
+                closeModal('editTagModal');
+            }
+        }
+
+        // Add new tag
+        function addTag() {
+            const tagText = prompt('Enter new tag name:');
+            if (tagText && tagText.trim()) {
+                currentPlan.tags.push(tagText.trim());
+                renderTags();
+                updateSaveStatus('Unsaved changes');
+            }
+        }
+
+        // Save plan
+        function savePlan() {
+            showLoading(true);
+            
+            // Update plan data from UI
+            currentPlan.name = document.getElementById('planTitle').textContent;
+            
+            // Update sections
+            const sections = document.querySelectorAll('.section');
+            currentPlan.sections = Array.from(sections).map(section => {
+                const id = section.dataset.id;
+                const title = section.querySelector('.section-title').textContent;
+                const content = section.querySelector('.content-area').innerHTML;
+                
+                // Find original section to preserve icon
+                const originalSection = currentPlan.sections.find(s => s.id === id);
+                
+                return {
+                    id: id,
+                    title: title,
+                    icon: originalSection?.icon || 'file-alt',
+                    content: content
+                };
+            });
+            
+            currentPlan.lastSaved = new Date().toISOString();
+            
+            // Save to localStorage
+            localStorage.setItem('currentPlan', JSON.stringify(currentPlan));
+            
+            // Update UI
+            setTimeout(() => {
+                showLoading(false);
+                updateSaveStatus('Saved successfully!', 'success');
+                document.getElementById('lastSaved').textContent = `Last saved: ${new Date().toLocaleString()}`;
+                
+                // Auto-hide success message
+                setTimeout(() => {
+                    updateSaveStatus('Ready to save');
+                }, 3000);
+            }, 500);
+        }
+
+        // New plan
+        function newPlan() {
+            showModal('newPlanModal');
+        }
+
+        // Create new plan
+        function createNewPlan() {
+            const name = document.getElementById('newPlanName').value.trim() || 'New Trading Plan';
+            const type = document.getElementById('newPlanType').value;
+            
+            currentPlan = {
+                id: 'plan-' + Date.now(),
+                name: name,
+                tags: ['New Plan', 'Draft'],
+                sections: [],
+                lastSaved: null
+            };
+            
+            // Load template based on type
+            switch(type) {
+                case 'ict-scalping':
+                    currentPlan.sections = getDefaultSections();
+                    currentPlan.tags = ['ICT Strategy', 'London Session', 'Scalping'];
+                    break;
+                case 'day-trading':
+                    currentPlan.sections = getDayTradingTemplate();
+                    currentPlan.tags = ['Day Trading', 'Intraday', 'High Frequency'];
+                    break;
+                case 'swing-trading':
+                    currentPlan.sections = getSwingTradingTemplate();
+                    currentPlan.tags = ['Swing Trading', 'Trend Following'];
+                    break;
+                case 'news-trading':
+                    currentPlan.sections = getNewsTradingTemplate();
+                    currentPlan.tags = ['News Trading', 'High Impact'];
+                    break;
+                default:
+                    currentPlan.sections = [{
+                        id: 'section-1',
+                        title: 'New Trading Plan',
+                        icon: 'file-alt',
+                        content: '<p>Start building your trading plan here...</p>'
+                    }];
+            }
+            
+            closeModal('newPlanModal');
+            renderPlan();
+            updateSaveStatus('New plan created');
+        }
+
+        // Template functions
+        function getDayTradingTemplate() {
+            return [
+                {
+                    id: 'section-1',
+                    title: '📈 Day Trading Strategy',
+                    icon: 'chart-line',
+                    content: '<p><strong>Timeframe:</strong> M1-M15 charts</p>' +
+                            '<p><strong>Session:</strong> London & NY overlap</p>' +
+                            '<p><strong>Maximum trades:</strong> 5 per day</p>'
+                }
+            ];
+        }
+
+        function getSwingTradingTemplate() {
+            return [
+                {
+                    id: 'section-1',
+                    title: '🌊 Swing Trading Plan',
+                    icon: 'wave-square',
+                    content: '<p><strong>Timeframe:</strong> H4-Daily charts</p>' +
+                            '<p><strong>Hold time:</strong> 3-10 days</p>' +
+                            '<p><strong>Risk per trade:</strong> 2% maximum</p>'
+                }
+            ];
+        }
+
+        function getNewsTradingTemplate() {
+            return [
+                {
+                    id: 'section-1',
+                    title: '📰 News Trading',
+                    icon: 'newspaper',
+                    content: '<p><strong>Focus:</strong> High-impact news only</p>' +
+                            '<p><strong>Pairs:</strong> Major currencies</p>' +
+                            '<p><strong>Entry:</strong> Post-news retracement</p>'
+                }
+            ];
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Auto-save on changes
+            document.addEventListener('input', function(e) {
+                if (e.target.hasAttribute('contenteditable')) {
+                    updateSaveStatus('Unsaved changes');
+                }
+            });
+            
+            // Save with Ctrl+S
+            document.addEventListener('keydown', function(e) {
+                if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                    e.preventDefault();
+                    savePlan();
+                }
+            });
+        }
+
+        // Update save status
+        function updateSaveStatus(message, type = 'info') {
+            const statusElement = document.getElementById('saveStatus');
+            statusElement.textContent = message;
+            
+            if (type === 'success') {
+                statusElement.style.color = 'var(--notion-green)';
+            } else if (type === 'error') {
+                statusElement.style.color = 'var(--notion-red)';
+            } else {
+                statusElement.style.color = 'var(--notion-text-light)';
+            }
+        }
+
+        // Show loading
+        function showLoading(show) {
+            document.getElementById('loadingIndicator').style.display = show ? 'block' : 'none';
+        }
+
+        // Show modal
+        function showModal(modalId) {
+            document.getElementById(modalId).style.display = 'flex';
+        }
+
+        // Close modal
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        // Close modals when clicking outside
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        }
+
+        // Export plan (optional)
+        function exportPlan() {
+            const dataStr = JSON.stringify(currentPlan, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
+            const exportName = currentPlan.name.toLowerCase().replace(/\s+/g, '-') + '.json';
+            
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportName);
+            linkElement.click();
+        }
+    </script>
+</body>
+</html>
