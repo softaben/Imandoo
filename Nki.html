@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Complete Trading Journal - ICT Scalping</title>
+    <title>Firebase Trading Journal - ICT Scalping</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -29,10 +29,9 @@
             --notion-purple-light: #f3e5f5;
             --notion-yellow: #ffc800;
             --notion-yellow-light: #fff8e1;
+            --notion-pink: #e55ca2;
             --notion-orange: #ff6b35;
             --notion-orange-light: #fff3e0;
-            --notion-pink: #e55ca2;
-            --notion-pink-light: #fce4ec;
         }
 
         * {
@@ -219,13 +218,8 @@
         }
 
         .page {
-            max-width: 1000px;
+            max-width: 900px;
             margin: 0 auto;
-            display: none;
-        }
-
-        .page.active {
-            display: block;
         }
 
         /* Page Header */
@@ -252,7 +246,6 @@
             display: flex;
             gap: 8px;
             margin-bottom: 16px;
-            flex-wrap: wrap;
         }
 
         .page-tag {
@@ -269,8 +262,6 @@
         .page-tag.green { background-color: var(--notion-green-light); color: var(--notion-green); }
         .page-tag.red { background-color: var(--notion-red-light); color: var(--notion-red); }
         .page-tag.purple { background-color: var(--notion-purple-light); color: var(--notion-purple); }
-        .page-tag.orange { background-color: var(--notion-orange-light); color: var(--notion-orange); }
-        .page-tag.pink { background-color: var(--notion-pink-light); color: var(--notion-pink); }
 
         /* Database */
         .database {
@@ -326,7 +317,6 @@
             display: flex;
             gap: 4px;
             background-color: var(--notion-gray-light);
-            overflow-x: auto;
         }
 
         .view-btn {
@@ -336,7 +326,6 @@
             background-color: transparent;
             font-size: 13px;
             cursor: pointer;
-            white-space: nowrap;
         }
 
         .view-btn:hover {
@@ -346,6 +335,177 @@
         .view-btn.active {
             background-color: white;
             border-color: var(--notion-gray-dark);
+        }
+
+        .database-table {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        th {
+            text-align: left;
+            padding: 10px 14px;
+            background-color: var(--notion-gray-light);
+            border-bottom: 1px solid var(--notion-gray-dark);
+            font-weight: 500;
+            color: var(--notion-text);
+            white-space: nowrap;
+            font-size: 13px;
+        }
+
+        td {
+            padding: 10px 14px;
+            border-bottom: 1px solid var(--notion-gray-dark);
+            min-width: 120px;
+        }
+
+        tr:hover {
+            background-color: var(--notion-gray-light);
+        }
+
+        /* Property Styles */
+        .property {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .select-property {
+            padding: 4px 8px;
+            border-radius: 4px;
+            border: 1px solid var(--notion-gray-dark);
+            background-color: white;
+            font-size: 13px;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .select-property.blue {
+            background-color: var(--notion-blue-light);
+            border-color: var(--notion-blue);
+        }
+
+        .select-property.green {
+            background-color: var(--notion-green-light);
+            border-color: var(--notion-green);
+        }
+
+        .select-property.red {
+            background-color: var(--notion-red-light);
+            border-color: var(--notion-red);
+        }
+
+        .select-property.purple {
+            background-color: var(--notion-purple-light);
+            border-color: var(--notion-purple);
+        }
+
+        .number-property {
+            padding: 4px 8px;
+            border-radius: 4px;
+            border: 1px solid var(--notion-gray-dark);
+            background-color: white;
+            font-size: 13px;
+            width: 100%;
+        }
+
+        .text-property {
+            padding: 4px 8px;
+            border-radius: 4px;
+            border: 1px solid transparent;
+            background-color: transparent;
+            font-size: 13px;
+            width: 100%;
+        }
+
+        .text-property:focus {
+            outline: none;
+            background-color: white;
+            border-color: var(--notion-gray-dark);
+        }
+
+        .date-property {
+            padding: 4px 8px;
+            border-radius: 4px;
+            border: 1px solid transparent;
+            background-color: transparent;
+            font-size: 13px;
+            width: 100%;
+        }
+
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+            display: inline-block;
+        }
+
+        .status-win {
+            background-color: var(--notion-green-light);
+            color: var(--notion-green);
+        }
+
+        .status-loss {
+            background-color: var(--notion-red-light);
+            color: var(--notion-red);
+        }
+
+        .status-be {
+            background-color: var(--notion-gray);
+            color: var(--notion-text-light);
+        }
+
+        /* Toggle */
+        .toggle {
+            position: relative;
+            display: inline-block;
+            width: 36px;
+            height: 20px;
+        }
+
+        .toggle input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .2s;
+            border-radius: 34px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 14px;
+            width: 14px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .2s;
+            border-radius: 50%;
+        }
+
+        input:checked + .toggle-slider {
+            background-color: var(--notion-green);
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(16px);
         }
 
         /* Callouts */
@@ -375,18 +535,12 @@
             color: var(--notion-text);
         }
 
-        /* Charts Grid */
+        /* Charts */
         .charts-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            grid-template-columns: 1fr 1fr;
             gap: 24px;
             margin-bottom: 32px;
-        }
-
-        @media (max-width: 900px) {
-            .charts-grid {
-                grid-template-columns: 1fr;
-            }
         }
 
         .chart-card {
@@ -407,40 +561,6 @@
             font-size: 16px;
             font-weight: 600;
         }
-
-        /* Metrics */
-        .metrics-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 16px;
-            margin-bottom: 32px;
-        }
-
-        .metric-card {
-            background-color: white;
-            border: 1px solid var(--notion-gray-dark);
-            border-radius: 6px;
-            padding: 16px;
-        }
-
-        .metric-title {
-            font-size: 13px;
-            color: var(--notion-text-light);
-            margin-bottom: 8px;
-        }
-
-        .metric-value {
-            font-size: 24px;
-            font-weight: 700;
-        }
-
-        .metric-change {
-            font-size: 12px;
-            font-weight: 500;
-        }
-
-        .positive { color: var(--notion-green); }
-        .negative { color: var(--notion-red); }
 
         /* Modal */
         .modal-overlay {
@@ -525,199 +645,39 @@
             border-top: 1px solid var(--notion-gray-dark);
         }
 
-        /* Toggle */
-        .toggle {
-            position: relative;
-            display: inline-block;
-            width: 36px;
-            height: 20px;
+        /* Metrics */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
         }
 
-        .toggle input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .toggle-slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #ccc;
-            transition: .2s;
-            border-radius: 34px;
-        }
-
-        .toggle-slider:before {
-            position: absolute;
-            content: "";
-            height: 14px;
-            width: 14px;
-            left: 3px;
-            bottom: 3px;
+        .metric-card {
             background-color: white;
-            transition: .2s;
-            border-radius: 50%;
+            border: 1px solid var(--notion-gray-dark);
+            border-radius: 6px;
+            padding: 16px;
         }
 
-        input:checked + .toggle-slider {
-            background-color: var(--notion-green);
-        }
-
-        input:checked + .toggle-slider:before {
-            transform: translateX(16px);
-        }
-
-        /* Tables */
-        .database-table {
-            width: 100%;
-            overflow-x: auto;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 14px;
-        }
-
-        th {
-            text-align: left;
-            padding: 10px 14px;
-            background-color: var(--notion-gray-light);
-            border-bottom: 1px solid var(--notion-gray-dark);
-            font-weight: 500;
-            color: var(--notion-text);
-            white-space: nowrap;
+        .metric-title {
             font-size: 13px;
+            color: var(--notion-text-light);
+            margin-bottom: 8px;
         }
 
-        td {
-            padding: 10px 14px;
-            border-bottom: 1px solid var(--notion-gray-dark);
-            min-width: 120px;
+        .metric-value {
+            font-size: 24px;
+            font-weight: 700;
         }
 
-        tr:hover {
-            background-color: var(--notion-gray-light);
-        }
-
-        .status-badge {
-            padding: 4px 10px;
-            border-radius: 12px;
+        .metric-change {
             font-size: 12px;
             font-weight: 500;
-            display: inline-block;
         }
 
-        .status-win {
-            background-color: var(--notion-green-light);
-            color: var(--notion-green);
-        }
-
-        .status-loss {
-            background-color: var(--notion-red-light);
-            color: var(--notion-red);
-        }
-
-        .status-be {
-            background-color: var(--notion-gray);
-            color: var(--notion-text-light);
-        }
-
-        /* Content Blocks */
-        .content-block {
-            background-color: white;
-            border: 1px solid var(--notion-gray-dark);
-            border-radius: 6px;
-            padding: 24px;
-            margin-bottom: 24px;
-        }
-
-        .content-block h2 {
-            margin-bottom: 16px;
-            color: var(--notion-text);
-            font-size: 20px;
-        }
-
-        .content-block h3 {
-            margin-bottom: 12px;
-            color: var(--notion-text);
-            font-size: 16px;
-            margin-top: 24px;
-        }
-
-        .content-block p {
-            margin-bottom: 16px;
-            line-height: 1.6;
-        }
-
-        .content-block ul, .content-block ol {
-            margin-left: 20px;
-            margin-bottom: 16px;
-        }
-
-        .content-block li {
-            margin-bottom: 8px;
-        }
-
-        /* Trading Plan Grid */
-        .plan-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 24px;
-            margin-top: 24px;
-        }
-
-        .plan-card {
-            background-color: white;
-            border: 1px solid var(--notion-gray-dark);
-            border-radius: 6px;
-            padding: 20px;
-        }
-
-        .plan-card h3 {
-            margin-bottom: 16px;
-            color: var(--notion-blue);
-            font-size: 18px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        /* Psychology Metrics */
-        .psychology-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-top: 24px;
-        }
-
-        .psychology-card {
-            background-color: white;
-            border: 1px solid var(--notion-gray-dark);
-            border-radius: 6px;
-            padding: 20px;
-            text-align: center;
-        }
-
-        .psychology-card h3 {
-            margin-bottom: 12px;
-            font-size: 16px;
-            color: var(--notion-text);
-        }
-
-        .psychology-value {
-            font-size: 32px;
-            font-weight: 700;
-            margin-bottom: 8px;
-        }
-
-        .psychology-value.good { color: var(--notion-green); }
-        .psychology-value.average { color: var(--notion-yellow); }
-        .psychology-value.poor { color: var(--notion-red); }
+        .positive { color: var(--notion-green); }
+        .negative { color: var(--notion-red); }
 
         /* Loading */
         .loading {
@@ -748,6 +708,10 @@
                 display: none;
             }
             
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+            
             .form-row {
                 grid-template-columns: 1fr;
             }
@@ -755,151 +719,6 @@
             .header-actions {
                 display: none;
             }
-            
-            .charts-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .page-title {
-                font-size: 32px;
-            }
-        }
-
-        /* Checklist */
-        .checklist {
-            margin: 16px 0;
-        }
-
-        .checklist-item {
-            display: flex;
-            align-items: center;
-            padding: 8px 0;
-            border-bottom: 1px solid var(--notion-gray);
-        }
-
-        .checklist-item:last-child {
-            border-bottom: none;
-        }
-
-        .checklist-checkbox {
-            margin-right: 12px;
-            width: 18px;
-            height: 18px;
-        }
-
-        .checklist-text {
-            flex: 1;
-        }
-
-        /* Tabs */
-        .tabs {
-            display: flex;
-            border-bottom: 1px solid var(--notion-gray-dark);
-            margin-bottom: 24px;
-            overflow-x: auto;
-        }
-
-        .tab {
-            padding: 12px 20px;
-            border: none;
-            background: none;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
-            color: var(--notion-text-light);
-            border-bottom: 2px solid transparent;
-            white-space: nowrap;
-        }
-
-        .tab:hover {
-            color: var(--notion-text);
-        }
-
-        .tab.active {
-            color: var(--notion-blue);
-            border-bottom-color: var(--notion-blue);
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        /* Weekly Performance */
-        .weekly-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-            margin-top: 24px;
-        }
-
-        .week-card {
-            background-color: white;
-            border: 1px solid var(--notion-gray-dark);
-            border-radius: 6px;
-            padding: 20px;
-        }
-
-        .week-card h3 {
-            margin-bottom: 16px;
-            font-size: 16px;
-            color: var(--notion-blue);
-        }
-
-        .week-stats {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-        }
-
-        .week-stat {
-            text-align: center;
-            padding: 12px;
-            background-color: var(--notion-gray-light);
-            border-radius: 4px;
-        }
-
-        .week-stat .label {
-            font-size: 12px;
-            color: var(--notion-text-light);
-            margin-bottom: 4px;
-        }
-
-        .week-stat .value {
-            font-size: 18px;
-            font-weight: 600;
-        }
-
-        /* Trade Timeline */
-        .timeline {
-            margin-top: 24px;
-        }
-
-        .timeline-item {
-            display: flex;
-            margin-bottom: 20px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid var(--notion-gray);
-        }
-
-        .timeline-date {
-            min-width: 100px;
-            font-weight: 600;
-            color: var(--notion-blue);
-        }
-
-        .timeline-content {
-            flex: 1;
-        }
-
-        .timeline-trade {
-            background-color: var(--notion-gray-light);
-            padding: 12px;
-            border-radius: 4px;
-            margin-bottom: 8px;
         }
     </style>
 </head>
@@ -907,7 +726,7 @@
     <!-- Header -->
     <div class="header">
         <div class="workspace-icon">T</div>
-        <div class="header-title">Complete Trading Journal</div>
+        <div class="header-title">ICT Scalping Journal</div>
         <div class="header-actions">
             <div class="sync-status synced" id="syncStatus">
                 <i class="fas fa-cloud"></i> Synced
@@ -931,7 +750,7 @@
             </div>
 
             <div class="favorites">
-                <div class="nav-title">Main Pages</div>
+                <div class="nav-title">Favorites</div>
                 <a href="#" class="nav-item active" data-page="dashboard">
                     <i class="fas fa-tachometer-alt"></i> Dashboard
                 </a>
@@ -941,71 +760,61 @@
                 <a href="#" class="nav-item" data-page="analytics">
                     <i class="fas fa-chart-bar"></i> Analytics
                 </a>
-                <a href="#" class="nav-item" data-page="performance">
-                    <i class="fas fa-trophy"></i> Performance
-                </a>
-            </div>
-
-            <div class="nav-section">
-                <div class="nav-title">Trading Resources</div>
-                <a href="#" class="nav-item" data-page="tradingPlan">
-                    <i class="fas fa-file-alt"></i> Trading Plan
-                </a>
-                <a href="#" class="nav-item" data-page="psychology">
-                    <i class="fas fa-brain"></i> Psychology
-                </a>
                 <a href="#" class="nav-item" data-page="daily">
                     <i class="fas fa-calendar-day"></i> Daily Journal
                 </a>
-                <a href="#" class="nav-item" data-page="weeklyGoals">
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-title">Pages</div>
+                <a href="#" class="nav-item">
+                    <i class="fas fa-file-alt"></i> Trading Plan
+                </a>
+                <a href="#" class="nav-item">
                     <i class="fas fa-bullseye"></i> Weekly Goals
                 </a>
+                <a href="#" class="nav-item">
+                    <i class="fas fa-brain"></i> Psychology Review
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="fas fa-chart-pie"></i> Performance
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="fas fa-cog"></i> Settings
+                </a>
             </div>
 
             <div class="nav-section">
-                <div class="nav-title">Database Views</div>
-                <a href="#" class="nav-item" data-page="allTrades">
+                <div class="nav-title">Databases</div>
+                <a href="#" class="nav-item">
                     <i class="fas fa-table"></i> All Trades
                 </a>
-                <a href="#" class="nav-item" data-page="eurusdView">
+                <a href="#" class="nav-item">
+                    <i class="fas fa-filter"></i> London Session
+                </a>
+                <a href="#" class="nav-item">
                     <i class="fas fa-euro-sign"></i> EURUSD Only
                 </a>
-                <a href="#" class="nav-item" data-page="gbpusdView">
+                <a href="#" class="nav-item">
                     <i class="fas fa-pound-sign"></i> GBPUSD Only
                 </a>
-                <a href="#" class="nav-item" data-page="winningTrades">
+                <a href="#" class="nav-item">
                     <i class="fas fa-trophy"></i> Winning Trades
-                </a>
-                <a href="#" class="nav-item" data-page="losingTrades">
-                    <i class="fas fa-exclamation-triangle"></i> Losing Trades
-                </a>
-            </div>
-
-            <div class="nav-section">
-                <div class="nav-title">Settings</div>
-                <a href="#" class="nav-item" data-page="settings">
-                    <i class="fas fa-cog"></i> Template Settings
-                </a>
-                <a href="#" class="nav-item" id="exportData">
-                    <i class="fas fa-database"></i> Export Data
-                </a>
-                <a href="#" class="nav-item" id="importData">
-                    <i class="fas fa-upload"></i> Import Data
                 </a>
             </div>
         </div>
 
         <!-- Main Content -->
         <div class="main-content">
-            <!-- Dashboard Page -->
-            <div class="page active" id="dashboard-page">
+            <!-- Dashboard Page (Default) -->
+            <div class="page" id="dashboard-page">
                 <div class="page-header">
                     <input type="text" class="page-title" value="📈 Trading Dashboard" id="page-title">
                     <div class="page-tags">
                         <span class="page-tag blue">ICT Strategy</span>
                         <span class="page-tag green">Scalping</span>
                         <span class="page-tag purple">London Session</span>
-                        <span class="page-tag orange">EURUSD & GBPUSD</span>
+                        <span class="page-tag red">EURUSD & GBPUSD</span>
                     </div>
                 </div>
 
@@ -1016,7 +825,7 @@
                     </div>
                     <div class="callout-content">
                         <h3>Today's London Session Focus</h3>
-                        <p>Trade only premium/discount zones on H1. Maximum 3 trades. Focus on 07:00-08:00 GMT kill zone. Watch for ECB statement at 13:45 GMT.</p>
+                        <p>Trade only premium/discount zones on H1. Maximum 3 trades. Focus on 07:00-08:00 GMT kill zone.</p>
                     </div>
                 </div>
 
@@ -1096,6 +905,7 @@
                                     <th>Pair</th>
                                     <th>ICT Model</th>
                                     <th>Direction</th>
+                                    <th>Entry</th>
                                     <th>Result</th>
                                     <th>P/L ($)</th>
                                     <th>R:R</th>
@@ -1104,8 +914,8 @@
                             </thead>
                             <tbody id="recentTradesBody">
                                 <tr id="loadingTrades">
-                                    <td colspan="8" class="loading">
-                                        <i class="fas fa-spinner"></i> Loading trades...
+                                    <td colspan="9" class="loading">
+                                        <i class="fas fa-spinner"></i> Loading trades from database...
                                     </td>
                                 </tr>
                             </tbody>
@@ -1114,569 +924,71 @@
                 </div>
             </div>
 
-            <!-- Analytics Page -->
-            <div class="page" id="analytics-page">
+            <!-- Trades Page -->
+            <div class="page" id="trades-page" style="display: none;">
                 <div class="page-header">
-                    <input type="text" class="page-title" value="📊 Advanced Analytics">
-                    <div class="page-tags">
-                        <span class="page-tag purple">Data Analysis</span>
-                        <span class="page-tag blue">Performance Metrics</span>
-                        <span class="page-tag green">ICT Models</span>
-                    </div>
+                    <input type="text" class="page-title" value="📊 Trade Journal Database">
                 </div>
 
-                <div class="tabs">
-                    <button class="tab active" data-tab="overview">Overview</button>
-                    <button class="tab" data-tab="ictModels">ICT Models</button>
-                    <button class="tab" data-tab="timeAnalysis">Time Analysis</button>
-                    <button class="tab" data-tab="pairAnalysis">Pair Analysis</button>
-                    <button class="tab" data-tab="psychology">Psychology</button>
-                </div>
-
-                <div class="tab-content active" id="overviewTab">
-                    <div class="charts-grid">
-                        <div class="chart-card">
-                            <div class="chart-header">
-                                <div class="chart-title">Monthly Performance</div>
-                            </div>
-                            <canvas id="monthlyPerformanceChart" height="250"></canvas>
+                <div class="database">
+                    <div class="database-header">
+                        <div class="database-title">
+                            <i class="fas fa-table"></i>
+                            All Trades <span id="tradeCount">(0 trades)</span>
                         </div>
-                        
-                        <div class="chart-card">
-                            <div class="chart-header">
-                                <div class="chart-title">Win Rate by Day of Week</div>
-                            </div>
-                            <canvas id="dayOfWeekChart" height="250"></canvas>
-                        </div>
-                    </div>
-
-                    <div class="charts-grid">
-                        <div class="chart-card">
-                            <div class="chart-header">
-                                <div class="chart-title">Profit Factor by ICT Model</div>
-                            </div>
-                            <canvas id="modelProfitChart" height="250"></canvas>
-                        </div>
-                        
-                        <div class="chart-card">
-                            <div class="chart-header">
-                                <div class="chart-title">Drawdown Analysis</div>
-                            </div>
-                            <canvas id="drawdownChart" height="250"></canvas>
-                        </div>
-                    </div>
-
-                    <div class="content-block">
-                        <h2><i class="fas fa-chart-line"></i> Key Performance Indicators</h2>
-                        <div class="metrics-grid">
-                            <div class="metric-card">
-                                <div class="metric-title">Profit Factor</div>
-                                <div class="metric-value" id="profitFactor">0.00</div>
-                                <div class="metric-change">Gross Profit / Gross Loss</div>
-                            </div>
-                            
-                            <div class="metric-card">
-                                <div class="metric-title">Expectancy</div>
-                                <div class="metric-value" id="expectancy">$0.00</div>
-                                <div class="metric-change">Avg Profit per Trade</div>
-                            </div>
-                            
-                            <div class="metric-card">
-                                <div class="metric-title">Sharpe Ratio</div>
-                                <div class="metric-value" id="sharpeRatio">0.00</div>
-                                <div class="metric-change">Risk-Adjusted Return</div>
-                            </div>
-                            
-                            <div class="metric-card">
-                                <div class="metric-title">Max Consecutive Wins</div>
-                                <div class="metric-value" id="maxConsecutiveWins">0</div>
-                                <div class="metric-change">Best Winning Streak</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="tab-content" id="ictModelsTab">
-                    <div class="content-block">
-                        <h2><i class="fas fa-shapes"></i> ICT Model Performance Analysis</h2>
-                        <p>Analysis of different ICT trading models used in your scalping strategy:</p>
-                        
-                        <div class="charts-grid">
-                            <div class="chart-card">
-                                <div class="chart-header">
-                                    <div class="chart-title">Win Rate by ICT Model</div>
-                                </div>
-                                <canvas id="modelWinRateChart" height="250"></canvas>
-                            </div>
-                            
-                            <div class="chart-card">
-                                <div class="chart-header">
-                                    <div class="chart-title">Average R:R by Model</div>
-                                </div>
-                                <canvas id="modelRRChart" height="250"></canvas>
-                            </div>
-                        </div>
-
-                        <div class="database">
-                            <div class="database-header">
-                                <div class="database-title">
-                                    <i class="fas fa-table"></i>
-                                    ICT Model Statistics
-                                </div>
-                            </div>
-                            <div class="database-table">
-                                <table id="modelStatsTable">
-                                    <thead>
-                                        <tr>
-                                            <th>ICT Model</th>
-                                            <th>Trades</th>
-                                            <th>Win Rate</th>
-                                            <th>Avg R:R</th>
-                                            <th>Total P/L</th>
-                                            <th>Profit Factor</th>
-                                            <th>Success Score</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="modelStatsBody">
-                                        <!-- Dynamic content -->
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="tab-content" id="timeAnalysisTab">
-                    <div class="content-block">
-                        <h2><i class="fas fa-clock"></i> Time-Based Analysis</h2>
-                        
-                        <div class="charts-grid">
-                            <div class="chart-card">
-                                <div class="chart-header">
-                                    <div class="chart-title">Performance by Hour (GMT)</div>
-                                </div>
-                                <canvas id="hourPerformanceChart" height="250"></canvas>
-                            </div>
-                            
-                            <div class="chart-card">
-                                <div class="chart-header">
-                                    <div class="chart-title">London Kill Zones Performance</div>
-                                </div>
-                                <canvas id="killZonesChart" height="250"></canvas>
-                            </div>
-                        </div>
-
-                        <div class="plan-grid">
-                            <div class="plan-card">
-                                <h3><i class="fas fa-check-circle"></i> Best Trading Hours</h3>
-                                <div id="bestHoursList">
-                                    <p>Loading analysis...</p>
-                                </div>
-                            </div>
-                            
-                            <div class="plan-card">
-                                <h3><i class="fas fa-times-circle"></i> Worst Trading Hours</h3>
-                                <div id="worstHoursList">
-                                    <p>Loading analysis...</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Performance Page -->
-            <div class="page" id="performance-page">
-                <div class="page-header">
-                    <input type="text" class="page-title" value="🏆 Performance Review">
-                    <div class="page-tags">
-                        <span class="page-tag green">Achievements</span>
-                        <span class="page-tag blue">Goals Tracking</span>
-                        <span class="page-tag orange">Improvement Areas</span>
-                    </div>
-                </div>
-
-                <div class="content-block">
-                    <h2><i class="fas fa-trophy"></i> Monthly Performance Summary</h2>
-                    
-                    <div class="weekly-grid">
-                        <div class="week-card">
-                            <h3>This Week</h3>
-                            <div class="week-stats">
-                                <div class="week-stat">
-                                    <div class="label">Trades</div>
-                                    <div class="value" id="weekTrades">0</div>
-                                </div>
-                                <div class="week-stat">
-                                    <div class="label">Win Rate</div>
-                                    <div class="value" id="weekWinRate">0%</div>
-                                </div>
-                                <div class="week-stat">
-                                    <div class="label">P/L</div>
-                                    <div class="value" id="weekPL">$0</div>
-                                </div>
-                                <div class="week-stat">
-                                    <div class="label">Best Trade</div>
-                                    <div class="value" id="weekBest">$0</div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="week-card">
-                            <h3>This Month</h3>
-                            <div class="week-stats">
-                                <div class="week-stat">
-                                    <div class="label">Trades</div>
-                                    <div class="value" id="monthTrades">0</div>
-                                </div>
-                                <div class="week-stat">
-                                    <div class="label">Win Rate</div>
-                                    <div class="value" id="monthWinRate">0%</div>
-                                </div>
-                                <div class="week-stat">
-                                    <div class="label">P/L</div>
-                                    <div class="value" id="monthPL">$0</div>
-                                </div>
-                                <div class="week-stat">
-                                    <div class="label">Avg Daily</div>
-                                    <div class="value" id="avgDaily">$0</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="charts-grid">
-                        <div class="chart-card">
-                            <div class="chart-header">
-                                <div class="chart-title">Weekly Performance Trend</div>
-                            </div>
-                            <canvas id="weeklyTrendChart" height="250"></canvas>
-                        </div>
-                        
-                        <div class="chart-card">
-                            <div class="chart-header">
-                                <div class="chart-title">Consistency Score</div>
-                            </div>
-                            <canvas id="consistencyChart" height="250"></canvas>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="content-block">
-                    <h2><i class="fas fa-star"></i> Achievements & Milestones</h2>
-                    
-                    <div class="plan-grid">
-                        <div class="plan-card">
-                            <h3><i class="fas fa-award"></i> Recent Achievements</h3>
-                            <div class="checklist">
-                                <div class="checklist-item">
-                                    <input type="checkbox" class="checklist-checkbox" checked disabled>
-                                    <div class="checklist-text">5 consecutive winning trades</div>
-                                </div>
-                                <div class="checklist-item">
-                                    <input type="checkbox" class="checklist-checkbox" checked disabled>
-                                    <div class="checklist-text">Achieved 70%+ win rate this month</div>
-                                </div>
-                                <div class="checklist-item">
-                                    <input type="checkbox" class="checklist-checkbox" checked disabled>
-                                    <div class="checklist-text">Stayed within risk limits for 30 days</div>
-                                </div>
-                                <div class="checklist-item">
-                                    <input type="checkbox" class="checklist-checkbox">
-                                    <div class="checklist-text">Reach $10,000 account balance</div>
-                                </div>
-                                <div class="checklist-item">
-                                    <input type="checkbox" class="checklist-checkbox">
-                                    <div class="checklist-text">Maintain 2:1 R:R for 50 trades</div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="plan-card">
-                            <h3><i class="fas fa-bullseye"></i> Current Goals</h3>
-                            <div class="checklist">
-                                <div class="checklist-item">
-                                    <input type="checkbox" class="checklist-checkbox">
-                                    <div class="checklist-text">Increase win rate to 75%</div>
-                                </div>
-                                <div class="checklist-item">
-                                    <input type="checkbox" class="checklist-checkbox">
-                                    <div class="checklist-text">Reduce max drawdown below 3%</div>
-                                </div>
-                                <div class="checklist-item">
-                                    <input type="checkbox" class="checklist-checkbox">
-                                    <div class="checklist-text">Complete 100 London session trades</div>
-                                </div>
-                                <div class="checklist-item">
-                                    <input type="checkbox" class="checklist-checkbox">
-                                    <div class="checklist-text">Master FVG entries on M5 timeframe</div>
-                                </div>
-                                <div class="checklist-item">
-                                    <input type="checkbox" class="checklist-checkbox">
-                                    <div class="checklist-text">Achieve 10% monthly return</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="content-block">
-                    <h2><i class="fas fa-chart-bar"></i> Performance Timeline</h2>
-                    <div class="timeline" id="performanceTimeline">
-                        <!-- Dynamic timeline will be added here -->
-                    </div>
-                </div>
-            </div>
-
-            <!-- Trading Plan Page -->
-            <div class="page" id="tradingPlan-page">
-                <div class="page-header">
-                    <input type="text" class="page-title" value="📋 ICT Scalping Trading Plan">
-                    <div class="page-tags">
-                        <span class="page-tag blue">Rules</span>
-                        <span class="page-tag green">Strategy</span>
-                        <span class="page-tag purple">London Session</span>
-                        <span class="page-tag red">Risk Management</span>
-                    </div>
-                </div>
-
-                <div class="content-block">
-                    <h2><i class="fas fa-crosshairs"></i> Trading Strategy Overview</h2>
-                    <p><strong>Primary Strategy:</strong> ICT (Inner Circle Trader) Scalping during London Session</p>
-                    <p><strong>Trading Pairs:</strong> EURUSD & GBPUSD only</p>
-                    <p><strong>Session Focus:</strong> 07:00-16:00 GMT (London Session)</p>
-                    <p><strong>Primary Kill Zones:</strong> 07:00-08:00 GMT & 10:00-11:00 GMT</p>
-                </div>
-
-                <div class="plan-grid">
-                    <div class="plan-card">
-                        <h3><i class="fas fa-search"></i> Entry Conditions</h3>
-                        <div class="checklist">
-                            <div class="checklist-item">
-                                <input type="checkbox" class="checklist-checkbox" checked disabled>
-                                <div class="checklist-text">Trade only during London Session hours</div>
-                            </div>
-                            <div class="checklist-item">
-                                <input type="checkbox" class="checklist-checkbox" checked disabled>
-                                <div class="checklist-text">Wait for H1 premium/discount alignment</div>
-                            </div>
-                            <div class="checklist-item">
-                                <input type="checkbox" class="checklist-checkbox" checked disabled>
-                                <div class="checklist-text">ICT model confirmation (FVG, OB, LS)</div>
-                            </div>
-                            <div class="checklist-item">
-                                <input type="checkbox" class="checklist-checkbox" checked disabled>
-                                <div class="checklist-text">M5/M1 entry confirmation</div>
-                            </div>
-                            <div class="checklist-item">
-                                <input type="checkbox" class="checklist-checkbox" checked disabled>
-                                <div class="checklist-text">Minimum 1:2 risk/reward ratio</div>
-                            </div>
+                        <div class="database-actions">
+                            <button class="db-btn" id="filterBtn">
+                                <i class="fas fa-filter"></i> Filter
+                            </button>
+                            <button class="db-btn" id="sortBtn">
+                                <i class="fas fa-sort"></i> Sort
+                            </button>
+                            <button class="db-btn primary" id="addTradeMain">
+                                <i class="fas fa-plus"></i> New Trade
+                            </button>
                         </div>
                     </div>
                     
-                    <div class="plan-card">
-                        <h3><i class="fas fa-shield-alt"></i> Risk Management Rules</h3>
-                        <div class="checklist">
-                            <div class="checklist-item">
-                                <input type="checkbox" class="checklist-checkbox" checked disabled>
-                                <div class="checklist-text">Maximum 1% risk per trade</div>
-                            </div>
-                            <div class="checklist-item">
-                                <input type="checkbox" class="checklist-checkbox" checked disabled>
-                                <div class="checklist-text">Maximum 3% daily loss limit</div>
-                            </div>
-                            <div class="checklist-item">
-                                <input type="checkbox" class="checklist-checkbox" checked disabled>
-                                <div class="checklist-text">Maximum 3 trades per session</div>
-                            </div>
-                            <div class="checklist-item">
-                                <input type="checkbox" class="checklist-checkbox" checked disabled>
-                                <div class="checklist-text">Stop loss always set before entry</div>
-                            </div>
-                            <div class="checklist-item">
-                                <input type="checkbox" class="checklist-checkbox" checked disabled>
-                                <div class="checklist-text">No trading 5 min before/after high impact news</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="content-block">
-                    <h2><i class="fas fa-project-diagram"></i> ICT Model Rules</h2>
-                    
-                    <div class="plan-grid">
-                        <div class="plan-card">
-                            <h3><i class="fas fa-bolt"></i> FVG (Fair Value Gap) Rules</h3>
-                            <ul>
-                                <li>Wait for 3-candle formation on M5 or M15</li>
-                                <li>Enter on retest of FVG boundaries</li>
-                                <li>Stop loss below/above FVG</li>
-                                <li>Take profit at next liquidity zone</li>
-                            </ul>
-                        </div>
-                        
-                        <div class="plan-card">
-                            <h3><i class="fas fa-cube"></i> Order Block Rules</h3>
-                            <ul>
-                                <li>Identify on H1 or M15 timeframe</li>
-                                <li>Enter on break and retest of OB</li>
-                                <li>Stop loss below/above OB</li>
-                                <li>Target previous swing high/low</li>
-                            </ul>
-                        </div>
-                        
-                        <div class="plan-card">
-                            <h3><i class="fas fa-wave-square"></i> Liquidity Sweep Rules</h3>
-                            <ul>
-                                <li>Identify liquidity pools on HTF</li>
-                                <li>Enter on reversal confirmation</li>
-                                <li>Stop loss beyond liquidity sweep</li>
-                                <li>Target opposite liquidity zone</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="content-block">
-                    <h2><i class="fas fa-ban"></i> Prohibited Actions</h2>
-                    <div class="checklist">
-                        <div class="checklist-item">
-                            <input type="checkbox" class="checklist-checkbox" checked disabled>
-                            <div class="checklist-text">No trading outside London Session hours</div>
-                        </div>
-                        <div class="checklist-item">
-                            <input type="checkbox" class="checklist-checkbox" checked disabled>
-                            <div class="checklist-text">No trading during high impact news (red folder)</div>
-                        </div>
-                        <div class="checklist-item">
-                            <input type="checkbox" class="checklist-checkbox" checked disabled>
-                            <div class="checklist-text">No revenge trading after losses</div>
-                        </div>
-                        <div class="checklist-item">
-                            <input type="checkbox" class="checklist-checkbox" checked disabled>
-                            <div class="checklist-text">No position size increases during losing streak</div>
-                        </div>
-                        <div class="checklist-item">
-                            <input type="checkbox" class="checklist-checkbox" checked disabled>
-                            <div class="checklist-text">No trading without clear ICT setup</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Psychology Page -->
-            <div class="page" id="psychology-page">
-                <div class="page-header">
-                    <input type="text" class="page-title" value="🧠 Trading Psychology">
-                    <div class="page-tags">
-                        <span class="page-tag pink">Mindset</span>
-                        <span class="page-tag orange">Emotions</span>
-                        <span class="page-tag blue">Discipline</span>
-                    </div>
-                </div>
-
-                <div class="content-block">
-                    <h2><i class="fas fa-brain"></i> Psychology Metrics</h2>
-                    <p>Monitor your trading psychology and emotional state over time:</p>
-                    
-                    <div class="psychology-grid">
-                        <div class="psychology-card">
-                            <h3>Emotional Score</h3>
-                            <div class="psychology-value good" id="emotionalScore">8.2</div>
-                            <p>Average emotion before trades</p>
-                        </div>
-                        
-                        <div class="psychology-card">
-                            <h3>Discipline Score</h3>
-                            <div class="psychology-value average" id="disciplineScore">75%</div>
-                            <p>Trades with full discipline</p>
-                        </div>
-                        
-                        <div class="psychology-card">
-                            <h3>Mistake Rate</h3>
-                            <div class="psychology-value poor" id="mistakeRate">12%</div>
-                            <p>Trades with identified mistakes</p>
-                        </div>
-                        
-                        <div class="psychology-card">
-                            <h3>Recovery Rate</h3>
-                            <div class="psychology-value good" id="recoveryRate">85%</div>
-                            <p>Ability to recover from losses</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="charts-grid">
-                    <div class="chart-card">
-                        <div class="chart-header">
-                            <div class="chart-title">Emotional State Over Time</div>
-                        </div>
-                        <canvas id="emotionalStateChart" height="250"></canvas>
+                    <div class="database-views">
+                        <button class="view-btn active" data-view="all">All Trades</button>
+                        <button class="view-btn" data-view="london">London Session</button>
+                        <button class="view-btn" data-view="eurusd">EURUSD Only</button>
+                        <button class="view-btn" data-view="gbpusd">GBPUSD Only</button>
+                        <button class="view-btn" data-view="wins">Winning Trades</button>
+                        <button class="view-btn" data-view="losses">Losing Trades</button>
                     </div>
                     
-                    <div class="chart-card">
-                        <div class="chart-header">
-                            <div class="chart-title">Mistake Analysis</div>
-                        </div>
-                        <canvas id="mistakeAnalysisChart" height="250"></canvas>
-                    </div>
-                </div>
-
-                <div class="content-block">
-                    <h2><i class="fas fa-exclamation-triangle"></i> Common Psychological Pitfalls</h2>
-                    
-                    <div class="plan-grid">
-                        <div class="plan-card">
-                            <h3><i class="fas fa-running"></i> FOMO (Fear Of Missing Out)</h3>
-                            <p><strong>Symptoms:</strong> Entering trades late, chasing price, overtrading</p>
-                            <p><strong>Solution:</strong> Wait for proper setup, stick to trading plan, maximum 3 trades per session</p>
-                        </div>
-                        
-                        <div class="plan-card">
-                            <h3><i class="fas fa-hand-holding-usd"></i> Revenge Trading</h3>
-                            <p><strong>Symptoms:</strong> Increasing position size after losses, trading without setups</p>
-                            <p><strong>Solution:</strong> Take a break after 2 consecutive losses, stick to 1% risk rule</p>
-                        </div>
-                        
-                        <div class="plan-card">
-                            <h3><i class="fas fa-clock"></i> Impatience</h3>
-                            <p><strong>Symptoms:</strong> Early entries, cutting winners short, moving stop losses</p>
-                            <p><strong>Solution:</strong> Use checklist before every trade, set alerts for entries</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="content-block">
-                    <h2><i class="fas fa-medal"></i> Psychology Improvement Plan</h2>
-                    
-                    <div class="checklist">
-                        <div class="checklist-item">
-                            <input type="checkbox" class="checklist-checkbox">
-                            <div class="checklist-text">Meditate for 10 minutes before trading session</div>
-                        </div>
-                        <div class="checklist-item">
-                            <input type="checkbox" class="checklist-checkbox">
-                            <div class="checklist-text">Review trading plan before first trade</div>
-                        </div>
-                        <div class="checklist-item">
-                            <input type="checkbox" class="checklist-checkbox">
-                            <div class="checklist-text">Rate emotional state before/after each trade</div>
-                        </div>
-                        <div class="checklist-item">
-                            <input type="checkbox" class="checklist-checkbox">
-                            <div class="checklist-text">Take 15-minute break after 2 consecutive losses</div>
-                        </div>
-                        <div class="checklist-item">
-                            <input type="checkbox" class="checklist-checkbox">
-                            <div class="checklist-text">Weekly psychology review session</div>
-                        </div>
+                    <div class="database-table">
+                        <table id="allTradesTable">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Pair</th>
+                                    <th>Session</th>
+                                    <th>ICT Model</th>
+                                    <th>Direction</th>
+                                    <th>Entry Price</th>
+                                    <th>Stop Loss</th>
+                                    <th>Take Profit</th>
+                                    <th>Result</th>
+                                    <th>P/L ($)</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="allTradesBody">
+                                <tr id="loadingAllTrades">
+                                    <td colspan="11" class="loading">
+                                        <i class="fas fa-spinner"></i> Loading trades from database...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
 
             <!-- Daily Journal Page -->
-            <div class="page" id="daily-page">
+            <div class="page" id="daily-page" style="display: none;">
                 <div class="page-header">
                     <input type="text" class="page-title" value="📅 Daily Scalping Journal">
                 </div>
@@ -1730,14 +1042,6 @@
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">Session Goals</label>
-                    <textarea class="form-control" id="sessionGoals" rows="3" placeholder="What do you want to achieve today?">1. Stick to maximum 3 trades
-2. Wait for proper FVG confirmation
-3. Maintain emotional discipline
-4. Review HTF structure before entries</textarea>
-                </div>
-
-                <div class="form-group">
                     <label class="form-label">What I Did Right Yesterday</label>
                     <textarea class="form-control" id="didRight" rows="4" placeholder="Describe what worked well in yesterday's session..."></textarea>
                 </div>
@@ -1756,143 +1060,6 @@
                     <button class="db-btn primary" id="saveDaily">Save to Database</button>
                 </div>
             </div>
-
-            <!-- Trades Database Page -->
-            <div class="page" id="trades-page">
-                <div class="page-header">
-                    <input type="text" class="page-title" value="📊 Trade Journal Database">
-                </div>
-
-                <div class="database">
-                    <div class="database-header">
-                        <div class="database-title">
-                            <i class="fas fa-table"></i>
-                            All Trades <span id="tradeCount">(0 trades)</span>
-                        </div>
-                        <div class="database-actions">
-                            <button class="db-btn" id="filterBtn">
-                                <i class="fas fa-filter"></i> Filter
-                            </button>
-                            <button class="db-btn" id="sortBtn">
-                                <i class="fas fa-sort"></i> Sort
-                            </button>
-                            <button class="db-btn primary" id="addTradeMain">
-                                <i class="fas fa-plus"></i> New Trade
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div class="database-views">
-                        <button class="view-btn active" data-view="all">All Trades</button>
-                        <button class="view-btn" data-view="london">London Session</button>
-                        <button class="view-btn" data-view="eurusd">EURUSD Only</button>
-                        <button class="view-btn" data-view="gbpusd">GBPUSD Only</button>
-                        <button class="view-btn" data-view="wins">Winning Trades</button>
-                        <button class="view-btn" data-view="losses">Losing Trades</button>
-                        <button class="view-btn" data-view="fvg">FVG Trades</button>
-                        <button class="view-btn" data-view="ob">Order Block Trades</button>
-                    </div>
-                    
-                    <div class="database-table">
-                        <table id="allTradesTable">
-                            <thead>
-                                <tr>
-                                    <th>Date</th>
-                                    <th>Pair</th>
-                                    <th>ICT Model</th>
-                                    <th>Direction</th>
-                                    <th>Entry</th>
-                                    <th>Result</th>
-                                    <th>P/L ($)</th>
-                                    <th>R:R</th>
-                                    <th>Emotion</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="allTradesBody">
-                                <tr id="loadingAllTrades">
-                                    <td colspan="10" class="loading">
-                                        <i class="fas fa-spinner"></i> Loading trades from database...
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Settings Page -->
-            <div class="page" id="settings-page">
-                <div class="page-header">
-                    <input type="text" class="page-title" value="⚙️ Template Settings">
-                </div>
-
-                <div class="content-block">
-                    <h2><i class="fas fa-cog"></i> Application Settings</h2>
-                    
-                    <div class="form-group">
-                        <label class="form-label">
-                            <input type="checkbox" id="autoSave" checked> Auto-save to Firebase
-                        </label>
-                        <p style="font-size: 12px; color: var(--notion-text-light); margin-top: 4px;">
-                            Automatically save all changes to cloud database
-                        </p>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">
-                            <input type="checkbox" id="notifications" checked> Enable notifications
-                        </label>
-                        <p style="font-size: 12px; color: var(--notion-text-light); margin-top: 4px;">
-                            Show alerts for important events
-                        </p>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label class="form-label">Default Risk %</label>
-                            <input type="number" class="form-control" id="defaultRisk" value="1.0" step="0.1">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label class="form-label">Default Lot Size</label>
-                            <input type="number" class="form-control" id="defaultLotSize" value="0.10" step="0.01">
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">Trading Session Hours (GMT)</label>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-                            <div>
-                                <label style="font-size: 13px;">Start Time</label>
-                                <input type="time" class="form-control" id="sessionStart" value="07:00">
-                            </div>
-                            <div>
-                                <label style="font-size: 13px;">End Time</label>
-                                <input type="time" class="form-control" id="sessionEnd" value="16:00">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="content-block">
-                    <h2><i class="fas fa-database"></i> Data Management</h2>
-                    
-                    <div class="form-actions">
-                        <button class="db-btn" id="backupData">
-                            <i class="fas fa-save"></i> Backup to Local Storage
-                        </button>
-                        <button class="db-btn" id="restoreData">
-                            <i class="fas fa-undo"></i> Restore from Backup
-                        </button>
-                        <button class="db-btn" style="background-color: var(--notion-red-light); color: var(--notion-red);" id="clearData">
-                            <i class="fas fa-trash"></i> Clear All Data
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Other database view pages would follow similar structure -->
         </div>
     </div>
 
@@ -1951,26 +1118,6 @@
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label class="form-label">Timeframe HTF</label>
-                        <select class="form-control" id="timeframeHTF">
-                            <option value="H1">H1</option>
-                            <option value="M15" selected>M15</option>
-                            <option value="H4">H4</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label">Timeframe Entry</label>
-                        <select class="form-control" id="timeframeEntry">
-                            <option value="M5" selected>M5</option>
-                            <option value="M1">M1</option>
-                            <option value="M3">M3</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
                         <label class="form-label">Entry Price</label>
                         <input type="number" step="0.00001" class="form-control" id="entryPrice" placeholder="1.08542">
                     </div>
@@ -2009,32 +1156,13 @@
                     </div>
                 </div>
 
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label">Emotion Before (1-10)</label>
-                        <input type="number" min="1" max="10" class="form-control" id="emotionBefore" value="7">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label">Emotion After (1-10)</label>
-                        <input type="number" min="1" max="10" class="form-control" id="emotionAfter" value="7">
-                    </div>
+                <div class="form-group">
+                    <label class="form-label">Emotion Before Trade (1-10)</label>
+                    <input type="number" min="1" max="10" class="form-control" id="emotionBefore" value="7">
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">Mistake Type</label>
-                    <select class="form-control" id="mistakeType">
-                        <option value="None" selected>None</option>
-                        <option value="FOMO">FOMO (Fear of Missing Out)</option>
-                        <option value="Early Entry">Early Entry</option>
-                        <option value="Overtrade">Overtrade</option>
-                        <option value="Revenge">Revenge Trading</option>
-                        <option value="Discipline">Lack of Discipline</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Notes & Lessons Learned</label>
+                    <label class="form-label">Notes & Lessons</label>
                     <textarea class="form-control" id="tradeNotes" rows="3" placeholder="Trade rationale, what worked, what to improve..."></textarea>
                 </div>
 
@@ -2066,21 +1194,17 @@
 
         // Database References
         const tradesRef = database.ref('trades');
-        const analyticsRef = database.ref('analytics');
-        const psychologyRef = database.ref('psychology');
-        const performanceRef = database.ref('performance');
+        const metricsRef = database.ref('metrics');
         const dailyJournalRef = database.ref('dailyJournal');
-        const tradingPlanRef = database.ref('tradingPlan');
         const settingsRef = database.ref('settings');
 
         // Global Variables
         let trades = [];
-        let analyticsData = {};
-        let psychologyData = {};
-        let performanceData = {};
-        let currentPage = 'dashboard';
         let tradeIdCounter = 0;
-        let charts = {};
+        let equityChart = null;
+        let winLossChart = null;
+        let currentView = 'all';
+        let isOnline = navigator.onLine;
 
         // Initialize Application
         document.addEventListener('DOMContentLoaded', function() {
@@ -2103,10 +1227,14 @@
             setupEventListeners();
             
             // Show dashboard by default
-            showPage('dashboard');
+            showPage('dashboard-page');
+            
+            // Monitor online status
+            window.addEventListener('online', handleOnlineStatus);
+            window.addEventListener('offline', handleOnlineStatus);
         });
 
-        // Initialize Firebase
+        // Initialize Firebase and Load Data
         function initFirebase() {
             updateSyncStatus('Connecting to Firebase...', 'syncing');
             
@@ -2123,60 +1251,42 @@
                     trades.sort((a, b) => new Date(b.date) - new Date(a.date));
                     
                     // Update trade counter
-                    const numericIds = trades.map(t => parseInt(t.id)).filter(id => !isNaN(id));
-                    tradeIdCounter = numericIds.length > 0 ? Math.max(...numericIds) + 1 : 1;
+                    tradeIdCounter = trades.length > 0 ? Math.max(...trades.map(t => parseInt(t.id) || 0)) + 1 : 1;
                     
-                    // Update UI
-                    updateAllPages();
+                    // Render UI
+                    renderTrades();
+                    updateMetrics();
+                    updateCharts();
+                    
                     updateSyncStatus('Synced with Firebase', 'synced');
                 } else {
                     trades = [];
-                    updateAllPages();
+                    renderTrades();
                     updateSyncStatus('No trades found', 'error');
                 }
+                
+                // Hide loading indicator
+                document.getElementById('loadingTrades')?.remove();
+                document.getElementById('loadingAllTrades')?.remove();
             }, (error) => {
                 console.error('Firebase error:', error);
                 updateSyncStatus('Connection error', 'error');
+                
+                // Try to load from localStorage as fallback
+                loadFromLocalStorage();
             });
 
-            // Load analytics data
-            analyticsRef.on('value', (snapshot) => {
-                analyticsData = snapshot.val() || {};
-                updateAnalyticsPage();
-            });
-
-            // Load psychology data
-            psychologyRef.on('value', (snapshot) => {
-                psychologyData = snapshot.val() || {};
-                updatePsychologyPage();
-            });
-
-            // Load performance data
-            performanceRef.on('value', (snapshot) => {
-                performanceData = snapshot.val() || {};
-                updatePerformancePage();
-            });
-
-            // Load daily journal for today
-            const today = new Date().toISOString().split('T')[0];
-            dailyJournalRef.child(today).on('value', (snapshot) => {
+            // Listen for metrics updates
+            metricsRef.on('value', (snapshot) => {
                 const data = snapshot.val();
                 if (data) {
-                    // Populate daily journal form
-                    document.getElementById('sessionBias').value = data.sessionBias || 'Neutral/Ranging';
-                    document.getElementById('highImpactNews').value = data.highImpactNews || 'No significant news';
-                    document.getElementById('didRight').value = data.didRight || '';
-                    document.getElementById('toImprove').value = data.toImprove || '';
-                    document.getElementById('sessionGoals').value = data.sessionGoals || '';
-                    
-                    if (data.killZones) {
-                        document.getElementById('killzone1').checked = data.killZones.zone1 || true;
-                        document.getElementById('killzone2').checked = data.killZones.zone2 || false;
-                        document.getElementById('killzone3').checked = data.killZones.zone3 || true;
-                        document.getElementById('killzone4').checked = data.killZones.zone4 || false;
-                    }
+                    // Update metrics from database
+                    updateMetricsFromDB(data);
                 }
             });
+
+            // Load daily journal
+            loadDailyJournal();
         }
 
         // Setup Event Listeners
@@ -2186,15 +1296,17 @@
                 item.addEventListener('click', function(e) {
                     e.preventDefault();
                     const page = this.getAttribute('data-page');
-                    showPage(page);
+                    showPage(page + '-page');
                 });
             });
 
-            // Tabs
-            document.querySelectorAll('.tab').forEach(tab => {
-                tab.addEventListener('click', function() {
-                    const tabId = this.getAttribute('data-tab');
-                    switchTab(tabId);
+            // View buttons
+            document.querySelectorAll('.view-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    currentView = this.getAttribute('data-view');
+                    renderTrades();
                 });
             });
 
@@ -2206,1035 +1318,61 @@
             document.getElementById('cancelTrade').addEventListener('click', closeModal);
             document.getElementById('saveTrade').addEventListener('click', saveTradeToFirebase);
 
+            // Export
+            document.getElementById('exportBtn').addEventListener('click', exportData);
+
+            // View All Trades
+            document.getElementById('viewAllTrades').addEventListener('click', () => showPage('trades-page'));
+
+            // Chart period change
+            document.getElementById('chartPeriod').addEventListener('change', updateCharts);
+
             // Daily Journal
             document.getElementById('saveDaily').addEventListener('click', saveDailyJournal);
-            document.getElementById('saveDraft').addEventListener('click', saveDailyJournalAsDraft);
-
-            // View buttons in trades page
-            document.querySelectorAll('.view-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
-                    this.classList.add('active');
-                    renderTradesTable(this.getAttribute('data-view'));
-                });
+            document.getElementById('saveDraft').addEventListener('click', () => {
+                alert('Daily journal saved as draft locally');
             });
-
-            // Export/Import
-            document.getElementById('exportData').addEventListener('click', exportAllData);
-            document.getElementById('importData').addEventListener('click', importData);
-            document.getElementById('exportBtn').addEventListener('click', exportTrades);
-
-            // Settings
-            document.getElementById('backupData').addEventListener('click', backupToLocalStorage);
-            document.getElementById('restoreData').addEventListener('click', restoreFromLocalStorage);
-            document.getElementById('clearData').addEventListener('click', clearAllData);
         }
 
-        // Update All Pages
-        function updateAllPages() {
-            updateDashboard();
-            updateAnalyticsPage();
-            updatePsychologyPage();
-            updatePerformancePage();
-            renderTradesTable('all');
-        }
-
-        // Update Dashboard
-        function updateDashboard() {
-            if (trades.length === 0) {
-                document.getElementById('winRate').textContent = '0%';
-                document.getElementById('avgRR').textContent = '1:0.0';
-                document.getElementById('totalTrades').textContent = '0';
-                document.getElementById('totalPL').textContent = '$0';
-                return;
-            }
-
-            const wins = trades.filter(t => t.result === 'Win').length;
-            const winRate = (wins / trades.length * 100).toFixed(1);
-            const totalPL = trades.reduce((sum, t) => sum + (t.pl || 0), 0);
-            
-            // Calculate average R:R
-            let totalRR = 0;
-            let countRR = 0;
-            trades.forEach(t => {
-                if (t.rr) {
-                    const rrValue = parseFloat(t.rr.split(':')[1]);
-                    if (!isNaN(rrValue)) {
-                        totalRR += rrValue;
-                        countRR++;
-                    }
-                }
-            });
-            const avgRR = countRR > 0 ? (totalRR / countRR).toFixed(1) : '0.0';
-
-            // Update UI
-            document.getElementById('winRate').textContent = `${winRate}%`;
-            document.getElementById('avgRR').textContent = `1:${avgRR}`;
-            document.getElementById('totalTrades').textContent = trades.length;
-            document.getElementById('totalPL').textContent = `$${totalPL >= 0 ? '+' : ''}${totalPL}`;
-
-            // Update win/loss stats
-            const losses = trades.filter(t => t.result === 'Loss').length;
-            const be = trades.length - wins - losses;
-            document.getElementById('wlStats').textContent = `${wins}W / ${losses}L / ${be}BE`;
-
-            // Update recent trades table
-            updateRecentTrades();
-
-            // Update charts
-            updateDashboardCharts();
-        }
-
-        // Update Recent Trades
-        function updateRecentTrades() {
-            const recentBody = document.getElementById('recentTradesBody');
-            if (!recentBody) return;
-
-            recentBody.innerHTML = '';
-            const recentTrades = trades.slice(0, 5);
-
-            if (recentTrades.length === 0) {
-                recentBody.innerHTML = `
-                    <tr>
-                        <td colspan="8" style="text-align: center; padding: 40px; color: var(--notion-text-light);">
-                            <i class="fas fa-inbox"></i><br>
-                            No trades yet. Add your first trade!
-                        </td>
-                    </tr>
-                `;
-                return;
-            }
-
-            recentTrades.forEach(trade => {
-                const row = document.createElement('tr');
-                const plClass = trade.pl >= 0 ? 'positive' : 'negative';
-                const plSign = trade.pl >= 0 ? '+' : '';
+        // Update Sync Status
+        function updateSyncStatus(message, status) {
+            const statusEl = document.getElementById('syncStatus');
+            if (statusEl) {
+                statusEl.textContent = message;
+                statusEl.className = 'sync-status ' + status;
                 
-                row.innerHTML = `
-                    <td>${formatDate(trade.date)}</td>
-                    <td>${trade.pair || 'N/A'}</td>
-                    <td>${trade.model || 'N/A'}</td>
-                    <td>${trade.direction || 'N/A'}</td>
-                    <td>
-                        <span class="status-badge ${trade.result === 'Win' ? 'status-win' : trade.result === 'Loss' ? 'status-loss' : 'status-be'}">
-                            ${trade.result || 'N/A'}
-                        </span>
-                    </td>
-                    <td class="${plClass}">${plSign}$${trade.pl || 0}</td>
-                    <td>${trade.rr || '1:0.0'}</td>
-                    <td>
-                        <button class="db-btn" onclick="editTrade('${trade.id}')" style="padding: 4px 8px; font-size: 12px;">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                    </td>
-                `;
-                recentBody.appendChild(row);
-            });
-        }
-
-        // Update Dashboard Charts
-        function updateDashboardCharts() {
-            const period = document.getElementById('chartPeriod')?.value || '30';
-            
-            // Filter trades by period
-            let filteredTrades = [...trades];
-            if (period !== 'all') {
-                const days = parseInt(period);
-                const cutoffDate = new Date();
-                cutoffDate.setDate(cutoffDate.getDate() - days);
-                filteredTrades = filteredTrades.filter(t => new Date(t.date) >= cutoffDate);
-            }
-            
-            // Sort by date ascending for equity curve
-            filteredTrades.sort((a, b) => new Date(a.date) - new Date(b.date));
-            
-            // Prepare equity curve data
-            let balance = 10000;
-            const equityDates = [];
-            const equityValues = [];
-            
-            filteredTrades.forEach(trade => {
-                balance += trade.pl || 0;
-                equityDates.push(formatDateShort(trade.date));
-                equityValues.push(balance);
-            });
-            
-            // Update or create equity chart
-            const equityCtx = document.getElementById('equityChart');
-            if (equityCtx) {
-                if (charts.equityChart) {
-                    charts.equityChart.data.labels = equityDates;
-                    charts.equityChart.data.datasets[0].data = equityValues;
-                    charts.equityChart.update();
-                } else {
-                    charts.equityChart = new Chart(equityCtx.getContext('2d'), {
-                        type: 'line',
-                        data: {
-                            labels: equityDates,
-                            datasets: [{
-                                label: 'Account Balance',
-                                data: equityValues,
-                                borderColor: '#0c8ce9',
-                                backgroundColor: 'rgba(12, 140, 233, 0.1)',
-                                fill: true,
-                                tension: 0.3
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            plugins: { legend: { display: false } },
-                            scales: {
-                                y: {
-                                    beginAtZero: false,
-                                    grid: { color: 'rgba(0,0,0,0.05)' },
-                                    ticks: { callback: v => '$' + v.toLocaleString() }
-                                }
-                            }
-                        }
-                    });
-                }
-            }
-            
-            // Update win/loss chart
-            const wins = trades.filter(t => t.result === 'Win').length;
-            const losses = trades.filter(t => t.result === 'Loss').length;
-            const be = trades.length - wins - losses;
-            
-            const winLossCtx = document.getElementById('winLossChart');
-            if (winLossCtx) {
-                if (charts.winLossChart) {
-                    charts.winLossChart.data.datasets[0].data = [wins, losses, be];
-                    charts.winLossChart.update();
-                } else {
-                    charts.winLossChart = new Chart(winLossCtx.getContext('2d'), {
-                        type: 'doughnut',
-                        data: {
-                            labels: ['Wins', 'Losses', 'Break Even'],
-                            datasets: [{
-                                data: [wins, losses, be],
-                                backgroundColor: ['#0f7b6c', '#d1453b', '#70716e']
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            plugins: { 
-                                legend: { position: 'bottom' }
-                            },
-                            cutout: '70%'
-                        }
-                    });
-                }
+                const icon = status === 'synced' ? 'fa-cloud' : 
+                            status === 'syncing' ? 'fa-sync fa-spin' : 
+                            'fa-cloud-slash';
+                statusEl.innerHTML = `<i class="fas ${icon}"></i> ${message}`;
             }
         }
 
-        // Update Analytics Page
-        function updateAnalyticsPage() {
-            if (trades.length === 0) return;
-
-            // Calculate analytics
-            const analytics = calculateAnalytics();
-            
-            // Update KPI metrics
-            document.getElementById('profitFactor').textContent = analytics.profitFactor.toFixed(2);
-            document.getElementById('expectancy').textContent = `$${analytics.expectancy.toFixed(2)}`;
-            document.getElementById('sharpeRatio').textContent = analytics.sharpeRatio.toFixed(2);
-            document.getElementById('maxConsecutiveWins').textContent = analytics.maxConsecutiveWins;
-
-            // Update analytics charts
-            updateAnalyticsCharts(analytics);
-            
-            // Update model statistics table
-            updateModelStatsTable(analytics.modelStats);
-            
-            // Save analytics to Firebase
-            analyticsRef.set(analytics).catch(error => {
-                console.error('Error saving analytics:', error);
-            });
-        }
-
-        // Calculate Analytics
-        function calculateAnalytics() {
-            const result = {
-                profitFactor: 0,
-                expectancy: 0,
-                sharpeRatio: 0,
-                maxConsecutiveWins: 0,
-                modelStats: {},
-                hourlyPerformance: {},
-                monthlyPerformance: {}
-            };
-
-            if (trades.length === 0) return result;
-
-            // Calculate profit factor
-            const grossProfit = trades.filter(t => t.pl > 0).reduce((sum, t) => sum + t.pl, 0);
-            const grossLoss = Math.abs(trades.filter(t => t.pl < 0).reduce((sum, t) => sum + t.pl, 0));
-            result.profitFactor = grossLoss > 0 ? grossProfit / grossLoss : 0;
-
-            // Calculate expectancy
-            result.expectancy = trades.reduce((sum, t) => sum + (t.pl || 0), 0) / trades.length;
-
-            // Calculate max consecutive wins
-            let currentStreak = 0;
-            let maxStreak = 0;
-            trades.forEach(trade => {
-                if (trade.result === 'Win') {
-                    currentStreak++;
-                    maxStreak = Math.max(maxStreak, currentStreak);
-                } else {
-                    currentStreak = 0;
-                }
-            });
-            result.maxConsecutiveWins = maxStreak;
-
-            // Calculate model statistics
-            const models = {};
-            trades.forEach(trade => {
-                const model = trade.model || 'Unknown';
-                if (!models[model]) {
-                    models[model] = {
-                        trades: 0,
-                        wins: 0,
-                        losses: 0,
-                        totalPL: 0,
-                        totalRR: 0,
-                        countRR: 0
-                    };
-                }
-                
-                models[model].trades++;
-                if (trade.result === 'Win') models[model].wins++;
-                if (trade.result === 'Loss') models[model].losses++;
-                models[model].totalPL += trade.pl || 0;
-                
-                if (trade.rr) {
-                    const rrValue = parseFloat(trade.rr.split(':')[1]);
-                    if (!isNaN(rrValue)) {
-                        models[model].totalRR += rrValue;
-                        models[model].countRR++;
-                    }
-                }
-            });
-
-            // Process model stats
-            for (const [model, stats] of Object.entries(models)) {
-                const winRate = stats.trades > 0 ? (stats.wins / stats.trades * 100).toFixed(1) : 0;
-                const avgRR = stats.countRR > 0 ? (stats.totalRR / stats.countRR).toFixed(1) : 0;
-                const profitFactor = stats.losses > 0 ? 
-                    (stats.wins * (stats.totalPL / stats.wins || 0)) / (stats.losses * Math.abs(stats.totalPL / stats.losses || 0)) : 
-                    stats.wins > 0 ? 10 : 0;
-                
-                result.modelStats[model] = {
-                    trades: stats.trades,
-                    winRate: parseFloat(winRate),
-                    avgRR: parseFloat(avgRR),
-                    totalPL: stats.totalPL,
-                    profitFactor: profitFactor.toFixed(2),
-                    successScore: (parseFloat(winRate) * parseFloat(avgRR) * profitFactor).toFixed(1)
-                };
-            }
-
-            // Calculate hourly performance
-            const hourlyStats = {};
-            trades.forEach(trade => {
-                const hour = new Date(trade.date).getHours();
-                if (!hourlyStats[hour]) {
-                    hourlyStats[hour] = { trades: 0, pl: 0, wins: 0 };
-                }
-                hourlyStats[hour].trades++;
-                hourlyStats[hour].pl += trade.pl || 0;
-                if (trade.result === 'Win') hourlyStats[hour].wins++;
-            });
-
-            for (const [hour, stats] of Object.entries(hourlyStats)) {
-                result.hourlyPerformance[hour] = {
-                    trades: stats.trades,
-                    pl: stats.pl,
-                    winRate: (stats.wins / stats.trades * 100).toFixed(1)
-                };
-            }
-
-            // Calculate monthly performance
-            const monthlyStats = {};
-            trades.forEach(trade => {
-                const date = new Date(trade.date);
-                const monthKey = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
-                if (!monthlyStats[monthKey]) {
-                    monthlyStats[monthKey] = { trades: 0, pl: 0, wins: 0 };
-                }
-                monthlyStats[monthKey].trades++;
-                monthlyStats[monthKey].pl += trade.pl || 0;
-                if (trade.result === 'Win') monthlyStats[monthKey].wins++;
-            });
-
-            for (const [month, stats] of Object.entries(monthlyStats)) {
-                result.monthlyPerformance[month] = {
-                    trades: stats.trades,
-                    pl: stats.pl,
-                    winRate: (stats.wins / stats.trades * 100).toFixed(1)
-                };
-            }
-
-            return result;
-        }
-
-        // Update Analytics Charts
-        function updateAnalyticsCharts(analytics) {
-            // Update monthly performance chart
-            updateMonthlyPerformanceChart(analytics.monthlyPerformance);
-            
-            // Update model performance charts
-            updateModelPerformanceCharts(analytics.modelStats);
-            
-            // Update hourly performance chart
-            updateHourlyPerformanceChart(analytics.hourlyPerformance);
-        }
-
-        // Update Monthly Performance Chart
-        function updateMonthlyPerformanceChart(monthlyPerformance) {
-            const ctx = document.getElementById('monthlyPerformanceChart');
-            if (!ctx) return;
-
-            const months = Object.keys(monthlyPerformance).sort();
-            const plData = months.map(month => monthlyPerformance[month].pl);
-            const winRateData = months.map(month => monthlyPerformance[month].winRate);
-
-            if (charts.monthlyPerformanceChart) {
-                charts.monthlyPerformanceChart.data.labels = months;
-                charts.monthlyPerformanceChart.data.datasets[0].data = plData;
-                charts.monthlyPerformanceChart.data.datasets[1].data = winRateData;
-                charts.monthlyPerformanceChart.update();
+        // Handle Online Status
+        function handleOnlineStatus() {
+            isOnline = navigator.onLine;
+            if (isOnline) {
+                updateSyncStatus('Reconnecting...', 'syncing');
+                // Firebase will automatically reconnect
             } else {
-                charts.monthlyPerformanceChart = new Chart(ctx.getContext('2d'), {
-                    type: 'bar',
-                    data: {
-                        labels: months,
-                        datasets: [
-                            {
-                                label: 'P/L ($)',
-                                data: plData,
-                                backgroundColor: '#0c8ce9',
-                                yAxisID: 'y'
-                            },
-                            {
-                                label: 'Win Rate %',
-                                data: winRateData,
-                                type: 'line',
-                                borderColor: '#0f7b6c',
-                                backgroundColor: 'rgba(15, 123, 108, 0.1)',
-                                fill: true,
-                                yAxisID: 'y1'
-                            }
-                        ]
-                    },
-                    options: {
-                        responsive: true,
-                        scales: {
-                            y: {
-                                type: 'linear',
-                                position: 'left',
-                                title: { display: true, text: 'P/L ($)' }
-                            },
-                            y1: {
-                                type: 'linear',
-                                position: 'right',
-                                title: { display: true, text: 'Win Rate %' },
-                                grid: { drawOnChartArea: false },
-                                min: 0,
-                                max: 100
-                            }
-                        }
-                    }
-                });
+                updateSyncStatus('Offline - using local data', 'error');
             }
-        }
-
-        // Update Model Performance Charts
-        function updateModelPerformanceCharts(modelStats) {
-            // Update model win rate chart
-            const modelWinRateCtx = document.getElementById('modelWinRateChart');
-            if (modelWinRateCtx) {
-                const models = Object.keys(modelStats);
-                const winRates = models.map(model => modelStats[model].winRate);
-
-                if (charts.modelWinRateChart) {
-                    charts.modelWinRateChart.data.labels = models;
-                    charts.modelWinRateChart.data.datasets[0].data = winRates;
-                    charts.modelWinRateChart.update();
-                } else {
-                    charts.modelWinRateChart = new Chart(modelWinRateCtx.getContext('2d'), {
-                        type: 'bar',
-                        data: {
-                            labels: models,
-                            datasets: [{
-                                label: 'Win Rate %',
-                                data: winRates,
-                                backgroundColor: [
-                                    '#0c8ce9',
-                                    '#0f7b6c',
-                                    '#6940a5',
-                                    '#ff6b35',
-                                    '#e55ca2'
-                                ]
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            scales: {
-                                y: {
-                                    beginAtZero: true,
-                                    max: 100,
-                                    title: { display: true, text: 'Win Rate %' }
-                                }
-                            }
-                        }
-                    });
-                }
-            }
-
-            // Update model R:R chart
-            const modelRRCtx = document.getElementById('modelRRChart');
-            if (modelRRCtx) {
-                const models = Object.keys(modelStats);
-                const avgRR = models.map(model => modelStats[model].avgRR);
-
-                if (charts.modelRRChart) {
-                    charts.modelRRChart.data.labels = models;
-                    charts.modelRRChart.data.datasets[0].data = avgRR;
-                    charts.modelRRChart.update();
-                } else {
-                    charts.modelRRChart = new Chart(modelRRCtx.getContext('2d'), {
-                        type: 'bar',
-                        data: {
-                            labels: models,
-                            datasets: [{
-                                label: 'Average R:R',
-                                data: avgRR,
-                                backgroundColor: [
-                                    '#0f7b6c',
-                                    '#0c8ce9',
-                                    '#6940a5',
-                                    '#ff6b35',
-                                    '#e55ca2'
-                                ]
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            scales: {
-                                y: {
-                                    beginAtZero: true,
-                                    title: { display: true, text: 'Risk/Reward Ratio' }
-                                }
-                            }
-                        }
-                    });
-                }
-            }
-        }
-
-        // Update Hourly Performance Chart
-        function updateHourlyPerformanceChart(hourlyPerformance) {
-            const ctx = document.getElementById('hourPerformanceChart');
-            if (!ctx) return;
-
-            const hours = Object.keys(hourlyPerformance).sort((a, b) => a - b);
-            const plData = hours.map(hour => hourlyPerformance[hour].pl);
-            const winRateData = hours.map(hour => hourlyPerformance[hour].winRate);
-
-            if (charts.hourPerformanceChart) {
-                charts.hourPerformanceChart.data.labels = hours.map(h => `${h}:00`);
-                charts.hourPerformanceChart.data.datasets[0].data = plData;
-                charts.hourPerformanceChart.update();
-            } else {
-                charts.hourPerformanceChart = new Chart(ctx.getContext('2d'), {
-                    type: 'bar',
-                    data: {
-                        labels: hours.map(h => `${h}:00`),
-                        datasets: [{
-                            label: 'P/L ($)',
-                            data: plData,
-                            backgroundColor: hours.map(h => {
-                                const hour = parseInt(h);
-                                return (hour >= 7 && hour <= 16) ? '#0f7b6c' : '#0c8ce9';
-                            })
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        scales: {
-                            y: {
-                                title: { display: true, text: 'P/L ($)' }
-                            }
-                        }
-                    }
-                });
-            }
-        }
-
-        // Update Model Stats Table
-        function updateModelStatsTable(modelStats) {
-            const tableBody = document.getElementById('modelStatsBody');
-            if (!tableBody) return;
-
-            tableBody.innerHTML = '';
-            const models = Object.keys(modelStats);
-
-            if (models.length === 0) {
-                tableBody.innerHTML = `
-                    <tr>
-                        <td colspan="7" style="text-align: center; padding: 20px; color: var(--notion-text-light);">
-                            No model statistics available
-                        </td>
-                    </tr>
-                `;
-                return;
-            }
-
-            models.forEach(model => {
-                const stats = modelStats[model];
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td><strong>${model}</strong></td>
-                    <td>${stats.trades}</td>
-                    <td>${stats.winRate}%</td>
-                    <td>1:${stats.avgRR}</td>
-                    <td class="${stats.totalPL >= 0 ? 'positive' : 'negative'}">${stats.totalPL >= 0 ? '+' : ''}$${stats.totalPL}</td>
-                    <td>${stats.profitFactor}</td>
-                    <td>${stats.successScore}</td>
-                `;
-                tableBody.appendChild(row);
-            });
-        }
-
-        // Update Psychology Page
-        function updatePsychologyPage() {
-            if (trades.length === 0) return;
-
-            // Calculate psychology metrics
-            const psychology = calculatePsychologyMetrics();
-            
-            // Update psychology cards
-            document.getElementById('emotionalScore').textContent = psychology.emotionalScore.toFixed(1);
-            document.getElementById('disciplineScore').textContent = `${psychology.disciplineScore}%`;
-            document.getElementById('mistakeRate').textContent = `${psychology.mistakeRate}%`;
-            document.getElementById('recoveryRate').textContent = `${psychology.recoveryRate}%`;
-            
-            // Update psychology charts
-            updatePsychologyCharts(psychology);
-            
-            // Save to Firebase
-            psychologyRef.set(psychology).catch(error => {
-                console.error('Error saving psychology data:', error);
-            });
-        }
-
-        // Calculate Psychology Metrics
-        function calculatePsychologyMetrics() {
-            const result = {
-                emotionalScore: 0,
-                disciplineScore: 0,
-                mistakeRate: 0,
-                recoveryRate: 0,
-                emotionalTimeline: [],
-                mistakeAnalysis: {}
-            };
-
-            if (trades.length === 0) return result;
-
-            // Calculate emotional score (average of emotionBefore)
-            const emotionScores = trades.map(t => t.emotionBefore || 5).filter(score => score > 0);
-            result.emotionalScore = emotionScores.reduce((a, b) => a + b, 0) / emotionScores.length;
-
-            // Calculate discipline score (percentage of trades with emotionAfter >= emotionBefore)
-            const disciplinedTrades = trades.filter(t => {
-                const before = t.emotionBefore || 5;
-                const after = t.emotionAfter || 5;
-                return after >= before || (t.result === 'Win' && after >= before - 1);
-            }).length;
-            result.disciplineScore = Math.round((disciplinedTrades / trades.length) * 100);
-
-            // Calculate mistake rate
-            const tradesWithMistakes = trades.filter(t => t.mistakeType && t.mistakeType !== 'None').length;
-            result.mistakeRate = Math.round((tradesWithMistakes / trades.length) * 100);
-
-            // Calculate recovery rate (win rate after a loss)
-            const losses = trades.filter(t => t.result === 'Loss');
-            let recoveries = 0;
-            for (let i = 0; i < trades.length - 1; i++) {
-                if (trades[i].result === 'Loss' && trades[i + 1].result === 'Win') {
-                    recoveries++;
-                }
-            }
-            result.recoveryRate = losses.length > 0 ? Math.round((recoveries / losses.length) * 100) : 100;
-
-            // Build emotional timeline
-            const last10Trades = trades.slice(0, 10).reverse();
-            result.emotionalTimeline = last10Trades.map(trade => ({
-                date: trade.date,
-                before: trade.emotionBefore || 5,
-                after: trade.emotionAfter || 5,
-                result: trade.result
-            }));
-
-            // Analyze mistakes
-            const mistakeCounts = {};
-            trades.forEach(trade => {
-                if (trade.mistakeType && trade.mistakeType !== 'None') {
-                    mistakeCounts[trade.mistakeType] = (mistakeCounts[trade.mistakeType] || 0) + 1;
-                }
-            });
-            result.mistakeAnalysis = mistakeCounts;
-
-            return result;
-        }
-
-        // Update Psychology Charts
-        function updatePsychologyCharts(psychology) {
-            // Update emotional state chart
-            const emotionalCtx = document.getElementById('emotionalStateChart');
-            if (emotionalCtx && psychology.emotionalTimeline.length > 0) {
-                const dates = psychology.emotionalTimeline.map(t => formatDateShort(t.date));
-                const beforeScores = psychology.emotionalTimeline.map(t => t.before);
-                const afterScores = psychology.emotionalTimeline.map(t => t.after);
-
-                if (charts.emotionalStateChart) {
-                    charts.emotionalStateChart.data.labels = dates;
-                    charts.emotionalStateChart.data.datasets[0].data = beforeScores;
-                    charts.emotionalStateChart.data.datasets[1].data = afterScores;
-                    charts.emotionalStateChart.update();
-                } else {
-                    charts.emotionalStateChart = new Chart(emotionalCtx.getContext('2d'), {
-                        type: 'line',
-                        data: {
-                            labels: dates,
-                            datasets: [
-                                {
-                                    label: 'Emotion Before',
-                                    data: beforeScores,
-                                    borderColor: '#0c8ce9',
-                                    backgroundColor: 'rgba(12, 140, 233, 0.1)',
-                                    fill: true,
-                                    tension: 0.3
-                                },
-                                {
-                                    label: 'Emotion After',
-                                    data: afterScores,
-                                    borderColor: '#0f7b6c',
-                                    backgroundColor: 'rgba(15, 123, 108, 0.1)',
-                                    fill: true,
-                                    tension: 0.3
-                                }
-                            ]
-                        },
-                        options: {
-                            responsive: true,
-                            scales: {
-                                y: {
-                                    min: 1,
-                                    max: 10,
-                                    title: { display: true, text: 'Emotional Score (1-10)' }
-                                }
-                            }
-                        }
-                    });
-                }
-            }
-
-            // Update mistake analysis chart
-            const mistakeCtx = document.getElementById('mistakeAnalysisChart');
-            if (mistakeCtx && Object.keys(psychology.mistakeAnalysis).length > 0) {
-                const mistakes = Object.keys(psychology.mistakeAnalysis);
-                const counts = Object.values(psychology.mistakeAnalysis);
-
-                if (charts.mistakeAnalysisChart) {
-                    charts.mistakeAnalysisChart.data.labels = mistakes;
-                    charts.mistakeAnalysisChart.data.datasets[0].data = counts;
-                    charts.mistakeAnalysisChart.update();
-                } else {
-                    charts.mistakeAnalysisChart = new Chart(mistakeCtx.getContext('2d'), {
-                        type: 'doughnut',
-                        data: {
-                            labels: mistakes,
-                            datasets: [{
-                                data: counts,
-                                backgroundColor: [
-                                    '#d1453b',
-                                    '#ff6b35',
-                                    '#ffc800',
-                                    '#0c8ce9',
-                                    '#6940a5'
-                                ]
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            plugins: {
-                                legend: { position: 'bottom' }
-                            },
-                            cutout: '60%'
-                        }
-                    });
-                }
-            }
-        }
-
-        // Update Performance Page
-        function updatePerformancePage() {
-            if (trades.length === 0) return;
-
-            // Calculate performance metrics
-            const performance = calculatePerformanceMetrics();
-            
-            // Update weekly and monthly stats
-            document.getElementById('weekTrades').textContent = performance.weekStats.trades;
-            document.getElementById('weekWinRate').textContent = `${performance.weekStats.winRate}%`;
-            document.getElementById('weekPL').textContent = `$${performance.weekStats.pl >= 0 ? '+' : ''}${performance.weekStats.pl}`;
-            document.getElementById('weekBest').textContent = `$${performance.weekStats.bestTrade}`;
-
-            document.getElementById('monthTrades').textContent = performance.monthStats.trades;
-            document.getElementById('monthWinRate').textContent = `${performance.monthStats.winRate}%`;
-            document.getElementById('monthPL').textContent = `$${performance.monthStats.pl >= 0 ? '+' : ''}${performance.monthStats.pl}`;
-            document.getElementById('avgDaily').textContent = `$${performance.monthStats.avgDaily.toFixed(2)}`;
-
-            // Update performance charts
-            updatePerformanceCharts(performance);
-            
-            // Update performance timeline
-            updatePerformanceTimeline(performance.timeline);
-            
-            // Save to Firebase
-            performanceRef.set(performance).catch(error => {
-                console.error('Error saving performance data:', error);
-            });
-        }
-
-        // Calculate Performance Metrics
-        function calculatePerformanceMetrics() {
-            const now = new Date();
-            const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-            const oneMonthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-
-            const weekTrades = trades.filter(t => new Date(t.date) >= oneWeekAgo);
-            const monthTrades = trades.filter(t => new Date(t.date) >= oneMonthAgo);
-
-            // Calculate week stats
-            const weekWins = weekTrades.filter(t => t.result === 'Win').length;
-            const weekPL = weekTrades.reduce((sum, t) => sum + (t.pl || 0), 0);
-            const weekBest = weekTrades.length > 0 ? Math.max(...weekTrades.map(t => t.pl || 0)) : 0;
-
-            // Calculate month stats
-            const monthWins = monthTrades.filter(t => t.result === 'Win').length;
-            const monthPL = monthTrades.reduce((sum, t) => sum + (t.pl || 0), 0);
-            
-            // Group trades by day for average daily
-            const dailyPL = {};
-            monthTrades.forEach(trade => {
-                const date = new Date(trade.date).toDateString();
-                dailyPL[date] = (dailyPL[date] || 0) + (trade.pl || 0);
-            });
-            const avgDaily = Object.values(dailyPL).reduce((a, b) => a + b, 0) / Object.keys(dailyPL).length;
-
-            // Build timeline (last 10 significant events)
-            const timeline = [];
-            if (trades.length > 0) {
-                // Add best trade
-                const bestTrade = trades.reduce((best, current) => 
-                    (current.pl || 0) > (best.pl || 0) ? current : best
-                );
-                timeline.push({
-                    date: bestTrade.date,
-                    type: 'achievement',
-                    title: 'Best Trade',
-                    description: `$${bestTrade.pl} on ${bestTrade.pair}`
-                });
-
-                // Add worst trade
-                const worstTrade = trades.reduce((worst, current) => 
-                    (current.pl || 0) < (worst.pl || 0) ? current : worst
-                );
-                timeline.push({
-                    date: worstTrade.date,
-                    type: 'lesson',
-                    title: 'Learning Experience',
-                    description: `Lost $${Math.abs(worstTrade.pl)} on ${worstTrade.pair}`
-                });
-
-                // Add recent achievements
-                if (weekWins >= 3) {
-                    timeline.push({
-                        date: now.toISOString(),
-                        type: 'achievement',
-                        title: 'Consistent Week',
-                        description: `${weekWins} winning trades this week`
-                    });
-                }
-            }
-
-            return {
-                weekStats: {
-                    trades: weekTrades.length,
-                    winRate: weekTrades.length > 0 ? Math.round((weekWins / weekTrades.length) * 100) : 0,
-                    pl: weekPL,
-                    bestTrade: weekBest
-                },
-                monthStats: {
-                    trades: monthTrades.length,
-                    winRate: monthTrades.length > 0 ? Math.round((monthWins / monthTrades.length) * 100) : 0,
-                    pl: monthPL,
-                    avgDaily: avgDaily || 0
-                },
-                timeline: timeline
-            };
-        }
-
-        // Update Performance Charts
-        function updatePerformanceCharts(performance) {
-            // Update weekly trend chart
-            const weeklyTrendCtx = document.getElementById('weeklyTrendChart');
-            if (weeklyTrendCtx) {
-                // Generate sample weekly data for demo
-                const weeks = ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
-                const plData = [350, 520, 280, 410];
-                const winRateData = [65, 72, 58, 70];
-
-                if (charts.weeklyTrendChart) {
-                    charts.weeklyTrendChart.data.labels = weeks;
-                    charts.weeklyTrendChart.data.datasets[0].data = plData;
-                    charts.weeklyTrendChart.data.datasets[1].data = winRateData;
-                    charts.weeklyTrendChart.update();
-                } else {
-                    charts.weeklyTrendChart = new Chart(weeklyTrendCtx.getContext('2d'), {
-                        type: 'line',
-                        data: {
-                            labels: weeks,
-                            datasets: [
-                                {
-                                    label: 'Weekly P/L ($)',
-                                    data: plData,
-                                    borderColor: '#0c8ce9',
-                                    backgroundColor: 'rgba(12, 140, 233, 0.1)',
-                                    fill: true,
-                                    yAxisID: 'y'
-                                },
-                                {
-                                    label: 'Win Rate %',
-                                    data: winRateData,
-                                    borderColor: '#0f7b6c',
-                                    backgroundColor: 'rgba(15, 123, 108, 0.1)',
-                                    fill: true,
-                                    yAxisID: 'y1'
-                                }
-                            ]
-                        },
-                        options: {
-                            responsive: true,
-                            scales: {
-                                y: {
-                                    type: 'linear',
-                                    position: 'left',
-                                    title: { display: true, text: 'P/L ($)' }
-                                },
-                                y1: {
-                                    type: 'linear',
-                                    position: 'right',
-                                    title: { display: true, text: 'Win Rate %' },
-                                    grid: { drawOnChartArea: false },
-                                    min: 0,
-                                    max: 100
-                                }
-                            }
-                        }
-                    });
-                }
-            }
-
-            // Update consistency chart
-            const consistencyCtx = document.getElementById('consistencyChart');
-            if (consistencyCtx) {
-                const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
-                const consistencyScores = [85, 90, 78, 92, 88];
-
-                if (charts.consistencyChart) {
-                    charts.consistencyChart.data.labels = days;
-                    charts.consistencyChart.data.datasets[0].data = consistencyScores;
-                    charts.consistencyChart.update();
-                } else {
-                    charts.consistencyChart = new Chart(consistencyCtx.getContext('2d'), {
-                        type: 'radar',
-                        data: {
-                            labels: days,
-                            datasets: [{
-                                label: 'Consistency Score %',
-                                data: consistencyScores,
-                                backgroundColor: 'rgba(12, 140, 233, 0.2)',
-                                borderColor: '#0c8ce9',
-                                pointBackgroundColor: '#0c8ce9'
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            scales: {
-                                r: {
-                                    beginAtZero: true,
-                                    max: 100,
-                                    ticks: { stepSize: 20 }
-                                }
-                            }
-                        }
-                    });
-                }
-            }
-        }
-
-        // Update Performance Timeline
-        function updatePerformanceTimeline(timeline) {
-            const timelineEl = document.getElementById('performanceTimeline');
-            if (!timelineEl) return;
-
-            timelineEl.innerHTML = '';
-            
-            if (timeline.length === 0) {
-                timelineEl.innerHTML = `
-                    <div style="text-align: center; padding: 40px; color: var(--notion-text-light);">
-                        <i class="fas fa-inbox"></i><br>
-                        No performance data yet
-                    </div>
-                `;
-                return;
-            }
-
-            timeline.forEach(event => {
-                const eventEl = document.createElement('div');
-                eventEl.className = 'timeline-item';
-                
-                const typeIcon = event.type === 'achievement' ? 'fa-trophy' : 'fa-graduation-cap';
-                const typeColor = event.type === 'achievement' ? 'var(--notion-green)' : 'var(--notion-orange)';
-                
-                eventEl.innerHTML = `
-                    <div class="timeline-date">${formatDateShort(event.date)}</div>
-                    <div class="timeline-content">
-                        <div class="timeline-trade">
-                            <i class="fas ${typeIcon}" style="color: ${typeColor}; margin-right: 8px;"></i>
-                            <strong>${event.title}</strong><br>
-                            ${event.description}
-                        </div>
-                    </div>
-                `;
-                timelineEl.appendChild(eventEl);
-            });
         }
 
         // Render Trades Table
-        function renderTradesTable(view = 'all') {
-            const tableBody = document.getElementById('allTradesBody');
-            if (!tableBody) return;
-
-            tableBody.innerHTML = '';
+        function renderTrades() {
+            const recentBody = document.getElementById('recentTradesBody');
+            const allBody = document.getElementById('allTradesBody');
             
-            // Filter trades based on view
+            if (!recentBody || !allBody) return;
+            
+            // Clear existing rows (except loading indicator)
+            recentBody.innerHTML = '';
+            allBody.innerHTML = '';
+            
+            // Filter trades based on current view
             let filteredTrades = [...trades];
-            switch(view) {
+            switch(currentView) {
                 case 'london':
                     filteredTrades = filteredTrades.filter(t => t.session === 'London');
                     break;
@@ -3250,104 +1388,137 @@
                 case 'losses':
                     filteredTrades = filteredTrades.filter(t => t.result === 'Loss');
                     break;
-                case 'fvg':
-                    filteredTrades = filteredTrades.filter(t => t.model === 'FVG');
-                    break;
-                case 'ob':
-                    filteredTrades = filteredTrades.filter(t => t.model === 'Order Block');
-                    break;
             }
-
+            
             // Update trade count
             document.getElementById('tradeCount').textContent = `(${filteredTrades.length} trades)`;
-
-            if (filteredTrades.length === 0) {
-                tableBody.innerHTML = `
+            
+            // Get recent trades (last 5)
+            const recentTrades = filteredTrades.slice(0, 5);
+            
+            // Render recent trades
+            if (recentTrades.length === 0) {
+                recentBody.innerHTML = `
                     <tr>
-                        <td colspan="10" style="text-align: center; padding: 40px; color: var(--notion-text-light);">
+                        <td colspan="9" style="text-align: center; padding: 40px; color: var(--notion-text-light);">
                             <i class="fas fa-inbox"></i><br>
-                            No trades found for this view
+                            No trades yet. Add your first trade!
                         </td>
                     </tr>
                 `;
-                return;
+            } else {
+                recentTrades.forEach(trade => {
+                    recentBody.appendChild(createTradeRow(trade));
+                });
             }
-
-            filteredTrades.forEach(trade => {
-                const row = document.createElement('tr');
-                const plClass = trade.pl >= 0 ? 'positive' : 'negative';
-                const plSign = trade.pl >= 0 ? '+' : '';
-                
-                row.innerHTML = `
-                    <td>${formatDate(trade.date)}</td>
-                    <td>${trade.pair || 'N/A'}</td>
-                    <td>${trade.model || 'N/A'}</td>
-                    <td>${trade.direction || 'N/A'}</td>
-                    <td>${trade.entry ? trade.entry.toFixed(5) : 'N/A'}</td>
-                    <td>
-                        <span class="status-badge ${trade.result === 'Win' ? 'status-win' : trade.result === 'Loss' ? 'status-loss' : 'status-be'}">
-                            ${trade.result || 'N/A'}
-                        </span>
-                    </td>
-                    <td class="${plClass}">${plSign}$${trade.pl || 0}</td>
-                    <td>${trade.rr || '1:0.0'}</td>
-                    <td>${trade.emotionBefore || 'N/A'}</td>
-                    <td>
-                        <button class="db-btn" onclick="editTrade('${trade.id}')" style="padding: 4px 8px; font-size: 12px;">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="db-btn" onclick="deleteTrade('${trade.id}')" style="padding: 4px 8px; font-size: 12px; margin-left: 4px; background-color: var(--notion-red-light); color: var(--notion-red);">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </td>
+            
+            // Render all trades
+            if (filteredTrades.length === 0) {
+                allBody.innerHTML = `
+                    <tr>
+                        <td colspan="11" style="text-align: center; padding: 40px; color: var(--notion-text-light);">
+                            <i class="fas fa-inbox"></i><br>
+                            No trades found for this view.
+                        </td>
+                    </tr>
                 `;
-                tableBody.appendChild(row);
-            });
+            } else {
+                filteredTrades.forEach(trade => {
+                    allBody.appendChild(createTradeRow(trade, true));
+                });
+            }
         }
 
-        // Save Trade to Firebase
-        function saveTradeToFirebase() {
-            const tradeData = {
-                date: document.getElementById('tradeDate').value,
-                pair: document.getElementById('tradePair').value,
-                direction: document.getElementById('tradeDirection').value,
-                model: document.getElementById('tradeModel').value,
-                premiumDiscount: document.getElementById('tradePd').value,
-                timeframeHTF: document.getElementById('timeframeHTF').value,
-                timeframeEntry: document.getElementById('timeframeEntry').value,
-                entry: parseFloat(document.getElementById('entryPrice').value),
-                sl: parseFloat(document.getElementById('stopLoss').value),
-                tp: parseFloat(document.getElementById('takeProfit').value),
-                result: document.getElementById('tradeResult').value,
-                riskPercent: parseFloat(document.getElementById('riskPercent').value),
-                lotSize: parseFloat(document.getElementById('lotSize').value) || 0.1,
-                emotionBefore: parseInt(document.getElementById('emotionBefore').value),
-                emotionAfter: parseInt(document.getElementById('emotionAfter').value),
-                mistakeType: document.getElementById('mistakeType').value,
-                notes: document.getElementById('tradeNotes').value,
-                session: 'London',
-                createdAt: firebase.database.ServerValue.TIMESTAMP
-            };
+        // Create Trade Row HTML
+        function createTradeRow(trade, isFullView = false) {
+            const row = document.createElement('tr');
+            const plClass = trade.pl >= 0 ? 'positive' : 'negative';
+            const plSign = trade.pl >= 0 ? '+' : '';
             
-            // Calculate P/L and R:R
-            tradeData.pl = calculatePL(tradeData);
-            tradeData.rr = calculateRR(tradeData);
+            let rowHTML = `
+                <td>${formatDate(trade.date)}</td>
+                <td>
+                    <select class="select-property ${trade.pair === 'EURUSD' ? 'blue' : 'purple'}" onchange="updateTradeProperty('${trade.id}', 'pair', this.value)">
+                        <option ${trade.pair === 'EURUSD' ? 'selected' : ''}>EURUSD</option>
+                        <option ${trade.pair === 'GBPUSD' ? 'selected' : ''}>GBPUSD</option>
+                    </select>
+                </td>
+                <td>
+                    <select class="select-property" onchange="updateTradeProperty('${trade.id}', 'model', this.value)">
+                        <option ${trade.model === 'FVG' ? 'selected' : ''}>FVG</option>
+                        <option ${trade.model === 'Liquidity Sweep' ? 'selected' : ''}>Liquidity Sweep</option>
+                        <option ${trade.model === 'Order Block' ? 'selected' : ''}>Order Block</option>
+                        <option ${trade.model === 'Breaker' ? 'selected' : ''}>Breaker</option>
+                        <option ${trade.model === 'MIT' ? 'selected' : ''}>MIT</option>
+                    </select>
+                </td>
+                <td>
+                    <select class="select-property ${trade.direction === 'Buy' ? 'green' : 'red'}" onchange="updateTradeProperty('${trade.id}', 'direction', this.value)">
+                        <option ${trade.direction === 'Buy' ? 'selected' : ''}>Buy</option>
+                        <option ${trade.direction === 'Sell' ? 'selected' : ''}>Sell</option>
+                    </select>
+                </td>
+            `;
             
-            // Generate trade ID
-            const tradeId = tradeIdCounter.toString();
+            if (isFullView) {
+                rowHTML += `
+                    <td>${trade.entry || 'N/A'}</td>
+                    <td>${trade.sl || 'N/A'}</td>
+                    <td>${trade.tp || 'N/A'}</td>
+                `;
+            } else {
+                rowHTML += `<td>${trade.entry ? trade.entry.toFixed(5) : 'N/A'}</td>`;
+            }
             
-            updateSyncStatus('Saving trade to cloud...', 'syncing');
+            rowHTML += `
+                <td>
+                    <span class="status-badge ${trade.result === 'Win' ? 'status-win' : trade.result === 'Loss' ? 'status-loss' : 'status-be'}">
+                        ${trade.result}
+                    </span>
+                </td>
+                <td class="${plClass}">${plSign}$${trade.pl || 0}</td>
+                <td>${trade.rr || '1:0.0'}</td>
+                <td>
+                    <button class="db-btn" onclick="editTrade('${trade.id}')" style="padding: 4px 8px; font-size: 12px;">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="db-btn" onclick="deleteTrade('${trade.id}')" style="padding: 4px 8px; font-size: 12px; margin-left: 4px; background-color: var(--notion-red-light); color: var(--notion-red);">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+            `;
             
-            // Save to Firebase
-            tradesRef.child(tradeId).set(tradeData)
+            row.innerHTML = rowHTML;
+            return row;
+        }
+
+        // Update Trade Property
+        function updateTradeProperty(tradeId, property, value) {
+            updateSyncStatus('Updating trade...', 'syncing');
+            
+            const updates = {};
+            updates[property] = value;
+            
+            // Recalculate P/L if needed
+            if (property === 'result' || property === 'entry' || property === 'sl' || property === 'tp') {
+                const trade = trades.find(t => t.id === tradeId);
+                if (trade) {
+                    const updatedTrade = { ...trade, [property]: value };
+                    const pl = calculatePL(updatedTrade);
+                    const rr = calculateRR(updatedTrade);
+                    
+                    updates.pl = pl;
+                    updates.rr = rr;
+                }
+            }
+            
+            tradesRef.child(tradeId).update(updates)
                 .then(() => {
-                    updateSyncStatus('Trade saved to cloud', 'synced');
-                    closeModal();
-                    tradeIdCounter++;
+                    updateSyncStatus('Synced with Firebase', 'synced');
                 })
                 .catch(error => {
-                    console.error('Error saving trade:', error);
-                    updateSyncStatus('Save failed', 'error');
+                    console.error('Error updating trade:', error);
+                    updateSyncStatus('Update failed', 'error');
                 });
         }
 
@@ -3379,51 +1550,14 @@
             return `1:${(reward / risk).toFixed(1)}`;
         }
 
-        // Edit Trade
-        function editTrade(tradeId) {
-            const trade = trades.find(t => t.id === tradeId);
-            if (!trade) return;
-
-            // Populate modal with trade data
-            document.getElementById('tradeDate').value = trade.date.replace(' ', 'T');
-            document.getElementById('tradePair').value = trade.pair;
-            document.getElementById('tradeDirection').value = trade.direction;
-            document.getElementById('tradeModel').value = trade.model;
-            document.getElementById('tradePd').value = trade.premiumDiscount || 'Discount';
-            document.getElementById('timeframeHTF').value = trade.timeframeHTF || 'M15';
-            document.getElementById('timeframeEntry').value = trade.timeframeEntry || 'M5';
-            document.getElementById('entryPrice').value = trade.entry;
-            document.getElementById('stopLoss').value = trade.sl;
-            document.getElementById('takeProfit').value = trade.tp;
-            document.getElementById('tradeResult').value = trade.result;
-            document.getElementById('riskPercent').value = trade.riskPercent || 1.0;
-            document.getElementById('lotSize').value = trade.lotSize || 0.1;
-            document.getElementById('emotionBefore').value = trade.emotionBefore || 7;
-            document.getElementById('emotionAfter').value = trade.emotionAfter || 7;
-            document.getElementById('mistakeType').value = trade.mistakeType || 'None';
-            document.getElementById('tradeNotes').value = trade.notes || '';
-            
-            // Change modal title
-            document.querySelector('.modal-title').textContent = '✏️ Edit Trade';
-            
-            // Change save button
-            const saveBtn = document.getElementById('saveTrade');
-            saveBtn.textContent = 'Update Trade';
-            saveBtn.onclick = () => updateTradeInFirebase(tradeId);
-            
-            openModal();
-        }
-
-        // Update Trade in Firebase
-        function updateTradeInFirebase(tradeId) {
+        // Save Trade to Firebase
+        function saveTradeToFirebase() {
             const tradeData = {
                 date: document.getElementById('tradeDate').value,
                 pair: document.getElementById('tradePair').value,
                 direction: document.getElementById('tradeDirection').value,
                 model: document.getElementById('tradeModel').value,
                 premiumDiscount: document.getElementById('tradePd').value,
-                timeframeHTF: document.getElementById('timeframeHTF').value,
-                timeframeEntry: document.getElementById('timeframeEntry').value,
                 entry: parseFloat(document.getElementById('entryPrice').value),
                 sl: parseFloat(document.getElementById('stopLoss').value),
                 tp: parseFloat(document.getElementById('takeProfit').value),
@@ -3431,28 +1565,101 @@
                 riskPercent: parseFloat(document.getElementById('riskPercent').value),
                 lotSize: parseFloat(document.getElementById('lotSize').value) || 0.1,
                 emotionBefore: parseInt(document.getElementById('emotionBefore').value),
-                emotionAfter: parseInt(document.getElementById('emotionAfter').value),
-                mistakeType: document.getElementById('mistakeType').value,
                 notes: document.getElementById('tradeNotes').value,
-                updatedAt: firebase.database.ServerValue.TIMESTAMP
+                session: 'London',
+                createdAt: firebase.database.ServerValue.TIMESTAMP
             };
             
-            // Recalculate
+            // Calculate P/L and R:R
             tradeData.pl = calculatePL(tradeData);
             tradeData.rr = calculateRR(tradeData);
             
-            updateSyncStatus('Updating trade...', 'syncing');
+            // Generate trade ID
+            const tradeId = tradeIdCounter.toString();
             
-            // Update in Firebase
-            tradesRef.child(tradeId).update(tradeData)
+            updateSyncStatus('Saving trade to cloud...', 'syncing');
+            
+            // Save to Firebase
+            tradesRef.child(tradeId).set(tradeData)
                 .then(() => {
-                    updateSyncStatus('Trade updated', 'synced');
+                    updateSyncStatus('Trade saved to cloud', 'synced');
                     closeModal();
+                    tradeIdCounter++;
+                    
+                    // Also save to local storage as backup
+                    saveToLocalStorage();
                 })
                 .catch(error => {
-                    console.error('Error updating trade:', error);
-                    updateSyncStatus('Update failed', 'error');
+                    console.error('Error saving trade:', error);
+                    updateSyncStatus('Save failed', 'error');
+                    alert('Failed to save trade. Please check your connection.');
                 });
+        }
+
+        // Edit Trade
+        function editTrade(tradeId) {
+            const trade = trades.find(t => t.id === tradeId);
+            if (trade) {
+                // Populate modal with trade data
+                document.getElementById('tradeDate').value = trade.date.replace(' ', 'T');
+                document.getElementById('tradePair').value = trade.pair;
+                document.getElementById('tradeDirection').value = trade.direction;
+                document.getElementById('tradeModel').value = trade.model;
+                document.getElementById('tradePd').value = trade.premiumDiscount || 'Discount';
+                document.getElementById('entryPrice').value = trade.entry;
+                document.getElementById('stopLoss').value = trade.sl;
+                document.getElementById('takeProfit').value = trade.tp;
+                document.getElementById('tradeResult').value = trade.result;
+                document.getElementById('riskPercent').value = trade.riskPercent || 1.0;
+                document.getElementById('lotSize').value = trade.lotSize || 0.1;
+                document.getElementById('emotionBefore').value = trade.emotionBefore || 7;
+                document.getElementById('tradeNotes').value = trade.notes || '';
+                
+                // Change modal title
+                document.querySelector('.modal-title').textContent = '✏️ Edit Trade';
+                
+                // Change save button
+                const saveBtn = document.getElementById('saveTrade');
+                saveBtn.textContent = 'Update Trade';
+                saveBtn.onclick = () => {
+                    // Update trade data
+                    const updatedTrade = {
+                        date: document.getElementById('tradeDate').value,
+                        pair: document.getElementById('tradePair').value,
+                        direction: document.getElementById('tradeDirection').value,
+                        model: document.getElementById('tradeModel').value,
+                        premiumDiscount: document.getElementById('tradePd').value,
+                        entry: parseFloat(document.getElementById('entryPrice').value),
+                        sl: parseFloat(document.getElementById('stopLoss').value),
+                        tp: parseFloat(document.getElementById('takeProfit').value),
+                        result: document.getElementById('tradeResult').value,
+                        riskPercent: parseFloat(document.getElementById('riskPercent').value),
+                        lotSize: parseFloat(document.getElementById('lotSize').value) || 0.1,
+                        emotionBefore: parseInt(document.getElementById('emotionBefore').value),
+                        notes: document.getElementById('tradeNotes').value,
+                        updatedAt: firebase.database.ServerValue.TIMESTAMP
+                    };
+                    
+                    // Recalculate
+                    updatedTrade.pl = calculatePL(updatedTrade);
+                    updatedTrade.rr = calculateRR(updatedTrade);
+                    
+                    updateSyncStatus('Updating trade...', 'syncing');
+                    
+                    // Update in Firebase
+                    tradesRef.child(tradeId).update(updatedTrade)
+                        .then(() => {
+                            updateSyncStatus('Trade updated', 'synced');
+                            closeModal();
+                        })
+                        .catch(error => {
+                            console.error('Error updating trade:', error);
+                            updateSyncStatus('Update failed', 'error');
+                        });
+                };
+                
+                openModal();
+            }
         }
 
         // Delete Trade
@@ -3471,7 +1678,187 @@
             }
         }
 
-        // Save Daily Journal
+        // Update Metrics
+        function updateMetrics() {
+            if (trades.length === 0) {
+                document.getElementById('winRate').textContent = '0%';
+                document.getElementById('avgRR').textContent = '1:0.0';
+                document.getElementById('totalTrades').textContent = '0';
+                document.getElementById('totalPL').textContent = '$0';
+                return;
+            }
+            
+            // Calculate metrics
+            const wins = trades.filter(t => t.result === 'Win').length;
+            const losses = trades.filter(t => t.result === 'Loss').length;
+            const winRate = (wins / trades.length * 100).toFixed(1);
+            
+            const totalPL = trades.reduce((sum, t) => sum + (t.pl || 0), 0);
+            
+            // Calculate average R:R
+            let totalRR = 0;
+            let countRR = 0;
+            trades.forEach(t => {
+                if (t.rr) {
+                    const rrValue = parseFloat(t.rr.split(':')[1]);
+                    if (!isNaN(rrValue)) {
+                        totalRR += rrValue;
+                        countRR++;
+                    }
+                }
+            });
+            const avgRR = countRR > 0 ? (totalRR / countRR).toFixed(1) : '0.0';
+            
+            // Update UI
+            document.getElementById('winRate').textContent = `${winRate}%`;
+            document.getElementById('avgRR').textContent = `1:${avgRR}`;
+            document.getElementById('totalTrades').textContent = trades.length;
+            document.getElementById('totalPL').textContent = `$${totalPL >= 0 ? '+' : ''}${totalPL}`;
+            
+            // Update win/loss stats
+            const be = trades.length - wins - losses;
+            document.getElementById('wlStats').textContent = `${wins}W / ${losses}L / ${be}BE`;
+            
+            // Save metrics to Firebase
+            const metrics = {
+                winRate: winRate,
+                avgRR: avgRR,
+                totalTrades: trades.length,
+                totalPL: totalPL,
+                wins: wins,
+                losses: losses,
+                breakEven: be,
+                lastUpdated: firebase.database.ServerValue.TIMESTAMP
+            };
+            
+            metricsRef.set(metrics).catch(error => {
+                console.error('Error saving metrics:', error);
+            });
+        }
+
+        // Update Metrics from Database
+        function updateMetricsFromDB(data) {
+            if (data.winRate) {
+                document.getElementById('winRate').textContent = `${data.winRate}%`;
+                document.getElementById('winRateChange').textContent = 'From cloud';
+            }
+            if (data.avgRR) {
+                document.getElementById('avgRR').textContent = `1:${data.avgRR}`;
+                document.getElementById('avgRRChange').textContent = 'From cloud';
+            }
+            if (data.totalTrades) {
+                document.getElementById('totalTrades').textContent = data.totalTrades;
+                document.getElementById('tradesChange').textContent = 'From cloud';
+            }
+            if (data.totalPL) {
+                document.getElementById('totalPL').textContent = `$${data.totalPL >= 0 ? '+' : ''}${data.totalPL}`;
+                document.getElementById('plChange').textContent = 'From cloud';
+            }
+        }
+
+        // Update Charts
+        function updateCharts() {
+            const period = document.getElementById('chartPeriod').value;
+            
+            // Filter trades by period
+            let filteredTrades = [...trades];
+            if (period !== 'all') {
+                const days = parseInt(period);
+                const cutoffDate = new Date();
+                cutoffDate.setDate(cutoffDate.getDate() - days);
+                filteredTrades = filteredTrades.filter(t => new Date(t.date) >= cutoffDate);
+            }
+            
+            // Sort by date ascending for equity curve
+            filteredTrades.sort((a, b) => new Date(a.date) - new Date(b.date));
+            
+            // Prepare equity curve data
+            let balance = 10000;
+            const equityDates = [];
+            const equityValues = [];
+            
+            filteredTrades.forEach(trade => {
+                balance += trade.pl || 0;
+                equityDates.push(formatDateShort(trade.date));
+                equityValues.push(balance);
+            });
+            
+            // Update or create equity chart
+            const equityCtx = document.getElementById('equityChart').getContext('2d');
+            if (equityChart) {
+                equityChart.data.labels = equityDates;
+                equityChart.data.datasets[0].data = equityValues;
+                equityChart.update();
+            } else {
+                equityChart = new Chart(equityCtx, {
+                    type: 'line',
+                    data: {
+                        labels: equityDates,
+                        datasets: [{
+                            label: 'Account Balance',
+                            data: equityValues,
+                            borderColor: '#0c8ce9',
+                            backgroundColor: 'rgba(12, 140, 233, 0.1)',
+                            fill: true,
+                            tension: 0.3
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: {
+                                beginAtZero: false,
+                                grid: { color: 'rgba(0,0,0,0.05)' },
+                                ticks: { callback: v => '$' + v.toLocaleString() }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // Update win/loss chart
+            const wins = trades.filter(t => t.result === 'Win').length;
+            const losses = trades.filter(t => t.result === 'Loss').length;
+            const be = trades.length - wins - losses;
+            
+            const winLossCtx = document.getElementById('winLossChart').getContext('2d');
+            if (winLossChart) {
+                winLossChart.data.datasets[0].data = [wins, losses, be];
+                winLossChart.update();
+            } else {
+                winLossChart = new Chart(winLossCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Wins', 'Losses', 'Break Even'],
+                        datasets: [{
+                            data: [wins, losses, be],
+                            backgroundColor: ['#0f7b6c', '#d1453b', '#70716e']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: { 
+                            legend: { position: 'bottom' },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const label = context.label || '';
+                                        const value = context.raw || 0;
+                                        const total = wins + losses + be;
+                                        const percentage = Math.round((value / total) * 100);
+                                        return `${label}: ${value} (${percentage}%)`;
+                                    }
+                                }
+                            }
+                        },
+                        cutout: '70%'
+                    }
+                });
+            }
+        }
+
+        // Save Daily Journal to Firebase
         function saveDailyJournal() {
             const dailyData = {
                 date: new Date().toISOString().split('T')[0],
@@ -3483,7 +1870,6 @@
                     zone3: document.getElementById('killzone3').checked,
                     zone4: document.getElementById('killzone4').checked
                 },
-                sessionGoals: document.getElementById('sessionGoals').value,
                 didRight: document.getElementById('didRight').value,
                 toImprove: document.getElementById('toImprove').value,
                 createdAt: firebase.database.ServerValue.TIMESTAMP
@@ -3501,126 +1887,81 @@
                 .catch(error => {
                     console.error('Error saving daily journal:', error);
                     updateSyncStatus('Save failed', 'error');
+                    alert('Failed to save daily journal.');
                 });
         }
 
-        // Save Daily Journal as Draft
-        function saveDailyJournalAsDraft() {
-            const dailyData = {
-                sessionBias: document.getElementById('sessionBias').value,
-                highImpactNews: document.getElementById('highImpactNews').value,
-                killZones: {
-                    zone1: document.getElementById('killzone1').checked,
-                    zone2: document.getElementById('killzone2').checked,
-                    zone3: document.getElementById('killzone3').checked,
-                    zone4: document.getElementById('killzone4').checked
-                },
-                sessionGoals: document.getElementById('sessionGoals').value,
-                didRight: document.getElementById('didRight').value,
-                toImprove: document.getElementById('toImprove').value
-            };
-            
-            localStorage.setItem('dailyJournalDraft', JSON.stringify(dailyData));
-            alert('Daily journal saved as draft locally!');
-        }
-
-        // Export Trades
-        function exportTrades() {
-            const exportData = {
-                trades: trades,
-                exportDate: new Date().toISOString(),
-                totalTrades: trades.length,
-                totalPL: trades.reduce((sum, t) => sum + (t.pl || 0), 0)
-            };
-            
-            const dataStr = JSON.stringify(exportData, null, 2);
-            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-            const exportFileDefaultName = `trading-journal-export-${new Date().toISOString().split('T')[0]}.json`;
-            
-            const linkElement = document.createElement('a');
-            linkElement.setAttribute('href', dataUri);
-            linkElement.setAttribute('download', exportFileDefaultName);
-            linkElement.click();
-        }
-
-        // Export All Data
-        function exportAllData() {
-            const exportData = {
-                trades: trades,
-                analytics: analyticsData,
-                psychology: psychologyData,
-                performance: performanceData,
-                exportDate: new Date().toISOString()
-            };
-            
-            const dataStr = JSON.stringify(exportData, null, 2);
-            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-            const exportFileDefaultName = `complete-trading-data-${new Date().toISOString().split('T')[0]}.json`;
-            
-            const linkElement = document.createElement('a');
-            linkElement.setAttribute('href', dataUri);
-            linkElement.setAttribute('download', exportFileDefaultName);
-            linkElement.click();
-        }
-
-        // Import Data
-        function importData() {
-            alert('Import feature would allow you to upload JSON backup files. This requires additional implementation.');
-        }
-
-        // Backup to Local Storage
-        function backupToLocalStorage() {
-            try {
-                const backupData = {
-                    trades: trades,
-                    timestamp: new Date().toISOString()
-                };
-                localStorage.setItem('tradingJournalBackup', JSON.stringify(backupData));
-                alert('Backup created successfully!');
-            } catch (e) {
-                alert('Backup failed: ' + e.message);
-            }
-        }
-
-        // Restore from Local Storage
-        function restoreFromLocalStorage() {
-            try {
-                const backup = localStorage.getItem('tradingJournalBackup');
-                if (!backup) {
-                    alert('No backup found in local storage.');
-                    return;
-                }
-                
-                if (confirm('This will overwrite your current data. Continue?')) {
-                    const backupData = JSON.parse(backup);
-                    // Here you would implement restoring to Firebase
-                    alert('Restore feature would upload backup data to Firebase. This requires additional implementation.');
-                }
-            } catch (e) {
-                alert('Restore failed: ' + e.message);
-            }
-        }
-
-        // Clear All Data
-        function clearAllData() {
-            if (confirm('WARNING: This will delete ALL data from Firebase. This action cannot be undone. Continue?')) {
-                updateSyncStatus('Clearing all data...', 'syncing');
-                
-                // Clear all Firebase data
-                Promise.all([
-                    tradesRef.remove(),
-                    analyticsRef.remove(),
-                    psychologyRef.remove(),
-                    performanceRef.remove()
-                ])
-                .then(() => {
-                    updateSyncStatus('All data cleared', 'synced');
-                    location.reload();
+        // Load Daily Journal from Firebase
+        function loadDailyJournal() {
+            const dateKey = new Date().toISOString().split('T')[0];
+            dailyJournalRef.child(dateKey).once('value')
+                .then(snapshot => {
+                    const data = snapshot.val();
+                    if (data) {
+                        // Populate form with existing data
+                        document.getElementById('sessionBias').value = data.sessionBias || 'Neutral/Ranging';
+                        document.getElementById('highImpactNews').value = data.highImpactNews || 'No significant news';
+                        document.getElementById('killzone1').checked = data.killZones?.zone1 || true;
+                        document.getElementById('killzone2').checked = data.killZones?.zone2 || false;
+                        document.getElementById('killzone3').checked = data.killZones?.zone3 || true;
+                        document.getElementById('killzone4').checked = data.killZones?.zone4 || false;
+                        document.getElementById('didRight').value = data.didRight || '';
+                        document.getElementById('toImprove').value = data.toImprove || '';
+                    }
                 })
                 .catch(error => {
-                    console.error('Error clearing data:', error);
-                    updateSyncStatus('Clear failed', 'error');
+                    console.error('Error loading daily journal:', error);
                 });
+        }
+
+        // Export Data
+        function exportData() {
+            const exportData = {
+                trades: trades,
+                metrics: {
+                    winRate: document.getElementById('winRate').textContent,
+                    avgRR: document.getElementById('avgRR').textContent,
+                    totalTrades: trades.length,
+                    totalPL: document.getElementById('totalPL').textContent.replace('$', ''),
+                    exportDate: new Date().toISOString()
+                }
+            };
+            
+            const dataStr = JSON.stringify(exportData, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            const exportFileDefaultName = `trading-journal-${new Date().toISOString().split('T')[0]}.json`;
+            
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportFileDefaultName);
+            linkElement.click();
+        }
+
+        // Local Storage Backup
+        function saveToLocalStorage() {
+            try {
+                localStorage.setItem('tradesBackup', JSON.stringify(trades));
+                localStorage.setItem('tradeIdCounter', tradeIdCounter);
+            } catch (e) {
+                console.warn('Local storage save failed:', e);
+            }
+        }
+
+        function loadFromLocalStorage() {
+            try {
+                const backup = localStorage.getItem('tradesBackup');
+                const counter = localStorage.getItem('tradeIdCounter');
+                
+                if (backup) {
+                    trades = JSON.parse(backup);
+                    tradeIdCounter = parseInt(counter) || trades.length + 1;
+                    renderTrades();
+                    updateMetrics();
+                    updateCharts();
+                    updateSyncStatus('Loaded from backup', 'synced');
+                }
+            } catch (e) {
+                console.warn('Local storage load failed:', e);
             }
         }
 
@@ -3637,92 +1978,37 @@
         }
 
         function showPage(pageId) {
-            currentPage = pageId;
-            
-            // Hide all pages
             document.querySelectorAll('.page').forEach(page => {
-                page.classList.remove('active');
+                page.style.display = 'none';
             });
-            
-            // Show selected page
-            const pageEl = document.getElementById(pageId + '-page');
-            if (pageEl) {
-                pageEl.classList.add('active');
-            }
+            document.getElementById(pageId).style.display = 'block';
             
             // Update active nav
             document.querySelectorAll('.nav-item').forEach(item => {
                 item.classList.remove('active');
-                if (item.getAttribute('data-page') === pageId) {
-                    item.classList.add('active');
-                }
             });
+            const pageName = pageId.replace('-page', '');
+            document.querySelector(`[data-page="${pageName}"]`).classList.add('active');
             
-            // Scroll to top
-            window.scrollTo(0, 0);
-        }
-
-        function switchTab(tabId) {
-            // Update active tab
-            document.querySelectorAll('.tab').forEach(tab => {
-                tab.classList.remove('active');
-                if (tab.getAttribute('data-tab') === tabId) {
-                    tab.classList.add('active');
-                }
-            });
-            
-            // Show active tab content
-            document.querySelectorAll('.tab-content').forEach(content => {
-                content.classList.remove('active');
-                if (content.id === tabId + 'Tab') {
-                    content.classList.add('active');
-                }
-            });
-        }
-
-        function updateSyncStatus(message, status) {
-            const statusEl = document.getElementById('syncStatus');
-            if (statusEl) {
-                statusEl.textContent = message;
-                statusEl.className = 'sync-status ' + status;
-                
-                const icon = status === 'synced' ? 'fa-cloud' : 
-                            status === 'syncing' ? 'fa-sync fa-spin' : 
-                            'fa-cloud-slash';
-                statusEl.innerHTML = `<i class="fas ${icon}"></i> ${message}`;
+            // Update charts when switching to dashboard
+            if (pageId === 'dashboard-page' && trades.length > 0) {
+                updateCharts();
             }
         }
 
         function openModal() {
             document.getElementById('addTradeModal').style.display = 'flex';
+            // Reset form
+            document.querySelector('.modal-title').textContent = '➕ Add New Trade';
+            document.getElementById('saveTrade').textContent = 'Save Trade to Cloud';
+            document.getElementById('saveTrade').onclick = saveTradeToFirebase;
+            
+            // Set default date to now
+            document.getElementById('tradeDate').value = new Date().toISOString().slice(0, 16);
         }
 
         function closeModal() {
             document.getElementById('addTradeModal').style.display = 'none';
-            // Reset modal
-            document.querySelector('.modal-title').textContent = '➕ Add New Trade';
-            const saveBtn = document.getElementById('saveTrade');
-            saveBtn.textContent = 'Save Trade to Cloud';
-            saveBtn.onclick = saveTradeToFirebase;
-            
-            // Reset form
-            document.getElementById('tradeDate').value = new Date().toISOString().slice(0, 16);
-            document.getElementById('tradePair').value = 'EURUSD';
-            document.getElementById('tradeDirection').value = 'Buy';
-            document.getElementById('tradeModel').value = 'FVG';
-            document.getElementById('tradePd').value = 'Discount';
-            document.getElementById('timeframeHTF').value = 'M15';
-            document.getElementById('timeframeEntry').value = 'M5';
-            document.getElementById('entryPrice').value = '';
-            document.getElementById('stopLoss').value = '';
-            document.getElementById('takeProfit').value = '';
-            document.getElementById('tradeResult').value = 'Win';
-            document.getElementById('riskPercent').value = '1.0';
-            document.getElementById('lotSize').value = '0.10';
-            document.getElementById('emotionBefore').value = '7';
-            document.getElementById('emotionAfter').value = '7';
-            document.getElementById('mistakeType').value = 'None';
-            document.getElementById('tradeNotes').value = '';
         }
     </script>
 </body>
