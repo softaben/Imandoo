@@ -767,7 +767,7 @@
 
             <div class="nav-section">
                 <div class="nav-title">Pages</div>
-                <a href="#" class="nav-item">
+                <a href="Plan.html" class="nav-item">
                     <i class="fas fa-file-alt"></i> Trading Plan
                 </a>
                 <a href="#" class="nav-item">
@@ -1291,14 +1291,17 @@
 
         // Setup Event Listeners
         function setupEventListeners() {
-            // Navigation
-            document.querySelectorAll('.nav-item').forEach(item => {
+            // Navigation - only for internal pages (with data-page attribute)
+            document.querySelectorAll('.nav-item[data-page]').forEach(item => {
                 item.addEventListener('click', function(e) {
                     e.preventDefault();
                     const page = this.getAttribute('data-page');
                     showPage(page + '-page');
                 });
             });
+
+            // Note: Trading Plan link has href="Plan.html" and will navigate naturally
+            // Other links without data-page attribute will also navigate naturally
 
             // View buttons
             document.querySelectorAll('.view-btn').forEach(btn => {
