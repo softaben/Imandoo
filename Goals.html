@@ -1,521 +1,1442 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تحميل الصور - Imandou Food</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    
+    <title>Weekly Goals - ICT Scalping Journal</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        :root{
-            --bg: #0f172a;
-            --card: #0b1220;
-            --text: #e2e8f0;
-            --muted: #94a3b8;
-            --accent: #fbbf24;
-            --radius-lg: 14px;
-            --radius-md: 8px;
-            --success: #10b981;
-            --danger: #ef4444;
-            --warning: #f59e0b;
+        :root {
+            --notion-bg: #ffffff;
+            --notion-gray: #f7f6f3;
+            --notion-gray-light: #fbfbfa;
+            --notion-gray-dark: #e9e9e7;
+            --notion-text: #37352f;
+            --notion-text-light: #70716e;
+            --notion-blue: #0c8ce9;
+            --notion-blue-light: #e3f2fd;
+            --notion-green: #0f7b6c;
+            --notion-green-light: #e8f5e9;
+            --notion-red: #d1453b;
+            --notion-red-light: #ffebee;
+            --notion-purple: #6940a5;
+            --notion-purple-light: #f3e5f5;
+            --notion-yellow: #ffc800;
+            --notion-yellow-light: #fff8e1;
+            --notion-pink: #e55ca2;
+            --notion-orange: #ff6b35;
+            --notion-orange-light: #fff3e0;
         }
 
-        html,body{ height:100% }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
         body {
-            font-family: 'Inter', system-ui, -apple-system, "Segoe UI", sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-            overflow-x: hidden;
-            position: relative;
-            font-weight: 400;
-            line-height: 1.6;
+            background-color: var(--notion-bg);
+            color: var(--notion-text);
+            line-height: 1.5;
         }
 
-        body::before {
-            content: '';
+        /* Header */
+        .header {
             position: fixed;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: url('https://images.unsplash.com/photo-1563245372-f21724e3856d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2064&q=80');
-            background-size: cover;
-            background-position: center;
-            opacity: 0.08;
-            z-index: -1;
-            pointer-events: none;
-        }
-
-        h1, h2, h3, h4, h5, h6 {
-            font-family: 'Playfair Display', serif;
-            font-weight: 600;
-            letter-spacing: -0.025em;
-        }
-        [lang="ar"] body, [dir="rtl"] body { font-family: 'Cairo', 'Inter', sans-serif; }
-        [lang="ar"] h1, [lang="ar"] h2, [lang="ar"] h3, [dir="rtl"] h1, [dir="rtl"] h2, [dir="rtl"] h3 { font-family: 'Cairo', 'Playfair Display', serif; }
-
-        .app {
-            max-width: 480px;
-            margin: 0 auto;
-            min-height: 100vh;
+            right: 0;
+            height: 45px;
+            background-color: var(--notion-bg);
+            border-bottom: 1px solid var(--notion-gray-dark);
             display: flex;
-            flex-direction: column;
-            position: relative;
-            z-index: 1;
-            padding: 1.5rem;
-        }
-        @media(min-width:768px){ .app{max-width:720px} }
-
-        .card {
-            background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.03));
-            border-radius: var(--radius-lg);
-            padding: 12px;
-            box-shadow: 0 6px 18px rgba(2,6,23,0.6);
-            border: 1px solid rgba(255,255,255,0.03);
-            backdrop-filter: blur(10px);
+            align-items: center;
+            padding: 0 16px;
+            z-index: 100;
         }
 
-        .pill {
-            background: rgba(255,255,255,0.02);
-            border-radius: 999px;
-            padding: 8px 12px;
-            font-weight: 500;
-            color: var(--text);
-            display: inline-flex;
+        .header-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+
+        .header-actions {
+            margin-left: auto;
+            display: flex;
             gap: 8px;
             align-items: center;
-            border: 1px solid rgba(255,255,255,0.03);
-            transition: all 0.2s ease;
-            cursor: pointer;
-            font-size: 0.875rem;
         }
-        .pill:hover:not(:disabled) { background: rgba(255,255,255,0.05); }
-        .pill:disabled { cursor: not-allowed; opacity: 0.6; }
 
-        .form-input {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: var(--radius-md);
-            padding: 10px 12px;
-            color: var(--text);
-            width: 100%;
-            margin-bottom: 12px;
-            transition: border-color 0.2s, box-shadow 0.2s;
-        }
-        .form-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.1); }
-        .form-input:disabled { background: rgba(255, 255, 255, 0.01); cursor: not-allowed; }
-
-        .spinner {
-            border: 3px solid rgba(255,255,255,0.1);
-            border-radius: 50%;
-            border-top: 3px solid var(--accent);
-            width: 24px;
-            height: 24px;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 20px; backdrop-filter: blur(5px); opacity: 0; transition: opacity 0.3s ease; }
-        .modal.active { display: flex; opacity: 1; }
-        .modal-content { background: var(--card); border-radius: var(--radius-lg); width: 100%; max-width: 90%; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5); border: 1px solid rgba(255,255,255,0.05); transform: scale(0.95); transition: transform 0.3s ease; }
-        .modal.active .modal-content { transform: scale(1); }
-        .modal-header { padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; align-items: center; }
-        .modal-title { font-size: 1.5rem; font-weight: 700; margin: 0; }
-        .close { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text); }
-        .modal-body { padding: 20px; }
-        
-        .image-gallery {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 16px;
-        }
-        .gallery-item {
-            position: relative;
-            overflow: hidden;
-            border-radius: var(--radius-md);
-            border: 1px solid rgba(255,255,255,0.05);
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-        .gallery-item:hover {
-            transform: scale(1.03);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-        }
-        .gallery-item img {
-            width: 100%;
-            height: 150px;
-            object-fit: cover;
-            cursor: pointer;
-        }
-        .delete-btn {
-            position: absolute;
-            top: 8px;
-            left: 8px;
-            background-color: rgba(239, 68, 68, 0.8);
-            color: white;
+        .header-btn {
+            padding: 4px 12px;
+            background-color: var(--notion-gray);
             border: none;
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
+            border-radius: 4px;
+            font-size: 13px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .header-btn.primary {
+            background-color: var(--notion-blue);
+            color: white;
+        }
+
+        /* Main Layout */
+        .container {
+            display: grid;
+            grid-template-columns: 240px 1fr;
+            margin-top: 45px;
+            height: calc(100vh - 45px);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            border-right: 1px solid var(--notion-gray-dark);
+            padding: 16px;
+            overflow-y: auto;
+        }
+
+        .workspace {
+            display: flex;
+            align-items: center;
+            padding: 4px 8px;
+            border-radius: 4px;
+            margin-bottom: 24px;
+            cursor: pointer;
+        }
+
+        .workspace:hover {
+            background-color: var(--notion-gray);
+        }
+
+        .workspace-icon {
+            width: 20px;
+            height: 20px;
+            background-color: var(--notion-blue);
+            border-radius: 4px;
+            margin-right: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
+            color: white;
+            font-size: 12px;
+        }
+
+        .workspace-name {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .nav-section {
+            margin-bottom: 24px;
+        }
+
+        .nav-title {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--notion-text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+            padding-left: 8px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 6px 8px;
+            border-radius: 4px;
+            margin-bottom: 2px;
             cursor: pointer;
-            transition: background-color 0.2s ease;
+            transition: background-color 0.1s;
+            font-size: 14px;
+            color: var(--notion-text);
+            text-decoration: none;
         }
-        .delete-btn:hover {
-            background-color: rgba(239, 68, 68, 1);
+
+        .nav-item:hover {
+            background-color: var(--notion-gray);
         }
-        
-        #video-preview {
-            display: none;
+
+        .nav-item.active {
+            background-color: var(--notion-blue-light);
+            color: var(--notion-blue);
+            font-weight: 500;
+        }
+
+        .nav-item i {
+            margin-right: 8px;
+            width: 16px;
+            text-align: center;
+            font-size: 16px;
+        }
+
+        .favorites {
+            border-bottom: 1px solid var(--notion-gray-dark);
+            padding-bottom: 16px;
+            margin-bottom: 16px;
+        }
+
+        /* Main Content */
+        .main-content {
+            padding: 24px;
+            overflow-y: auto;
+            background-color: var(--notion-gray-light);
+        }
+
+        .page {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        /* Page Header */
+        .page-header {
+            margin-bottom: 32px;
+        }
+
+        .page-title {
+            font-size: 40px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            border: none;
             width: 100%;
-            height: auto;
-            border-radius: var(--radius-md);
-            margin-top: 1rem;
+            background: transparent;
+            padding: 4px 0;
         }
-        #camera-controls {
-            display: none;
-            gap: 1rem;
-            margin-top: 1rem;
+
+        .page-tags {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .page-tag {
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .page-tag.blue { background-color: var(--notion-blue-light); color: var(--notion-blue); }
+        .page-tag.green { background-color: var(--notion-green-light); color: var(--notion-green); }
+        .page-tag.red { background-color: var(--notion-red-light); color: var(--notion-red); }
+        .page-tag.purple { background-color: var(--notion-purple-light); color: var(--notion-purple); }
+
+        /* Callouts */
+        .callout {
+            background-color: var(--notion-blue-light);
+            border: 1px solid var(--notion-blue);
+            border-radius: 6px;
+            padding: 16px;
+            margin-bottom: 24px;
+            display: flex;
+            gap: 12px;
+        }
+
+        .callout-icon {
+            color: var(--notion-blue);
+            font-size: 20px;
+            margin-top: 2px;
+        }
+
+        .callout-content h3 {
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+
+        .callout-content p {
+            font-size: 14px;
+            color: var(--notion-text);
+        }
+
+        /* Toggle */
+        .toggle {
+            position: relative;
+            display: inline-block;
+            width: 36px;
+            height: 20px;
+        }
+
+        .toggle input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .2s;
+            border-radius: 34px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 14px;
+            width: 14px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .2s;
+            border-radius: 50%;
+        }
+
+        input:checked + .toggle-slider {
+            background-color: var(--notion-green);
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(16px);
+        }
+
+        /* Goals Grid */
+        .goals-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .goal-card {
+            background-color: white;
+            border: 1px solid var(--notion-gray-dark);
+            border-radius: 8px;
+            padding: 20px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .goal-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .goal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .goal-title {
+            font-size: 18px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .goal-title i {
+            color: var(--notion-text-light);
+        }
+
+        .goal-actions {
+            display: flex;
+            gap: 4px;
+        }
+
+        .goal-btn {
+            padding: 4px 8px;
+            border-radius: 4px;
+            border: 1px solid var(--notion-gray-dark);
+            background-color: white;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .goal-progress {
+            margin-bottom: 16px;
+        }
+
+        .progress-bar {
+            height: 6px;
+            background-color: var(--notion-gray);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: var(--notion-green);
+            border-radius: 3px;
+            transition: width 0.3s;
+        }
+
+        .progress-text {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: var(--notion-text-light);
+        }
+
+        .goal-metrics {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .metric {
+            background-color: var(--notion-gray-light);
+            padding: 10px;
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        .metric-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--notion-blue);
+        }
+
+        .metric-label {
+            font-size: 11px;
+            color: var(--notion-text-light);
+            text-transform: uppercase;
+            margin-top: 4px;
+        }
+
+        .goal-tasks {
+            margin-top: 16px;
+        }
+
+        .task-item {
+            display: flex;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--notion-gray);
+        }
+
+        .task-item:last-child {
+            border-bottom: none;
+        }
+
+        .task-checkbox {
+            margin-right: 12px;
+        }
+
+        .task-text {
+            flex: 1;
+            font-size: 14px;
+        }
+
+        .task-text.completed {
+            text-decoration: line-through;
+            color: var(--notion-text-light);
+        }
+
+        /* Weekly Review */
+        .weekly-review {
+            background-color: white;
+            border: 1px solid var(--notion-gray-dark);
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 32px;
+        }
+
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .review-title {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .review-date {
+            color: var(--notion-text-light);
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--notion-gray-dark);
+            border-radius: 6px;
+            font-size: 14px;
+            background-color: var(--notion-gray-light);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--notion-blue);
+            background-color: white;
+        }
+
+        textarea.form-control {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 24px;
+            padding-top: 20px;
+            border-top: 1px solid var(--notion-gray-dark);
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: 1px solid var(--notion-gray-dark);
+            background-color: white;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn.primary {
+            background-color: var(--notion-blue);
+            color: white;
+            border-color: var(--notion-blue);
+        }
+
+        .btn.green {
+            background-color: var(--notion-green);
+            color: white;
+            border-color: var(--notion-green);
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            background-color: white;
+            border: 1px solid var(--notion-gray-dark);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .stat-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
             justify-content: center;
+            margin: 0 auto 12px;
+            font-size: 20px;
+        }
+
+        .stat-icon.blue { background-color: var(--notion-blue-light); color: var(--notion-blue); }
+        .stat-icon.green { background-color: var(--notion-green-light); color: var(--notion-green); }
+        .stat-icon.purple { background-color: var(--notion-purple-light); color: var(--notion-purple); }
+        .stat-icon.orange { background-color: var(--notion-orange-light); color: var(--notion-orange); }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: var(--notion-text-light);
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            display: none;
+        }
+
+        .modal {
+            background-color: white;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--notion-gray-dark);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--notion-text-light);
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+        }
+
+        .modal-close:hover {
+            background-color: var(--notion-gray);
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        /* Loading */
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+            color: var(--notion-text-light);
+        }
+
+        .loading i {
+            margin-right: 8px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar {
+                display: none;
+            }
+            
+            .goals-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .goal-metrics {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .header-actions {
+                display: none;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
     </style>
 </head>
-<body class="flex items-center justify-center min-h-screen">
-    <div class="app flex items-center justify-center min-h-screen p-4">
-        <div class="card p-8 w-full text-center space-y-6">
-            <h1 class="text-3xl md:text-4xl font-bold text-[var(--text)]">تحميل صورة</h1>
-            <p class="text-[var(--muted)]">اختر صورة من جهازك أو التقط واحدة.</p>
-
-            <div class="space-y-4">
-                <label class="block">
-                    <input type="file" id="image-upload" accept="image/*" class="form-input text-[var(--muted)]
-                        file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0
-                        file:text-sm file:font-semibold file:bg-gray-700/50 file:text-white
-                        hover:file:bg-gray-600/50 transition-colors duration-200"
-                    />
-                </label>
-                <div class="flex gap-4">
-                    <button id="camera-button" class="pill flex-1 bg-[var(--warning)] text-black font-semibold py-3 shadow-lg hover:bg-[var(--warning)]/80">
-                        <i class="fas fa-camera"></i> التقط صورة
-                    </button>
-                    <button id="upload-button" class="pill flex-1 bg-[var(--accent)] text-black font-semibold py-3 shadow-lg hover:bg-[var(--accent)]/80">
-                        <i class="fas fa-cloud-upload-alt"></i> رفع الصورة
-                    </button>
-                </div>
-            </div>
-            
-            <video id="video-preview" autoplay></video>
-            <div id="camera-controls" class="flex">
-                <button id="take-photo-button" class="pill flex-1 bg-[var(--success)] text-black font-semibold py-3 shadow-lg hover:bg-[var(--success)]/80">
-                    التقط صورة
-                </button>
-                <button id="cancel-camera-button" class="pill flex-1 bg-[var(--danger)] text-white font-semibold py-3 shadow-lg hover:bg-[var(--danger)]/80">
-                    إلغاء
-                </button>
-            </div>
-            <canvas id="photo-canvas" style="display:none;"></canvas>
-
-            <div id="result-box" class="hidden mt-6 p-4 rounded-xl border border-[var(--success)] bg-[var(--success)]/20 text-[var(--success)] text-sm break-words text-left space-y-2">
-                <p class="font-bold flex items-center gap-2"><i class="fas fa-check-circle"></i> تم الرفع بنجاح!</p>
-                <a id="result-link" href="#" target="_blank" class="block text-[var(--success)] hover:underline"></a>
-            </div>
-
-            <div id="error-message" class="hidden mt-6 p-4 rounded-xl border border-[var(--danger)] bg-[var(--danger)]/20 text-[var(--danger)] text-sm space-y-2">
-                <p class="flex items-center gap-2"><i class="fas fa-exclamation-triangle"></i></p>
-            </div>
-            
-            <button id="view-gallery-button" class="pill w-full mt-6 bg-[var(--muted)]/20 text-[var(--muted)] hover:bg-[var(--muted)]/40 font-semibold py-3 shadow-lg">
-                <i class="fas fa-images"></i> رؤية الصور
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="workspace-icon">T</div>
+        <div class="header-title">ICT Scalping Journal - Weekly Goals</div>
+        <div class="header-actions">
+            <button class="header-btn" id="backBtn">
+                <i class="fas fa-arrow-left"></i> Back
+            </button>
+            <button class="header-btn primary" id="newGoalBtn">
+                <i class="fas fa-plus"></i> New Goal
             </button>
         </div>
     </div>
-    
-    <div id="gallery-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title">معرض الصور</h3>
-                <button type="button" class="close" data-modal-close="gallery-modal">&times;</button>
+
+    <!-- Main Layout -->
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="workspace">
+                <div class="workspace-icon">T</div>
+                <div class="workspace-name">Trading Journal</div>
             </div>
-            <div class="modal-body">
-                <div id="gallery-container" class="image-gallery">
+
+            <div class="favorites">
+                <div class="nav-title">Favorites</div>
+                <a href="index.html" class="nav-item">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="fas fa-book"></i> Trade Journal
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="fas fa-chart-bar"></i> Analytics
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="fas fa-calendar-day"></i> Daily Journal
+                </a>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-title">Pages</div>
+                <a href="Plan.html" class="nav-item">
+                    <i class="fas fa-file-alt"></i> Trading Plan
+                </a>
+                <a href="#" class="nav-item active">
+                    <i class="fas fa-bullseye"></i> Weekly Goals
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="fas fa-brain"></i> Psychology Review
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="fas fa-chart-pie"></i> Performance
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="fas fa-cog"></i> Settings
+                </a>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-title">Databases</div>
+                <a href="#" class="nav-item">
+                    <i class="fas fa-table"></i> All Trades
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="fas fa-filter"></i> London Session
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="fas fa-euro-sign"></i> EURUSD Only
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="fas fa-pound-sign"></i> GBPUSD Only
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="fas fa-trophy"></i> Winning Trades
+                </a>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="page">
+                <!-- Page Header -->
+                <div class="page-header">
+                    <h1 class="page-title">🎯 Weekly Goals & Objectives</h1>
+                    <div class="page-tags">
+                        <span class="page-tag green">Week 15, 2024</span>
+                        <span class="page-tag blue">ICT Focus</span>
+                        <span class="page-tag purple">London Session</span>
+                        <span class="page-tag red">High Priority</span>
                     </div>
+                </div>
+
+                <!-- Quick Stats -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon green">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="stat-value">3/5</div>
+                        <div class="stat-label">Goals Completed</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon blue">
+                            <i class="fas fa-trophy"></i>
+                        </div>
+                        <div class="stat-value">65%</div>
+                        <div class="stat-label">Overall Progress</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon purple">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="stat-value">+2.8%</div>
+                        <div class="stat-label">Weekly P/L Target</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon orange">
+                            <i class="fas fa-bullseye"></i>
+                        </div>
+                        <div class="stat-value">80%</div>
+                        <div class="stat-label">Win Rate Target</div>
+                    </div>
+                </div>
+
+                <!-- Callout -->
+                <div class="callout">
+                    <div class="callout-icon">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <div class="callout-content">
+                        <h3>This Week's Focus: Patience & Precision</h3>
+                        <p>Key theme: Wait for premium/discount confirmation on H1 before entering trades. Maximum 3 trades per day during London kill zones only.</p>
+                    </div>
+                </div>
+
+                <!-- Goals Grid -->
+                <div class="goals-grid">
+                    <!-- Goal 1 -->
+                    <div class="goal-card">
+                        <div class="goal-header">
+                            <div class="goal-title">
+                                <i class="fas fa-chart-line"></i>
+                                Profit Target
+                            </div>
+                            <div class="goal-actions">
+                                <button class="goal-btn" onclick="editGoal(1)"><i class="fas fa-edit"></i></button>
+                                <button class="goal-btn" onclick="deleteGoal(1)"><i class="fas fa-trash"></i></button>
+                            </div>
+                        </div>
+                        
+                        <div class="goal-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 75%"></div>
+                            </div>
+                            <div class="progress-text">
+                                <span>Progress</span>
+                                <span>75%</span>
+                            </div>
+                        </div>
+                        
+                        <div class="goal-metrics">
+                            <div class="metric">
+                                <div class="metric-value">+$850</div>
+                                <div class="metric-label">Current P/L</div>
+                            </div>
+                            <div class="metric">
+                                <div class="metric-value">$1,200</div>
+                                <div class="metric-label">Target</div>
+                            </div>
+                        </div>
+                        
+                        <div class="goal-tasks">
+                            <div class="task-item">
+                                <input type="checkbox" class="task-checkbox" checked onclick="toggleTask(1)">
+                                <div class="task-text completed">Achieve +3% weekly return</div>
+                            </div>
+                            <div class="task-item">
+                                <input type="checkbox" class="task-checkbox" onclick="toggleTask(2)">
+                                <div class="task-text">Maintain 1:2 minimum R:R</div>
+                            </div>
+                            <div class="task-item">
+                                <input type="checkbox" class="task-checkbox" onclick="toggleTask(3)">
+                                <div class="task-text">Limit max daily loss to $200</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Goal 2 -->
+                    <div class="goal-card">
+                        <div class="goal-header">
+                            <div class="goal-title">
+                                <i class="fas fa-bullseye"></i>
+                                Win Rate Improvement
+                            </div>
+                            <div class="goal-actions">
+                                <button class="goal-btn" onclick="editGoal(2)"><i class="fas fa-edit"></i></button>
+                                <button class="goal-btn" onclick="deleteGoal(2)"><i class="fas fa-trash"></i></button>
+                            </div>
+                        </div>
+                        
+                        <div class="goal-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 60%"></div>
+                            </div>
+                            <div class="progress-text">
+                                <span>Progress</span>
+                                <span>60%</span>
+                            </div>
+                        </div>
+                        
+                        <div class="goal-metrics">
+                            <div class="metric">
+                                <div class="metric-value">72%</div>
+                                <div class="metric-label">Current</div>
+                            </div>
+                            <div class="metric">
+                                <div class="metric-value">80%</div>
+                                <div class="metric-label">Target</div>
+                            </div>
+                        </div>
+                        
+                        <div class="goal-tasks">
+                            <div class="task-item">
+                                <input type="checkbox" class="task-checkbox" checked onclick="toggleTask(4)">
+                                <div class="task-text completed">Review losing trades daily</div>
+                            </div>
+                            <div class="task-item">
+                                <input type="checkbox" class="task-checkbox" onclick="toggleTask(5)">
+                                <div class="task-text">Wait for kill zone confirmation</div>
+                            </div>
+                            <div class="task-item">
+                                <input type="checkbox" class="task-checkbox" onclick="toggleTask(6)">
+                                <div class="task-text">Avoid revenge trading</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Goal 3 -->
+                    <div class="goal-card">
+                        <div class="goal-header">
+                            <div class="goal-title">
+                                <i class="fas fa-clock"></i>
+                                Trade Management
+                            </div>
+                            <div class="goal-actions">
+                                <button class="goal-btn" onclick="editGoal(3)"><i class="fas fa-edit"></i></button>
+                                <button class="goal-btn" onclick="deleteGoal(3)"><i class="fas fa-trash"></i></button>
+                            </div>
+                        </div>
+                        
+                        <div class="goal-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 90%"></div>
+                            </div>
+                            <div class="progress-text">
+                                <span>Progress</span>
+                                <span>90%</span>
+                            </div>
+                        </div>
+                        
+                        <div class="goal-metrics">
+                            <div class="metric">
+                                <div class="metric-value">2.5</div>
+                                <div class="metric-label">Avg R:R</div>
+                            </div>
+                            <div class="metric">
+                                <div class="metric-value">3</div>
+                                <div class="metric-label">Max Trades/Day</div>
+                            </div>
+                        </div>
+                        
+                        <div class="goal-tasks">
+                            <div class="task-item">
+                                <input type="checkbox" class="task-checkbox" checked onclick="toggleTask(7)">
+                                <div class="task-text completed">Set stop loss immediately</div>
+                            </div>
+                            <div class="task-item">
+                                <input type="checkbox" class="task-checkbox" checked onclick="toggleTask(8)">
+                                <div class="task-text completed">Use trailing stops after 1:1</div>
+                            </div>
+                            <div class="task-item">
+                                <input type="checkbox" class="task-checkbox" onclick="toggleTask(9)">
+                                <div class="task-text">Scale out at 1:2 and 1:3</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Goal 4 -->
+                    <div class="goal-card">
+                        <div class="goal-header">
+                            <div class="goal-title">
+                                <i class="fas fa-brain"></i>
+                                Psychology & Discipline
+                            </div>
+                            <div class="goal-actions">
+                                <button class="goal-btn" onclick="editGoal(4)"><i class="fas fa-edit"></i></button>
+                                <button class="goal-btn" onclick="deleteGoal(4)"><i class="fas fa-trash"></i></button>
+                            </div>
+                        </div>
+                        
+                        <div class="goal-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 40%"></div>
+                            </div>
+                            <div class="progress-text">
+                                <span>Progress</span>
+                                <span>40%</span>
+                            </div>
+                        </div>
+                        
+                        <div class="goal-metrics">
+                            <div class="metric">
+                                <div class="metric-value">7/10</div>
+                                <div class="metric-label">Emotion Score</div>
+                            </div>
+                            <div class="metric">
+                                <div class="metric-value">3</div>
+                                <div class="metric-label">Meditation Days</div>
+                            </div>
+                        </div>
+                        
+                        <div class="goal-tasks">
+                            <div class="task-item">
+                                <input type="checkbox" class="task-checkbox" onclick="toggleTask(10)">
+                                <div class="task-text">Daily meditation 10min</div>
+                            </div>
+                            <div class="task-item">
+                                <input type="checkbox" class="task-checkbox" checked onclick="toggleTask(11)">
+                                <div class="task-text completed">Journal every trade</div>
+                            </div>
+                            <div class="task-item">
+                                <input type="checkbox" class="task-checkbox" onclick="toggleTask(12)">
+                                <div class="task-text">No trading after 2 losses</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Weekly Review -->
+                <div class="weekly-review">
+                    <div class="review-header">
+                        <div class="review-title">📝 Week 15 Review & Notes</div>
+                        <div class="review-date">Apr 8 - Apr 12, 2024</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">What Went Well This Week?</label>
+                        <textarea class="form-control" id="wentWell" rows="3">• Excellent patience waiting for premium/discount zones
+• Good trade management on EURUSD trades
+• Maintained 1:2 minimum R:R on all trades
+• Avoided overtrading - kept to max 3 trades/day
+• Successfully traded only London kill zones</textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Areas for Improvement Next Week</label>
+                        <textarea class="form-control" id="improveNextWeek" rows="3">• Need better entry timing on GBPUSD trades
+• Improve journaling of emotional state
+• Work on scaling out positions more effectively
+• Review HTF structure more consistently
+• Reduce revenge trading impulses</textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Key Lessons Learned</label>
+                        <textarea class="form-control" id="lessonsLearned" rows="3">1. London open (07:00 GMT) provides best liquidity for EURUSD
+2. Waiting for H1 candle close reduces false entries
+3. Emotional trading occurs after consecutive losses - take breaks
+4. Premium/discount zones on H1 work better than M5/M15
+5. Risk management is more important than being right</textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Next Week's Focus Areas</label>
+                        <textarea class="form-control" id="nextWeekFocus" rows="3">1. Implement scaling out strategy (1:2 and 1:3)
+2. Focus only on EURUSD during early London
+3. Daily meditation before trading session
+4. Review trading plan before each session
+5. Maximum 2 trades per day for first 3 days</textarea>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button class="btn" id="saveDraftBtn">
+                            <i class="fas fa-save"></i> Save Draft
+                        </button>
+                        <button class="btn primary" id="saveReviewBtn">
+                            <i class="fas fa-cloud-upload-alt"></i> Save to Database
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-    
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
-        
-        // These global variables are expected to be provided by the runtime environment.
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
-        const cloudName = "dzc99hze9";
-        const uploadPreset = "testaben";
-    
-        const fileInput = document.getElementById('image-upload');
-        const uploadButton = document.getElementById('upload-button');
-        const cameraButton = document.getElementById('camera-button');
-        const takePhotoButton = document.getElementById('take-photo-button');
-        const cancelButton = document.getElementById('cancel-camera-button');
-        const videoPreview = document.getElementById('video-preview');
-        const cameraControls = document.getElementById('camera-controls');
-        const photoCanvas = document.getElementById('photo-canvas');
-        const viewGalleryButton = document.getElementById('view-gallery-button');
-        const galleryModal = document.getElementById('gallery-modal');
-        const galleryContainer = document.getElementById('gallery-container');
-        const resultBox = document.getElementById('result-box');
-        const resultLink = document.getElementById('result-link');
-        const errorMessage = document.getElementById('error-message');
-
-        let db;
-        let auth;
-        let userId = null;
-        let cameraStream = null;
-
-        function initializeFirebase() {
-            if (typeof __firebase_config === 'undefined' || !__firebase_config || __firebase_config === '{}') {
-                console.error("Firebase config is not available.");
-                showError("فشل في تهيئة التطبيق. لم يتم توفير إعدادات Firebase.");
-                return;
-            }
-            try {
-                const firebaseConfig = JSON.parse(__firebase_config);
-                const app = initializeApp(firebaseConfig);
-                auth = getAuth(app);
-                db = getDatabase(app);
+    <!-- New Goal Modal -->
+    <div class="modal-overlay" id="newGoalModal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">🎯 Create New Goal</div>
+                <button class="modal-close" id="closeModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Goal Title</label>
+                    <input type="text" class="form-control" id="goalTitle" placeholder="e.g., Achieve 80% Win Rate">
+                </div>
                 
-                onAuthStateChanged(auth, async (user) => {
-                    if (user) {
-                        console.log("User signed in with UID:", user.uid);
-                        userId = user.uid;
-                        setupDatabaseListener();
-                    } else {
-                        console.log("No user, attempting to sign in...");
-                        try {
-                            if (initialAuthToken) {
-                                await signInWithCustomToken(auth, initialAuthToken);
-                            } else {
-                                await signInAnonymously(auth);
-                            }
-                        } catch (e) {
-                            console.error("Authentication failed:", e);
-                            showError("فشل في تسجيل الدخول. يرجى إعادة المحاولة.");
-                        }
-                    }
-                });
-            } catch (e) {
-                console.error("Firebase initialization failed:", e);
-                showError("فشل في تهيئة Firebase. يرجى التحقق من الإعدادات.");
-            }
-        }
-        
-        function setupDatabaseListener() {
-            if (!userId) return;
-            const imagesRef = ref(db, `artifacts/${appId}/public/data/uploaded_images`);
+                <div class="form-group">
+                    <label class="form-label">Category</label>
+                    <select class="form-control" id="goalCategory">
+                        <option value="performance">Performance</option>
+                        <option value="psychology">Psychology</option>
+                        <option value="discipline">Discipline</option>
+                        <option value="education">Education</option>
+                        <option value="risk">Risk Management</option>
+                    </select>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Target Value</label>
+                        <input type="text" class="form-control" id="goalTarget" placeholder="e.g., 80% or $1000">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Current Value</label>
+                        <input type="text" class="form-control" id="goalCurrent" placeholder="e.g., 65% or $650">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Deadline</label>
+                    <input type="date" class="form-control" id="goalDeadline">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Key Tasks (one per line)</label>
+                    <textarea class="form-control" id="goalTasks" rows="4" placeholder="Enter each task on a new line:
+• Wait for kill zone confirmation
+• Maintain 1:2 R:R minimum
+• Review trades daily"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Priority</label>
+                    <div style="display: flex; gap: 12px;">
+                        <label style="display: flex; align-items: center; gap: 4px;">
+                            <input type="radio" name="priority" value="low"> Low
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 4px;">
+                            <input type="radio" name="priority" value="medium" checked> Medium
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 4px;">
+                            <input type="radio" name="priority" value="high"> High
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button class="btn" id="cancelGoal">Cancel</button>
+                    <button class="btn primary" id="saveGoal">Create Goal</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-            onValue(imagesRef, (snapshot) => {
-                const data = snapshot.val();
-                const images = [];
-                if (data) {
-                    Object.entries(data).forEach(([key, value]) => {
-                        images.push({ id: key, url: value.url, timestamp: value.timestamp, userId: value.userId });
-                    });
-                }
-                images.sort((a, b) => b.timestamp - a.timestamp);
-                renderGallery(images);
-            }, (error) => {
-                console.error("Failed to fetch images:", error);
-                showError("فشل في تحميل الصور.");
-            });
-        }
-
-        async function saveImageUrl(imageUrl) {
-            if (!userId) {
-                showError("المستخدم غير مسجل. لا يمكن حفظ الصورة.");
-                return;
-            }
-            try {
-                const imagesRef = ref(db, `artifacts/${appId}/public/data/uploaded_images`);
-                await push(imagesRef, {
-                    url: imageUrl,
-                    timestamp: Date.now(),
-                    userId: userId
-                });
-                console.log("Image URL saved to Realtime Database.");
-            } catch (e) {
-                console.error("Error saving image URL:", e);
-                showError("حدث خطأ أثناء حفظ رابط الصورة.");
-            }
-        }
-
-        async function deleteImage(docId, imageUserId) {
-            if (!userId || !docId) return;
-            if (userId !== imageUserId) {
-                showError("لا يمكنك حذف صور المستخدمين الآخرين.");
-                return;
-            }
-            try {
-                const imageRef = ref(db, `artifacts/${appId}/public/data/uploaded_images/${docId}`);
-                await remove(imageRef);
-                console.log("Image document deleted.");
-            } catch (e) {
-                console.error("Error deleting image document:", e);
-                showError("فشل في حذف الصورة.");
-            }
-        }
-
-        function renderGallery(images) {
-            galleryContainer.innerHTML = '';
-            if (images.length === 0) {
-                galleryContainer.innerHTML = `<div class="col-span-full text-center text-[var(--muted)]">لا توجد صور.</div>`;
-                return;
-            }
-            images.forEach(image => {
-                const imgElement = document.createElement('div');
-                imgElement.classList.add('gallery-item');
-                imgElement.innerHTML = `
-                    <button class="delete-btn" data-doc-id="${image.id}" data-user-id="${image.userId}" style="display: ${userId === image.userId ? 'flex' : 'none'};"><i class="fas fa-times"></i></button>
-                    <img src="${image.url}" alt="Uploaded Image">
-                `;
-                imgElement.querySelector('.delete-btn').addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    const docId = e.currentTarget.dataset.docId;
-                    const imageUserId = e.currentTarget.dataset.userId;
-                    deleteImage(docId, imageUserId);
-                });
-                imgElement.querySelector('img').addEventListener('click', () => {
-                    window.open(image.url, '_blank');
-                });
-                galleryContainer.appendChild(imgElement);
-            });
-        }
-    
-        fileInput.addEventListener('change', () => {
-            resultBox.classList.add('hidden');
-            errorMessage.classList.add('hidden');
-        });
-
-        cameraButton.addEventListener('click', async () => {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
-                videoPreview.srcObject = stream;
-                videoPreview.style.display = 'block';
-                cameraControls.style.display = 'flex';
-                uploadButton.disabled = true;
-                fileInput.disabled = true;
-                cameraStream = stream;
-            } catch (err) {
-                console.error("Error accessing camera:", err);
-                showError("فشل الوصول إلى الكاميرا. تأكد من إعطاء الصلاحيات.");
-            }
-        });
-
-        takePhotoButton.addEventListener('click', () => {
-            const context = photoCanvas.getContext('2d');
-            photoCanvas.width = videoPreview.videoWidth;
-            photoCanvas.height = videoPreview.videoHeight;
-            context.drawImage(videoPreview, 0, 0, photoCanvas.width, photoCanvas.height);
+    <script>
+        // Initialize Application
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set default deadline to end of week
+            const today = new Date();
+            const endOfWeek = new Date(today);
+            endOfWeek.setDate(today.getDate() + (6 - today.getDay())); // Next Saturday
+            document.getElementById('goalDeadline').value = endOfWeek.toISOString().split('T')[0];
             
-            photoCanvas.toBlob((blob) => {
-                const photoFile = new File([blob], "camera-photo.png", { type: "image/png" });
-                const dataTransfer = new DataTransfer();
-                dataTransfer.items.add(photoFile);
-                fileInput.files = dataTransfer.files;
-            }, 'image/png');
-
-            stopCamera();
+            // Setup Event Listeners
+            setupEventListeners();
+            
+            // Load goals from localStorage
+            loadGoals();
         });
 
-        cancelButton.addEventListener('click', stopCamera);
-
-        function stopCamera() {
-            if (cameraStream) {
-                cameraStream.getTracks().forEach(track => track.stop());
-            }
-            videoPreview.style.display = 'none';
-            cameraControls.style.display = 'none';
-            uploadButton.disabled = false;
-            fileInput.disabled = false;
+        // Setup Event Listeners
+        function setupEventListeners() {
+            // Navigation
+            document.getElementById('backBtn').addEventListener('click', function() {
+                window.location.href = 'index.html';
+            });
+            
+            // New Goal Modal
+            document.getElementById('newGoalBtn').addEventListener('click', openModal);
+            document.getElementById('closeModal').addEventListener('click', closeModal);
+            document.getElementById('cancelGoal').addEventListener('click', closeModal);
+            document.getElementById('saveGoal').addEventListener('click', saveGoal);
+            
+            // Save Review
+            document.getElementById('saveReviewBtn').addEventListener('click', saveWeeklyReview);
+            document.getElementById('saveDraftBtn').addEventListener('click', function() {
+                alert('Weekly review saved as draft locally');
+                saveToLocalStorage();
+            });
         }
-        
-        uploadButton.addEventListener('click', async () => {
-            const file = fileInput.files[0];
-            if (!file) {
-                showError("الرجاء اختيار صورة أولاً.");
+
+        // Task Toggle Function
+        function toggleTask(taskId) {
+            const taskCheckbox = event.target;
+            const taskText = taskCheckbox.nextElementSibling;
+            
+            if (taskCheckbox.checked) {
+                taskText.classList.add('completed');
+            } else {
+                taskText.classList.remove('completed');
+            }
+            
+            // Update progress
+            updateGoalProgress(taskCheckbox.closest('.goal-card'));
+            saveToLocalStorage();
+        }
+
+        // Update Goal Progress
+        function updateGoalProgress(goalCard) {
+            const tasks = goalCard.querySelectorAll('.task-item');
+            const completed = goalCard.querySelectorAll('.task-checkbox:checked').length;
+            const total = tasks.length;
+            const progress = total > 0 ? Math.round((completed / total) * 100) : 0;
+            
+            // Update progress bar
+            const progressFill = goalCard.querySelector('.progress-fill');
+            const progressText = goalCard.querySelector('.progress-text span:last-child');
+            
+            if (progressFill) progressFill.style.width = `${progress}%`;
+            if (progressText) progressText.textContent = `${progress}%`;
+            
+            // Update overall stats
+            updateOverallStats();
+        }
+
+        // Update Overall Stats
+        function updateOverallStats() {
+            const goals = document.querySelectorAll('.goal-card');
+            let totalProgress = 0;
+            let completedGoals = 0;
+            
+            goals.forEach(goal => {
+                const progressText = goal.querySelector('.progress-text span:last-child');
+                const progress = parseInt(progressText.textContent) || 0;
+                totalProgress += progress;
+                
+                if (progress >= 100) {
+                    completedGoals++;
+                }
+            });
+            
+            // Update stats
+            const overallProgress = goals.length > 0 ? Math.round(totalProgress / goals.length) : 0;
+            
+            // Update stat cards
+            document.querySelector('.stat-card:nth-child(1) .stat-value').textContent = 
+                `${completedGoals}/${goals.length}`;
+            document.querySelector('.stat-card:nth-child(2) .stat-value').textContent = 
+                `${overallProgress}%`;
+        }
+
+        // Edit Goal
+        function editGoal(goalId) {
+            // For now, just open the modal with placeholder data
+            openModal();
+            document.getElementById('goalTitle').value = 'Edit Goal ' + goalId;
+            // In a real app, you would load the goal data from storage/database
+        }
+
+        // Delete Goal
+        function deleteGoal(goalId) {
+            if (confirm('Are you sure you want to delete this goal?')) {
+                // In a real app, you would remove from storage/database
+                const goalCard = event.target.closest('.goal-card');
+                if (goalCard) {
+                    goalCard.style.opacity = '0.5';
+                    goalCard.style.pointerEvents = 'none';
+                    setTimeout(() => {
+                        goalCard.remove();
+                        updateOverallStats();
+                        saveToLocalStorage();
+                    }, 300);
+                }
+            }
+        }
+
+        // Open Modal
+        function openModal() {
+            document.getElementById('newGoalModal').style.display = 'flex';
+        }
+
+        // Close Modal
+        function closeModal() {
+            document.getElementById('newGoalModal').style.display = 'none';
+            // Reset form
+            document.getElementById('goalTitle').value = '';
+            document.getElementById('goalTarget').value = '';
+            document.getElementById('goalCurrent').value = '';
+            document.getElementById('goalTasks').value = '';
+        }
+
+        // Save Goal
+        function saveGoal() {
+            const title = document.getElementById('goalTitle').value;
+            const category = document.getElementById('goalCategory').value;
+            const target = document.getElementById('goalTarget').value;
+            const current = document.getElementById('goalCurrent').value;
+            const tasks = document.getElementById('goalTasks').value;
+            
+            if (!title.trim()) {
+                alert('Please enter a goal title');
                 return;
             }
-            showLoading(true);
-            resultBox.classList.add('hidden');
-            errorMessage.classList.add('hidden');
-    
-            const formData = new FormData();
-            formData.append('file', file);
-            formData.append('upload_preset', uploadPreset);
-    
-            try {
-                const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
-                    method: 'POST',
-                    body: formData
-                });
-    
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.error.message || 'فشل في رفع الصورة.');
+            
+            // Calculate progress
+            let progress = 0;
+            if (target && current) {
+                if (target.includes('%') || current.includes('%')) {
+                    const targetNum = parseFloat(target);
+                    const currentNum = parseFloat(current);
+                    progress = targetNum > 0 ? Math.round((currentNum / targetNum) * 100) : 0;
                 }
-    
-                const data = await response.json();
-                const imageUrl = data.secure_url;
-                
-                resultLink.href = imageUrl;
-                resultLink.textContent = imageUrl;
-                resultBox.classList.remove('hidden');
-
-                await saveImageUrl(imageUrl);
-                
-            } catch (error) {
-                console.error("Upload error:", error);
-                showError(`فشل في الرفع: ${error.message}`);
-            } finally {
-                showLoading(false);
             }
-        });
+            
+            // Create new goal card
+            const goalsGrid = document.querySelector('.goals-grid');
+            const newGoal = document.createElement('div');
+            newGoal.className = 'goal-card';
+            newGoal.innerHTML = `
+                <div class="goal-header">
+                    <div class="goal-title">
+                        <i class="fas fa-bullseye"></i>
+                        ${title}
+                    </div>
+                    <div class="goal-actions">
+                        <button class="goal-btn" onclick="editGoal(${Date.now()})"><i class="fas fa-edit"></i></button>
+                        <button class="goal-btn" onclick="deleteGoal(${Date.now()})"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>
+                
+                <div class="goal-progress">
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: ${progress}%"></div>
+                    </div>
+                    <div class="progress-text">
+                        <span>Progress</span>
+                        <span>${progress}%</span>
+                    </div>
+                </div>
+                
+                <div class="goal-metrics">
+                    <div class="metric">
+                        <div class="metric-value">${current}</div>
+                        <div class="metric-label">Current</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value">${target}</div>
+                        <div class="metric-label">Target</div>
+                    </div>
+                </div>
+                
+                <div class="goal-tasks">
+                    ${tasks.split('\n').filter(t => t.trim()).map((task, i) => `
+                        <div class="task-item">
+                            <input type="checkbox" class="task-checkbox" onclick="toggleTask(${Date.now() + i})">
+                            <div class="task-text">${task.trim()}</div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            
+            // Add to grid
+            goalsGrid.appendChild(newGoal);
+            
+            // Close modal and update stats
+            closeModal();
+            updateOverallStats();
+            saveToLocalStorage();
+            
+            alert('New goal created successfully!');
+        }
 
-        viewGalleryButton.addEventListener('click', () => {
-            galleryModal.classList.add('active');
-        });
+        // Save Weekly Review
+        function saveWeeklyReview() {
+            const reviewData = {
+                wentWell: document.getElementById('wentWell').value,
+                improveNextWeek: document.getElementById('improveNextWeek').value,
+                lessonsLearned: document.getElementById('lessonsLearned').value,
+                nextWeekFocus: document.getElementById('nextWeekFocus').value,
+                savedAt: new Date().toISOString()
+            };
+            
+            // In a real app, save to database
+            // For now, save to localStorage
+            localStorage.setItem('weeklyReview', JSON.stringify(reviewData));
+            
+            alert('Weekly review saved successfully!');
+        }
 
-        document.addEventListener('click', (e) => {
-            if (e.target.dataset.modalClose) {
-                document.getElementById(e.target.dataset.modalClose).classList.remove('active');
-            }
-        });
-    
-        function showLoading(isLoading) {
-            if (isLoading) {
-                uploadButton.innerHTML = `<div class="spinner mx-auto w-5 h-5"></div>`;
-                uploadButton.disabled = true;
-                cameraButton.disabled = true;
-            } else {
-                uploadButton.innerHTML = `<i class="fas fa-cloud-upload-alt"></i> رفع الصورة`;
-                uploadButton.disabled = false;
-                cameraButton.disabled = false;
+        // Load Goals from localStorage
+        function loadGoals() {
+            try {
+                const savedGoals = localStorage.getItem('weeklyGoals');
+                const savedReview = localStorage.getItem('weeklyReview');
+                
+                if (savedReview) {
+                    const review = JSON.parse(savedReview);
+                    document.getElementById('wentWell').value = review.wentWell || '';
+                    document.getElementById('improveNextWeek').value = review.improveNextWeek || '';
+                    document.getElementById('lessonsLearned').value = review.lessonsLearned || '';
+                    document.getElementById('nextWeekFocus').value = review.nextWeekFocus || '';
+                }
+                
+                // Update stats after loading
+                setTimeout(updateOverallStats, 100);
+            } catch (e) {
+                console.log('No saved data found or error loading:', e);
             }
         }
-    
-        function showError(message) {
-            errorMessage.querySelector('p').innerHTML = `<i class="fas fa-exclamation-triangle"></i> ${message}`;
-            errorMessage.classList.remove('hidden');
+
+        // Save to localStorage
+        function saveToLocalStorage() {
+            try {
+                // Save review
+                const reviewData = {
+                    wentWell: document.getElementById('wentWell').value,
+                    improveNextWeek: document.getElementById('improveNextWeek').value,
+                    lessonsLearned: document.getElementById('lessonsLearned').value,
+                    nextWeekFocus: document.getElementById('nextWeekFocus').value,
+                    savedAt: new Date().toISOString()
+                };
+                localStorage.setItem('weeklyReview', JSON.stringify(reviewData));
+                
+                // Save goals (simplified version)
+                // In a full implementation, you would save all goals data
+            } catch (e) {
+                console.warn('Failed to save to localStorage:', e);
+            }
         }
 
-        initializeFirebase();
+        // Initialize on load
+        updateOverallStats();
     </script>
 </body>
 </html>
