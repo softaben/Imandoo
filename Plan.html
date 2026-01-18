@@ -24,6 +24,8 @@
             --notion-purple-light: #f3e5f5;
             --notion-yellow: #ffc800;
             --notion-yellow-light: #fff8e1;
+            --notion-orange: #ff6b35;
+            --notion-orange-light: #ffe8e0;
         }
 
         * {
@@ -41,7 +43,7 @@
         }
 
         .container {
-            max-width: 1000px;
+            max-width: 1200px;
             margin: 0 auto;
             background: white;
             border-radius: 8px;
@@ -110,6 +112,15 @@
             background-color: var(--notion-gray-dark);
         }
 
+        .btn-orange {
+            background-color: var(--notion-orange);
+            color: white;
+        }
+
+        .btn-orange:hover {
+            background-color: #e05a2b;
+        }
+
         /* Plan Tags */
         .plan-tags {
             display: flex;
@@ -133,6 +144,7 @@
         .tag-red { background: var(--notion-red-light); color: var(--notion-red); }
         .tag-purple { background: var(--notion-purple-light); color: var(--notion-purple); }
         .tag-yellow { background: var(--notion-yellow-light); color: var(--notion-yellow); }
+        .tag-orange { background: var(--notion-orange-light); color: var(--notion-orange); }
 
         .tag-edit {
             cursor: pointer;
@@ -347,15 +359,18 @@
             z-index: 1000;
             align-items: center;
             justify-content: center;
+            padding: 20px;
         }
 
         .modal-content {
             background: white;
             border-radius: 8px;
             width: 90%;
-            max-width: 500px;
+            max-width: 800px;
+            max-height: 80vh;
             padding: 30px;
             box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow-y: auto;
         }
 
         .modal-header {
@@ -466,6 +481,163 @@
             transform: translateX(24px);
         }
 
+        /* History Table */
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .history-table th {
+            background: var(--notion-gray-light);
+            padding: 12px 15px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--notion-text);
+            border-bottom: 2px solid var(--notion-gray-dark);
+        }
+
+        .history-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--notion-gray-dark);
+            vertical-align: top;
+        }
+
+        .history-table tr:hover {
+            background: var(--notion-gray-light);
+        }
+
+        .history-name {
+            font-weight: 500;
+        }
+
+        .history-date {
+            color: var(--notion-text-light);
+            font-size: 14px;
+        }
+
+        .history-actions {
+            display: flex;
+            gap: 5px;
+        }
+
+        .history-action-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            transition: all 0.2s;
+        }
+
+        .history-action-btn.view {
+            background: var(--notion-blue-light);
+            color: var(--notion-blue);
+        }
+
+        .history-action-btn.restore {
+            background: var(--notion-green-light);
+            color: var(--notion-green);
+        }
+
+        .history-action-btn.delete {
+            background: var(--notion-red-light);
+            color: var(--notion-red);
+        }
+
+        .history-action-btn:hover {
+            opacity: 0.8;
+        }
+
+        .empty-history {
+            text-align: center;
+            padding: 40px;
+            color: var(--notion-text-light);
+            font-style: italic;
+        }
+
+        /* Historical Plan Viewer */
+        .history-viewer {
+            background: var(--notion-gray-light);
+            border: 1px solid var(--notion-gray-dark);
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+
+        .history-viewer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--notion-gray-dark);
+        }
+
+        .history-viewer-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--notion-text);
+        }
+
+        .history-badge {
+            background: var(--notion-orange-light);
+            color: var(--notion-orange);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .history-viewer-content {
+            padding: 15px;
+            background: white;
+            border-radius: 6px;
+            border: 1px solid var(--notion-gray-dark);
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .history-section {
+            background: var(--notion-gray-light);
+            border: 1px solid var(--notion-gray-dark);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+
+        .history-section-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: var(--notion-text);
+        }
+
+        .history-section-content {
+            padding: 15px;
+            background: white;
+            border-radius: 4px;
+        }
+
+        /* Loading */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+            color: var(--notion-text-light);
+        }
+
+        .loading i {
+            margin-right: 10px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             body {
@@ -485,6 +657,7 @@
             .header-actions {
                 width: 100%;
                 justify-content: flex-start;
+                flex-wrap: wrap;
             }
             
             .section {
@@ -500,24 +673,11 @@
                 width: 100%;
                 justify-content: flex-end;
             }
-        }
-
-        /* Loading */
-        .loading {
-            display: none;
-            text-align: center;
-            padding: 40px;
-            color: var(--notion-text-light);
-        }
-
-        .loading i {
-            margin-right: 10px;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            
+            .history-table {
+                display: block;
+                overflow-x: auto;
+            }
         }
     </style>
 </head>
@@ -540,6 +700,9 @@
             <div class="header-actions">
                 <button class="btn btn-secondary" onclick="toggleEditMode()" id="editModeBtn">
                     <i class="fas fa-edit"></i> Edit Mode
+                </button>
+                <button class="btn btn-orange" onclick="viewHistory()">
+                    <i class="fas fa-history"></i> View History
                 </button>
                 <button class="btn btn-success" onclick="newPlan()">
                     <i class="fas fa-plus"></i> New Plan
@@ -645,6 +808,42 @@
         </div>
     </div>
 
+    <!-- History Modal -->
+    <div class="modal" id="historyModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Historical Plans</h3>
+            </div>
+            <div class="modal-body">
+                <div id="historyList">
+                    <!-- History items will be loaded here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('historyModal')">Close</button>
+                <button class="btn btn-primary" onclick="clearHistory()">Clear All History</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Historical Plan Viewer Modal -->
+    <div class="modal" id="historyViewerModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Historical Plan</h3>
+            </div>
+            <div class="modal-body">
+                <div id="historyViewerContent">
+                    <!-- Historical plan will be displayed here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('historyViewerModal')">Close</button>
+                <button class="btn btn-success" onclick="restoreHistoricalPlan()">Restore This Version</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // State Management
         let currentPlan = {
@@ -652,16 +851,20 @@
             name: 'ICT Scalping Trading Plan',
             tags: ['ICT Strategy', 'London Session', 'Strict Rules', 'Daily Review'],
             sections: [],
-            lastSaved: null
+            lastSaved: null,
+            created: new Date().toISOString()
         };
 
         let isEditMode = true;
         let currentEditingTag = null;
         let currentTagColor = 'blue';
+        let historicalPlans = [];
+        let currentViewingHistoryId = null;
 
         // Initialize the page
         document.addEventListener('DOMContentLoaded', function() {
             loadPlan();
+            loadHistoricalPlans();
             setupEventListeners();
             updateSaveStatus('Ready');
         });
@@ -677,6 +880,35 @@
             }
             
             renderPlan();
+        }
+
+        // Load historical plans
+        function loadHistoricalPlans() {
+            const savedHistory = localStorage.getItem('planHistory');
+            if (savedHistory) {
+                historicalPlans = JSON.parse(savedHistory);
+            }
+        }
+
+        // Save historical plan
+        function saveHistoricalPlan(planData) {
+            const historyEntry = {
+                id: 'hist-' + Date.now(),
+                name: planData.name,
+                plan: JSON.parse(JSON.stringify(planData)), // Deep clone
+                date: new Date().toISOString(),
+                tags: [...planData.tags]
+            };
+
+            // Add to beginning of array (newest first)
+            historicalPlans.unshift(historyEntry);
+
+            // Keep only last 50 historical plans
+            if (historicalPlans.length > 50) {
+                historicalPlans = historicalPlans.slice(0, 50);
+            }
+
+            localStorage.setItem('planHistory', JSON.stringify(historicalPlans));
         }
 
         // Get default sections
@@ -826,6 +1058,166 @@
             const colors = ['blue', 'green', 'red', 'purple', 'yellow'];
             const hash = tag.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
             return colors[hash % colors.length];
+        }
+
+        // View history
+        function viewHistory() {
+            renderHistoryList();
+            showModal('historyModal');
+        }
+
+        // Render history list
+        function renderHistoryList() {
+            const historyList = document.getElementById('historyList');
+            
+            if (historicalPlans.length === 0) {
+                historyList.innerHTML = '<div class="empty-history">No historical plans found</div>';
+                return;
+            }
+            
+            let html = `
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>Plan Name</th>
+                            <th>Date</th>
+                            <th>Tags</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            historicalPlans.forEach(history => {
+                const date = new Date(history.date);
+                const dateStr = date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                
+                const tagsHtml = history.tags.slice(0, 3).map(tag => {
+                    const color = getTagColor(tag);
+                    return `<span class="tag tag-${color}" style="font-size: 10px; padding: 2px 6px;">${tag}</span>`;
+                }).join(' ');
+                
+                html += `
+                    <tr>
+                        <td>
+                            <div class="history-name">${history.name}</div>
+                        </td>
+                        <td>
+                            <div class="history-date">${dateStr}</div>
+                        </td>
+                        <td>
+                            <div style="display: flex; gap: 4px; flex-wrap: wrap;">${tagsHtml}</div>
+                        </td>
+                        <td>
+                            <div class="history-actions">
+                                <button class="history-action-btn view" onclick="viewHistoricalPlan('${history.id}')">
+                                    <i class="fas fa-eye"></i> View
+                                </button>
+                                <button class="history-action-btn restore" onclick="restoreFromHistory('${history.id}')">
+                                    <i class="fas fa-history"></i> Restore
+                                </button>
+                                <button class="history-action-btn delete" onclick="deleteHistoryItem('${history.id}')">
+                                    <i class="fas fa-trash"></i> Delete
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            html += '</tbody></table>';
+            historyList.innerHTML = html;
+        }
+
+        // View historical plan
+        function viewHistoricalPlan(historyId) {
+            const history = historicalPlans.find(h => h.id === historyId);
+            if (!history) return;
+            
+            currentViewingHistoryId = historyId;
+            
+            const date = new Date(history.date);
+            const dateStr = date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            
+            let html = `
+                <div class="history-viewer">
+                    <div class="history-viewer-header">
+                        <div class="history-viewer-title">${history.name}</div>
+                        <div>
+                            <span class="history-badge">Historical Version</span>
+                            <span style="margin-left: 10px; color: var(--notion-text-light); font-size: 14px;">${dateStr}</span>
+                        </div>
+                    </div>
+            `;
+            
+            // Add tags
+            const tagsHtml = history.plan.tags.map(tag => {
+                const color = getTagColor(tag);
+                return `<span class="tag tag-${color}" style="margin-right: 5px;">${tag}</span>`;
+            }).join('');
+            
+            html += `<div style="margin-bottom: 20px;">${tagsHtml}</div>`;
+            
+            // Add sections
+            history.plan.sections.forEach(section => {
+                html += `
+                    <div class="history-section">
+                        <div class="history-section-title">${section.title}</div>
+                        <div class="history-section-content">${section.content}</div>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            
+            document.getElementById('historyViewerContent').innerHTML = html;
+            closeModal('historyModal');
+            showModal('historyViewerModal');
+        }
+
+        // Restore from history
+        function restoreFromHistory(historyId) {
+            if (!confirm('Restore this historical plan? Current changes will be lost.')) return;
+            
+            const history = historicalPlans.find(h => h.id === historyId);
+            if (!history) return;
+            
+            currentPlan = JSON.parse(JSON.stringify(history.plan));
+            currentPlan.lastSaved = new Date().toISOString();
+            
+            // Save current version to history before restoring
+            saveHistoricalPlan(currentPlan);
+            
+            renderPlan();
+            closeModal('historyModal');
+            updateSaveStatus('Plan restored from history', 'success');
+        }
+
+        // Restore historical plan from viewer
+        function restoreHistoricalPlan() {
+            if (!currentViewingHistoryId) return;
+            restoreFromHistory(currentViewingHistoryId);
+            closeModal('historyViewerModal');
+        }
+
+        // Delete history item
+        function deleteHistoryItem(historyId) {
+            if (!confirm('Delete this historical plan?')) return;
+            
+            historicalPlans = historicalPlans.filter(h => h.id !== historyId);
+            localStorage.setItem('planHistory', JSON.stringify(historicalPlans));
+            renderHistoryList();
+            updateSaveStatus('History item deleted', 'success');
+        }
+
+        // Clear all history
+        function clearHistory() {
+            if (!confirm('Clear all historical plans? This cannot be undone.')) return;
+            
+            historicalPlans = [];
+            localStorage.setItem('planHistory', JSON.stringify([]));
+            renderHistoryList();
+            updateSaveStatus('All history cleared', 'success');
         }
 
         // Add new section
@@ -999,7 +1391,11 @@
                 };
             });
             
-            currentPlan.lastSaved = new Date().toISOString();
+            const saveTime = new Date().toISOString();
+            currentPlan.lastSaved = saveTime;
+            
+            // Save historical version
+            saveHistoricalPlan(currentPlan);
             
             // Save to localStorage
             localStorage.setItem('currentPlan', JSON.stringify(currentPlan));
@@ -1008,7 +1404,7 @@
             setTimeout(() => {
                 showLoading(false);
                 updateSaveStatus('Saved successfully!', 'success');
-                document.getElementById('lastSaved').textContent = `Last saved: ${new Date().toLocaleString()}`;
+                document.getElementById('lastSaved').textContent = `Last saved: ${new Date(saveTime).toLocaleString()}`;
                 
                 // Auto-hide success message
                 setTimeout(() => {
@@ -1027,12 +1423,16 @@
             const name = document.getElementById('newPlanName').value.trim() || 'New Trading Plan';
             const type = document.getElementById('newPlanType').value;
             
+            // Save current plan to history before creating new one
+            saveHistoricalPlan(currentPlan);
+            
             currentPlan = {
                 id: 'plan-' + Date.now(),
                 name: name,
                 tags: ['New Plan', 'Draft'],
                 sections: [],
-                lastSaved: null
+                lastSaved: null,
+                created: new Date().toISOString()
             };
             
             // Load template based on type
