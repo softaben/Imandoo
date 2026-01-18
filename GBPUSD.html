@@ -225,7 +225,7 @@
         }
 
         .page {
-            max-width: 900px;
+            max-width: 1000px;
             margin: 0 auto;
         }
 
@@ -471,52 +471,6 @@
             color: var(--notion-text-light);
         }
 
-        /* Toggle */
-        .toggle {
-            position: relative;
-            display: inline-block;
-            width: 36px;
-            height: 20px;
-        }
-
-        .toggle input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .toggle-slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #ccc;
-            transition: .2s;
-            border-radius: 34px;
-        }
-
-        .toggle-slider:before {
-            position: absolute;
-            content: "";
-            height: 14px;
-            width: 14px;
-            left: 3px;
-            bottom: 3px;
-            background-color: white;
-            transition: .2s;
-            border-radius: 50%;
-        }
-
-        input:checked + .toggle-slider {
-            background-color: var(--notion-green);
-        }
-
-        input:checked + .toggle-slider:before {
-            transform: translateX(16px);
-        }
-
         /* Callouts */
         .callout {
             background-color: var(--gbp-color-light);
@@ -557,7 +511,7 @@
             border: 1px solid var(--notion-gray-dark);
             border-radius: 6px;
             padding: 12px;
-            min-height: 180px;
+            min-height: 300px;
             display: flex;
             flex-direction: column;
         }
@@ -566,18 +520,18 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 8px;
+            margin-bottom: 12px;
             flex-shrink: 0;
         }
 
         .chart-title {
-            font-size: 15px;
+            font-size: 16px;
             font-weight: 600;
         }
 
         .chart-container {
             flex-grow: 1;
-            min-height: 120px;
+            min-height: 250px;
             position: relative;
         }
 
@@ -634,7 +588,7 @@
             background-color: white;
             border-radius: 8px;
             width: 90%;
-            max-width: 600px;
+            max-width: 700px;
             max-height: 90vh;
             overflow-y: auto;
         }
@@ -844,6 +798,31 @@
             width: 100%;
             background-color: var(--gbp-color);
         }
+
+        /* Form Section */
+        .form-section {
+            background-color: var(--notion-gray-light);
+            padding: 20px;
+            border-radius: 6px;
+            margin-bottom: 24px;
+            border: 1px solid var(--notion-gray-dark);
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: var(--gbp-color);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-row-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 16px;
+        }
     </style>
 </head>
 <body>
@@ -967,16 +946,31 @@
                     </div>
                 </div>
 
-                <!-- Callout -->
-                <div class="callout">
-                    <div class="callout-icon">
-                        <i class="fas fa-lightbulb"></i>
+                <!-- Charts Grid -->
+                <div class="charts-grid">
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <div class="chart-title">GBPUSD Performance Chart</div>
+                            <select class="form-control" id="chartPeriod" style="width: auto; font-size: 13px; padding: 4px 8px;">
+                                <option value="7">Last 7 Days</option>
+                                <option value="30" selected>Last 30 Days</option>
+                                <option value="90">Last 90 Days</option>
+                                <option value="all">All Time</option>
+                            </select>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="performanceChart"></canvas>
+                        </div>
                     </div>
-                    <div class="callout-content">
-                        <h3>GBPUSD Trading Strategy</h3>
-                        <p><strong>Cable</strong> is highly volatile - perfect for scalping. Focus on liquidity sweeps and 
-                           order blocks on M15/H1. Trade breakouts during London session (08:00-10:00 GMT). 
-                           Be cautious during BOE news releases. Use 1:3 risk-reward ratio for high volatility moves.</p>
+                    
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <div class="chart-title">Win/Loss Distribution</div>
+                            <div style="font-size: 13px; color: var(--notion-text-light);" id="winLossStats"></div>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="winLossChart"></canvas>
+                        </div>
                     </div>
                 </div>
 
@@ -1023,66 +1017,6 @@
                     </div>
                 </div>
 
-                <!-- Charts -->
-                <div class="charts-grid">
-                    <div class="chart-card">
-                        <div class="chart-header">
-                            <div class="chart-title">GBPUSD Performance</div>
-                            <select class="form-control" id="chartPeriod" style="width: auto; font-size: 13px; padding: 4px 8px;">
-                                <option value="7">Last 7 Days</option>
-                                <option value="30" selected>Last 30 Days</option>
-                                <option value="90">Last 90 Days</option>
-                                <option value="all">All Time</option>
-                            </select>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="performanceChart"></canvas>
-                        </div>
-                    </div>
-                    
-                    <div class="chart-card">
-                        <div class="chart-header">
-                            <div class="chart-title">Session Performance</div>
-                            <div style="font-size: 13px; color: var(--notion-text-light);" id="sessionStats">Loading...</div>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="sessionChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Volatility Analysis -->
-                <div class="database">
-                    <div class="database-header">
-                        <div class="database-title">
-                            <i class="fas fa-chart-line"></i>
-                            GBPUSD Volatility Analysis
-                        </div>
-                    </div>
-                    
-                    <div class="database-table">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Session</th>
-                                    <th>Avg Range (Pips)</th>
-                                    <th>Win Rate</th>
-                                    <th>Avg P/L</th>
-                                    <th>Volatility Level</th>
-                                    <th>Best Time</th>
-                                </tr>
-                            </thead>
-                            <tbody id="volatilityAnalysis">
-                                <tr>
-                                    <td colspan="6" class="loading">
-                                        <i class="fas fa-spinner"></i> Loading volatility analysis...
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
                 <!-- GBPUSD Trades Database -->
                 <div class="database">
                     <div class="database-header">
@@ -1115,16 +1049,16 @@
                         <table id="gbpusdTradesTable">
                             <thead>
                                 <tr>
-                                    <th>Date</th>
+                                    <th>Date & Time</th>
                                     <th>Session</th>
                                     <th>Direction</th>
                                     <th>ICT Model</th>
-                                    <th>Entry Price</th>
-                                    <th>Exit Price</th>
-                                    <th>Pips</th>
                                     <th>Risk %</th>
+                                    <th>Profit %</th>
+                                    <th>Return ($)</th>
+                                    <th>Account Size</th>
+                                    <th>Lot Size</th>
                                     <th>Result</th>
-                                    <th>P/L ($)</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
@@ -1162,128 +1096,128 @@
     <div class="modal-overlay" id="addTradeModal">
         <div class="modal">
             <div class="modal-header">
-                <div class="modal-title">➕ Add GBPUSD Trade</div>
+                <div class="modal-title">➕ Add New GBPUSD Trade</div>
                 <button class="modal-close" id="closeModal">&times;</button>
             </div>
             <div class="modal-body">
-                <div class="form-group">
-                    <label class="form-label">Date & Time</label>
-                    <input type="datetime-local" class="form-control" id="tradeDate" value="">
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label">Session</label>
-                        <select class="form-control" id="tradeSession">
-                            <option value="London" selected>London Session</option>
-                            <option value="New York">New York Session</option>
-                            <option value="Asian">Asian Session</option>
-                            <option value="Sydney">Sydney Session</option>
-                            <option value="Overlap">Session Overlap</option>
-                        </select>
+                <!-- Trade Details Section -->
+                <div class="form-section">
+                    <div class="section-title">
+                        <i class="fas fa-info-circle"></i> Trade Details
                     </div>
                     
                     <div class="form-group">
-                        <label class="form-label">Direction</label>
-                        <select class="form-control" id="tradeDirection">
-                            <option value="Buy">Buy</option>
-                            <option value="Sell">Sell</option>
-                        </select>
+                        <label class="form-label">Date & Time</label>
+                        <input type="datetime-local" class="form-control" id="tradeDate" value="">
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Session</label>
+                            <select class="form-control" id="tradeSession">
+                                <option value="London" selected>London Session</option>
+                                <option value="New York">New York Session</option>
+                                <option value="Asian">Asian Session</option>
+                                <option value="Sydney">Sydney Session</option>
+                                <option value="Overlap">Session Overlap</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Currency Pair</label>
+                            <input type="text" class="form-control" id="currencyPair" value="GBPUSD" readonly>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">ICT Model</label>
+                            <select class="form-control" id="tradeModel">
+                                <option value="FVG" selected>Fair Value Gap (FVG)</option>
+                                <option value="Liquidity Sweep">Liquidity Sweep</option>
+                                <option value="Order Block">Order Block</option>
+                                <option value="Breaker">Breaker Block</option>
+                                <option value="MIT">Market Structure Shift</option>
+                                <option value="BOS">Break of Structure</option>
+                                <option value="CHoCH">Change of Character</option>
+                                <option value="Breakout">Breakout Trade</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Direction</label>
+                            <select class="form-control" id="tradeDirection">
+                                <option value="Buy" selected>Buy</option>
+                                <option value="Sell">Sell</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row-3">
+                        <div class="form-group">
+                            <label class="form-label">Risk %</label>
+                            <input type="number" step="0.1" class="form-control" id="riskPercent" placeholder="1.0" value="1.0">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Profit %</label>
+                            <input type="number" step="0.1" class="form-control" id="profitPercent" placeholder="2.0" value="2.0">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Return ($)</label>
+                            <input type="number" step="0.01" class="form-control" id="returnAmount" placeholder="25.00" value="25.00">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Account Size ($)</label>
+                            <input type="number" step="0.01" class="form-control" id="accountSize" placeholder="10000" value="10000">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Lot Size</label>
+                            <input type="number" step="0.01" class="form-control" id="lotSize" placeholder="0.10" value="0.10">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Result</label>
+                            <select class="form-control" id="tradeResult">
+                                <option value="Win" selected>Win</option>
+                                <option value="Loss">Loss</option>
+                                <option value="Break Even">Break Even</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Emotion Before Trade (1-10)</label>
+                            <input type="number" min="1" max="10" class="form-control" id="emotionBefore" value="7">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Chart Image Link (Optional)</label>
+                        <input type="text" class="form-control" id="chartImageLink" placeholder="https://example.com/chart-screenshot.png">
                     </div>
                 </div>
 
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label">ICT Model</label>
-                        <select class="form-control" id="tradeModel">
-                            <option value="Liquidity Sweep" selected>Liquidity Sweep</option>
-                            <option value="FVG">Fair Value Gap (FVG)</option>
-                            <option value="Order Block">Order Block</option>
-                            <option value="Breaker">Breaker Block</option>
-                            <option value="MIT">Market Structure Shift</option>
-                            <option value="BOS">Break of Structure</option>
-                            <option value="CHoCH">Change of Character</option>
-                            <option value="Breakout">Breakout Trade</option>
-                        </select>
+                <!-- Notes Section -->
+                <div class="form-section">
+                    <div class="section-title">
+                        <i class="fas fa-sticky-note"></i> Notes & Lessons
                     </div>
-                    
                     <div class="form-group">
-                        <label class="form-label">Timeframe</label>
-                        <select class="form-control" id="tradeTimeframe">
-                            <option value="M1">M1</option>
-                            <option value="M5" selected>M5</option>
-                            <option value="M15">M15</option>
-                            <option value="H1">H1</option>
-                            <option value="H4">H4</option>
-                        </select>
+                        <label class="form-label">Trade rationale, what worked, what to improve...</label>
+                        <textarea class="form-control" id="tradeNotes" rows="4" placeholder="Enter trade details, analysis, lessons learned..."></textarea>
                     </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label">Entry Price</label>
-                        <input type="number" step="0.00001" class="form-control" id="entryPrice" placeholder="1.26500">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label">Exit Price</label>
-                        <input type="number" step="0.00001" class="form-control" id="exitPrice" placeholder="1.26600">
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label">Pips</label>
-                        <input type="number" step="0.1" class="form-control" id="pips" placeholder="10.0">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label">Lot Size</label>
-                        <input type="number" step="0.01" class="form-control" id="lotSize" placeholder="0.10" value="0.10">
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label">Risk %</label>
-                        <input type="number" step="0.01" class="form-control" id="riskPercent" placeholder="1.0" value="1.0">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label">Result</label>
-                        <select class="form-control" id="tradeResult">
-                            <option value="Win" selected>Win</option>
-                            <option value="Loss">Loss</option>
-                            <option value="Break Even">Break Even</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Setup Quality (1-10)</label>
-                    <input type="number" min="1" max="10" class="form-control" id="setupQuality" value="7">
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">News Impact (if any)</label>
-                    <select class="form-control" id="newsImpact">
-                        <option value="None">No News Impact</option>
-                        <option value="BOE">BOE Decision/News</option>
-                        <option value="CPI">UK CPI Data</option>
-                        <option value="NFP">US NFP Data</option>
-                        <option value="FOMC">Fed Decision</option>
-                        <option value="Other">Other News</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Notes & Market Context</label>
-                    <textarea class="form-control" id="tradeNotes" rows="3" placeholder="Market context, volatility level, why you took the trade, news impact..."></textarea>
                 </div>
 
                 <div class="form-actions">
                     <button class="db-btn" id="cancelTrade">Cancel</button>
-                    <button class="db-btn primary" id="saveTrade">Save GBPUSD Trade</button>
+                    <button class="db-btn primary" id="saveTrade">Save GBPUSD Trade to Cloud</button>
                 </div>
             </div>
         </div>
@@ -1314,10 +1248,10 @@
         // Global Variables
         let gbpusdTrades = [];
         let tradeIdCounter = 0;
-        let performanceChart = null;
-        let sessionChart = null;
         let currentView = 'all';
         let isSavingTrade = false;
+        let performanceChart = null;
+        let winLossChart = null;
 
         // Initialize Application
         document.addEventListener('DOMContentLoaded', function() {
@@ -1359,13 +1293,13 @@
                     renderGBPUSDStats();
                     renderTrades();
                     updateCharts();
-                    updateVolatilityAnalysis();
                     
                     updateSyncStatus('Synced with Firebase', 'synced');
                 } else {
                     gbpusdTrades = [];
                     renderGBPUSDStats();
                     renderTrades();
+                    updateCharts();
                     updateSyncStatus('No GBPUSD trades found', 'error');
                 }
                 
@@ -1414,64 +1348,223 @@
             // Chart period change
             document.getElementById('chartPeriod').addEventListener('change', updateCharts);
             
-            // Auto-calculate pips when entry/exit prices change
-            document.getElementById('entryPrice').addEventListener('input', calculatePips);
-            document.getElementById('exitPrice').addEventListener('input', calculatePips);
+            // Auto-calculate return
+            document.getElementById('riskPercent').addEventListener('input', calculateReturn);
+            document.getElementById('accountSize').addEventListener('input', calculateReturn);
+            document.getElementById('profitPercent').addEventListener('input', calculateReturn);
             
             // Setup sidebar navigation
             setupSidebarNavigation();
         }
 
-        // Setup Sidebar Navigation
-        function setupSidebarNavigation() {
-            const navItems = document.querySelectorAll('.nav-item');
+        // Calculate Return
+        function calculateReturn() {
+            const riskPercent = parseFloat(document.getElementById('riskPercent').value) || 0;
+            const accountSize = parseFloat(document.getElementById('accountSize').value) || 0;
+            const profitPercent = parseFloat(document.getElementById('profitPercent').value) || 0;
             
-            navItems.forEach(item => {
-                const newItem = item.cloneNode(true);
-                item.parentNode.replaceChild(newItem, item);
-                
-                newItem.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    
-                    navItems.forEach(nav => nav.classList.remove('active'));
-                    this.classList.add('active');
-                    
-                    const href = this.getAttribute('href');
-                    if (href && href !== '#' && href !== 'index.html') {
-                        window.location.href = href;
-                    }
-                });
-            });
-        }
-
-        // Update Sync Status
-        function updateSyncStatus(message, status) {
-            const statusEl = document.getElementById('syncStatus');
-            if (statusEl) {
-                statusEl.textContent = message;
-                statusEl.className = 'sync-status ' + status;
-                
-                const icon = status === 'synced' ? 'fa-cloud' : 
-                            status === 'syncing' ? 'fa-sync fa-spin' : 
-                            'fa-cloud-slash';
-                statusEl.innerHTML = `<i class="fas ${icon}"></i> ${message}`;
+            if (riskPercent > 0 && accountSize > 0 && profitPercent > 0) {
+                const riskAmount = (accountSize * riskPercent) / 100;
+                const returnAmount = (riskAmount * profitPercent) / riskPercent;
+                document.getElementById('returnAmount').value = returnAmount.toFixed(2);
             }
         }
 
-        // Calculate Pips
-        function calculatePips() {
-            const entryPrice = parseFloat(document.getElementById('entryPrice').value);
-            const exitPrice = parseFloat(document.getElementById('exitPrice').value);
-            const direction = document.getElementById('tradeDirection').value;
+        // Update Charts
+        function updateCharts() {
+            const period = document.getElementById('chartPeriod').value;
             
-            if (entryPrice && exitPrice) {
-                let pips = 0;
-                if (direction === 'Buy') {
-                    pips = (exitPrice - entryPrice) * 10000; // For GBPUSD
-                } else {
-                    pips = (entryPrice - exitPrice) * 10000;
+            // Filter trades by period
+            let filteredTrades = [...gbpusdTrades];
+            if (period !== 'all') {
+                const days = parseInt(period);
+                const cutoffDate = new Date();
+                cutoffDate.setDate(cutoffDate.getDate() - days);
+                filteredTrades = filteredTrades.filter(t => {
+                    try {
+                        const tradeDate = new Date(t.date);
+                        return tradeDate >= cutoffDate;
+                    } catch (e) {
+                        return false;
+                    }
+                });
+            }
+            
+            // Sort by date ascending for performance chart
+            filteredTrades.sort((a, b) => {
+                try {
+                    return new Date(a.date) - new Date(b.date);
+                } catch (e) {
+                    return 0;
                 }
-                document.getElementById('pips').value = pips.toFixed(1);
+            });
+            
+            // Prepare performance data
+            let cumulativePL = 0;
+            const performanceDates = [];
+            const performanceValues = [];
+            
+            filteredTrades.forEach(trade => {
+                try {
+                    cumulativePL += trade.returnAmount || 0;
+                    performanceDates.push(formatDateShort(trade.date));
+                    performanceValues.push(cumulativePL);
+                } catch (e) {
+                    console.warn('Error processing trade for chart:', trade, e);
+                }
+            });
+            
+            // Update or create performance chart
+            const performanceCtx = document.getElementById('performanceChart').getContext('2d');
+            if (performanceChart) {
+                performanceChart.data.labels = performanceDates;
+                performanceChart.data.datasets[0].data = performanceValues;
+                performanceChart.update();
+            } else {
+                performanceChart = new Chart(performanceCtx, {
+                    type: 'line',
+                    data: {
+                        labels: performanceDates,
+                        datasets: [{
+                            label: 'Cumulative P/L',
+                            data: performanceValues,
+                            borderColor: '#d1453b',
+                            backgroundColor: 'rgba(209, 69, 59, 0.1)',
+                            fill: true,
+                            tension: 0.3,
+                            borderWidth: 2,
+                            pointRadius: 3,
+                            pointBackgroundColor: '#d1453b'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        layout: {
+                            padding: {
+                                top: 5,
+                                bottom: 5,
+                                left: 5,
+                                right: 5
+                            }
+                        },
+                        plugins: { 
+                            legend: { 
+                                display: true,
+                                position: 'top',
+                                labels: {
+                                    font: {
+                                        size: 12
+                                    }
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return `P/L: $${context.raw.toLocaleString()}`;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                grid: { 
+                                    color: 'rgba(0,0,0,0.05)',
+                                    drawBorder: false
+                                },
+                                ticks: {
+                                    maxTicksLimit: 8,
+                                    font: {
+                                        size: 10
+                                    },
+                                    padding: 3
+                                }
+                            },
+                            y: {
+                                beginAtZero: true,
+                                grid: { 
+                                    color: 'rgba(0,0,0,0.05)',
+                                    drawBorder: false
+                                },
+                                ticks: { 
+                                    callback: v => '$' + v.toLocaleString(),
+                                    padding: 5,
+                                    font: {
+                                        size: 10
+                                    }
+                                }
+                            }
+                        },
+                        interaction: {
+                            intersect: false,
+                            mode: 'index'
+                        }
+                    }
+                });
+            }
+            
+            // Update win/loss chart
+            const wins = filteredTrades.filter(t => t.result === 'Win').length;
+            const losses = filteredTrades.filter(t => t.result === 'Loss').length;
+            const breakEven = filteredTrades.filter(t => t.result === 'Break Even').length;
+            
+            // Update win/loss stats
+            const winRate = filteredTrades.length > 0 ? ((wins / filteredTrades.length) * 100).toFixed(1) : 0;
+            document.getElementById('winLossStats').textContent = `Win Rate: ${winRate}%`;
+            
+            const winLossCtx = document.getElementById('winLossChart').getContext('2d');
+            if (winLossChart) {
+                winLossChart.data.datasets[0].data = [wins, losses, breakEven];
+                winLossChart.update();
+            } else {
+                winLossChart = new Chart(winLossCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Wins', 'Losses', 'Break Even'],
+                        datasets: [{
+                            data: [wins, losses, breakEven],
+                            backgroundColor: [
+                                'rgba(15, 123, 108, 0.8)',  // Green for wins
+                                'rgba(209, 69, 59, 0.8)',   // Red for losses
+                                'rgba(112, 113, 110, 0.8)'  // Gray for break even
+                            ],
+                            borderColor: [
+                                'rgba(15, 123, 108, 1)',
+                                'rgba(209, 69, 59, 1)',
+                                'rgba(112, 113, 110, 1)'
+                            ],
+                            borderWidth: 1,
+                            hoverOffset: 15
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    font: {
+                                        size: 11
+                                    },
+                                    padding: 15
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const label = context.label || '';
+                                        const value = context.raw || 0;
+                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                        const percentage = Math.round((value / total) * 100);
+                                        return `${label}: ${value} (${percentage}%)`;
+                                    }
+                                }
+                            }
+                        },
+                        cutout: '60%'
+                    }
+                });
             }
         }
 
@@ -1493,7 +1586,7 @@
             const losses = gbpusdTrades.filter(t => t.result === 'Loss').length;
             const winRate = (wins / gbpusdTrades.length * 100).toFixed(1);
             
-            const totalPL = gbpusdTrades.reduce((sum, t) => sum + (t.pl || 0), 0);
+            const totalPL = gbpusdTrades.reduce((sum, t) => sum + (t.returnAmount || 0), 0);
             
             // Calculate average R:R
             let totalRR = 0;
@@ -1505,6 +1598,9 @@
                         totalRR += rrValue;
                         countRR++;
                     }
+                } else if (t.riskPercent && t.profitPercent) {
+                    totalRR += (t.profitPercent / t.riskPercent);
+                    countRR++;
                 }
             });
             const avgRR = countRR > 0 ? (totalRR / countRR).toFixed(2) : '0.0';
@@ -1515,7 +1611,7 @@
                 try {
                     const date = new Date(trade.date).toDateString();
                     if (!tradesByDay[date]) tradesByDay[date] = 0;
-                    tradesByDay[date] += trade.pl || 0;
+                    tradesByDay[date] += trade.returnAmount || 0;
                 } catch (e) {}
             });
             const bestDay = Object.values(tradesByDay).reduce((max, val) => Math.max(max, val), 0);
@@ -1526,25 +1622,11 @@
             // Update UI
             document.getElementById('gbpusdTotalTrades').textContent = gbpusdTrades.length;
             document.getElementById('gbpusdWinRate').textContent = `${winRate}%`;
-            document.getElementById('gbpusdTotalPL').textContent = `$${totalPL >= 0 ? '+' : ''}${totalPL}`;
+            document.getElementById('gbpusdTotalPL').textContent = `$${totalPL >= 0 ? '+' : ''}${totalPL.toFixed(2)}`;
             document.getElementById('gbpusdAvgRR').textContent = `1:${avgRR}`;
-            document.getElementById('gbpusdBestDay').textContent = `$${bestDay >= 0 ? '+' : ''}${bestDay}`;
+            document.getElementById('gbpusdBestDay').textContent = `$${bestDay >= 0 ? '+' : ''}${bestDay.toFixed(2)}`;
             document.getElementById('gbpusdAvgTrade').textContent = `$${avgTrade >= 0 ? '+' : ''}${avgTrade}`;
             document.getElementById('tradeCount').textContent = `(${gbpusdTrades.length} trades)`;
-            
-            // Update session stats
-            const londonTrades = gbpusdTrades.filter(t => t.session === 'London' || !t.session);
-            const nyTrades = gbpusdTrades.filter(t => t.session === 'New York');
-            const asianTrades = gbpusdTrades.filter(t => t.session === 'Asian');
-            
-            const londonPL = londonTrades.reduce((sum, t) => sum + (t.pl || 0), 0);
-            const nyPL = nyTrades.reduce((sum, t) => sum + (t.pl || 0), 0);
-            const asianPL = asianTrades.reduce((sum, t) => sum + (t.pl || 0), 0);
-            
-            const bestSession = londonPL > nyPL && londonPL > asianPL ? 'London' : 
-                               nyPL > asianPL ? 'New York' : 'Asian';
-            
-            document.getElementById('sessionStats').textContent = `Best: ${bestSession}`;
             
             // Save metrics to Firebase
             const metrics = {
@@ -1557,38 +1639,12 @@
                 wins: wins,
                 losses: losses,
                 breakEven: gbpusdTrades.length - wins - losses,
-                bestSession: bestSession,
-                londonPL: londonPL,
-                nyPL: nyPL,
-                asianPL: asianPL,
                 lastUpdated: firebase.database.ServerValue.TIMESTAMP
             };
             
             gbpusdMetricsRef.set(metrics).catch(error => {
                 console.error('Error saving GBPUSD metrics:', error);
             });
-        }
-
-        // Update GBPUSD Metrics from Database
-        function updateGBPUSDMetricsFromDB(data) {
-            if (data.totalTrades) {
-                document.getElementById('gbpusdTotalTrades').textContent = data.totalTrades;
-            }
-            if (data.winRate) {
-                document.getElementById('gbpusdWinRate').textContent = `${data.winRate}%`;
-            }
-            if (data.totalPL) {
-                document.getElementById('gbpusdTotalPL').textContent = `$${data.totalPL >= 0 ? '+' : ''}${data.totalPL}`;
-            }
-            if (data.avgRR) {
-                document.getElementById('gbpusdAvgRR').textContent = `1:${data.avgRR}`;
-            }
-            if (data.bestDay) {
-                document.getElementById('gbpusdBestDay').textContent = `$${data.bestDay >= 0 ? '+' : ''}${data.bestDay}`;
-            }
-            if (data.avgTrade) {
-                document.getElementById('gbpusdAvgTrade').textContent = `$${data.avgTrade >= 0 ? '+' : ''}${data.avgTrade}`;
-            }
         }
 
         // Render Trades Table
@@ -1645,44 +1701,28 @@
         // Create GBPUSD Trade Row
         function createGBPUSDTradeRow(trade) {
             const row = document.createElement('tr');
-            const plClass = trade.pl >= 0 ? 'positive' : 'negative';
-            const plSign = trade.pl >= 0 ? '+' : '';
-            
-            // Calculate pips if not available
-            let pips = trade.pips || 'N/A';
-            if (trade.entryPrice && trade.exitPrice && trade.direction) {
-                if (trade.direction === 'Buy') {
-                    pips = ((trade.exitPrice - trade.entryPrice) * 10000).toFixed(1);
-                } else {
-                    pips = ((trade.entryPrice - trade.exitPrice) * 10000).toFixed(1);
-                }
-            }
-            
-            // News indicator
-            let newsIndicator = '';
-            if (trade.newsImpact && trade.newsImpact !== 'None') {
-                newsIndicator = `<span style="color: var(--notion-orange); font-size: 12px;" title="${trade.newsImpact}">📰</span> `;
-            }
+            const plClass = (trade.returnAmount || 0) >= 0 ? 'positive' : 'negative';
+            const plSign = (trade.returnAmount || 0) >= 0 ? '+' : '';
             
             row.innerHTML = `
-                <td>${formatDateShort(trade.date)}</td>
+                <td>${formatDate(trade.date)}</td>
                 <td>${trade.session || 'London'}</td>
                 <td>
                     <span class="select-property ${trade.direction === 'Buy' ? 'green' : 'red'}" style="min-width: 60px;">
                         ${trade.direction || 'N/A'}
                     </span>
                 </td>
-                <td>${newsIndicator}${trade.model || 'Liquidity Sweep'}</td>
-                <td>${trade.entryPrice ? trade.entryPrice.toFixed(5) : 'N/A'}</td>
-                <td>${trade.exitPrice ? trade.exitPrice.toFixed(5) : 'N/A'}</td>
-                <td>${pips}</td>
+                <td>${trade.model || 'FVG'}</td>
                 <td>${trade.riskPercent || 0}%</td>
+                <td>${trade.profitPercent || 0}%</td>
+                <td class="${plClass}">${plSign}$${trade.returnAmount || 0}</td>
+                <td>$${trade.accountSize || 'N/A'}</td>
+                <td>${trade.lotSize || 'N/A'}</td>
                 <td>
                     <span class="status-badge ${trade.result === 'Win' ? 'status-win' : trade.result === 'Loss' ? 'status-loss' : 'status-be'}">
                         ${trade.result}
                     </span>
                 </td>
-                <td class="${plClass}">${plSign}$${trade.pl || 0}</td>
                 <td>
                     <button class="db-btn" onclick="editTrade('${trade.id}')" style="padding: 4px 8px; font-size: 12px;">
                         <i class="fas fa-edit"></i>
@@ -1693,300 +1733,6 @@
                 </td>
             `;
             return row;
-        }
-
-        // Update Volatility Analysis
-        function updateVolatilityAnalysis() {
-            const tbody = document.getElementById('volatilityAnalysis');
-            if (!tbody || gbpusdTrades.length === 0) return;
-            
-            // Group trades by session
-            const sessionStats = {
-                'London': { trades: [], totalPips: 0, wins: 0 },
-                'New York': { trades: [], totalPips: 0, wins: 0 },
-                'Asian': { trades: [], totalPips: 0, wins: 0 },
-                'Overlap': { trades: [], totalPips: 0, wins: 0 }
-            };
-            
-            gbpusdTrades.forEach(trade => {
-                const session = trade.session || 'London';
-                if (sessionStats[session]) {
-                    sessionStats[session].trades.push(trade);
-                    sessionStats[session].totalPips += Math.abs(trade.pips || 0);
-                    if (trade.result === 'Win') {
-                        sessionStats[session].wins++;
-                    }
-                }
-            });
-            
-            // Clear and populate table
-            tbody.innerHTML = '';
-            
-            Object.entries(sessionStats).forEach(([session, stats]) => {
-                if (stats.trades.length === 0) return;
-                
-                const avgPips = stats.totalPips / stats.trades.length;
-                const winRate = (stats.wins / stats.trades.length * 100).toFixed(1);
-                const totalPL = stats.trades.reduce((sum, t) => sum + (t.pl || 0), 0);
-                const avgPL = totalPL / stats.trades.length;
-                
-                // Determine volatility level
-                let volatility = 'Medium';
-                let volatilityClass = '';
-                if (avgPips > 25) {
-                    volatility = 'High';
-                    volatilityClass = 'high';
-                } else if (avgPips > 35) {
-                    volatility = 'Very High';
-                    volatilityClass = 'very-high';
-                }
-                
-                // Determine best time
-                let bestTime = '08:00-10:00';
-                if (session === 'New York') bestTime = '13:00-15:00';
-                if (session === 'Asian') bestTime = '23:00-02:00';
-                if (session === 'Overlap') bestTime = '12:00-13:00';
-                
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td><strong>${session}</strong></td>
-                    <td>${avgPips.toFixed(1)} pips</td>
-                    <td>${winRate}%</td>
-                    <td class="${avgPL >= 0 ? 'positive' : 'negative'}">$${avgPL >= 0 ? '+' : ''}${avgPL.toFixed(2)}</td>
-                    <td>
-                        <span>${volatility}</span>
-                        <div class="volatility-indicator">
-                            <div class="volatility-bar">
-                                <div class="volatility-level ${volatilityClass}"></div>
-                            </div>
-                        </div>
-                    </td>
-                    <td>${bestTime} GMT</td>
-                `;
-                tbody.appendChild(row);
-            });
-        }
-
-        // Update Charts
-        function updateCharts() {
-            const period = document.getElementById('chartPeriod').value;
-            
-            // Filter trades by period
-            let filteredTrades = [...gbpusdTrades];
-            if (period !== 'all') {
-                const days = parseInt(period);
-                const cutoffDate = new Date();
-                cutoffDate.setDate(cutoffDate.getDate() - days);
-                filteredTrades = filteredTrades.filter(t => {
-                    try {
-                        const tradeDate = new Date(t.date);
-                        return tradeDate >= cutoffDate;
-                    } catch (e) {
-                        return false;
-                    }
-                });
-            }
-            
-            // Sort by date ascending for performance chart
-            filteredTrades.sort((a, b) => {
-                try {
-                    return new Date(a.date) - new Date(b.date);
-                } catch (e) {
-                    return 0;
-                }
-            });
-            
-            // Prepare performance data
-            let balance = 0;
-            const performanceDates = [];
-            const performanceValues = [];
-            
-            filteredTrades.forEach(trade => {
-                try {
-                    balance += trade.pl || 0;
-                    performanceDates.push(formatDateShort(trade.date));
-                    performanceValues.push(balance);
-                } catch (e) {
-                    console.warn('Error processing trade for chart:', trade, e);
-                }
-            });
-            
-            // Update or create performance chart
-            const performanceCtx = document.getElementById('performanceChart').getContext('2d');
-            if (performanceChart) {
-                performanceChart.data.labels = performanceDates;
-                performanceChart.data.datasets[0].data = performanceValues;
-                performanceChart.update();
-            } else {
-                performanceChart = new Chart(performanceCtx, {
-                    type: 'line',
-                    data: {
-                        labels: performanceDates,
-                        datasets: [{
-                            label: 'GBPUSD P/L',
-                            data: performanceValues,
-                            borderColor: '#d1453b',
-                            backgroundColor: 'rgba(209, 69, 59, 0.1)',
-                            fill: true,
-                            tension: 0.3,
-                            borderWidth: 2,
-                            pointRadius: 2,
-                            pointBackgroundColor: '#d1453b'
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: true,
-                        layout: {
-                            padding: {
-                                top: 5,
-                                bottom: 5,
-                                left: 5,
-                                right: 5
-                            }
-                        },
-                        plugins: { 
-                            legend: { 
-                                display: false
-                            },
-                            tooltip: {
-                                callbacks: {
-                                    label: function(context) {
-                                        return `P/L: $${context.raw.toLocaleString()}`;
-                                    }
-                                }
-                            }
-                        },
-                        scales: {
-                            x: {
-                                grid: { 
-                                    color: 'rgba(0,0,0,0.05)',
-                                    drawBorder: false
-                                },
-                                ticks: {
-                                    maxTicksLimit: 6,
-                                    font: {
-                                        size: 10
-                                    },
-                                    padding: 3
-                                }
-                            },
-                            y: {
-                                beginAtZero: true,
-                                grid: { 
-                                    color: 'rgba(0,0,0,0.05)',
-                                    drawBorder: false
-                                },
-                                ticks: { 
-                                    callback: v => '$' + v.toLocaleString(),
-                                    padding: 5,
-                                    font: {
-                                        size: 10
-                                    }
-                                }
-                            }
-                        },
-                        interaction: {
-                            intersect: false,
-                            mode: 'index'
-                        }
-                    }
-                });
-            }
-            
-            // Update session chart
-            const londonTrades = filteredTrades.filter(t => t.session === 'London' || !t.session);
-            const nyTrades = filteredTrades.filter(t => t.session === 'New York');
-            const asianTrades = filteredTrades.filter(t => t.session === 'Asian');
-            const overlapTrades = filteredTrades.filter(t => t.session === 'Overlap');
-            
-            const sessionPL = [
-                londonTrades.reduce((sum, t) => sum + (t.pl || 0), 0),
-                nyTrades.reduce((sum, t) => sum + (t.pl || 0), 0),
-                asianTrades.reduce((sum, t) => sum + (t.pl || 0), 0),
-                overlapTrades.reduce((sum, t) => sum + (t.pl || 0), 0)
-            ];
-            
-            const sessionCtx = document.getElementById('sessionChart').getContext('2d');
-            if (sessionChart) {
-                sessionChart.data.datasets[0].data = sessionPL;
-                sessionChart.update();
-            } else {
-                sessionChart = new Chart(sessionCtx, {
-                    type: 'bar',
-                    data: {
-                        labels: ['London', 'New York', 'Asian', 'Overlap'],
-                        datasets: [{
-                            label: 'P/L by Session',
-                            data: sessionPL,
-                            backgroundColor: [
-                                '#d1453b',
-                                '#0c8ce9',
-                                '#6940a5',
-                                '#ff6b35'
-                            ],
-                            borderColor: [
-                                '#d1453b',
-                                '#0c8ce9',
-                                '#6940a5',
-                                '#ff6b35'
-                            ],
-                            borderWidth: 1
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: true,
-                        layout: {
-                            padding: {
-                                top: 5,
-                                bottom: 5,
-                                left: 5,
-                                right: 5
-                            }
-                        },
-                        plugins: { 
-                            legend: { 
-                                display: false
-                            },
-                            tooltip: {
-                                callbacks: {
-                                    label: function(context) {
-                                        return `P/L: $${context.raw.toLocaleString()}`;
-                                    }
-                                }
-                            }
-                        },
-                        scales: {
-                            x: {
-                                grid: { 
-                                    display: false,
-                                    drawBorder: false
-                                },
-                                ticks: {
-                                    font: {
-                                        size: 10
-                                    }
-                                }
-                            },
-                            y: {
-                                beginAtZero: true,
-                                grid: { 
-                                    color: 'rgba(0,0,0,0.05)',
-                                    drawBorder: false
-                                },
-                                ticks: { 
-                                    callback: v => '$' + v,
-                                    padding: 5,
-                                    font: {
-                                        size: 10
-                                    }
-                                }
-                            }
-                        }
-                    }
-                });
-            }
         }
 
         // Save GBPUSD Trade
@@ -2007,48 +1753,23 @@
                     saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
                 }
                 
-                const entryPrice = parseFloat(document.getElementById('entryPrice').value);
-                const exitPrice = parseFloat(document.getElementById('exitPrice').value);
-                const pips = parseFloat(document.getElementById('pips').value);
-                const riskPercent = parseFloat(document.getElementById('riskPercent').value);
-                const lotSize = parseFloat(document.getElementById('lotSize').value) || 0.1;
-                const result = document.getElementById('tradeResult').value;
-                const session = document.getElementById('tradeSession').value;
-                const direction = document.getElementById('tradeDirection').value;
-                const model = document.getElementById('tradeModel').value;
-                const timeframe = document.getElementById('tradeTimeframe').value;
-                const setupQuality = parseInt(document.getElementById('setupQuality').value);
-                const newsImpact = document.getElementById('newsImpact').value;
-                
-                // Calculate P/L (simplified calculation)
-                let pl = 0;
-                if (pips && lotSize) {
-                    // For GBPUSD: 1 pip = $1 per 0.01 lot (simplified)
-                    pl = pips * lotSize * 10;
-                    if (result === 'Loss') pl = -pl;
-                }
-                
-                // Calculate R:R (simplified)
-                const rrString = '1:3.0'; // Default for high volatility pair
-                
                 const tradeData = {
                     date: document.getElementById('tradeDate').value,
-                    session: session,
+                    session: document.getElementById('tradeSession').value,
                     pair: 'GBPUSD',
-                    direction: direction,
-                    model: model,
-                    timeframe: timeframe,
-                    entryPrice: entryPrice,
-                    exitPrice: exitPrice,
-                    pips: pips,
-                    riskPercent: riskPercent,
-                    lotSize: lotSize,
-                    result: result,
-                    rr: rrString,
-                    pl: pl,
-                    setupQuality: setupQuality,
-                    newsImpact: newsImpact,
+                    direction: document.getElementById('tradeDirection').value,
+                    model: document.getElementById('tradeModel').value,
+                    riskPercent: parseFloat(document.getElementById('riskPercent').value) || 0,
+                    profitPercent: parseFloat(document.getElementById('profitPercent').value) || 0,
+                    returnAmount: parseFloat(document.getElementById('returnAmount').value) || 0,
+                    accountSize: parseFloat(document.getElementById('accountSize').value) || 0,
+                    lotSize: parseFloat(document.getElementById('lotSize').value) || 0.1,
+                    result: document.getElementById('tradeResult').value,
+                    emotionBefore: parseInt(document.getElementById('emotionBefore').value) || 7,
+                    chartImageLink: document.getElementById('chartImageLink').value || '',
                     notes: document.getElementById('tradeNotes').value,
+                    rr: `1:${((parseFloat(document.getElementById('profitPercent').value) || 0) / (parseFloat(document.getElementById('riskPercent').value) || 1)).toFixed(2)}`,
+                    pl: parseFloat(document.getElementById('returnAmount').value) || 0,
                     createdAt: firebase.database.ServerValue.TIMESTAMP
                 };
                 
@@ -2088,16 +1809,15 @@
                 document.getElementById('tradeDate').value = trade.date.replace(' ', 'T');
                 document.getElementById('tradeSession').value = trade.session || 'London';
                 document.getElementById('tradeDirection').value = trade.direction;
-                document.getElementById('tradeModel').value = trade.model || 'Liquidity Sweep';
-                document.getElementById('tradeTimeframe').value = trade.timeframe || 'M5';
-                document.getElementById('entryPrice').value = trade.entryPrice || '';
-                document.getElementById('exitPrice').value = trade.exitPrice || '';
-                document.getElementById('pips').value = trade.pips || '';
+                document.getElementById('tradeModel').value = trade.model || 'FVG';
                 document.getElementById('riskPercent').value = trade.riskPercent || 1.0;
+                document.getElementById('profitPercent').value = trade.profitPercent || 2.0;
+                document.getElementById('returnAmount').value = trade.returnAmount || 25.00;
+                document.getElementById('accountSize').value = trade.accountSize || 10000;
                 document.getElementById('lotSize').value = trade.lotSize || 0.1;
                 document.getElementById('tradeResult').value = trade.result;
-                document.getElementById('setupQuality').value = trade.setupQuality || 7;
-                document.getElementById('newsImpact').value = trade.newsImpact || 'None';
+                document.getElementById('emotionBefore').value = trade.emotionBefore || 7;
+                document.getElementById('chartImageLink').value = trade.chartImageLink || '';
                 document.getElementById('tradeNotes').value = trade.notes || '';
                 
                 // Change modal title
@@ -2121,24 +1841,19 @@
                             pair: 'GBPUSD',
                             direction: document.getElementById('tradeDirection').value,
                             model: document.getElementById('tradeModel').value,
-                            timeframe: document.getElementById('tradeTimeframe').value,
-                            entryPrice: parseFloat(document.getElementById('entryPrice').value),
-                            exitPrice: parseFloat(document.getElementById('exitPrice').value),
-                            pips: parseFloat(document.getElementById('pips').value),
-                            riskPercent: parseFloat(document.getElementById('riskPercent').value),
+                            riskPercent: parseFloat(document.getElementById('riskPercent').value) || 0,
+                            profitPercent: parseFloat(document.getElementById('profitPercent').value) || 0,
+                            returnAmount: parseFloat(document.getElementById('returnAmount').value) || 0,
+                            accountSize: parseFloat(document.getElementById('accountSize').value) || 0,
                             lotSize: parseFloat(document.getElementById('lotSize').value) || 0.1,
                             result: document.getElementById('tradeResult').value,
-                            setupQuality: parseInt(document.getElementById('setupQuality').value),
-                            newsImpact: document.getElementById('newsImpact').value,
+                            emotionBefore: parseInt(document.getElementById('emotionBefore').value) || 7,
+                            chartImageLink: document.getElementById('chartImageLink').value || '',
                             notes: document.getElementById('tradeNotes').value,
+                            rr: `1:${((parseFloat(document.getElementById('profitPercent').value) || 0) / (parseFloat(document.getElementById('riskPercent').value) || 1)).toFixed(2)}`,
+                            pl: parseFloat(document.getElementById('returnAmount').value) || 0,
                             updatedAt: firebase.database.ServerValue.TIMESTAMP
                         };
-                        
-                        // Recalculate P/L
-                        if (updatedTrade.pips && updatedTrade.lotSize) {
-                            updatedTrade.pl = updatedTrade.pips * updatedTrade.lotSize * 10;
-                            if (updatedTrade.result === 'Loss') updatedTrade.pl = -updatedTrade.pl;
-                        }
                         
                         updateSyncStatus('Updating trade...', 'syncing');
                         
@@ -2206,36 +1921,6 @@
             linkElement.click();
         }
 
-        // Local Storage Backup
-        function saveToLocalStorage() {
-            try {
-                localStorage.setItem('gbpusdTradesBackup', JSON.stringify(gbpusdTrades));
-                localStorage.setItem('gbpusdTradeIdCounter', tradeIdCounter);
-            } catch (e) {
-                console.warn('Local storage save failed:', e);
-            }
-        }
-
-        function loadFromLocalStorage() {
-            try {
-                const backup = localStorage.getItem('gbpusdTradesBackup');
-                const counter = localStorage.getItem('gbpusdTradeIdCounter');
-                
-                if (backup) {
-                    gbpusdTrades = JSON.parse(backup);
-                    tradeIdCounter = parseInt(counter) || gbpusdTrades.length + 1;
-                    renderGBPUSDStats();
-                    renderTrades();
-                    updateCharts();
-                    updateVolatilityAnalysis();
-                }
-                
-                updateSyncStatus('Loaded from backup', 'synced');
-            } catch (e) {
-                console.warn('Local storage load failed:', e);
-            }
-        }
-
         // Utility Functions
         function formatDate(dateString) {
             try {
@@ -2243,8 +1928,16 @@
                 if (isNaN(date.getTime())) {
                     return 'Invalid Date';
                 }
-                return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ' ' + 
-                       date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+                return date.toLocaleDateString('en-US', { 
+                    month: '2-digit', 
+                    day: '2-digit', 
+                    year: 'numeric' 
+                }) + ', ' + 
+                date.toLocaleTimeString('en-US', { 
+                    hour: '2-digit', 
+                    minute: '2-digit',
+                    hour12: true 
+                });
             } catch (e) {
                 return 'Invalid Date';
             }
@@ -2262,21 +1955,37 @@
             }
         }
 
+        function updateSyncStatus(message, status) {
+            const statusEl = document.getElementById('syncStatus');
+            if (statusEl) {
+                statusEl.textContent = message;
+                statusEl.className = 'sync-status ' + status;
+                
+                const icon = status === 'synced' ? 'fa-cloud' : 
+                            status === 'syncing' ? 'fa-sync fa-spin' : 
+                            'fa-cloud-slash';
+                statusEl.innerHTML = `<i class="fas ${icon}"></i> ${message}`;
+            }
+        }
+
         function openModal() {
             document.getElementById('addTradeModal').style.display = 'flex';
-            document.querySelector('.modal-title').textContent = '➕ Add GBPUSD Trade';
-            document.getElementById('saveTrade').textContent = 'Save GBPUSD Trade';
+            document.querySelector('.modal-title').textContent = '➕ Add New GBPUSD Trade';
+            document.getElementById('saveTrade').textContent = 'Save GBPUSD Trade to Cloud';
             document.getElementById('saveTrade').onclick = saveGBPUSDTrade;
             
             // Set default date to now
             document.getElementById('tradeDate').value = new Date().toISOString().slice(0, 16);
             
             // Reset form
-            document.getElementById('entryPrice').value = '';
-            document.getElementById('exitPrice').value = '';
-            document.getElementById('pips').value = '';
+            document.getElementById('riskPercent').value = '1.0';
+            document.getElementById('profitPercent').value = '2.0';
+            document.getElementById('returnAmount').value = '25.00';
+            document.getElementById('accountSize').value = '10000';
+            document.getElementById('lotSize').value = '0.10';
+            document.getElementById('emotionBefore').value = '7';
+            document.getElementById('chartImageLink').value = '';
             document.getElementById('tradeNotes').value = '';
-            document.getElementById('newsImpact').value = 'None';
         }
 
         function closeModal() {
