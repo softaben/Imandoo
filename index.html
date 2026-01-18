@@ -335,6 +335,12 @@
             border-color: #2962FF;
         }
 
+        .db-btn.image {
+            background-color: var(--notion-purple-light);
+            color: var(--notion-purple);
+            border-color: var(--notion-purple);
+        }
+
         .database-views {
             padding: 8px 16px;
             border-bottom: 1px solid var(--notion-gray-dark);
@@ -857,6 +863,72 @@
             height: 500px;
         }
 
+        /* Image Modal Styles */
+        .image-modal {
+            max-width: 1000px;
+            max-height: 90vh;
+        }
+
+        .image-container {
+            text-align: center;
+            padding: 10px;
+        }
+
+        .tradingview-image {
+            max-width: 100%;
+            max-height: 70vh;
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .image-info {
+            margin-top: 15px;
+            padding: 15px;
+            background-color: var(--notion-gray-light);
+            border-radius: 6px;
+            font-size: 14px;
+            text-align: left;
+        }
+
+        .image-url {
+            word-break: break-all;
+            font-family: monospace;
+            background-color: white;
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid var(--notion-gray-dark);
+            margin-top: 5px;
+        }
+
+        /* Image Link Button */
+        .image-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            background-color: var(--notion-purple-light);
+            color: var(--notion-purple);
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 500;
+            margin: 2px;
+            cursor: pointer;
+        }
+
+        .image-link:hover {
+            background-color: var(--notion-purple);
+            color: white;
+        }
+
+        /* Image Links Container */
+        .image-links-container {
+            margin-top: 8px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
         /* Responsive for TradingView */
         @media (max-width: 1024px) {
             .tradingview-container {
@@ -879,6 +951,10 @@
             
             .pair-selector {
                 flex-wrap: wrap;
+            }
+            
+            .image-modal {
+                width: 95%;
             }
         }
     </style>
@@ -1150,12 +1226,13 @@
                                     <th>Return ($)</th>
                                     <th>Result</th>
                                     <th>P/L ($)</th>
+                                    <th>Image Links</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="allTradesBody">
                                 <tr id="loadingAllTrades">
-                                    <td colspan="11" class="loading">
+                                    <td colspan="12" class="loading">
                                         <i class="fas fa-spinner"></i> Loading trades from database...
                                     </td>
                                 </tr>
@@ -1351,6 +1428,22 @@
                     <input type="number" min="1" max="10" class="form-control" id="emotionBefore" value="7">
                 </div>
 
+                <!-- New Field: TradingView Image Links -->
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-image"></i> TradingView Image Links
+                        <span style="font-size: 12px; color: var(--notion-text-light); font-weight: normal;">
+                            (Add URLs separated by commas or new lines)
+                        </span>
+                    </label>
+                    <textarea class="form-control" id="imageLinks" rows="3" placeholder="Paste TradingView image URLs here...
+Example: https://www.tradingview.com/x/ABC123/
+You can add multiple URLs separated by commas or new lines"></textarea>
+                    <div style="margin-top: 8px; font-size: 12px; color: var(--notion-text-light);">
+                        <i class="fas fa-info-circle"></i> Right-click on TradingView chart → "Copy image address" or "Share" → "Copy link"
+                    </div>
+                </div>
+
                 <div class="form-group">
                     <label class="form-label">Notes & Lessons</label>
                     <textarea class="form-control" id="tradeNotes" rows="3" placeholder="Trade rationale, what worked, what to improve..."></textarea>
@@ -1428,6 +1521,35 @@
                     <p>• Identify Premium/Discount zones for optimal entry</p>
                     <p>• Monitor Order Blocks and Liquidity Sweeps</p>
                     <p>• Use 15-min chart for precise entry timing</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Image Modal -->
+    <div class="modal-overlay" id="imageModal">
+        <div class="modal image-modal">
+            <div class="modal-header">
+                <div class="modal-title">
+                    <i class="fas fa-image"></i> TradingView Chart Image
+                </div>
+                <button class="modal-close" id="closeImageModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="image-container">
+                    <img id="modalImage" src="" alt="TradingView Chart" class="tradingview-image">
+                </div>
+                <div class="image-info">
+                    <div><strong>Image URL:</strong></div>
+                    <div class="image-url" id="imageUrl"></div>
+                    <div style="margin-top: 10px; display: flex; gap: 10px;">
+                        <button class="db-btn" onclick="copyImageUrl()">
+                            <i class="fas fa-copy"></i> Copy URL
+                        </button>
+                        <a class="db-btn primary" id="openImageLink" target="_blank" href="#">
+                            <i class="fas fa-external-link-alt"></i> Open in New Tab
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1619,6 +1741,9 @@
             document.getElementById('dailyTradingView').onclick = openTradingViewModal;
             document.getElementById('closeTradingViewModal').onclick = closeTradingViewModal;
             
+            // Image Modal
+            document.getElementById('closeImageModal').onclick = closeImageModal;
+            
             // Pair selector buttons
             document.querySelectorAll('.pair-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
@@ -1631,10 +1756,16 @@
                 });
             });
 
-            // Close TradingView modal when clicking outside
+            // Close modals when clicking outside
             document.getElementById('tradingViewModal').addEventListener('click', function(e) {
                 if (e.target === this) {
                     closeTradingViewModal();
+                }
+            });
+            
+            document.getElementById('imageModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeImageModal();
                 }
             });
         }
@@ -1731,6 +1862,57 @@
                     "popup_height": "650"
                 });
             }
+        }
+
+        // Image Modal Functions
+        function openImageModal(imageUrl) {
+            const modalImage = document.getElementById('modalImage');
+            const imageUrlElement = document.getElementById('imageUrl');
+            const openImageLink = document.getElementById('openImageLink');
+            
+            // Set image source
+            modalImage.src = imageUrl;
+            imageUrlElement.textContent = imageUrl;
+            openImageLink.href = imageUrl;
+            
+            // Show modal
+            document.getElementById('imageModal').style.display = 'flex';
+        }
+
+        function closeImageModal() {
+            document.getElementById('imageModal').style.display = 'none';
+        }
+
+        function copyImageUrl() {
+            const imageUrl = document.getElementById('imageUrl').textContent;
+            navigator.clipboard.writeText(imageUrl)
+                .then(() => {
+                    showNotification('Image URL copied to clipboard!', 'success');
+                })
+                .catch(err => {
+                    console.error('Failed to copy: ', err);
+                    showNotification('Failed to copy URL', 'error');
+                });
+        }
+
+        // Parse image links from text
+        function parseImageLinks(text) {
+            if (!text) return [];
+            
+            // Split by commas, new lines, or spaces
+            const links = text.split(/[\n,]+/)
+                .map(link => link.trim())
+                .filter(link => link.length > 0)
+                .filter(link => link.startsWith('http'));
+            
+            return links;
+        }
+
+        // Format image links for display
+        function formatImageLinks(links) {
+            if (!links || links.length === 0) return '';
+            
+            return links.join('\n');
         }
 
         // Update Sync Status
@@ -1836,7 +2018,7 @@
             if (filteredTrades.length === 0) {
                 allBody.innerHTML = `
                     <tr>
-                        <td colspan="11" style="text-align: center; padding: 40px; color: var(--notion-text-light);">
+                        <td colspan="12" style="text-align: center; padding: 40px; color: var(--notion-text-light);">
                             <i class="fas fa-inbox"></i><br>
                             No trades found for this view.
                         </td>
@@ -1885,6 +2067,24 @@
             const plClass = trade.pl >= 0 ? 'positive' : 'negative';
             const plSign = trade.pl >= 0 ? '+' : '';
             
+            // Parse image links
+            const imageLinks = trade.imageLinks ? parseImageLinks(trade.imageLinks) : [];
+            
+            // Create image links display
+            let imageLinksHtml = '<div class="image-links-container">';
+            if (imageLinks.length > 0) {
+                imageLinks.forEach((link, index) => {
+                    imageLinksHtml += `
+                        <a href="#" class="image-link" onclick="openImageModal('${link}'); return false;" title="${link}">
+                            <i class="fas fa-image"></i> Image ${index + 1}
+                        </a>
+                    `;
+                });
+            } else {
+                imageLinksHtml += '<span style="color: var(--notion-text-light); font-size: 12px;">No images</span>';
+            }
+            imageLinksHtml += '</div>';
+            
             row.innerHTML = `
                 <td>${formatDate(trade.date)}</td>
                 <td>${trade.session || 'London'}</td>
@@ -1915,6 +2115,7 @@
                     </span>
                 </td>
                 <td class="${plClass}">${plSign}$${trade.pl || 0}</td>
+                <td>${imageLinksHtml}</td>
                 <td>
                     <button class="db-btn" onclick="editTrade('${trade.id}')" style="padding: 4px 8px; font-size: 12px;">
                         <i class="fas fa-edit"></i>
@@ -1998,6 +2199,7 @@
                 const lotSize = parseFloat(document.getElementById('lotSize').value) || 0.1;
                 const result = document.getElementById('tradeResult').value;
                 const session = document.getElementById('tradeSession').value;
+                const imageLinks = document.getElementById('imageLinks').value;
                 
                 // Calculate R:R from percentages
                 const rrRatio = profitPercent / riskPercent;
@@ -2033,6 +2235,7 @@
                     pl: pl,
                     accountSize: accountSize,
                     emotionBefore: parseInt(document.getElementById('emotionBefore').value),
+                    imageLinks: imageLinks,
                     notes: document.getElementById('tradeNotes').value,
                     createdAt: firebase.database.ServerValue.TIMESTAMP
                 };
@@ -2085,6 +2288,7 @@
                 document.getElementById('tradeResult').value = trade.result;
                 document.getElementById('lotSize').value = trade.lotSize || 0.1;
                 document.getElementById('emotionBefore').value = trade.emotionBefore || 7;
+                document.getElementById('imageLinks').value = trade.imageLinks || '';
                 document.getElementById('tradeNotes').value = trade.notes || '';
                 
                 // Change modal title
@@ -2116,6 +2320,7 @@
                             result: document.getElementById('tradeResult').value,
                             lotSize: parseFloat(document.getElementById('lotSize').value) || 0.1,
                             emotionBefore: parseInt(document.getElementById('emotionBefore').value),
+                            imageLinks: document.getElementById('imageLinks').value,
                             notes: document.getElementById('tradeNotes').value,
                             updatedAt: firebase.database.ServerValue.TIMESTAMP
                         };
@@ -2663,6 +2868,9 @@
             
             // Clear return amount field for new trades
             document.getElementById('returnAmount').value = '';
+            
+            // Clear image links field
+            document.getElementById('imageLinks').value = '';
         }
 
         function closeModal() {
