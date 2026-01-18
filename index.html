@@ -905,7 +905,7 @@
                                     <th>Pair</th>
                                     <th>ICT Model</th>
                                     <th>Direction</th>
-                                    <th>Entry</th>
+                                    <th>Risk/Profit %</th>
                                     <th>Result</th>
                                     <th>P/L ($)</th>
                                     <th>R:R</th>
@@ -967,9 +967,9 @@
                                     <th>Session</th>
                                     <th>ICT Model</th>
                                     <th>Direction</th>
-                                    <th>Entry Price</th>
-                                    <th>Stop Loss</th>
-                                    <th>Take Profit</th>
+                                    <th>Risk %</th>
+                                    <th>Profit %</th>
+                                    <th>Return ($)</th>
                                     <th>Result</th>
                                     <th>P/L ($)</th>
                                     <th>Actions</th>
@@ -1118,29 +1118,34 @@
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label class="form-label">Entry Price</label>
-                        <input type="number" step="0.00001" class="form-control" id="entryPrice" placeholder="1.08542">
+                        <label class="form-label">Risk %</label>
+                        <input type="number" step="0.01" class="form-control" id="riskPercent" placeholder="1.0" value="1.0">
                     </div>
                     
                     <div class="form-group">
-                        <label class="form-label">Stop Loss</label>
-                        <input type="number" step="0.00001" class="form-control" id="stopLoss" placeholder="1.08420">
+                        <label class="form-label">Profit %</label>
+                        <input type="number" step="0.01" class="form-control" id="profitPercent" placeholder="2.0" value="2.0">
                     </div>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label class="form-label">Take Profit</label>
-                        <input type="number" step="0.00001" class="form-control" id="takeProfit" placeholder="1.08750">
+                        <label class="form-label">Return ($)</label>
+                        <input type="number" step="0.01" class="form-control" id="returnAmount" placeholder="25.00">
                     </div>
                     
+                    <div class="form-group">
+                        <label class="form-label">Account Size ($)</label>
+                        <input type="number" step="100" class="form-control" id="accountSize" placeholder="10000" value="10000">
+                    </div>
+                </div>
+
+                <div class="form-row">
                     <div class="form-group">
                         <label class="form-label">Lot Size</label>
                         <input type="number" step="0.01" class="form-control" id="lotSize" placeholder="0.10" value="0.10">
                     </div>
-                </div>
-
-                <div class="form-row">
+                    
                     <div class="form-group">
                         <label class="form-label">Result</label>
                         <select class="form-control" id="tradeResult">
@@ -1148,11 +1153,6 @@
                             <option value="Loss">Loss</option>
                             <option value="Break Even">Break Even</option>
                         </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label">Risk %</label>
-                        <input type="number" step="0.1" class="form-control" id="riskPercent" placeholder="1.0" value="1.0">
                     </div>
                 </div>
 
@@ -1374,20 +1374,31 @@
             let filteredTrades = [...trades];
             switch(currentView) {
                 case 'london':
-                    filteredTrades = filteredTrades.filter(t => t.session === 'London');
+                    filteredTrades = filteredTrades.filter(t => 
+                        t.session === 'London' || !t.session
+                    );
                     break;
                 case 'eurusd':
-                    filteredTrades = filteredTrades.filter(t => t.pair === 'EURUSD');
+                    filteredTrades = filteredTrades.filter(t => 
+                        t.pair === 'EURUSD'
+                    );
                     break;
                 case 'gbpusd':
-                    filteredTrades = filteredTrades.filter(t => t.pair === 'GBPUSD');
+                    filteredTrades = filteredTrades.filter(t => 
+                        t.pair === 'GBPUSD'
+                    );
                     break;
                 case 'wins':
-                    filteredTrades = filteredTrades.filter(t => t.result === 'Win');
+                    filteredTrades = filteredTrades.filter(t => 
+                        t.result === 'Win'
+                    );
                     break;
                 case 'losses':
-                    filteredTrades = filteredTrades.filter(t => t.result === 'Loss');
+                    filteredTrades = filteredTrades.filter(t => 
+                        t.result === 'Loss'
+                    );
                     break;
+                // 'all' view shows all trades
             }
             
             // Update trade count
@@ -1443,15 +1454,36 @@
                         <option ${trade.pair === 'GBPUSD' ? 'selected' : ''}>GBPUSD</option>
                     </select>
                 </td>
-                <td>
-                    <select class="select-property" onchange="updateTradeProperty('${trade.id}', 'model', this.value)">
-                        <option ${trade.model === 'FVG' ? 'selected' : ''}>FVG</option>
-                        <option ${trade.model === 'Liquidity Sweep' ? 'selected' : ''}>Liquidity Sweep</option>
-                        <option ${trade.model === 'Order Block' ? 'selected' : ''}>Order Block</option>
-                        <option ${trade.model === 'Breaker' ? 'selected' : ''}>Breaker</option>
-                        <option ${trade.model === 'MIT' ? 'selected' : ''}>MIT</option>
-                    </select>
-                </td>
+            `;
+            
+            if (isFullView) {
+                rowHTML += `
+                    <td>${trade.session || 'London'}</td>
+                    <td>
+                        <select class="select-property" onchange="updateTradeProperty('${trade.id}', 'model', this.value)">
+                            <option ${trade.model === 'FVG' ? 'selected' : ''}>FVG</option>
+                            <option ${trade.model === 'Liquidity Sweep' ? 'selected' : ''}>Liquidity Sweep</option>
+                            <option ${trade.model === 'Order Block' ? 'selected' : ''}>Order Block</option>
+                            <option ${trade.model === 'Breaker' ? 'selected' : ''}>Breaker</option>
+                            <option ${trade.model === 'MIT' ? 'selected' : ''}>MIT</option>
+                        </select>
+                    </td>
+                `;
+            } else {
+                rowHTML += `
+                    <td>
+                        <select class="select-property" onchange="updateTradeProperty('${trade.id}', 'model', this.value)">
+                            <option ${trade.model === 'FVG' ? 'selected' : ''}>FVG</option>
+                            <option ${trade.model === 'Liquidity Sweep' ? 'selected' : ''}>Liquidity Sweep</option>
+                            <option ${trade.model === 'Order Block' ? 'selected' : ''}>Order Block</option>
+                            <option ${trade.model === 'Breaker' ? 'selected' : ''}>Breaker</option>
+                            <option ${trade.model === 'MIT' ? 'selected' : ''}>MIT</option>
+                        </select>
+                    </td>
+                `;
+            }
+            
+            rowHTML += `
                 <td>
                     <select class="select-property ${trade.direction === 'Buy' ? 'green' : 'red'}" onchange="updateTradeProperty('${trade.id}', 'direction', this.value)">
                         <option ${trade.direction === 'Buy' ? 'selected' : ''}>Buy</option>
@@ -1462,12 +1494,12 @@
             
             if (isFullView) {
                 rowHTML += `
-                    <td>${trade.entry || 'N/A'}</td>
-                    <td>${trade.sl || 'N/A'}</td>
-                    <td>${trade.tp || 'N/A'}</td>
+                    <td>${trade.riskPercent || 0}%</td>
+                    <td>${trade.profitPercent || 0}%</td>
+                    <td>${trade.returnAmount || trade.pl || 0}</td>
                 `;
             } else {
-                rowHTML += `<td>${trade.entry ? trade.entry.toFixed(5) : 'N/A'}</td>`;
+                rowHTML += `<td>${trade.riskPercent || 0}%/${trade.profitPercent || 0}%</td>`;
             }
             
             rowHTML += `
@@ -1499,16 +1531,22 @@
             const updates = {};
             updates[property] = value;
             
-            // Recalculate P/L if needed
-            if (property === 'result' || property === 'entry' || property === 'sl' || property === 'tp') {
-                const trade = trades.find(t => t.id === tradeId);
-                if (trade) {
-                    const updatedTrade = { ...trade, [property]: value };
-                    const pl = calculatePL(updatedTrade);
-                    const rr = calculateRR(updatedTrade);
+            // Recalculate R:R if risk or profit percent changes
+            const trade = trades.find(t => t.id === tradeId);
+            if (trade && (property === 'riskPercent' || property === 'profitPercent')) {
+                const riskPercent = property === 'riskPercent' ? parseFloat(value) : trade.riskPercent;
+                const profitPercent = property === 'profitPercent' ? parseFloat(value) : trade.profitPercent;
+                
+                if (riskPercent && profitPercent && riskPercent > 0) {
+                    const rrRatio = profitPercent / riskPercent;
+                    updates.rr = `1:${rrRatio.toFixed(2)}`;
                     
-                    updates.pl = pl;
-                    updates.rr = rr;
+                    // Also recalculate P/L for win trades
+                    if (trade.result === 'Win' && trade.accountSize) {
+                        const riskAmount = (trade.accountSize * riskPercent / 100);
+                        updates.pl = riskAmount * rrRatio;
+                        updates.returnAmount = updates.pl;
+                    }
                 }
             }
             
@@ -1522,57 +1560,53 @@
                 });
         }
 
-        // Calculate P/L
-        function calculatePL(trade) {
-            if (!trade.entry || !trade.sl || !trade.tp || !trade.lotSize) return 0;
-            
-            const lotSize = trade.lotSize || 0.1;
-            const pipValue = lotSize * 10; // Simplified pip value calculation
-            
-            if (trade.result === 'Win') {
-                const pips = Math.abs(trade.tp - trade.entry) * 10000;
-                return Math.round(pips * pipValue);
-            } else if (trade.result === 'Loss') {
-                const pips = Math.abs(trade.sl - trade.entry) * 10000;
-                return -Math.round(pips * pipValue);
-            }
-            return 0;
-        }
-
-        // Calculate Risk/Reward
-        function calculateRR(trade) {
-            if (!trade.entry || !trade.sl || !trade.tp) return '1:0.0';
-            
-            const risk = Math.abs(trade.entry - trade.sl);
-            const reward = Math.abs(trade.tp - trade.entry);
-            
-            if (risk === 0) return '1:0.0';
-            return `1:${(reward / risk).toFixed(1)}`;
-        }
-
         // Save Trade to Firebase
         function saveTradeToFirebase() {
+            const riskPercent = parseFloat(document.getElementById('riskPercent').value);
+            const profitPercent = parseFloat(document.getElementById('profitPercent').value);
+            const returnAmount = parseFloat(document.getElementById('returnAmount').value);
+            const accountSize = parseFloat(document.getElementById('accountSize').value) || 10000;
+            const lotSize = parseFloat(document.getElementById('lotSize').value) || 0.1;
+            const result = document.getElementById('tradeResult').value;
+            
+            // Calculate R:R from percentages
+            const rrRatio = profitPercent / riskPercent;
+            const rrString = `1:${rrRatio.toFixed(2)}`;
+            
+            // Calculate risk amount in dollars
+            const riskAmount = (accountSize * riskPercent / 100);
+            
+            // Use return amount if provided, otherwise calculate from result
+            let pl = returnAmount;
+            if (!pl && pl !== 0) {
+                if (result === 'Win') {
+                    pl = riskAmount * rrRatio;
+                } else if (result === 'Loss') {
+                    pl = -riskAmount;
+                } else {
+                    pl = 0; // Break even
+                }
+            }
+            
             const tradeData = {
                 date: document.getElementById('tradeDate').value,
                 pair: document.getElementById('tradePair').value,
                 direction: document.getElementById('tradeDirection').value,
                 model: document.getElementById('tradeModel').value,
                 premiumDiscount: document.getElementById('tradePd').value,
-                entry: parseFloat(document.getElementById('entryPrice').value),
-                sl: parseFloat(document.getElementById('stopLoss').value),
-                tp: parseFloat(document.getElementById('takeProfit').value),
-                result: document.getElementById('tradeResult').value,
-                riskPercent: parseFloat(document.getElementById('riskPercent').value),
-                lotSize: parseFloat(document.getElementById('lotSize').value) || 0.1,
+                riskPercent: riskPercent,
+                profitPercent: profitPercent,
+                returnAmount: pl, // Use calculated P/L as return amount
+                result: result,
+                lotSize: lotSize,
+                rr: rrString,
+                pl: pl,
+                accountSize: accountSize,
                 emotionBefore: parseInt(document.getElementById('emotionBefore').value),
                 notes: document.getElementById('tradeNotes').value,
                 session: 'London',
                 createdAt: firebase.database.ServerValue.TIMESTAMP
             };
-            
-            // Calculate P/L and R:R
-            tradeData.pl = calculatePL(tradeData);
-            tradeData.rr = calculateRR(tradeData);
             
             // Generate trade ID
             const tradeId = tradeIdCounter.toString();
@@ -1606,11 +1640,11 @@
                 document.getElementById('tradeDirection').value = trade.direction;
                 document.getElementById('tradeModel').value = trade.model;
                 document.getElementById('tradePd').value = trade.premiumDiscount || 'Discount';
-                document.getElementById('entryPrice').value = trade.entry;
-                document.getElementById('stopLoss').value = trade.sl;
-                document.getElementById('takeProfit').value = trade.tp;
-                document.getElementById('tradeResult').value = trade.result;
                 document.getElementById('riskPercent').value = trade.riskPercent || 1.0;
+                document.getElementById('profitPercent').value = trade.profitPercent || 2.0;
+                document.getElementById('returnAmount').value = trade.returnAmount || trade.pl || 0;
+                document.getElementById('accountSize').value = trade.accountSize || 10000;
+                document.getElementById('tradeResult').value = trade.result;
                 document.getElementById('lotSize').value = trade.lotSize || 0.1;
                 document.getElementById('emotionBefore').value = trade.emotionBefore || 7;
                 document.getElementById('tradeNotes').value = trade.notes || '';
@@ -1629,20 +1663,37 @@
                         direction: document.getElementById('tradeDirection').value,
                         model: document.getElementById('tradeModel').value,
                         premiumDiscount: document.getElementById('tradePd').value,
-                        entry: parseFloat(document.getElementById('entryPrice').value),
-                        sl: parseFloat(document.getElementById('stopLoss').value),
-                        tp: parseFloat(document.getElementById('takeProfit').value),
-                        result: document.getElementById('tradeResult').value,
                         riskPercent: parseFloat(document.getElementById('riskPercent').value),
+                        profitPercent: parseFloat(document.getElementById('profitPercent').value),
+                        returnAmount: parseFloat(document.getElementById('returnAmount').value),
+                        accountSize: parseFloat(document.getElementById('accountSize').value),
+                        result: document.getElementById('tradeResult').value,
                         lotSize: parseFloat(document.getElementById('lotSize').value) || 0.1,
                         emotionBefore: parseInt(document.getElementById('emotionBefore').value),
                         notes: document.getElementById('tradeNotes').value,
                         updatedAt: firebase.database.ServerValue.TIMESTAMP
                     };
                     
-                    // Recalculate
-                    updatedTrade.pl = calculatePL(updatedTrade);
-                    updatedTrade.rr = calculateRR(updatedTrade);
+                    // Calculate R:R
+                    const rrRatio = updatedTrade.profitPercent / updatedTrade.riskPercent;
+                    updatedTrade.rr = `1:${rrRatio.toFixed(2)}`;
+                    
+                    // Calculate P/L if not provided
+                    if (!updatedTrade.returnAmount && updatedTrade.returnAmount !== 0) {
+                        const riskAmount = (updatedTrade.accountSize * updatedTrade.riskPercent / 100);
+                        if (updatedTrade.result === 'Win') {
+                            updatedTrade.pl = riskAmount * rrRatio;
+                            updatedTrade.returnAmount = updatedTrade.pl;
+                        } else if (updatedTrade.result === 'Loss') {
+                            updatedTrade.pl = -riskAmount;
+                            updatedTrade.returnAmount = updatedTrade.pl;
+                        } else {
+                            updatedTrade.pl = 0;
+                            updatedTrade.returnAmount = 0;
+                        }
+                    } else {
+                        updatedTrade.pl = updatedTrade.returnAmount;
+                    }
                     
                     updateSyncStatus('Updating trade...', 'syncing');
                     
@@ -1707,7 +1758,7 @@
                     }
                 }
             });
-            const avgRR = countRR > 0 ? (totalRR / countRR).toFixed(1) : '0.0';
+            const avgRR = countRR > 0 ? (totalRR / countRR).toFixed(2) : '0.0';
             
             // Update UI
             document.getElementById('winRate').textContent = `${winRate}%`;
@@ -2005,6 +2056,9 @@
             
             // Set default date to now
             document.getElementById('tradeDate').value = new Date().toISOString().slice(0, 16);
+            
+            // Clear return amount field for new trades
+            document.getElementById('returnAmount').value = '';
         }
 
         function closeModal() {
