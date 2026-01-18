@@ -1,0 +1,2501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Winning Trades - ICT Scalping Journal</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics-compat.js"></script>
+    <style>
+        :root {
+            --notion-bg: #ffffff;
+            --notion-gray: #f7f6f3;
+            --notion-gray-light: #fbfbfa;
+            --notion-gray-dark: #e9e9e7;
+            --notion-text: #37352f;
+            --notion-text-light: #70716e;
+            --notion-blue: #0c8ce9;
+            --notion-blue-light: #e3f2fd;
+            --notion-green: #0f7b6c;
+            --notion-green-light: #e8f5e9;
+            --notion-red: #d1453b;
+            --notion-red-light: #ffebee;
+            --notion-purple: #6940a5;
+            --notion-purple-light: #f3e5f5;
+            --notion-yellow: #ffc800;
+            --notion-yellow-light: #fff8e1;
+            --notion-pink: #e55ca2;
+            --notion-orange: #ff6b35;
+            --notion-orange-light: #fff3e0;
+            --win-color: #0f7b6c;
+            --win-color-light: #e8f5e9;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        body {
+            background-color: var(--notion-bg);
+            color: var(--notion-text);
+            line-height: 1.5;
+        }
+
+        /* Header */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 45px;
+            background-color: var(--notion-bg);
+            border-bottom: 1px solid var(--notion-gray-dark);
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            z-index: 100;
+        }
+
+        .header-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+
+        .header-actions {
+            margin-left: auto;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .sync-status {
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            margin-right: 8px;
+        }
+
+        .sync-status.syncing {
+            background-color: var(--notion-yellow-light);
+            color: var(--notion-yellow);
+        }
+
+        .sync-status.synced {
+            background-color: var(--win-color-light);
+            color: var(--win-color);
+        }
+
+        .sync-status.error {
+            background-color: var(--notion-red-light);
+            color: var(--notion-red);
+        }
+
+        .header-btn {
+            padding: 4px 12px;
+            background-color: var(--notion-gray);
+            border: none;
+            border-radius: 4px;
+            font-size: 13px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .header-btn.primary {
+            background-color: var(--win-color);
+            color: white;
+        }
+
+        .header-btn.danger {
+            background-color: var(--notion-red);
+            color: white;
+        }
+
+        /* Main Layout */
+        .container {
+            display: grid;
+            grid-template-columns: 240px 1fr;
+            margin-top: 45px;
+            height: calc(100vh - 45px);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            border-right: 1px solid var(--notion-gray-dark);
+            padding: 16px;
+            overflow-y: auto;
+        }
+
+        .workspace {
+            display: flex;
+            align-items: center;
+            padding: 4px 8px;
+            border-radius: 4px;
+            margin-bottom: 24px;
+            cursor: pointer;
+        }
+
+        .workspace:hover {
+            background-color: var(--notion-gray);
+        }
+
+        .workspace-icon {
+            width: 20px;
+            height: 20px;
+            background-color: var(--win-color);
+            border-radius: 4px;
+            margin-right: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+        }
+
+        .workspace-name {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .nav-section {
+            margin-bottom: 24px;
+        }
+
+        .nav-title {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--notion-text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+            padding-left: 8px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 6px 8px;
+            border-radius: 4px;
+            margin-bottom: 2px;
+            cursor: pointer;
+            transition: background-color 0.1s;
+            font-size: 14px;
+            color: var(--notion-text);
+            text-decoration: none;
+        }
+
+        .nav-item:hover {
+            background-color: var(--notion-gray);
+        }
+
+        .nav-item.active {
+            background-color: var(--win-color-light);
+            color: var(--win-color);
+            font-weight: 500;
+        }
+
+        .nav-item i {
+            margin-right: 8px;
+            width: 16px;
+            text-align: center;
+            font-size: 16px;
+        }
+
+        .favorites {
+            border-bottom: 1px solid var(--notion-gray-dark);
+            padding-bottom: 16px;
+            margin-bottom: 16px;
+        }
+
+        /* Main Content */
+        .main-content {
+            padding: 24px;
+            overflow-y: auto;
+            background-color: var(--notion-gray-light);
+        }
+
+        .page {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        /* Page Header */
+        .page-header {
+            margin-bottom: 32px;
+        }
+
+        .page-title {
+            font-size: 40px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            border: none;
+            width: 100%;
+            background: transparent;
+            padding: 4px 0;
+        }
+
+        .page-tags {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .page-tag {
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .page-tag.blue { background-color: var(--notion-blue-light); color: var(--notion-blue); }
+        .page-tag.green { background-color: var(--win-color-light); color: var(--win-color); }
+        .page-tag.red { background-color: var(--notion-red-light); color: var(--notion-red); }
+        .page-tag.purple { background-color: var(--notion-purple-light); color: var(--notion-purple); }
+        .page-tag.orange { background-color: var(--notion-orange-light); color: var(--notion-orange); }
+        .page-tag.yellow { background-color: var(--notion-yellow-light); color: var(--notion-yellow); }
+
+        /* Database */
+        .database {
+            background-color: white;
+            border: 1px solid var(--notion-gray-dark);
+            border-radius: 6px;
+            overflow: hidden;
+            margin-bottom: 32px;
+        }
+
+        .database-header {
+            padding: 16px;
+            border-bottom: 1px solid var(--notion-gray-dark);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .database-title {
+            font-size: 20px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .database-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .db-btn {
+            padding: 6px 12px;
+            border-radius: 4px;
+            border: 1px solid var(--notion-gray-dark);
+            background-color: white;
+            font-size: 13px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .db-btn.primary {
+            background-color: var(--win-color);
+            color: white;
+            border-color: var(--win-color);
+        }
+
+        .db-btn.danger {
+            background-color: var(--notion-red);
+            color: white;
+            border-color: var(--notion-red);
+        }
+
+        .database-views {
+            padding: 8px 16px;
+            border-bottom: 1px solid var(--notion-gray-dark);
+            display: flex;
+            gap: 4px;
+            background-color: var(--notion-gray-light);
+        }
+
+        .view-btn {
+            padding: 6px 12px;
+            border-radius: 4px;
+            border: 1px solid transparent;
+            background-color: transparent;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .view-btn:hover {
+            background-color: var(--notion-gray);
+        }
+
+        .view-btn.active {
+            background-color: white;
+            border-color: var(--notion-gray-dark);
+        }
+
+        .database-table {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        th {
+            text-align: left;
+            padding: 10px 14px;
+            background-color: var(--notion-gray-light);
+            border-bottom: 1px solid var(--notion-gray-dark);
+            font-weight: 500;
+            color: var(--notion-text);
+            white-space: nowrap;
+            font-size: 13px;
+        }
+
+        td {
+            padding: 10px 14px;
+            border-bottom: 1px solid var(--notion-gray-dark);
+            min-width: 120px;
+        }
+
+        tr:hover {
+            background-color: var(--notion-gray-light);
+        }
+
+        /* Property Styles */
+        .property {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .select-property {
+            padding: 4px 8px;
+            border-radius: 4px;
+            border: 1px solid var(--notion-gray-dark);
+            background-color: white;
+            font-size: 13px;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .select-property.blue {
+            background-color: var(--notion-blue-light);
+            border-color: var(--notion-blue);
+        }
+
+        .select-property.green {
+            background-color: var(--win-color-light);
+            border-color: var(--win-color);
+        }
+
+        .select-property.red {
+            background-color: var(--notion-red-light);
+            border-color: var(--notion-red);
+        }
+
+        .select-property.purple {
+            background-color: var(--notion-purple-light);
+            border-color: var(--notion-purple);
+        }
+
+        .number-property {
+            padding: 4px 8px;
+            border-radius: 4px;
+            border: 1px solid var(--notion-gray-dark);
+            background-color: white;
+            font-size: 13px;
+            width: 100%;
+        }
+
+        .text-property {
+            padding: 4px 8px;
+            border-radius: 4px;
+            border: 1px solid transparent;
+            background-color: transparent;
+            font-size: 13px;
+            width: 100%;
+        }
+
+        .text-property:focus {
+            outline: none;
+            background-color: white;
+            border-color: var(--notion-gray-dark);
+        }
+
+        .date-property {
+            padding: 4px 8px;
+            border-radius: 4px;
+            border: 1px solid transparent;
+            background-color: transparent;
+            font-size: 13px;
+            width: 100%;
+        }
+
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+            display: inline-block;
+        }
+
+        .status-win {
+            background-color: var(--win-color-light);
+            color: var(--win-color);
+        }
+
+        .status-loss {
+            background-color: var(--notion-red-light);
+            color: var(--notion-red);
+        }
+
+        .status-be {
+            background-color: var(--notion-gray);
+            color: var(--notion-text-light);
+        }
+
+        /* Callouts */
+        .callout {
+            background-color: var(--win-color-light);
+            border: 1px solid var(--win-color);
+            border-radius: 6px;
+            padding: 16px;
+            margin-bottom: 24px;
+            display: flex;
+            gap: 12px;
+        }
+
+        .callout-icon {
+            color: var(--win-color);
+            font-size: 20px;
+            margin-top: 2px;
+        }
+
+        .callout-content h3 {
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+
+        .callout-content p {
+            font-size: 14px;
+            color: var(--notion-text);
+        }
+
+        /* Charts */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        .chart-card {
+            background-color: white;
+            border: 1px solid var(--notion-gray-dark);
+            border-radius: 6px;
+            padding: 12px;
+            min-height: 180px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            flex-shrink: 0;
+        }
+
+        .chart-title {
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .chart-container {
+            flex-grow: 1;
+            min-height: 120px;
+            position: relative;
+        }
+
+        /* Metrics */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .metric-card {
+            background-color: white;
+            border: 1px solid var(--notion-gray-dark);
+            border-radius: 6px;
+            padding: 16px;
+        }
+
+        .metric-title {
+            font-size: 13px;
+            color: var(--notion-text-light);
+            margin-bottom: 8px;
+        }
+
+        .metric-value {
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .metric-change {
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .positive { color: var(--win-color); }
+        .negative { color: var(--notion-red); }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background-color: white;
+            border: 1px solid var(--notion-gray-dark);
+            border-radius: 6px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--notion-text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Winning Trade Card */
+        .winning-trade-card {
+            background-color: var(--win-color-light);
+            border: 2px solid var(--win-color);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+            position: relative;
+        }
+
+        .winning-trade-card::before {
+            content: "🏆";
+            position: absolute;
+            top: -12px;
+            right: 16px;
+            background: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+        }
+
+        .win-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .win-pair {
+            font-weight: 600;
+            font-size: 16px;
+            color: var(--win-color);
+        }
+
+        .win-profit {
+            font-weight: 700;
+            font-size: 18px;
+            color: var(--win-color);
+        }
+
+        .win-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+            font-size: 13px;
+        }
+
+        .win-detail-item {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .win-detail-label {
+            color: var(--notion-text-light);
+        }
+
+        .win-detail-value {
+            font-weight: 500;
+        }
+
+        /* Best Practices Grid */
+        .best-practices-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .practice-card {
+            background-color: white;
+            border: 1px solid var(--notion-gray-dark);
+            border-radius: 6px;
+            padding: 16px;
+        }
+
+        .practice-icon {
+            font-size: 24px;
+            color: var(--win-color);
+            margin-bottom: 12px;
+        }
+
+        .practice-title {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .practice-desc {
+            font-size: 13px;
+            color: var(--notion-text);
+            line-height: 1.5;
+        }
+
+        /* Loading */
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+            color: var(--notion-text-light);
+        }
+
+        .loading i {
+            margin-right: 8px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar {
+                display: none;
+            }
+            
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .best-practices-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header-actions {
+                display: none;
+            }
+        }
+
+        /* Win Streak Indicator */
+        .win-streak {
+            display: inline-block;
+            background-color: var(--win-color);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+
+        /* Consistency Meter */
+        .consistency-meter {
+            width: 100%;
+            height: 8px;
+            background-color: var(--notion-gray);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+
+        .consistency-bar {
+            height: 100%;
+            background-color: var(--win-color);
+            transition: width 0.3s ease;
+        }
+
+        /* Top Performers */
+        .top-performer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px;
+            background-color: var(--win-color-light);
+            border-radius: 6px;
+            margin-bottom: 8px;
+        }
+
+        .top-performer-rank {
+            width: 24px;
+            height: 24px;
+            background-color: var(--win-color);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .top-performer-info {
+            flex-grow: 1;
+            margin-left: 12px;
+        }
+
+        .top-performer-name {
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        .top-performer-stats {
+            font-size: 11px;
+            color: var(--notion-text-light);
+        }
+
+        .top-performer-profit {
+            font-weight: 700;
+            color: var(--win-color);
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="workspace-icon">T</div>
+        <div class="header-title">ICT Scalping Journal - Winning Trades</div>
+        <div class="header-actions">
+            <div class="sync-status synced" id="syncStatus">
+                <i class="fas fa-cloud"></i> Synced
+            </div>
+            <button class="header-btn" id="exportBtn">
+                <i class="fas fa-download"></i> Export Wins
+            </button>
+            <button class="header-btn primary" id="analyzeBtn">
+                <i class="fas fa-chart-line"></i> Analyze Patterns
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Layout -->
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="workspace">
+                <div class="workspace-icon">T</div>
+                <div class="workspace-name">Trading Journal</div>
+            </div>
+
+            <div class="favorites">
+                <div class="nav-title">Favorites</div>
+                <a href="index.html" class="nav-item">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </a>
+                <a href="AllTrades.html" class="nav-item">
+                    <i class="fas fa-table"></i> All Trades
+                </a>
+                <a href="analytics.html" class="nav-item">
+                    <i class="fas fa-chart-bar"></i> Analytics
+                </a>
+                <a href="DailyJournal.html" class="nav-item">
+                    <i class="fas fa-calendar-day"></i> Daily Journal
+                </a>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-title">Pages</div>
+                <a href="Plan.html" class="nav-item">
+                    <i class="fas fa-file-alt"></i> Trading Plan
+                </a>
+                <a href="Goals.html" class="nav-item">
+                    <i class="fas fa-bullseye"></i> Weekly Goals
+                </a>
+                <a href="Psychology.html" class="nav-item">
+                    <i class="fas fa-brain"></i> Psychology Review
+                </a>
+                <a href="Performance.html" class="nav-item">
+                    <i class="fas fa-chart-pie"></i> Performance
+                </a>
+                <a href="Settings.html" class="nav-item">
+                    <i class="fas fa-cog"></i> Settings
+                </a>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-title">Databases</div>
+                <a href="AllTrades.html" class="nav-item">
+                    <i class="fas fa-table"></i> All Trades
+                </a>
+                <a href="LondonSession.html" class="nav-item">
+                    <i class="fas fa-filter"></i> London Session
+                </a>
+                <a href="EURUSD.html" class="nav-item">
+                    <i class="fas fa-euro-sign"></i> EURUSD Only
+                </a>
+                <a href="GBPUSD.html" class="nav-item">
+                    <i class="fas fa-pound-sign"></i> GBPUSD Only
+                </a>
+                <a href="#" class="nav-item active">
+                    <i class="fas fa-trophy"></i> Winning Trades
+                </a>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="page">
+                <!-- Page Header -->
+                <div class="page-header">
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+                        <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #0f7b6c, #ffc800); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-size: 20px;">
+                            <i class="fas fa-trophy"></i>
+                        </div>
+                        <div>
+                            <h1 class="page-title">Winning Trades Analysis</h1>
+                            <div class="page-tags">
+                                <span class="page-tag green">Success Patterns</span>
+                                <span class="page-tag yellow">Best Practices</span>
+                                <span class="page-tag blue">High Probability Setups</span>
+                                <span class="page-tag purple">Repeatable Strategies</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Win Streak -->
+                    <div class="session-times">
+                        <div class="session-time active">
+                            <i class="fas fa-fire"></i>
+                            Current Win Streak: <span id="winStreak">0</span> trades
+                        </div>
+                        <div class="session-time">
+                            <i class="fas fa-calendar-alt"></i>
+                            Best Day: <span id="bestDay">$0</span>
+                        </div>
+                        <div class="session-time">
+                            <i class="fas fa-chart-line"></i>
+                            Win Rate: <span id="overallWinRate">0%</span>
+                        </div>
+                        <div class="session-time">
+                            <i class="fas fa-money-bill-wave"></i>
+                            Total Profits: <span id="totalProfits">$0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Callout -->
+                <div class="callout">
+                    <div class="callout-icon">
+                        <i class="fas fa-trophy"></i>
+                    </div>
+                    <div class="callout-content">
+                        <h3>What Makes a Winning Trade?</h3>
+                        <p>Analyze your successful trades to identify patterns, setups, and behaviors that lead to consistent profits. 
+                           Focus on repeating what works and eliminating what doesn't. Track your best performing models, sessions, 
+                           and timeframes to build a winning strategy.</p>
+                    </div>
+                </div>
+
+                <!-- Winning Stats -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalWins">0</div>
+                        <div class="stat-label">Total Wins</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-value" id="avgWin">$0</div>
+                        <div class="stat-label">Avg Win</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-value" id="largestWin">$0</div>
+                        <div class="stat-label">Largest Win</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-value" id="bestModel">N/A</div>
+                        <div class="stat-label">Best Model</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-value" id="bestSession">N/A</div>
+                        <div class="stat-label">Best Session</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-value" id="bestPair">N/A</div>
+                        <div class="stat-label">Best Pair</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-value" id="consistency">0%</div>
+                        <div class="stat-label">Consistency</div>
+                        <div class="consistency-meter">
+                            <div class="consistency-bar" id="consistencyBar" style="width: 0%;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts -->
+                <div class="charts-grid">
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <div class="chart-title">Winning Trades Timeline</div>
+                            <select class="form-control" id="chartPeriod" style="width: auto; font-size: 13px; padding: 4px 8px;">
+                                <option value="7">Last 7 Days</option>
+                                <option value="30" selected>Last 30 Days</option>
+                                <option value="90">Last 90 Days</option>
+                                <option value="all">All Time</option>
+                            </select>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="winsTimelineChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <div class="chart-title">Win Distribution by Model</div>
+                            <div style="font-size: 13px; color: var(--notion-text-light);" id="modelStats">Loading...</div>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="modelDistributionChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Best Practices -->
+                <div class="best-practices-grid">
+                    <div class="practice-card">
+                        <div class="practice-icon">
+                            <i class="fas fa-chess-board"></i>
+                        </div>
+                        <div class="practice-title">Best Setups</div>
+                        <div class="practice-desc" id="bestSetups">
+                            Loading best performing ICT models...
+                        </div>
+                    </div>
+                    
+                    <div class="practice-card">
+                        <div class="practice-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="practice-title">Best Times</div>
+                        <div class="practice-desc" id="bestTimes">
+                            Loading most profitable trading times...
+                        </div>
+                    </div>
+                    
+                    <div class="practice-card">
+                        <div class="practice-icon">
+                            <i class="fas fa-chart-bar"></i>
+                        </div>
+                        <div class="practice-title">Risk Management</div>
+                        <div class="practice-desc" id="riskStats">
+                            Loading optimal risk parameters...
+                        </div>
+                    </div>
+                    
+                    <div class="practice-card">
+                        <div class="practice-icon">
+                            <i class="fas fa-lightbulb"></i>
+                        </div>
+                        <div class="practice-title">Key Insights</div>
+                        <div class="practice-desc" id="keyInsights">
+                            Analyzing winning trade patterns...
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Top Winning Trades -->
+                <div class="database">
+                    <div class="database-header">
+                        <div class="database-title">
+                            <i class="fas fa-crown"></i>
+                            Top 10 Winning Trades <span id="topWinsCount">(0 trades)</span>
+                        </div>
+                        <div class="database-actions">
+                            <button class="db-btn" id="sortByProfitBtn">
+                                <i class="fas fa-sort-amount-down"></i> Sort by Profit
+                            </button>
+                            <button class="db-btn primary" id="showAllWinsBtn">
+                                <i class="fas fa-list"></i> Show All Wins
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="database-views">
+                        <button class="view-btn active" data-view="top10">Top 10</button>
+                        <button class="view-btn" data-view="thisweek">This Week</button>
+                        <button class="view-btn" data-view="thismonth">This Month</button>
+                        <button class="view-btn" data-view="bigwins">Big Wins ($100+)</button>
+                        <button class="view-btn" data-view="highrr">High R:R (3:1+)</button>
+                        <button class="view-btn" data-view="quality10">Quality 10/10</button>
+                        <button class="view-btn" data-view="eurusd">EURUSD Wins</button>
+                        <button class="view-btn" data-view="gbpusd">GBPUSD Wins</button>
+                    </div>
+                    
+                    <div id="topWinsContainer">
+                        <!-- Top wins will be inserted here -->
+                        <div class="loading" id="loadingTopWins">
+                            <i class="fas fa-spinner"></i> Loading top winning trades...
+                        </div>
+                    </div>
+                </div>
+
+                <!-- All Winning Trades Database -->
+                <div class="database">
+                    <div class="database-header">
+                        <div class="database-title">
+                            <i class="fas fa-table"></i>
+                            All Winning Trades <span id="winningTradesCount">(0 trades)</span>
+                        </div>
+                        <div class="database-actions">
+                            <button class="db-btn" id="filterBtn">
+                                <i class="fas fa-filter"></i> Filter
+                            </button>
+                            <button class="db-btn" id="printBtn">
+                                <i class="fas fa-print"></i> Print
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="database-table">
+                        <table id="winningTradesTable">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Pair</th>
+                                    <th>Session</th>
+                                    <th>Model</th>
+                                    <th>Direction</th>
+                                    <th>Entry</th>
+                                    <th>Exit</th>
+                                    <th>Pips</th>
+                                    <th>Risk %</th>
+                                    <th>R:R</th>
+                                    <th>P/L ($)</th>
+                                    <th>Quality</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="winningTradesBody">
+                                <tr id="loadingWinningTrades">
+                                    <td colspan="13" class="loading">
+                                        <i class="fas fa-spinner"></i> Loading winning trades from database...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Repeatable Patterns -->
+                <div class="callout" style="background-color: var(--notion-yellow-light); border-color: var(--notion-yellow);">
+                    <div class="callout-icon" style="color: var(--notion-yellow);">
+                        <i class="fas fa-redo"></i>
+                    </div>
+                    <div class="callout-content">
+                        <h3>Repeatable Winning Patterns</h3>
+                        <p><strong>Patterns to Replicate:</strong> 
+                           <span id="patternsToReplicate">Loading patterns...</span><br>
+                           <strong>Common Success Factors:</strong> 
+                           <span id="successFactors">Loading factors...</span><br>
+                           <strong>Actions to Take:</strong> 
+                           <span id="actionsToTake">Loading actions...</span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Analyze Patterns Modal -->
+    <div class="modal-overlay" id="analyzeModal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">📊 Winning Patterns Analysis</div>
+                <button class="modal-close" id="closeAnalyzeModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Analysis Period</label>
+                    <select class="form-control" id="analysisPeriod">
+                        <option value="7">Last 7 Days</option>
+                        <option value="30" selected>Last 30 Days</option>
+                        <option value="90">Last 90 Days</option>
+                        <option value="all">All Time</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Focus Area</label>
+                    <select class="form-control" id="focusArea">
+                        <option value="model" selected>ICT Model Performance</option>
+                        <option value="session">Trading Session</option>
+                        <option value="pair">Currency Pair</option>
+                        <option value="timeframe">Timeframe</option>
+                        <option value="timeofday">Time of Day</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Minimum Win Amount ($)</label>
+                    <input type="number" class="form-control" id="minWinAmount" value="0" min="0" step="10">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Minimum Setup Quality (1-10)</label>
+                    <input type="number" class="form-control" id="minQuality" value="7" min="1" max="10">
+                </div>
+
+                <div id="analysisResults" style="margin-top: 20px; padding: 16px; background-color: var(--notion-gray-light); border-radius: 6px; display: none;">
+                    <h4 style="margin-bottom: 12px; color: var(--win-color);">Analysis Results</h4>
+                    <div id="analysisContent">
+                        <p style="font-size: 14px; color: var(--notion-text);">Run analysis to see results...</p>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button class="db-btn" id="cancelAnalysis">Cancel</button>
+                    <button class="db-btn primary" id="runAnalysis">
+                        <i class="fas fa-chart-line"></i> Run Analysis
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDuaP43jD8LWw5A8cIbcgS7-bqCZTXzEEg",
+            authDomain: "davily-feded.firebaseapp.com",
+            databaseURL: "https://davily-feded-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "davily-feded",
+            storageBucket: "davily-feded.firebasestorage.app",
+            messagingSenderId: "83255410493",
+            appId: "1:83255410493:web:927c5e859c5b20805c4f54",
+            measurementId: "G-LD4XHS6FGM"
+        };
+
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const analytics = firebase.analytics();
+
+        // Database References
+        const tradesRef = database.ref('trades');
+        const winningTradesMetricsRef = database.ref('metrics/winningTrades');
+
+        // Global Variables
+        let allTrades = [];
+        let winningTrades = [];
+        let winsTimelineChart = null;
+        let modelDistributionChart = null;
+        let currentView = 'top10';
+        let isAnalyzing = false;
+
+        // Initialize Application
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize Firebase
+            initFirebase();
+            
+            // Setup Event Listeners
+            setupEventListeners();
+        });
+
+        // Initialize Firebase and Load Data
+        function initFirebase() {
+            updateSyncStatus('Loading winning trades...', 'syncing');
+            
+            // Listen for all trades
+            tradesRef.on('value', (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    allTrades = Object.keys(data)
+                        .map(key => ({
+                            id: key,
+                            ...data[key]
+                        }))
+                        .filter(trade => trade.result === 'Win');
+                    
+                    // Sort by date (newest first)
+                    allTrades.sort((a, b) => new Date(b.date) - new Date(a.date));
+                    
+                    // Update winning trades
+                    winningTrades = [...allTrades];
+                    
+                    // Render UI
+                    renderWinningStats();
+                    renderTopWins();
+                    renderWinningTrades();
+                    updateCharts();
+                    updateBestPractices();
+                    
+                    updateSyncStatus('Synced with Firebase', 'synced');
+                } else {
+                    allTrades = [];
+                    winningTrades = [];
+                    renderWinningStats();
+                    renderTopWins();
+                    renderWinningTrades();
+                    updateSyncStatus('No winning trades found', 'error');
+                }
+                
+                // Hide loading indicators
+                document.getElementById('loadingTopWins')?.remove();
+                document.getElementById('loadingWinningTrades')?.remove();
+            }, (error) => {
+                console.error('Firebase error:', error);
+                updateSyncStatus('Connection error', 'error');
+                
+                // Try to load from localStorage as fallback
+                loadFromLocalStorage();
+            });
+
+            // Listen for winning trades metrics updates
+            winningTradesMetricsRef.on('value', (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    // Update metrics from database
+                    updateWinningMetricsFromDB(data);
+                }
+            });
+        }
+
+        // Setup Event Listeners
+        function setupEventListeners() {
+            // Export
+            document.getElementById('exportBtn').addEventListener('click', exportWinningTrades);
+            
+            // Analysis
+            document.getElementById('analyzeBtn').addEventListener('click', openAnalyzeModal);
+            document.getElementById('closeAnalyzeModal').addEventListener('click', closeAnalyzeModal);
+            document.getElementById('cancelAnalysis').addEventListener('click', closeAnalyzeModal);
+            document.getElementById('runAnalysis').addEventListener('click', runAnalysis);
+            
+            // View buttons
+            document.querySelectorAll('.view-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    currentView = this.getAttribute('data-view');
+                    renderTopWins();
+                });
+            });
+            
+            // Sort buttons
+            document.getElementById('sortByProfitBtn').addEventListener('click', function() {
+                winningTrades.sort((a, b) => (b.pl || 0) - (a.pl || 0));
+                renderTopWins();
+            });
+            
+            document.getElementById('showAllWinsBtn').addEventListener('click', function() {
+                currentView = 'all';
+                document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+                renderTopWins();
+            });
+            
+            // Chart period change
+            document.getElementById('chartPeriod').addEventListener('change', updateCharts);
+            
+            // Setup sidebar navigation
+            setupSidebarNavigation();
+        }
+
+        // Setup Sidebar Navigation
+        function setupSidebarNavigation() {
+            const navItems = document.querySelectorAll('.nav-item');
+            
+            navItems.forEach(item => {
+                const newItem = item.cloneNode(true);
+                item.parentNode.replaceChild(newItem, item);
+                
+                newItem.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    navItems.forEach(nav => nav.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    const href = this.getAttribute('href');
+                    if (href && href !== '#' && href !== 'index.html') {
+                        window.location.href = href;
+                    }
+                });
+            });
+        }
+
+        // Update Sync Status
+        function updateSyncStatus(message, status) {
+            const statusEl = document.getElementById('syncStatus');
+            if (statusEl) {
+                statusEl.textContent = message;
+                statusEl.className = 'sync-status ' + status;
+                
+                const icon = status === 'synced' ? 'fa-cloud' : 
+                            status === 'syncing' ? 'fa-sync fa-spin' : 
+                            'fa-cloud-slash';
+                statusEl.innerHTML = `<i class="fas ${icon}"></i> ${message}`;
+            }
+        }
+
+        // Render Winning Statistics
+        function renderWinningStats() {
+            if (winningTrades.length === 0) {
+                document.getElementById('totalWins').textContent = '0';
+                document.getElementById('avgWin').textContent = '$0';
+                document.getElementById('largestWin').textContent = '$0';
+                document.getElementById('bestModel').textContent = 'N/A';
+                document.getElementById('bestSession').textContent = 'N/A';
+                document.getElementById('bestPair').textContent = 'N/A';
+                document.getElementById('consistency').textContent = '0%';
+                document.getElementById('consistencyBar').style.width = '0%';
+                document.getElementById('winningTradesCount').textContent = '(0 trades)';
+                document.getElementById('topWinsCount').textContent = '(0 trades)';
+                document.getElementById('winStreak').textContent = '0';
+                document.getElementById('totalProfits').textContent = '$0';
+                return;
+            }
+            
+            // Calculate statistics
+            const totalWins = winningTrades.length;
+            const totalProfit = winningTrades.reduce((sum, t) => sum + (t.pl || 0), 0);
+            const avgWin = totalWins > 0 ? (totalProfit / totalWins).toFixed(2) : 0;
+            const largestWin = winningTrades.reduce((max, t) => Math.max(max, t.pl || 0), 0);
+            
+            // Calculate win streak
+            const sortedByDate = [...winningTrades].sort((a, b) => new Date(b.date) - new Date(a.date));
+            let currentStreak = 0;
+            let currentDate = null;
+            
+            for (const trade of sortedByDate) {
+                const tradeDate = new Date(trade.date).toDateString();
+                if (trade.result === 'Win') {
+                    if (currentDate === null || tradeDate === currentDate) {
+                        currentStreak++;
+                        currentDate = tradeDate;
+                    } else {
+                        break;
+                    }
+                }
+            }
+            
+            // Find best model
+            const modelCounts = {};
+            winningTrades.forEach(t => {
+                const model = t.model || 'Unknown';
+                modelCounts[model] = (modelCounts[model] || 0) + 1;
+            });
+            const bestModel = Object.keys(modelCounts).reduce((a, b) => modelCounts[a] > modelCounts[b] ? a : b, 'N/A');
+            
+            // Find best session
+            const sessionCounts = {};
+            winningTrades.forEach(t => {
+                const session = t.session || 'Unknown';
+                sessionCounts[session] = (sessionCounts[session] || 0) + 1;
+            });
+            const bestSession = Object.keys(sessionCounts).reduce((a, b) => sessionCounts[a] > sessionCounts[b] ? a : b, 'N/A');
+            
+            // Find best pair
+            const pairCounts = {};
+            winningTrades.forEach(t => {
+                const pair = t.pair || 'Unknown';
+                pairCounts[pair] = (pairCounts[pair] || 0) + 1;
+            });
+            const bestPair = Object.keys(pairCounts).reduce((a, b) => pairCounts[a] > pairCounts[b] ? a : b, 'N/A');
+            
+            // Calculate consistency (winning days / total days)
+            const winDates = new Set();
+            winningTrades.forEach(t => {
+                try {
+                    const date = new Date(t.date).toDateString();
+                    winDates.add(date);
+                } catch (e) {}
+            });
+            
+            // For demo purposes, estimate consistency
+            const consistency = Math.min(100, Math.round((winDates.size / 30) * 100));
+            
+            // Update UI
+            document.getElementById('totalWins').textContent = totalWins;
+            document.getElementById('avgWin').textContent = `$${avgWin}`;
+            document.getElementById('largestWin').textContent = `$${largestWin}`;
+            document.getElementById('bestModel').textContent = bestModel;
+            document.getElementById('bestSession').textContent = bestSession;
+            document.getElementById('bestPair').textContent = bestPair;
+            document.getElementById('consistency').textContent = `${consistency}%`;
+            document.getElementById('consistencyBar').style.width = `${consistency}%`;
+            document.getElementById('winningTradesCount').textContent = `(${totalWins} winning trades)`;
+            document.getElementById('topWinsCount').textContent = `(${Math.min(10, totalWins)} trades)`;
+            document.getElementById('winStreak').textContent = currentStreak;
+            document.getElementById('totalProfits').textContent = `$${totalProfit}`;
+            
+            // Calculate overall win rate (need all trades for this)
+            const allTradesSnapshot = [...allTrades]; // This is just winning trades, need to get all trades
+            // For now, estimate or leave placeholder
+            
+            // Save metrics to Firebase
+            const metrics = {
+                totalWins: totalWins,
+                totalProfit: totalProfit,
+                avgWin: avgWin,
+                largestWin: largestWin,
+                bestModel: bestModel,
+                bestSession: bestSession,
+                bestPair: bestPair,
+                consistency: consistency,
+                winStreak: currentStreak,
+                lastUpdated: firebase.database.ServerValue.TIMESTAMP
+            };
+            
+            winningTradesMetricsRef.set(metrics).catch(error => {
+                console.error('Error saving winning trades metrics:', error);
+            });
+        }
+
+        // Update Winning Metrics from Database
+        function updateWinningMetricsFromDB(data) {
+            if (data.totalWins) {
+                document.getElementById('totalWins').textContent = data.totalWins;
+            }
+            if (data.totalProfit) {
+                document.getElementById('totalProfits').textContent = `$${data.totalProfit}`;
+            }
+            if (data.avgWin) {
+                document.getElementById('avgWin').textContent = `$${data.avgWin}`;
+            }
+            if (data.largestWin) {
+                document.getElementById('largestWin').textContent = `$${data.largestWin}`;
+            }
+            if (data.bestModel) {
+                document.getElementById('bestModel').textContent = data.bestModel;
+            }
+            if (data.bestSession) {
+                document.getElementById('bestSession').textContent = data.bestSession;
+            }
+            if (data.bestPair) {
+                document.getElementById('bestPair').textContent = data.bestPair;
+            }
+            if (data.consistency) {
+                document.getElementById('consistency').textContent = `${data.consistency}%`;
+                document.getElementById('consistencyBar').style.width = `${data.consistency}%`;
+            }
+            if (data.winStreak) {
+                document.getElementById('winStreak').textContent = data.winStreak;
+            }
+        }
+
+        // Render Top Wins
+        function renderTopWins() {
+            const container = document.getElementById('topWinsContainer');
+            if (!container) return;
+            
+            // Clear container
+            container.innerHTML = '';
+            
+            // Filter and sort based on view
+            let filteredWins = [...winningTrades];
+            
+            switch(currentView) {
+                case 'top10':
+                    filteredWins = filteredWins.slice(0, 10);
+                    break;
+                case 'thisweek':
+                    const weekAgo = new Date();
+                    weekAgo.setDate(weekAgo.getDate() - 7);
+                    filteredWins = filteredWins.filter(t => {
+                        try {
+                            return new Date(t.date) >= weekAgo;
+                        } catch (e) {
+                            return false;
+                        }
+                    }).slice(0, 10);
+                    break;
+                case 'thismonth':
+                    const monthAgo = new Date();
+                    monthAgo.setMonth(monthAgo.getMonth() - 1);
+                    filteredWins = filteredWins.filter(t => {
+                        try {
+                            return new Date(t.date) >= monthAgo;
+                        } catch (e) {
+                            return false;
+                        }
+                    }).slice(0, 10);
+                    break;
+                case 'bigwins':
+                    filteredWins = filteredWins.filter(t => (t.pl || 0) >= 100).slice(0, 10);
+                    break;
+                case 'highrr':
+                    filteredWins = filteredWins.filter(t => {
+                        if (!t.rr) return false;
+                        const rrValue = parseFloat(t.rr.split(':')[1]);
+                        return !isNaN(rrValue) && rrValue >= 3;
+                    }).slice(0, 10);
+                    break;
+                case 'quality10':
+                    filteredWins = filteredWins.filter(t => (t.setupQuality || 0) === 10).slice(0, 10);
+                    break;
+                case 'eurusd':
+                    filteredWins = filteredWins.filter(t => t.pair === 'EURUSD').slice(0, 10);
+                    break;
+                case 'gbpusd':
+                    filteredWins = filteredWins.filter(t => t.pair === 'GBPUSD').slice(0, 10);
+                    break;
+                case 'all':
+                    // Show all wins in card format
+                    filteredWins = filteredWins.slice(0, 20); // Limit to 20 for performance
+                    break;
+            }
+            
+            if (filteredWins.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: var(--notion-text-light);">
+                        <i class="fas fa-inbox"></i><br>
+                        No winning trades found for this view.
+                    </div>
+                `;
+            } else {
+                filteredWins.forEach((trade, index) => {
+                    container.appendChild(createWinningTradeCard(trade, index + 1));
+                });
+            }
+        }
+
+        // Create Winning Trade Card
+        function createWinningTradeCard(trade, rank) {
+            const card = document.createElement('div');
+            card.className = 'winning-trade-card';
+            
+            const profit = trade.pl || 0;
+            const pips = trade.pips || 0;
+            const rr = trade.rr || '1:0';
+            const quality = trade.setupQuality || 5;
+            
+            // Quality indicator
+            let qualityColor = '#0f7b6c'; // Default green
+            if (quality >= 9) qualityColor = '#ffc800'; // Gold
+            else if (quality >= 7) qualityColor = '#0f7b6c'; // Green
+            else qualityColor = '#0c8ce9'; // Blue
+            
+            card.innerHTML = `
+                <div class="win-header">
+                    <div>
+                        <span class="win-pair">${trade.pair || 'N/A'}</span>
+                        <span style="font-size: 12px; color: var(--notion-text-light); margin-left: 8px;">
+                            ${trade.model || 'Unknown Model'}
+                        </span>
+                        ${rank <= 3 ? `<span class="win-streak">#${rank}</span>` : ''}
+                    </div>
+                    <div class="win-profit">+$${profit.toFixed(2)}</div>
+                </div>
+                <div class="win-details">
+                    <div class="win-detail-item">
+                        <span class="win-detail-label">Date:</span>
+                        <span class="win-detail-value">${formatDateShort(trade.date)}</span>
+                    </div>
+                    <div class="win-detail-item">
+                        <span class="win-detail-label">Session:</span>
+                        <span class="win-detail-value">${trade.session || 'N/A'}</span>
+                    </div>
+                    <div class="win-detail-item">
+                        <span class="win-detail-label">Direction:</span>
+                        <span class="win-detail-value" style="color: ${trade.direction === 'Buy' ? 'var(--win-color)' : 'var(--notion-red)'}">
+                            ${trade.direction || 'N/A'}
+                        </span>
+                    </div>
+                    <div class="win-detail-item">
+                        <span class="win-detail-label">Pips:</span>
+                        <span class="win-detail-value">${pips}</span>
+                    </div>
+                    <div class="win-detail-item">
+                        <span class="win-detail-label">R:R:</span>
+                        <span class="win-detail-value">${rr}</span>
+                    </div>
+                    <div class="win-detail-item">
+                        <span class="win-detail-label">Quality:</span>
+                        <span class="win-detail-value" style="color: ${qualityColor}">
+                            ${quality}/10
+                        </span>
+                    </div>
+                </div>
+                ${trade.notes ? `<div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(15, 123, 108, 0.2); font-size: 12px; color: var(--notion-text);">
+                    <strong>Notes:</strong> ${trade.notes.substring(0, 100)}${trade.notes.length > 100 ? '...' : ''}
+                </div>` : ''}
+            `;
+            
+            return card;
+        }
+
+        // Render Winning Trades Table
+        function renderWinningTrades() {
+            const tbody = document.getElementById('winningTradesBody');
+            if (!tbody) return;
+            
+            // Clear existing rows
+            tbody.innerHTML = '';
+            
+            if (winningTrades.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="13" style="text-align: center; padding: 40px; color: var(--notion-text-light);">
+                            <i class="fas fa-inbox"></i><br>
+                            No winning trades found.
+                        </td>
+                    </tr>
+                `;
+            } else {
+                winningTrades.forEach(trade => {
+                    tbody.appendChild(createWinningTradeRow(trade));
+                });
+            }
+        }
+
+        // Create Winning Trade Row
+        function createWinningTradeRow(trade) {
+            const row = document.createElement('tr');
+            const profit = trade.pl || 0;
+            
+            // Calculate pips if not available
+            let pips = trade.pips || 'N/A';
+            if (trade.entryPrice && trade.exitPrice && trade.direction) {
+                if (trade.direction === 'Buy') {
+                    pips = ((trade.exitPrice - trade.entryPrice) * 10000).toFixed(1);
+                } else {
+                    pips = ((trade.entryPrice - trade.exitPrice) * 10000).toFixed(1);
+                }
+            }
+            
+            // Quality indicator
+            const quality = trade.setupQuality || 5;
+            let qualityClass = 'status-win';
+            if (quality >= 9) qualityClass = 'status-win';
+            else if (quality >= 7) qualityClass = 'status-win';
+            else qualityClass = 'status-be';
+            
+            row.innerHTML = `
+                <td>${formatDateShort(trade.date)}</td>
+                <td>${trade.pair || 'N/A'}</td>
+                <td>${trade.session || 'N/A'}</td>
+                <td>${trade.model || 'N/A'}</td>
+                <td>
+                    <span class="select-property ${trade.direction === 'Buy' ? 'green' : 'red'}" style="min-width: 60px;">
+                        ${trade.direction || 'N/A'}
+                    </span>
+                </td>
+                <td>${trade.entryPrice ? trade.entryPrice.toFixed(5) : 'N/A'}</td>
+                <td>${trade.exitPrice ? trade.exitPrice.toFixed(5) : 'N/A'}</td>
+                <td>${pips}</td>
+                <td>${trade.riskPercent || 0}%</td>
+                <td>${trade.rr || '1:0'}</td>
+                <td class="positive">+$${profit.toFixed(2)}</td>
+                <td>
+                    <span class="status-badge ${qualityClass}">
+                        ${quality}/10
+                    </span>
+                </td>
+                <td>
+                    <button class="db-btn" onclick="viewTradeDetails('${trade.id}')" style="padding: 4px 8px; font-size: 12px;">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </td>
+            `;
+            return row;
+        }
+
+        // Update Best Practices
+        function updateBestPractices() {
+            if (winningTrades.length === 0) {
+                document.getElementById('bestSetups').innerHTML = 'No winning trades to analyze.';
+                document.getElementById('bestTimes').innerHTML = 'No winning trades to analyze.';
+                document.getElementById('riskStats').innerHTML = 'No winning trades to analyze.';
+                document.getElementById('keyInsights').innerHTML = 'No winning trades to analyze.';
+                document.getElementById('patternsToReplicate').textContent = 'No patterns identified yet.';
+                document.getElementById('successFactors').textContent = 'No factors identified yet.';
+                document.getElementById('actionsToTake').textContent = 'Keep trading and collecting data.';
+                return;
+            }
+            
+            // Analyze best setups
+            const modelCounts = {};
+            winningTrades.forEach(t => {
+                const model = t.model || 'Unknown';
+                modelCounts[model] = (modelCounts[model] || 0) + 1;
+            });
+            
+            const sortedModels = Object.entries(modelCounts)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 3);
+            
+            const bestSetupsText = sortedModels.length > 0 
+                ? sortedModels.map(([model, count]) => `${model} (${count} wins)`).join(', ')
+                : 'No clear patterns yet';
+            
+            // Analyze best times
+            const hourCounts = {};
+            winningTrades.forEach(t => {
+                try {
+                    const hour = new Date(t.date).getUTCHours();
+                    const hourLabel = `${hour}:00-${hour+1}:00 GMT`;
+                    hourCounts[hourLabel] = (hourCounts[hourLabel] || 0) + 1;
+                } catch (e) {}
+            });
+            
+            const sortedHours = Object.entries(hourCounts)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 2);
+            
+            const bestTimesText = sortedHours.length > 0 
+                ? sortedHours.map(([hour, count]) => `${hour} (${count} wins)`).join(', ')
+                : 'Analyzing time patterns...';
+            
+            // Analyze risk management
+            const avgRisk = winningTrades.reduce((sum, t) => sum + (parseFloat(t.riskPercent) || 0), 0) / winningTrades.length;
+            const avgRR = winningTrades.reduce((sum, t) => {
+                if (!t.rr) return sum;
+                const rrValue = parseFloat(t.rr.split(':')[1]);
+                return isNaN(rrValue) ? sum : sum + rrValue;
+            }, 0) / winningTrades.filter(t => t.rr).length;
+            
+            const riskStatsText = avgRisk > 0 
+                ? `Avg risk: ${avgRisk.toFixed(1)}%, Avg R:R: ${avgRR.toFixed(2)}`
+                : 'Risk data not available';
+            
+            // Key insights
+            const totalProfit = winningTrades.reduce((sum, t) => sum + (t.pl || 0), 0);
+            const avgProfit = totalProfit / winningTrades.length;
+            const bestPair = Object.entries(winningTrades.reduce((acc, t) => {
+                acc[t.pair] = (acc[t.pair] || 0) + (t.pl || 0);
+                return acc;
+            }, {})).sort((a, b) => b[1] - a[1])[0];
+            
+            const keyInsightsText = bestPair 
+                ? `Best performer: ${bestPair[0]} ($${bestPair[1].toFixed(2)}), Avg win: $${avgProfit.toFixed(2)}`
+                : `Avg win: $${avgProfit.toFixed(2)}`;
+            
+            // Update UI
+            document.getElementById('bestSetups').innerHTML = bestSetupsText;
+            document.getElementById('bestTimes').innerHTML = bestTimesText;
+            document.getElementById('riskStats').innerHTML = riskStatsText;
+            document.getElementById('keyInsights').innerHTML = keyInsightsText;
+            
+            // Update repeatable patterns
+            const topModel = sortedModels[0];
+            const patternsText = topModel ? `${topModel[0]} setup during ${sortedHours[0] ? sortedHours[0][0] : 'peak hours'}` : 'High quality setups during London session';
+            const factorsText = topModel ? `Discipline, proper risk management (${avgRisk.toFixed(1)}%), following ${topModel[0]} model` : 'Discipline and proper risk management';
+            const actionsText = `Focus on ${topModel ? topModel[0] : 'best performing'} setups, maintain ${avgRisk.toFixed(1)}% risk, aim for ${avgRR.toFixed(2)}:1 R:R`;
+            
+            document.getElementById('patternsToReplicate').textContent = patternsText;
+            document.getElementById('successFactors').textContent = factorsText;
+            document.getElementById('actionsToTake').textContent = actionsText;
+            
+            // Update model stats
+            const modelStatsText = sortedModels.map(([model, count]) => `${model}: ${count}`).join(' | ');
+            document.getElementById('modelStats').textContent = modelStatsText;
+        }
+
+        // Update Charts
+        function updateCharts() {
+            const period = document.getElementById('chartPeriod').value;
+            
+            // Filter trades by period
+            let filteredTrades = [...winningTrades];
+            if (period !== 'all') {
+                const days = parseInt(period);
+                const cutoffDate = new Date();
+                cutoffDate.setDate(cutoffDate.getDate() - days);
+                filteredTrades = filteredTrades.filter(t => {
+                    try {
+                        const tradeDate = new Date(t.date);
+                        return tradeDate >= cutoffDate;
+                    } catch (e) {
+                        return false;
+                    }
+                });
+            }
+            
+            // Sort by date ascending for timeline chart
+            filteredTrades.sort((a, b) => {
+                try {
+                    return new Date(a.date) - new Date(b.date);
+                } catch (e) {
+                    return 0;
+                }
+            });
+            
+            // Prepare timeline data
+            const timelineData = {};
+            filteredTrades.forEach(trade => {
+                try {
+                    const date = formatDateShort(trade.date);
+                    if (!timelineData[date]) {
+                        timelineData[date] = 0;
+                    }
+                    timelineData[date] += trade.pl || 0;
+                } catch (e) {}
+            });
+            
+            const timelineDates = Object.keys(timelineData);
+            const timelineValues = Object.values(timelineData);
+            
+            // Update or create timeline chart
+            const timelineCtx = document.getElementById('winsTimelineChart').getContext('2d');
+            if (winsTimelineChart) {
+                winsTimelineChart.data.labels = timelineDates;
+                winsTimelineChart.data.datasets[0].data = timelineValues;
+                winsTimelineChart.update();
+            } else {
+                winsTimelineChart = new Chart(timelineCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: timelineDates,
+                        datasets: [{
+                            label: 'Daily Profits',
+                            data: timelineValues,
+                            backgroundColor: '#0f7b6c',
+                            borderColor: '#0f7b6c',
+                            borderWidth: 1,
+                            borderRadius: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        layout: {
+                            padding: {
+                                top: 5,
+                                bottom: 5,
+                                left: 5,
+                                right: 5
+                            }
+                        },
+                        plugins: { 
+                            legend: { 
+                                display: false
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return `Profit: $${context.raw.toLocaleString()}`;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                grid: { 
+                                    display: false,
+                                    drawBorder: false
+                                },
+                                ticks: {
+                                    maxTicksLimit: 6,
+                                    font: {
+                                        size: 10
+                                    }
+                                }
+                            },
+                            y: {
+                                beginAtZero: true,
+                                grid: { 
+                                    color: 'rgba(0,0,0,0.05)',
+                                    drawBorder: false
+                                },
+                                ticks: { 
+                                    callback: v => '$' + v,
+                                    padding: 5,
+                                    font: {
+                                        size: 10
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // Prepare model distribution data
+            const modelData = {};
+            filteredTrades.forEach(trade => {
+                const model = trade.model || 'Unknown';
+                modelData[model] = (modelData[model] || 0) + (trade.pl || 0);
+            });
+            
+            const sortedModels = Object.entries(modelData)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 5); // Top 5 models
+            
+            const modelNames = sortedModels.map(([name]) => name);
+            const modelProfits = sortedModels.map(([, profit]) => profit);
+            
+            // Color palette for models
+            const modelColors = ['#0f7b6c', '#0c8ce9', '#6940a5', '#ff6b35', '#ffc800'];
+            
+            // Update or create model distribution chart
+            const modelCtx = document.getElementById('modelDistributionChart').getContext('2d');
+            if (modelDistributionChart) {
+                modelDistributionChart.data.labels = modelNames;
+                modelDistributionChart.data.datasets[0].data = modelProfits;
+                modelDistributionChart.data.datasets[0].backgroundColor = modelColors;
+                modelDistributionChart.update();
+            } else {
+                modelDistributionChart = new Chart(modelCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: modelNames,
+                        datasets: [{
+                            data: modelProfits,
+                            backgroundColor: modelColors,
+                            borderWidth: 1,
+                            borderColor: '#ffffff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        layout: {
+                            padding: {
+                                top: 5,
+                                bottom: 5,
+                                left: 5,
+                                right: 5
+                            }
+                        },
+                        plugins: { 
+                            legend: { 
+                                position: 'bottom',
+                                labels: {
+                                    padding: 10,
+                                    usePointStyle: true,
+                                    font: {
+                                        size: 10
+                                    }
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return `Profit: $${context.raw.toLocaleString()}`;
+                                    }
+                                }
+                            }
+                        },
+                        cutout: '65%'
+                    }
+                });
+            }
+        }
+
+        // Open Analysis Modal
+        function openAnalyzeModal() {
+            document.getElementById('analyzeModal').style.display = 'flex';
+            document.getElementById('analysisResults').style.display = 'none';
+        }
+
+        // Close Analysis Modal
+        function closeAnalyzeModal() {
+            document.getElementById('analyzeModal').style.display = 'none';
+        }
+
+        // Run Analysis
+        function runAnalysis() {
+            if (isAnalyzing) return;
+            isAnalyzing = true;
+            
+            const runBtn = document.getElementById('runAnalysis');
+            const originalText = runBtn.innerHTML;
+            
+            try {
+                runBtn.disabled = true;
+                runBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing...';
+                
+                const period = document.getElementById('analysisPeriod').value;
+                const focusArea = document.getElementById('focusArea').value;
+                const minWinAmount = parseFloat(document.getElementById('minWinAmount').value) || 0;
+                const minQuality = parseInt(document.getElementById('minQuality').value) || 1;
+                
+                // Filter trades based on criteria
+                let filteredTrades = [...winningTrades];
+                
+                if (period !== 'all') {
+                    const days = parseInt(period);
+                    const cutoffDate = new Date();
+                    cutoffDate.setDate(cutoffDate.getDate() - days);
+                    filteredTrades = filteredTrades.filter(t => {
+                        try {
+                            const tradeDate = new Date(t.date);
+                            return tradeDate >= cutoffDate;
+                        } catch (e) {
+                            return false;
+                        }
+                    });
+                }
+                
+                filteredTrades = filteredTrades.filter(t => 
+                    (t.pl || 0) >= minWinAmount && 
+                    (t.setupQuality || 0) >= minQuality
+                );
+                
+                if (filteredTrades.length === 0) {
+                    document.getElementById('analysisContent').innerHTML = `
+                        <p style="color: var(--notion-text-light);">No winning trades match your criteria.</p>
+                    `;
+                    document.getElementById('analysisResults').style.display = 'block';
+                    return;
+                }
+                
+                // Perform analysis based on focus area
+                let analysisResult = '';
+                
+                switch(focusArea) {
+                    case 'model':
+                        const modelAnalysis = analyzeModels(filteredTrades);
+                        analysisResult = modelAnalysis;
+                        break;
+                    case 'session':
+                        const sessionAnalysis = analyzeSessions(filteredTrades);
+                        analysisResult = sessionAnalysis;
+                        break;
+                    case 'pair':
+                        const pairAnalysis = analyzePairs(filteredTrades);
+                        analysisResult = pairAnalysis;
+                        break;
+                    case 'timeframe':
+                        const timeframeAnalysis = analyzeTimeframes(filteredTrades);
+                        analysisResult = timeframeAnalysis;
+                        break;
+                    case 'timeofday':
+                        const timeAnalysis = analyzeTimeOfDay(filteredTrades);
+                        analysisResult = timeAnalysis;
+                        break;
+                }
+                
+                document.getElementById('analysisContent').innerHTML = analysisResult;
+                document.getElementById('analysisResults').style.display = 'block';
+                
+            } catch (error) {
+                console.error('Error running analysis:', error);
+                document.getElementById('analysisContent').innerHTML = `
+                    <p style="color: var(--notion-red);">Error running analysis. Please try again.</p>
+                `;
+                document.getElementById('analysisResults').style.display = 'block';
+            } finally {
+                isAnalyzing = false;
+                runBtn.disabled = false;
+                runBtn.innerHTML = originalText;
+            }
+        }
+
+        // Analysis Helper Functions
+        function analyzeModels(trades) {
+            const modelStats = {};
+            trades.forEach(t => {
+                const model = t.model || 'Unknown';
+                if (!modelStats[model]) {
+                    modelStats[model] = { count: 0, totalProfit: 0, avgProfit: 0 };
+                }
+                modelStats[model].count++;
+                modelStats[model].totalProfit += t.pl || 0;
+            });
+            
+            // Calculate averages
+            Object.keys(modelStats).forEach(model => {
+                modelStats[model].avgProfit = modelStats[model].totalProfit / modelStats[model].count;
+            });
+            
+            // Sort by total profit
+            const sortedModels = Object.entries(modelStats)
+                .sort((a, b) => b[1].totalProfit - a[1].totalProfit);
+            
+            let html = `<div style="margin-bottom: 12px;"><strong>Total Trades Analyzed:</strong> ${trades.length}</div>`;
+            html += `<div style="margin-bottom: 16px;"><strong>Top Performing Models:</strong></div>`;
+            
+            sortedModels.slice(0, 5).forEach(([model, stats], index) => {
+                const rank = index + 1;
+                const rankIcon = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `${rank}.`;
+                
+                html += `
+                    <div style="background: ${rank <= 3 ? 'var(--win-color-light)' : 'var(--notion-gray)'}; 
+                               padding: 10px; border-radius: 6px; margin-bottom: 8px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <span style="font-weight: 600;">${rankIcon} ${model}</span>
+                                <div style="font-size: 12px; color: var(--notion-text-light);">
+                                    ${stats.count} trades • Avg: $${stats.avgProfit.toFixed(2)}
+                                </div>
+                            </div>
+                            <div style="font-weight: 700; color: var(--win-color);">
+                                +$${stats.totalProfit.toFixed(2)}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            return html;
+        }
+
+        function analyzeSessions(trades) {
+            const sessionStats = {};
+            trades.forEach(t => {
+                const session = t.session || 'Unknown';
+                if (!sessionStats[session]) {
+                    sessionStats[session] = { count: 0, totalProfit: 0, avgProfit: 0 };
+                }
+                sessionStats[session].count++;
+                sessionStats[session].totalProfit += t.pl || 0;
+            });
+            
+            // Calculate averages
+            Object.keys(sessionStats).forEach(session => {
+                sessionStats[session].avgProfit = sessionStats[session].totalProfit / sessionStats[session].count;
+            });
+            
+            // Sort by total profit
+            const sortedSessions = Object.entries(sessionStats)
+                .sort((a, b) => b[1].totalProfit - a[1].totalProfit);
+            
+            let html = `<div style="margin-bottom: 12px;"><strong>Total Trades Analyzed:</strong> ${trades.length}</div>`;
+            html += `<div style="margin-bottom: 16px;"><strong>Most Profitable Sessions:</strong></div>`;
+            
+            sortedSessions.forEach(([session, stats], index) => {
+                const rank = index + 1;
+                const rankIcon = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `${rank}.`;
+                
+                html += `
+                    <div style="background: ${rank <= 3 ? 'var(--win-color-light)' : 'var(--notion-gray)'}; 
+                               padding: 10px; border-radius: 6px; margin-bottom: 8px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <span style="font-weight: 600;">${rankIcon} ${session}</span>
+                                <div style="font-size: 12px; color: var(--notion-text-light);">
+                                    ${stats.count} trades • Avg: $${stats.avgProfit.toFixed(2)}
+                                </div>
+                            </div>
+                            <div style="font-weight: 700; color: var(--win-color);">
+                                +$${stats.totalProfit.toFixed(2)}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            return html;
+        }
+
+        function analyzePairs(trades) {
+            const pairStats = {};
+            trades.forEach(t => {
+                const pair = t.pair || 'Unknown';
+                if (!pairStats[pair]) {
+                    pairStats[pair] = { count: 0, totalProfit: 0, avgProfit: 0 };
+                }
+                pairStats[pair].count++;
+                pairStats[pair].totalProfit += t.pl || 0;
+            });
+            
+            // Calculate averages
+            Object.keys(pairStats).forEach(pair => {
+                pairStats[pair].avgProfit = pairStats[pair].totalProfit / pairStats[pair].count;
+            });
+            
+            // Sort by total profit
+            const sortedPairs = Object.entries(pairStats)
+                .sort((a, b) => b[1].totalProfit - a[1].totalProfit);
+            
+            let html = `<div style="margin-bottom: 12px;"><strong>Total Trades Analyzed:</strong> ${trades.length}</div>`;
+            html += `<div style="margin-bottom: 16px;"><strong>Most Profitable Pairs:</strong></div>`;
+            
+            sortedPairs.forEach(([pair, stats], index) => {
+                const rank = index + 1;
+                const rankIcon = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `${rank}.`;
+                
+                html += `
+                    <div style="background: ${rank <= 3 ? 'var(--win-color-light)' : 'var(--notion-gray)'}; 
+                               padding: 10px; border-radius: 6px; margin-bottom: 8px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <span style="font-weight: 600;">${rankIcon} ${pair}</span>
+                                <div style="font-size: 12px; color: var(--notion-text-light);">
+                                    ${stats.count} trades • Avg: $${stats.avgProfit.toFixed(2)}
+                                </div>
+                            </div>
+                            <div style="font-weight: 700; color: var(--win-color);">
+                                +$${stats.totalProfit.toFixed(2)}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            return html;
+        }
+
+        function analyzeTimeframes(trades) {
+            const timeframeStats = {};
+            trades.forEach(t => {
+                const tf = t.timeframe || 'Unknown';
+                if (!timeframeStats[tf]) {
+                    timeframeStats[tf] = { count: 0, totalProfit: 0, avgProfit: 0 };
+                }
+                timeframeStats[tf].count++;
+                timeframeStats[tf].totalProfit += t.pl || 0;
+            });
+            
+            // Calculate averages
+            Object.keys(timeframeStats).forEach(tf => {
+                timeframeStats[tf].avgProfit = timeframeStats[tf].totalProfit / timeframeStats[tf].count;
+            });
+            
+            // Sort by total profit
+            const sortedTFs = Object.entries(timeframeStats)
+                .sort((a, b) => b[1].totalProfit - a[1].totalProfit);
+            
+            let html = `<div style="margin-bottom: 12px;"><strong>Total Trades Analyzed:</strong> ${trades.length}</div>`;
+            html += `<div style="margin-bottom: 16px;"><strong>Most Profitable Timeframes:</strong></div>`;
+            
+            sortedTFs.forEach(([tf, stats], index) => {
+                const rank = index + 1;
+                const rankIcon = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `${rank}.`;
+                
+                html += `
+                    <div style="background: ${rank <= 3 ? 'var(--win-color-light)' : 'var(--notion-gray)'}; 
+                               padding: 10px; border-radius: 6px; margin-bottom: 8px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <span style="font-weight: 600;">${rankIcon} ${tf}</span>
+                                <div style="font-size: 12px; color: var(--notion-text-light);">
+                                    ${stats.count} trades • Avg: $${stats.avgProfit.toFixed(2)}
+                                </div>
+                            </div>
+                            <div style="font-weight: 700; color: var(--win-color);">
+                                +$${stats.totalProfit.toFixed(2)}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            return html;
+        }
+
+        function analyzeTimeOfDay(trades) {
+            const hourStats = {};
+            trades.forEach(t => {
+                try {
+                    const hour = new Date(t.date).getUTCHours();
+                    const hourLabel = `${hour}:00-${hour+1}:00 GMT`;
+                    if (!hourStats[hourLabel]) {
+                        hourStats[hourLabel] = { count: 0, totalProfit: 0, avgProfit: 0 };
+                    }
+                    hourStats[hourLabel].count++;
+                    hourStats[hourLabel].totalProfit += t.pl || 0;
+                } catch (e) {}
+            });
+            
+            // Calculate averages
+            Object.keys(hourStats).forEach(hour => {
+                hourStats[hour].avgProfit = hourStats[hour].totalProfit / hourStats[hour].count;
+            });
+            
+            // Sort by hour
+            const sortedHours = Object.entries(hourStats)
+                .sort((a, b) => {
+                    const hourA = parseInt(a[0].split(':')[0]);
+                    const hourB = parseInt(b[0].split(':')[0]);
+                    return hourA - hourB;
+                });
+            
+            let html = `<div style="margin-bottom: 12px;"><strong>Total Trades Analyzed:</strong> ${trades.length}</div>`;
+            html += `<div style="margin-bottom: 16px;"><strong>Profitability by Hour (GMT):</strong></div>`;
+            
+            sortedHours.forEach(([hour, stats]) => {
+                html += `
+                    <div style="background: var(--notion-gray); padding: 10px; border-radius: 6px; margin-bottom: 8px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <span style="font-weight: 600;">${hour}</span>
+                                <div style="font-size: 12px; color: var(--notion-text-light);">
+                                    ${stats.count} trades • Avg: $${stats.avgProfit.toFixed(2)}
+                                </div>
+                            </div>
+                            <div style="font-weight: 700; color: var(--win-color);">
+                                +$${stats.totalProfit.toFixed(2)}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            return html;
+        }
+
+        // View Trade Details
+        function viewTradeDetails(tradeId) {
+            const trade = winningTrades.find(t => t.id === tradeId);
+            if (trade) {
+                alert(`Trade Details:\n\nPair: ${trade.pair || 'N/A'}\nDate: ${trade.date}\nModel: ${trade.model || 'N/A'}\nSession: ${trade.session || 'N/A'}\nDirection: ${trade.direction || 'N/A'}\nP/L: $${trade.pl || 0}\nPips: ${trade.pips || 'N/A'}\nRisk: ${trade.riskPercent || 0}%\nR:R: ${trade.rr || 'N/A'}\nQuality: ${trade.setupQuality || 'N/A'}/10\n\nNotes: ${trade.notes || 'No notes'}`);
+            }
+        }
+
+        // Export Winning Trades
+        function exportWinningTrades() {
+            const exportData = {
+                winningTrades: winningTrades,
+                metrics: {
+                    totalWins: winningTrades.length,
+                    totalProfit: winningTrades.reduce((sum, t) => sum + (t.pl || 0), 0),
+                    avgWin: winningTrades.length > 0 ? (winningTrades.reduce((sum, t) => sum + (t.pl || 0), 0) / winningTrades.length).toFixed(2) : 0,
+                    largestWin: winningTrades.reduce((max, t) => Math.max(max, t.pl || 0), 0),
+                    bestModel: document.getElementById('bestModel').textContent,
+                    exportDate: new Date().toISOString()
+                }
+            };
+            
+            const dataStr = JSON.stringify(exportData, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            const exportFileDefaultName = `winning-trades-${new Date().toISOString().split('T')[0]}.json`;
+            
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportFileDefaultName);
+            linkElement.click();
+        }
+
+        // Local Storage Backup
+        function saveToLocalStorage() {
+            try {
+                localStorage.setItem('winningTradesBackup', JSON.stringify(winningTrades));
+            } catch (e) {
+                console.warn('Local storage save failed:', e);
+            }
+        }
+
+        function loadFromLocalStorage() {
+            try {
+                const backup = localStorage.getItem('winningTradesBackup');
+                
+                if (backup) {
+                    winningTrades = JSON.parse(backup);
+                    renderWinningStats();
+                    renderTopWins();
+                    renderWinningTrades();
+                    updateCharts();
+                    updateBestPractices();
+                }
+                
+                updateSyncStatus('Loaded from backup', 'synced');
+            } catch (e) {
+                console.warn('Local storage load failed:', e);
+            }
+        }
+
+        // Utility Functions
+        function formatDateShort(dateString) {
+            try {
+                const date = new Date(dateString);
+                if (isNaN(date.getTime())) {
+                    return 'Invalid';
+                }
+                return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            } catch (e) {
+                return 'Invalid';
+            }
+        }
+
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 60px;
+                right: 20px;
+                padding: 12px 16px;
+                border-radius: 6px;
+                color: white;
+                font-size: 14px;
+                z-index: 1000;
+                animation: slideIn 0.3s ease;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            `;
+            
+            if (type === 'success') {
+                notification.style.backgroundColor = 'var(--win-color)';
+            } else if (type === 'error') {
+                notification.style.backgroundColor = 'var(--notion-red)';
+            } else {
+                notification.style.backgroundColor = 'var(--notion-blue)';
+            }
+            
+            notification.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i> ${message}`;
+            document.body.appendChild(notification);
+            
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes slideIn {
+                    from { transform: translateX(100%); opacity: 0; }
+                    to { transform: translateX(0); opacity: 1; }
+                }
+                @keyframes slideOut {
+                    from { transform: translateX(0); opacity: 1; }
+                    to { transform: translateX(100%); opacity: 0; }
+                }
+            `;
+            document.head.appendChild(style);
+            
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => {
+                    notification.remove();
+                    style.remove();
+                }, 300);
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
