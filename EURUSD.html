@@ -32,6 +32,8 @@
             --notion-pink: #e55ca2;
             --notion-orange: #ff6b35;
             --notion-orange-light: #fff3e0;
+            --eur-color: #0c8ce9;
+            --eur-color-light: #e3f2fd;
         }
 
         * {
@@ -110,7 +112,7 @@
         }
 
         .header-btn.primary {
-            background-color: var(--notion-blue);
+            background-color: var(--eur-color);
             color: white;
         }
 
@@ -150,7 +152,7 @@
         .workspace-icon {
             width: 20px;
             height: 20px;
-            background-color: var(--notion-blue);
+            background-color: var(--eur-color);
             border-radius: 4px;
             margin-right: 8px;
             display: flex;
@@ -197,8 +199,8 @@
         }
 
         .nav-item.active {
-            background-color: var(--notion-blue-light);
-            color: var(--notion-blue);
+            background-color: var(--eur-color-light);
+            color: var(--eur-color);
             font-weight: 500;
         }
 
@@ -223,7 +225,7 @@
         }
 
         .page {
-            max-width: 900px;
+            max-width: 1000px;
             margin: 0 auto;
         }
 
@@ -260,8 +262,9 @@
 
         .page-tag.blue { background-color: var(--notion-blue-light); color: var(--notion-blue); }
         .page-tag.green { background-color: var(--notion-green-light); color: var(--notion-green); }
-        .page-tag.red { background-color: var(--notion-red-light); color: var(--notion-red); }
+        .page-tag.red { background-color: var(--eur-color-light); color: var(--eur-color); }
         .page-tag.purple { background-color: var(--notion-purple-light); color: var(--notion-purple); }
+        .page-tag.orange { background-color: var(--notion-orange-light); color: var(--notion-orange); }
 
         /* Database */
         .database {
@@ -306,9 +309,9 @@
         }
 
         .db-btn.primary {
-            background-color: var(--notion-blue);
+            background-color: var(--eur-color);
             color: white;
-            border-color: var(--notion-blue);
+            border-color: var(--eur-color);
         }
 
         .db-btn.danger {
@@ -403,8 +406,8 @@
         }
 
         .select-property.red {
-            background-color: var(--notion-red-light);
-            border-color: var(--notion-red);
+            background-color: var(--eur-color-light);
+            border-color: var(--eur-color);
         }
 
         .select-property.purple {
@@ -468,56 +471,10 @@
             color: var(--notion-text-light);
         }
 
-        /* Toggle */
-        .toggle {
-            position: relative;
-            display: inline-block;
-            width: 36px;
-            height: 20px;
-        }
-
-        .toggle input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .toggle-slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #ccc;
-            transition: .2s;
-            border-radius: 34px;
-        }
-
-        .toggle-slider:before {
-            position: absolute;
-            content: "";
-            height: 14px;
-            width: 14px;
-            left: 3px;
-            bottom: 3px;
-            background-color: white;
-            transition: .2s;
-            border-radius: 50%;
-        }
-
-        input:checked + .toggle-slider {
-            background-color: var(--notion-green);
-        }
-
-        input:checked + .toggle-slider:before {
-            transform: translateX(16px);
-        }
-
         /* Callouts */
         .callout {
-            background-color: var(--notion-blue-light);
-            border: 1px solid var(--notion-blue);
+            background-color: var(--eur-color-light);
+            border: 1px solid var(--eur-color);
             border-radius: 6px;
             padding: 16px;
             margin-bottom: 24px;
@@ -526,7 +483,7 @@
         }
 
         .callout-icon {
-            color: var(--notion-blue);
+            color: var(--eur-color);
             font-size: 20px;
             margin-top: 2px;
         }
@@ -554,7 +511,7 @@
             border: 1px solid var(--notion-gray-dark);
             border-radius: 6px;
             padding: 12px;
-            min-height: 180px;
+            min-height: 300px;
             display: flex;
             flex-direction: column;
         }
@@ -563,18 +520,18 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 8px;
+            margin-bottom: 12px;
             flex-shrink: 0;
         }
 
         .chart-title {
-            font-size: 15px;
+            font-size: 16px;
             font-weight: 600;
         }
 
         .chart-container {
             flex-grow: 1;
-            min-height: 120px;
+            min-height: 250px;
             position: relative;
         }
 
@@ -631,7 +588,7 @@
             background-color: white;
             border-radius: 8px;
             width: 90%;
-            max-width: 600px;
+            max-width: 700px;
             max-height: 90vh;
             overflow-y: auto;
         }
@@ -748,7 +705,7 @@
         .eurusd-icon {
             width: 40px;
             height: 40px;
-            background: linear-gradient(135deg, #0c8ce9, #6940a5);
+            background: linear-gradient(135deg, #0c8ce9, #d1453b);
             border-radius: 8px;
             display: flex;
             align-items: center;
@@ -776,8 +733,8 @@
         }
 
         .session-time.active {
-            background-color: var(--notion-blue-light);
-            color: var(--notion-blue);
+            background-color: var(--eur-color-light);
+            color: var(--eur-color);
             font-weight: 500;
         }
 
@@ -808,6 +765,63 @@
             color: var(--notion-text-light);
             text-transform: uppercase;
             letter-spacing: 0.5px;
+        }
+
+        /* Volatility Indicator */
+        .volatility-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 4px;
+        }
+
+        .volatility-bar {
+            height: 6px;
+            border-radius: 3px;
+            flex-grow: 1;
+            background-color: var(--notion-gray);
+        }
+
+        .volatility-level {
+            width: 60%;
+            height: 100%;
+            border-radius: 3px;
+            background-color: var(--notion-green);
+        }
+
+        .volatility-level.high {
+            width: 80%;
+            background-color: var(--notion-orange);
+        }
+
+        .volatility-level.very-high {
+            width: 100%;
+            background-color: var(--notion-red);
+        }
+
+        /* Form Section */
+        .form-section {
+            background-color: var(--notion-gray-light);
+            padding: 20px;
+            border-radius: 6px;
+            margin-bottom: 24px;
+            border: 1px solid var(--notion-gray-dark);
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: var(--eur-color);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-row-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 16px;
         }
     </style>
 </head>
@@ -903,10 +917,10 @@
                         <div>
                             <h1 class="page-title">EURUSD Analysis & Trades</h1>
                             <div class="page-tags">
-                                <span class="page-tag blue">Most Liquid Pair</span>
-                                <span class="page-tag green">ICT Favorite</span>
-                                <span class="page-tag purple">London Session</span>
-                                <span class="page-tag red">High Precision</span>
+                                <span class="page-tag red">Medium Volatility</span>
+                                <span class="page-tag orange">ECB Sensitive</span>
+                                <span class="page-tag purple">All Sessions</span>
+                                <span class="page-tag green">Range Trading</span>
                             </div>
                         </div>
                     </div>
@@ -919,11 +933,11 @@
                         </div>
                         <div class="session-time">
                             <i class="fas fa-chart-line"></i>
-                            Best Moves: 07:00-08:00 GMT
+                            Best Moves: 08:00-10:00 GMT
                         </div>
                         <div class="session-time">
                             <i class="fas fa-bullseye"></i>
-                            Avg Daily Range: 50-70 pips
+                            Avg Daily Range: 60-90 pips
                         </div>
                         <div class="session-time">
                             <i class="fas fa-info-circle"></i>
@@ -932,15 +946,31 @@
                     </div>
                 </div>
 
-                <!-- Callout -->
-                <div class="callout">
-                    <div class="callout-icon">
-                        <i class="fas fa-lightbulb"></i>
+                <!-- Charts Grid -->
+                <div class="charts-grid">
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <div class="chart-title">EURUSD Performance Chart</div>
+                            <select class="form-control" id="chartPeriod" style="width: auto; font-size: 13px; padding: 4px 8px;">
+                                <option value="7">Last 7 Days</option>
+                                <option value="30" selected>Last 30 Days</option>
+                                <option value="90">Last 90 Days</option>
+                                <option value="all">All Time</option>
+                            </select>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="performanceChart"></canvas>
+                        </div>
                     </div>
-                    <div class="callout-content">
-                        <h3>EURUSD Trading Strategy</h3>
-                        <p>Focus on premium/discount zones on H1 timeframe. Best entries during London open (07:00-08:00 GMT). 
-                           Trade with trend on H4, counter-trend on M5/M15 for scalping. Maximum 1:2 risk-reward ratio required.</p>
+                    
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <div class="chart-title">Win/Loss Distribution</div>
+                            <div style="font-size: 13px; color: var(--notion-text-light);" id="winLossStats"></div>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="winLossChart"></canvas>
+                        </div>
                     </div>
                 </div>
 
@@ -975,65 +1005,15 @@
                         <div class="stat-value" id="eurusdAvgTrade">$0</div>
                         <div class="stat-label">Avg Trade</div>
                     </div>
-                </div>
-
-                <!-- Charts -->
-                <div class="charts-grid">
-                    <div class="chart-card">
-                        <div class="chart-header">
-                            <div class="chart-title">EURUSD Performance</div>
-                            <select class="form-control" id="chartPeriod" style="width: auto; font-size: 13px; padding: 4px 8px;">
-                                <option value="7">Last 7 Days</option>
-                                <option value="30" selected>Last 30 Days</option>
-                                <option value="90">Last 90 Days</option>
-                                <option value="all">All Time</option>
-                            </select>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="performanceChart"></canvas>
-                        </div>
-                    </div>
                     
-                    <div class="chart-card">
-                        <div class="chart-header">
-                            <div class="chart-title">Win/Loss Distribution</div>
-                            <div style="font-size: 13px; color: var(--notion-text-light);" id="wlStats">Loading...</div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="eurusdVolatility">Medium</div>
+                        <div class="stat-label">Volatility</div>
+                        <div class="volatility-indicator">
+                            <div class="volatility-bar">
+                                <div class="volatility-level"></div>
+                            </div>
                         </div>
-                        <div class="chart-container">
-                            <canvas id="winLossChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Model Performance -->
-                <div class="database">
-                    <div class="database-header">
-                        <div class="database-title">
-                            <i class="fas fa-chart-pie"></i>
-                            ICT Model Performance on EURUSD
-                        </div>
-                    </div>
-                    
-                    <div class="database-table">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>ICT Model</th>
-                                    <th>Trades</th>
-                                    <th>Win Rate</th>
-                                    <th>Avg R:R</th>
-                                    <th>Total P/L</th>
-                                    <th>Success Score</th>
-                                </tr>
-                            </thead>
-                            <tbody id="modelPerformance">
-                                <tr>
-                                    <td colspan="6" class="loading">
-                                        <i class="fas fa-spinner"></i> Loading model performance...
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
                     </div>
                 </div>
 
@@ -1061,24 +1041,24 @@
                         <button class="view-btn" data-view="asian">Asian Session</button>
                         <button class="view-btn" data-view="wins">Winning Trades</button>
                         <button class="view-btn" data-view="losses">Losing Trades</button>
+                        <button class="view-btn" data-view="breakout">Breakout Trades</button>
                         <button class="view-btn" data-view="fvg">FVG Trades</button>
-                        <button class="view-btn" data-view="orderblock">Order Blocks</button>
                     </div>
                     
                     <div class="database-table">
                         <table id="eurusdTradesTable">
                             <thead>
                                 <tr>
-                                    <th>Date</th>
+                                    <th>Date & Time</th>
                                     <th>Session</th>
                                     <th>Direction</th>
                                     <th>ICT Model</th>
-                                    <th>Entry Price</th>
-                                    <th>Exit Price</th>
-                                    <th>Pips</th>
                                     <th>Risk %</th>
+                                    <th>Profit %</th>
+                                    <th>Return ($)</th>
+                                    <th>Account Size</th>
+                                    <th>Lot Size</th>
                                     <th>Result</th>
-                                    <th>P/L ($)</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
@@ -1094,16 +1074,18 @@
                 </div>
 
                 <!-- Trading Notes -->
-                <div class="callout" style="background-color: var(--notion-purple-light); border-color: var(--notion-purple);">
-                    <div class="callout-icon" style="color: var(--notion-purple);">
-                        <i class="fas fa-sticky-note"></i>
+                <div class="callout" style="background-color: var(--notion-green-light); border-color: var(--notion-green);">
+                    <div class="callout-icon" style="color: var(--notion-green);">
+                        <i class="fas fa-lightbulb"></i>
                     </div>
                     <div class="callout-content">
                         <h3>EURUSD Trading Notes</h3>
-                        <p><strong>What works:</strong> FVG on H1 during London open, Order blocks at key support/resistance, 
-                           Liquidity sweeps before reversal.<br>
-                           <strong>What to avoid:</strong> Trading during ECB news, Thin volume periods, Counter-trend without confirmation.<br>
-                           <strong>Best setups:</strong> 07:00 GMT premium/discount alignment, 10:00 GMT retracement entries.</p>
+                        <p><strong>What works:</strong> FVG setups on H1/H4, Range trading during Asian session, 
+                           Breakout trades during London-New York overlap.<br>
+                           <strong>What to avoid:</strong> Trading during ECB/FOMC news, 
+                           Overtrading during low volatility periods, Trading without clear S/R levels.<br>
+                           <strong>Best setups:</strong> 08:00 GMT London open, 12:00-14:00 GMT overlap, 
+                           Asian session range plays (00:00-06:00 GMT).</p>
                     </div>
                 </div>
             </div>
@@ -1114,115 +1096,128 @@
     <div class="modal-overlay" id="addTradeModal">
         <div class="modal">
             <div class="modal-header">
-                <div class="modal-title">➕ Add EURUSD Trade</div>
+                <div class="modal-title">➕ Add New EURUSD Trade</div>
                 <button class="modal-close" id="closeModal">&times;</button>
             </div>
             <div class="modal-body">
-                <div class="form-group">
-                    <label class="form-label">Date & Time</label>
-                    <input type="datetime-local" class="form-control" id="tradeDate" value="">
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label">Session</label>
-                        <select class="form-control" id="tradeSession">
-                            <option value="London" selected>London Session</option>
-                            <option value="New York">New York Session</option>
-                            <option value="Asian">Asian Session</option>
-                            <option value="Sydney">Sydney Session</option>
-                            <option value="Overlap">Session Overlap</option>
-                        </select>
+                <!-- Trade Details Section -->
+                <div class="form-section">
+                    <div class="section-title">
+                        <i class="fas fa-info-circle"></i> Trade Details
                     </div>
                     
                     <div class="form-group">
-                        <label class="form-label">Direction</label>
-                        <select class="form-control" id="tradeDirection">
-                            <option value="Buy">Buy</option>
-                            <option value="Sell">Sell</option>
-                        </select>
+                        <label class="form-label">Date & Time</label>
+                        <input type="datetime-local" class="form-control" id="tradeDate" value="">
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Session</label>
+                            <select class="form-control" id="tradeSession">
+                                <option value="London" selected>London Session</option>
+                                <option value="New York">New York Session</option>
+                                <option value="Asian">Asian Session</option>
+                                <option value="Sydney">Sydney Session</option>
+                                <option value="Overlap">Session Overlap</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Currency Pair</label>
+                            <input type="text" class="form-control" id="currencyPair" value="EURUSD" readonly>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">ICT Model</label>
+                            <select class="form-control" id="tradeModel">
+                                <option value="FVG" selected>Fair Value Gap (FVG)</option>
+                                <option value="Liquidity Sweep">Liquidity Sweep</option>
+                                <option value="Order Block">Order Block</option>
+                                <option value="Breaker">Breaker Block</option>
+                                <option value="MIT">Market Structure Shift</option>
+                                <option value="BOS">Break of Structure</option>
+                                <option value="CHoCH">Change of Character</option>
+                                <option value="Breakout">Breakout Trade</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Direction</label>
+                            <select class="form-control" id="tradeDirection">
+                                <option value="Buy" selected>Buy</option>
+                                <option value="Sell">Sell</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row-3">
+                        <div class="form-group">
+                            <label class="form-label">Risk %</label>
+                            <input type="number" step="0.1" class="form-control" id="riskPercent" placeholder="1.0" value="1.0">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Profit %</label>
+                            <input type="number" step="0.1" class="form-control" id="profitPercent" placeholder="2.0" value="2.0">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Return ($)</label>
+                            <input type="number" step="0.01" class="form-control" id="returnAmount" placeholder="25.00" value="25.00">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Account Size ($)</label>
+                            <input type="number" step="0.01" class="form-control" id="accountSize" placeholder="10000" value="10000">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Lot Size</label>
+                            <input type="number" step="0.01" class="form-control" id="lotSize" placeholder="0.10" value="0.10">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Result</label>
+                            <select class="form-control" id="tradeResult">
+                                <option value="Win" selected>Win</option>
+                                <option value="Loss">Loss</option>
+                                <option value="Break Even">Break Even</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Emotion Before Trade (1-10)</label>
+                            <input type="number" min="1" max="10" class="form-control" id="emotionBefore" value="7">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Chart Image Link (Optional)</label>
+                        <input type="text" class="form-control" id="chartImageLink" placeholder="https://example.com/chart-screenshot.png">
                     </div>
                 </div>
 
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label">ICT Model</label>
-                        <select class="form-control" id="tradeModel">
-                            <option value="FVG" selected>Fair Value Gap (FVG)</option>
-                            <option value="Liquidity Sweep">Liquidity Sweep</option>
-                            <option value="Order Block">Order Block</option>
-                            <option value="Breaker">Breaker Block</option>
-                            <option value="MIT">Market Structure Shift</option>
-                            <option value="BOS">Break of Structure</option>
-                            <option value="CHoCH">Change of Character</option>
-                        </select>
+                <!-- Notes Section -->
+                <div class="form-section">
+                    <div class="section-title">
+                        <i class="fas fa-sticky-note"></i> Notes & Lessons
                     </div>
-                    
                     <div class="form-group">
-                        <label class="form-label">Timeframe</label>
-                        <select class="form-control" id="tradeTimeframe">
-                            <option value="M1">M1</option>
-                            <option value="M5" selected>M5</option>
-                            <option value="M15">M15</option>
-                            <option value="H1">H1</option>
-                            <option value="H4">H4</option>
-                        </select>
+                        <label class="form-label">Trade rationale, what worked, what to improve...</label>
+                        <textarea class="form-control" id="tradeNotes" rows="4" placeholder="Enter trade details, analysis, lessons learned..."></textarea>
                     </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label">Entry Price</label>
-                        <input type="number" step="0.00001" class="form-control" id="entryPrice" placeholder="1.08500">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label">Exit Price</label>
-                        <input type="number" step="0.00001" class="form-control" id="exitPrice" placeholder="1.08600">
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label">Pips</label>
-                        <input type="number" step="0.1" class="form-control" id="pips" placeholder="10.0">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label">Lot Size</label>
-                        <input type="number" step="0.01" class="form-control" id="lotSize" placeholder="0.10" value="0.10">
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label">Risk %</label>
-                        <input type="number" step="0.01" class="form-control" id="riskPercent" placeholder="1.0" value="1.0">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label">Result</label>
-                        <select class="form-control" id="tradeResult">
-                            <option value="Win" selected>Win</option>
-                            <option value="Loss">Loss</option>
-                            <option value="Break Even">Break Even</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Setup Quality (1-10)</label>
-                    <input type="number" min="1" max="10" class="form-control" id="setupQuality" value="7">
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Notes & Market Context</label>
-                    <textarea class="form-control" id="tradeNotes" rows="3" placeholder="Market context, why you took the trade, what worked/didn't work..."></textarea>
                 </div>
 
                 <div class="form-actions">
                     <button class="db-btn" id="cancelTrade">Cancel</button>
-                    <button class="db-btn primary" id="saveTrade">Save EURUSD Trade</button>
+                    <button class="db-btn primary" id="saveTrade">Save EURUSD Trade to Cloud</button>
                 </div>
             </div>
         </div>
@@ -1253,10 +1248,10 @@
         // Global Variables
         let eurusdTrades = [];
         let tradeIdCounter = 0;
-        let performanceChart = null;
-        let winLossChart = null;
         let currentView = 'all';
         let isSavingTrade = false;
+        let performanceChart = null;
+        let winLossChart = null;
 
         // Initialize Application
         document.addEventListener('DOMContentLoaded', function() {
@@ -1298,13 +1293,13 @@
                     renderEURUSDStats();
                     renderTrades();
                     updateCharts();
-                    updateModelPerformance();
                     
                     updateSyncStatus('Synced with Firebase', 'synced');
                 } else {
                     eurusdTrades = [];
                     renderEURUSDStats();
                     renderTrades();
+                    updateCharts();
                     updateSyncStatus('No EURUSD trades found', 'error');
                 }
                 
@@ -1330,11 +1325,6 @@
 
         // Setup Event Listeners
         function setupEventListeners() {
-            // Navigation
-            document.getElementById('backBtn')?.addEventListener('click', function() {
-                window.location.href = 'index.html';
-            });
-            
             // Export
             document.getElementById('exportBtn').addEventListener('click', exportEURUSDData);
             
@@ -1358,321 +1348,26 @@
             // Chart period change
             document.getElementById('chartPeriod').addEventListener('change', updateCharts);
             
-            // Auto-calculate pips when entry/exit prices change
-            document.getElementById('entryPrice').addEventListener('input', calculatePips);
-            document.getElementById('exitPrice').addEventListener('input', calculatePips);
+            // Auto-calculate return
+            document.getElementById('riskPercent').addEventListener('input', calculateReturn);
+            document.getElementById('accountSize').addEventListener('input', calculateReturn);
+            document.getElementById('profitPercent').addEventListener('input', calculateReturn);
             
             // Setup sidebar navigation
             setupSidebarNavigation();
         }
 
-        // Setup Sidebar Navigation
-        function setupSidebarNavigation() {
-            const navItems = document.querySelectorAll('.nav-item');
+        // Calculate Return
+        function calculateReturn() {
+            const riskPercent = parseFloat(document.getElementById('riskPercent').value) || 0;
+            const accountSize = parseFloat(document.getElementById('accountSize').value) || 0;
+            const profitPercent = parseFloat(document.getElementById('profitPercent').value) || 0;
             
-            navItems.forEach(item => {
-                const newItem = item.cloneNode(true);
-                item.parentNode.replaceChild(newItem, item);
-                
-                newItem.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    
-                    navItems.forEach(nav => nav.classList.remove('active'));
-                    this.classList.add('active');
-                    
-                    const href = this.getAttribute('href');
-                    if (href && href !== '#' && href !== 'index.html') {
-                        window.location.href = href;
-                    }
-                });
-            });
-        }
-
-        // Update Sync Status
-        function updateSyncStatus(message, status) {
-            const statusEl = document.getElementById('syncStatus');
-            if (statusEl) {
-                statusEl.textContent = message;
-                statusEl.className = 'sync-status ' + status;
-                
-                const icon = status === 'synced' ? 'fa-cloud' : 
-                            status === 'syncing' ? 'fa-sync fa-spin' : 
-                            'fa-cloud-slash';
-                statusEl.innerHTML = `<i class="fas ${icon}"></i> ${message}`;
+            if (riskPercent > 0 && accountSize > 0 && profitPercent > 0) {
+                const riskAmount = (accountSize * riskPercent) / 100;
+                const returnAmount = (riskAmount * profitPercent) / riskPercent;
+                document.getElementById('returnAmount').value = returnAmount.toFixed(2);
             }
-        }
-
-        // Calculate Pips
-        function calculatePips() {
-            const entryPrice = parseFloat(document.getElementById('entryPrice').value);
-            const exitPrice = parseFloat(document.getElementById('exitPrice').value);
-            const direction = document.getElementById('tradeDirection').value;
-            
-            if (entryPrice && exitPrice) {
-                let pips = 0;
-                if (direction === 'Buy') {
-                    pips = (exitPrice - entryPrice) * 10000; // For EURUSD
-                } else {
-                    pips = (entryPrice - exitPrice) * 10000;
-                }
-                document.getElementById('pips').value = pips.toFixed(1);
-            }
-        }
-
-        // Render EURUSD Statistics
-        function renderEURUSDStats() {
-            if (eurusdTrades.length === 0) {
-                document.getElementById('eurusdTotalTrades').textContent = '0';
-                document.getElementById('eurusdWinRate').textContent = '0%';
-                document.getElementById('eurusdTotalPL').textContent = '$0';
-                document.getElementById('eurusdAvgRR').textContent = '1:0.0';
-                document.getElementById('eurusdBestDay').textContent = '$0';
-                document.getElementById('eurusdAvgTrade').textContent = '$0';
-                document.getElementById('tradeCount').textContent = '(0 trades)';
-                return;
-            }
-            
-            // Calculate statistics
-            const wins = eurusdTrades.filter(t => t.result === 'Win').length;
-            const losses = eurusdTrades.filter(t => t.result === 'Loss').length;
-            const winRate = (wins / eurusdTrades.length * 100).toFixed(1);
-            
-            const totalPL = eurusdTrades.reduce((sum, t) => sum + (t.pl || 0), 0);
-            
-            // Calculate average R:R
-            let totalRR = 0;
-            let countRR = 0;
-            eurusdTrades.forEach(t => {
-                if (t.rr) {
-                    const rrValue = parseFloat(t.rr.split(':')[1]);
-                    if (!isNaN(rrValue)) {
-                        totalRR += rrValue;
-                        countRR++;
-                    }
-                }
-            });
-            const avgRR = countRR > 0 ? (totalRR / countRR).toFixed(2) : '0.0';
-            
-            // Calculate best day
-            const tradesByDay = {};
-            eurusdTrades.forEach(trade => {
-                try {
-                    const date = new Date(trade.date).toDateString();
-                    if (!tradesByDay[date]) tradesByDay[date] = 0;
-                    tradesByDay[date] += trade.pl || 0;
-                } catch (e) {}
-            });
-            const bestDay = Object.values(tradesByDay).reduce((max, val) => Math.max(max, val), 0);
-            
-            // Calculate average trade
-            const avgTrade = eurusdTrades.length > 0 ? (totalPL / eurusdTrades.length).toFixed(2) : 0;
-            
-            // Update UI
-            document.getElementById('eurusdTotalTrades').textContent = eurusdTrades.length;
-            document.getElementById('eurusdWinRate').textContent = `${winRate}%`;
-            document.getElementById('eurusdTotalPL').textContent = `$${totalPL >= 0 ? '+' : ''}${totalPL}`;
-            document.getElementById('eurusdAvgRR').textContent = `1:${avgRR}`;
-            document.getElementById('eurusdBestDay').textContent = `$${bestDay >= 0 ? '+' : ''}${bestDay}`;
-            document.getElementById('eurusdAvgTrade').textContent = `$${avgTrade >= 0 ? '+' : ''}${avgTrade}`;
-            document.getElementById('tradeCount').textContent = `(${eurusdTrades.length} trades)`;
-            
-            // Update win/loss stats
-            const be = eurusdTrades.length - wins - losses;
-            document.getElementById('wlStats').textContent = `${wins}W / ${losses}L / ${be}BE`;
-            
-            // Save metrics to Firebase
-            const metrics = {
-                totalTrades: eurusdTrades.length,
-                winRate: winRate,
-                totalPL: totalPL,
-                avgRR: avgRR,
-                bestDay: bestDay,
-                avgTrade: avgTrade,
-                wins: wins,
-                losses: losses,
-                breakEven: be,
-                lastUpdated: firebase.database.ServerValue.TIMESTAMP
-            };
-            
-            eurusdMetricsRef.set(metrics).catch(error => {
-                console.error('Error saving EURUSD metrics:', error);
-            });
-        }
-
-        // Update EURUSD Metrics from Database
-        function updateEURUSDMetricsFromDB(data) {
-            if (data.totalTrades) {
-                document.getElementById('eurusdTotalTrades').textContent = data.totalTrades;
-            }
-            if (data.winRate) {
-                document.getElementById('eurusdWinRate').textContent = `${data.winRate}%`;
-            }
-            if (data.totalPL) {
-                document.getElementById('eurusdTotalPL').textContent = `$${data.totalPL >= 0 ? '+' : ''}${data.totalPL}`;
-            }
-            if (data.avgRR) {
-                document.getElementById('eurusdAvgRR').textContent = `1:${data.avgRR}`;
-            }
-            if (data.bestDay) {
-                document.getElementById('eurusdBestDay').textContent = `$${data.bestDay >= 0 ? '+' : ''}${data.bestDay}`;
-            }
-            if (data.avgTrade) {
-                document.getElementById('eurusdAvgTrade').textContent = `$${data.avgTrade >= 0 ? '+' : ''}${data.avgTrade}`;
-            }
-        }
-
-        // Render Trades Table
-        function renderTrades() {
-            const tbody = document.getElementById('eurusdTradesBody');
-            if (!tbody) return;
-            
-            // Clear existing rows
-            tbody.innerHTML = '';
-            
-            // Filter trades based on current view
-            let filteredTrades = [...eurusdTrades];
-            switch(currentView) {
-                case 'london':
-                    filteredTrades = filteredTrades.filter(t => t.session === 'London' || !t.session);
-                    break;
-                case 'newyork':
-                    filteredTrades = filteredTrades.filter(t => t.session === 'New York');
-                    break;
-                case 'asian':
-                    filteredTrades = filteredTrades.filter(t => t.session === 'Asian');
-                    break;
-                case 'wins':
-                    filteredTrades = filteredTrades.filter(t => t.result === 'Win');
-                    break;
-                case 'losses':
-                    filteredTrades = filteredTrades.filter(t => t.result === 'Loss');
-                    break;
-                case 'fvg':
-                    filteredTrades = filteredTrades.filter(t => t.model === 'FVG');
-                    break;
-                case 'orderblock':
-                    filteredTrades = filteredTrades.filter(t => t.model === 'Order Block');
-                    break;
-                // 'all' view shows all EURUSD trades
-            }
-            
-            if (filteredTrades.length === 0) {
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="11" style="text-align: center; padding: 40px; color: var(--notion-text-light);">
-                            <i class="fas fa-inbox"></i><br>
-                            No EURUSD trades found for this view.
-                        </td>
-                    </tr>
-                `;
-            } else {
-                filteredTrades.forEach(trade => {
-                    tbody.appendChild(createEURUSDTradeRow(trade));
-                });
-            }
-        }
-
-        // Create EURUSD Trade Row
-        function createEURUSDTradeRow(trade) {
-            const row = document.createElement('tr');
-            const plClass = trade.pl >= 0 ? 'positive' : 'negative';
-            const plSign = trade.pl >= 0 ? '+' : '';
-            
-            // Calculate pips if not available
-            let pips = trade.pips || 'N/A';
-            if (trade.entryPrice && trade.exitPrice && trade.direction) {
-                if (trade.direction === 'Buy') {
-                    pips = ((trade.exitPrice - trade.entryPrice) * 10000).toFixed(1);
-                } else {
-                    pips = ((trade.entryPrice - trade.exitPrice) * 10000).toFixed(1);
-                }
-            }
-            
-            row.innerHTML = `
-                <td>${formatDateShort(trade.date)}</td>
-                <td>${trade.session || 'London'}</td>
-                <td>
-                    <span class="select-property ${trade.direction === 'Buy' ? 'green' : 'red'}" style="min-width: 60px;">
-                        ${trade.direction || 'N/A'}
-                    </span>
-                </td>
-                <td>${trade.model || 'FVG'}</td>
-                <td>${trade.entryPrice ? trade.entryPrice.toFixed(5) : 'N/A'}</td>
-                <td>${trade.exitPrice ? trade.exitPrice.toFixed(5) : 'N/A'}</td>
-                <td>${pips}</td>
-                <td>${trade.riskPercent || 0}%</td>
-                <td>
-                    <span class="status-badge ${trade.result === 'Win' ? 'status-win' : trade.result === 'Loss' ? 'status-loss' : 'status-be'}">
-                        ${trade.result}
-                    </span>
-                </td>
-                <td class="${plClass}">${plSign}$${trade.pl || 0}</td>
-                <td>
-                    <button class="db-btn" onclick="editTrade('${trade.id}')" style="padding: 4px 8px; font-size: 12px;">
-                        <i class="fas fa-edit"></i>
-                    </button>
-                    <button class="db-btn" onclick="deleteTrade('${trade.id}')" style="padding: 4px 8px; font-size: 12px; margin-left: 4px; background-color: var(--notion-red-light); color: var(--notion-red);">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </td>
-            `;
-            return row;
-        }
-
-        // Update Model Performance
-        function updateModelPerformance() {
-            const tbody = document.getElementById('modelPerformance');
-            if (!tbody || eurusdTrades.length === 0) return;
-            
-            // Group trades by model
-            const modelStats = {};
-            eurusdTrades.forEach(trade => {
-                const model = trade.model || 'Other';
-                if (!modelStats[model]) {
-                    modelStats[model] = {
-                        trades: 0,
-                        wins: 0,
-                        totalPL: 0,
-                        totalRR: 0,
-                        countRR: 0
-                    };
-                }
-                
-                modelStats[model].trades++;
-                if (trade.result === 'Win') modelStats[model].wins++;
-                modelStats[model].totalPL += trade.pl || 0;
-                
-                if (trade.rr) {
-                    const rrValue = parseFloat(trade.rr.split(':')[1]);
-                    if (!isNaN(rrValue)) {
-                        modelStats[model].totalRR += rrValue;
-                        modelStats[model].countRR++;
-                    }
-                }
-            });
-            
-            // Calculate metrics for each model
-            const models = Object.keys(modelStats);
-            if (models.length === 0) return;
-            
-            tbody.innerHTML = '';
-            models.forEach(model => {
-                const stats = modelStats[model];
-                const winRate = stats.trades > 0 ? ((stats.wins / stats.trades) * 100).toFixed(1) : '0.0';
-                const avgRR = stats.countRR > 0 ? (stats.totalRR / stats.countRR).toFixed(2) : '0.0';
-                const successScore = (parseFloat(winRate) * parseFloat(avgRR)).toFixed(1);
-                
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td><strong>${model}</strong></td>
-                    <td>${stats.trades}</td>
-                    <td>${winRate}%</td>
-                    <td>1:${avgRR}</td>
-                    <td class="${stats.totalPL >= 0 ? 'positive' : 'negative'}">${stats.totalPL >= 0 ? '+' : ''}$${stats.totalPL.toFixed(2)}</td>
-                    <td><span class="status-badge ${successScore >= 1.0 ? 'status-win' : 'status-loss'}">${successScore}</span></td>
-                `;
-                tbody.appendChild(row);
-            });
         }
 
         // Update Charts
@@ -1705,15 +1400,15 @@
             });
             
             // Prepare performance data
-            let balance = 0;
+            let cumulativePL = 0;
             const performanceDates = [];
             const performanceValues = [];
             
             filteredTrades.forEach(trade => {
                 try {
-                    balance += trade.pl || 0;
+                    cumulativePL += trade.returnAmount || 0;
                     performanceDates.push(formatDateShort(trade.date));
-                    performanceValues.push(balance);
+                    performanceValues.push(cumulativePL);
                 } catch (e) {
                     console.warn('Error processing trade for chart:', trade, e);
                 }
@@ -1731,14 +1426,14 @@
                     data: {
                         labels: performanceDates,
                         datasets: [{
-                            label: 'EURUSD P/L',
+                            label: 'Cumulative P/L',
                             data: performanceValues,
                             borderColor: '#0c8ce9',
                             backgroundColor: 'rgba(12, 140, 233, 0.1)',
                             fill: true,
                             tension: 0.3,
                             borderWidth: 2,
-                            pointRadius: 2,
+                            pointRadius: 3,
                             pointBackgroundColor: '#0c8ce9'
                         }]
                     },
@@ -1755,7 +1450,13 @@
                         },
                         plugins: { 
                             legend: { 
-                                display: false
+                                display: true,
+                                position: 'top',
+                                labels: {
+                                    font: {
+                                        size: 12
+                                    }
+                                }
                             },
                             tooltip: {
                                 callbacks: {
@@ -1772,7 +1473,7 @@
                                     drawBorder: false
                                 },
                                 ticks: {
-                                    maxTicksLimit: 6,
+                                    maxTicksLimit: 8,
                                     font: {
                                         size: 10
                                     },
@@ -1803,13 +1504,17 @@
             }
             
             // Update win/loss chart
-            const wins = eurusdTrades.filter(t => t.result === 'Win').length;
-            const losses = eurusdTrades.filter(t => t.result === 'Loss').length;
-            const be = eurusdTrades.length - wins - losses;
+            const wins = filteredTrades.filter(t => t.result === 'Win').length;
+            const losses = filteredTrades.filter(t => t.result === 'Loss').length;
+            const breakEven = filteredTrades.filter(t => t.result === 'Break Even').length;
+            
+            // Update win/loss stats
+            const winRate = filteredTrades.length > 0 ? ((wins / filteredTrades.length) * 100).toFixed(1) : 0;
+            document.getElementById('winLossStats').textContent = `Win Rate: ${winRate}%`;
             
             const winLossCtx = document.getElementById('winLossChart').getContext('2d');
             if (winLossChart) {
-                winLossChart.data.datasets[0].data = [wins, losses, be];
+                winLossChart.data.datasets[0].data = [wins, losses, breakEven];
                 winLossChart.update();
             } else {
                 winLossChart = new Chart(winLossCtx, {
@@ -1817,32 +1522,32 @@
                     data: {
                         labels: ['Wins', 'Losses', 'Break Even'],
                         datasets: [{
-                            data: [wins, losses, be],
-                            backgroundColor: ['#0f7b6c', '#d1453b', '#70716e'],
+                            data: [wins, losses, breakEven],
+                            backgroundColor: [
+                                'rgba(15, 123, 108, 0.8)',  // Green for wins
+                                'rgba(209, 69, 59, 0.8)',   // Red for losses
+                                'rgba(112, 113, 110, 0.8)'  // Gray for break even
+                            ],
+                            borderColor: [
+                                'rgba(15, 123, 108, 1)',
+                                'rgba(209, 69, 59, 1)',
+                                'rgba(112, 113, 110, 1)'
+                            ],
                             borderWidth: 1,
-                            borderColor: '#ffffff'
+                            hoverOffset: 15
                         }]
                     },
                     options: {
                         responsive: true,
                         maintainAspectRatio: true,
-                        layout: {
-                            padding: {
-                                top: 5,
-                                bottom: 5,
-                                left: 5,
-                                right: 5
-                            }
-                        },
-                        plugins: { 
-                            legend: { 
+                        plugins: {
+                            legend: {
                                 position: 'bottom',
                                 labels: {
-                                    padding: 10,
-                                    usePointStyle: true,
                                     font: {
-                                        size: 10
-                                    }
+                                        size: 11
+                                    },
+                                    padding: 15
                                 }
                             },
                             tooltip: {
@@ -1850,17 +1555,184 @@
                                     label: function(context) {
                                         const label = context.label || '';
                                         const value = context.raw || 0;
-                                        const total = wins + losses + be;
-                                        const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
+                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                        const percentage = Math.round((value / total) * 100);
                                         return `${label}: ${value} (${percentage}%)`;
                                     }
                                 }
                             }
                         },
-                        cutout: '65%'
+                        cutout: '60%'
                     }
                 });
             }
+        }
+
+        // Render EURUSD Statistics
+        function renderEURUSDStats() {
+            if (eurusdTrades.length === 0) {
+                document.getElementById('eurusdTotalTrades').textContent = '0';
+                document.getElementById('eurusdWinRate').textContent = '0%';
+                document.getElementById('eurusdTotalPL').textContent = '$0';
+                document.getElementById('eurusdAvgRR').textContent = '1:0.0';
+                document.getElementById('eurusdBestDay').textContent = '$0';
+                document.getElementById('eurusdAvgTrade').textContent = '$0';
+                document.getElementById('tradeCount').textContent = '(0 trades)';
+                return;
+            }
+            
+            // Calculate statistics
+            const wins = eurusdTrades.filter(t => t.result === 'Win').length;
+            const losses = eurusdTrades.filter(t => t.result === 'Loss').length;
+            const winRate = (wins / eurusdTrades.length * 100).toFixed(1);
+            
+            const totalPL = eurusdTrades.reduce((sum, t) => sum + (t.returnAmount || 0), 0);
+            
+            // Calculate average R:R
+            let totalRR = 0;
+            let countRR = 0;
+            eurusdTrades.forEach(t => {
+                if (t.rr) {
+                    const rrValue = parseFloat(t.rr.split(':')[1]);
+                    if (!isNaN(rrValue)) {
+                        totalRR += rrValue;
+                        countRR++;
+                    }
+                } else if (t.riskPercent && t.profitPercent) {
+                    totalRR += (t.profitPercent / t.riskPercent);
+                    countRR++;
+                }
+            });
+            const avgRR = countRR > 0 ? (totalRR / countRR).toFixed(2) : '0.0';
+            
+            // Calculate best day
+            const tradesByDay = {};
+            eurusdTrades.forEach(trade => {
+                try {
+                    const date = new Date(trade.date).toDateString();
+                    if (!tradesByDay[date]) tradesByDay[date] = 0;
+                    tradesByDay[date] += trade.returnAmount || 0;
+                } catch (e) {}
+            });
+            const bestDay = Object.values(tradesByDay).reduce((max, val) => Math.max(max, val), 0);
+            
+            // Calculate average trade
+            const avgTrade = eurusdTrades.length > 0 ? (totalPL / eurusdTrades.length).toFixed(2) : 0;
+            
+            // Update UI
+            document.getElementById('eurusdTotalTrades').textContent = eurusdTrades.length;
+            document.getElementById('eurusdWinRate').textContent = `${winRate}%`;
+            document.getElementById('eurusdTotalPL').textContent = `$${totalPL >= 0 ? '+' : ''}${totalPL.toFixed(2)}`;
+            document.getElementById('eurusdAvgRR').textContent = `1:${avgRR}`;
+            document.getElementById('eurusdBestDay').textContent = `$${bestDay >= 0 ? '+' : ''}${bestDay.toFixed(2)}`;
+            document.getElementById('eurusdAvgTrade').textContent = `$${avgTrade >= 0 ? '+' : ''}${avgTrade}`;
+            document.getElementById('tradeCount').textContent = `(${eurusdTrades.length} trades)`;
+            
+            // Save metrics to Firebase
+            const metrics = {
+                totalTrades: eurusdTrades.length,
+                winRate: winRate,
+                totalPL: totalPL,
+                avgRR: avgRR,
+                bestDay: bestDay,
+                avgTrade: avgTrade,
+                wins: wins,
+                losses: losses,
+                breakEven: eurusdTrades.length - wins - losses,
+                lastUpdated: firebase.database.ServerValue.TIMESTAMP
+            };
+            
+            eurusdMetricsRef.set(metrics).catch(error => {
+                console.error('Error saving EURUSD metrics:', error);
+            });
+        }
+
+        // Render Trades Table
+        function renderTrades() {
+            const tbody = document.getElementById('eurusdTradesBody');
+            if (!tbody) return;
+            
+            // Clear existing rows
+            tbody.innerHTML = '';
+            
+            // Filter trades based on current view
+            let filteredTrades = [...eurusdTrades];
+            switch(currentView) {
+                case 'london':
+                    filteredTrades = filteredTrades.filter(t => t.session === 'London' || !t.session);
+                    break;
+                case 'newyork':
+                    filteredTrades = filteredTrades.filter(t => t.session === 'New York');
+                    break;
+                case 'asian':
+                    filteredTrades = filteredTrades.filter(t => t.session === 'Asian');
+                    break;
+                case 'wins':
+                    filteredTrades = filteredTrades.filter(t => t.result === 'Win');
+                    break;
+                case 'losses':
+                    filteredTrades = filteredTrades.filter(t => t.result === 'Loss');
+                    break;
+                case 'breakout':
+                    filteredTrades = filteredTrades.filter(t => t.model === 'Breakout' || t.model === 'BOS');
+                    break;
+                case 'fvg':
+                    filteredTrades = filteredTrades.filter(t => t.model === 'FVG');
+                    break;
+                // 'all' view shows all EURUSD trades
+            }
+            
+            if (filteredTrades.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="11" style="text-align: center; padding: 40px; color: var(--notion-text-light);">
+                            <i class="fas fa-inbox"></i><br>
+                            No EURUSD trades found for this view.
+                        </td>
+                    </tr>
+                `;
+            } else {
+                filteredTrades.forEach(trade => {
+                    tbody.appendChild(createEURUSDTradeRow(trade));
+                });
+            }
+        }
+
+        // Create EURUSD Trade Row
+        function createEURUSDTradeRow(trade) {
+            const row = document.createElement('tr');
+            const plClass = (trade.returnAmount || 0) >= 0 ? 'positive' : 'negative';
+            const plSign = (trade.returnAmount || 0) >= 0 ? '+' : '';
+            
+            row.innerHTML = `
+                <td>${formatDate(trade.date)}</td>
+                <td>${trade.session || 'London'}</td>
+                <td>
+                    <span class="select-property ${trade.direction === 'Buy' ? 'green' : 'red'}" style="min-width: 60px;">
+                        ${trade.direction || 'N/A'}
+                    </span>
+                </td>
+                <td>${trade.model || 'FVG'}</td>
+                <td>${trade.riskPercent || 0}%</td>
+                <td>${trade.profitPercent || 0}%</td>
+                <td class="${plClass}">${plSign}$${trade.returnAmount || 0}</td>
+                <td>$${trade.accountSize || 'N/A'}</td>
+                <td>${trade.lotSize || 'N/A'}</td>
+                <td>
+                    <span class="status-badge ${trade.result === 'Win' ? 'status-win' : trade.result === 'Loss' ? 'status-loss' : 'status-be'}">
+                        ${trade.result}
+                    </span>
+                </td>
+                <td>
+                    <button class="db-btn" onclick="editTrade('${trade.id}')" style="padding: 4px 8px; font-size: 12px;">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="db-btn" onclick="deleteTrade('${trade.id}')" style="padding: 4px 8px; font-size: 12px; margin-left: 4px; background-color: var(--notion-red-light); color: var(--notion-red);">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+            `;
+            return row;
         }
 
         // Save EURUSD Trade
@@ -1881,46 +1753,23 @@
                     saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
                 }
                 
-                const entryPrice = parseFloat(document.getElementById('entryPrice').value);
-                const exitPrice = parseFloat(document.getElementById('exitPrice').value);
-                const pips = parseFloat(document.getElementById('pips').value);
-                const riskPercent = parseFloat(document.getElementById('riskPercent').value);
-                const lotSize = parseFloat(document.getElementById('lotSize').value) || 0.1;
-                const result = document.getElementById('tradeResult').value;
-                const session = document.getElementById('tradeSession').value;
-                const direction = document.getElementById('tradeDirection').value;
-                const model = document.getElementById('tradeModel').value;
-                const timeframe = document.getElementById('tradeTimeframe').value;
-                const setupQuality = parseInt(document.getElementById('setupQuality').value);
-                
-                // Calculate P/L (simplified calculation)
-                let pl = 0;
-                if (pips && lotSize) {
-                    // For EURUSD: 1 pip = $1 per 0.01 lot (simplified)
-                    pl = pips * lotSize * 10;
-                    if (result === 'Loss') pl = -pl;
-                }
-                
-                // Calculate R:R (simplified)
-                const rrString = '1:2.0'; // Default
-                
                 const tradeData = {
                     date: document.getElementById('tradeDate').value,
-                    session: session,
+                    session: document.getElementById('tradeSession').value,
                     pair: 'EURUSD',
-                    direction: direction,
-                    model: model,
-                    timeframe: timeframe,
-                    entryPrice: entryPrice,
-                    exitPrice: exitPrice,
-                    pips: pips,
-                    riskPercent: riskPercent,
-                    lotSize: lotSize,
-                    result: result,
-                    rr: rrString,
-                    pl: pl,
-                    setupQuality: setupQuality,
+                    direction: document.getElementById('tradeDirection').value,
+                    model: document.getElementById('tradeModel').value,
+                    riskPercent: parseFloat(document.getElementById('riskPercent').value) || 0,
+                    profitPercent: parseFloat(document.getElementById('profitPercent').value) || 0,
+                    returnAmount: parseFloat(document.getElementById('returnAmount').value) || 0,
+                    accountSize: parseFloat(document.getElementById('accountSize').value) || 0,
+                    lotSize: parseFloat(document.getElementById('lotSize').value) || 0.1,
+                    result: document.getElementById('tradeResult').value,
+                    emotionBefore: parseInt(document.getElementById('emotionBefore').value) || 7,
+                    chartImageLink: document.getElementById('chartImageLink').value || '',
                     notes: document.getElementById('tradeNotes').value,
+                    rr: `1:${((parseFloat(document.getElementById('profitPercent').value) || 0) / (parseFloat(document.getElementById('riskPercent').value) || 1)).toFixed(2)}`,
+                    pl: parseFloat(document.getElementById('returnAmount').value) || 0,
                     createdAt: firebase.database.ServerValue.TIMESTAMP
                 };
                 
@@ -1961,14 +1810,14 @@
                 document.getElementById('tradeSession').value = trade.session || 'London';
                 document.getElementById('tradeDirection').value = trade.direction;
                 document.getElementById('tradeModel').value = trade.model || 'FVG';
-                document.getElementById('tradeTimeframe').value = trade.timeframe || 'M5';
-                document.getElementById('entryPrice').value = trade.entryPrice || '';
-                document.getElementById('exitPrice').value = trade.exitPrice || '';
-                document.getElementById('pips').value = trade.pips || '';
                 document.getElementById('riskPercent').value = trade.riskPercent || 1.0;
+                document.getElementById('profitPercent').value = trade.profitPercent || 2.0;
+                document.getElementById('returnAmount').value = trade.returnAmount || 25.00;
+                document.getElementById('accountSize').value = trade.accountSize || 10000;
                 document.getElementById('lotSize').value = trade.lotSize || 0.1;
                 document.getElementById('tradeResult').value = trade.result;
-                document.getElementById('setupQuality').value = trade.setupQuality || 7;
+                document.getElementById('emotionBefore').value = trade.emotionBefore || 7;
+                document.getElementById('chartImageLink').value = trade.chartImageLink || '';
                 document.getElementById('tradeNotes').value = trade.notes || '';
                 
                 // Change modal title
@@ -1992,23 +1841,19 @@
                             pair: 'EURUSD',
                             direction: document.getElementById('tradeDirection').value,
                             model: document.getElementById('tradeModel').value,
-                            timeframe: document.getElementById('tradeTimeframe').value,
-                            entryPrice: parseFloat(document.getElementById('entryPrice').value),
-                            exitPrice: parseFloat(document.getElementById('exitPrice').value),
-                            pips: parseFloat(document.getElementById('pips').value),
-                            riskPercent: parseFloat(document.getElementById('riskPercent').value),
+                            riskPercent: parseFloat(document.getElementById('riskPercent').value) || 0,
+                            profitPercent: parseFloat(document.getElementById('profitPercent').value) || 0,
+                            returnAmount: parseFloat(document.getElementById('returnAmount').value) || 0,
+                            accountSize: parseFloat(document.getElementById('accountSize').value) || 0,
                             lotSize: parseFloat(document.getElementById('lotSize').value) || 0.1,
                             result: document.getElementById('tradeResult').value,
-                            setupQuality: parseInt(document.getElementById('setupQuality').value),
+                            emotionBefore: parseInt(document.getElementById('emotionBefore').value) || 7,
+                            chartImageLink: document.getElementById('chartImageLink').value || '',
                             notes: document.getElementById('tradeNotes').value,
+                            rr: `1:${((parseFloat(document.getElementById('profitPercent').value) || 0) / (parseFloat(document.getElementById('riskPercent').value) || 1)).toFixed(2)}`,
+                            pl: parseFloat(document.getElementById('returnAmount').value) || 0,
                             updatedAt: firebase.database.ServerValue.TIMESTAMP
                         };
-                        
-                        // Recalculate P/L
-                        if (updatedTrade.pips && updatedTrade.lotSize) {
-                            updatedTrade.pl = updatedTrade.pips * updatedTrade.lotSize * 10;
-                            if (updatedTrade.result === 'Loss') updatedTrade.pl = -updatedTrade.pl;
-                        }
                         
                         updateSyncStatus('Updating trade...', 'syncing');
                         
@@ -2061,6 +1906,7 @@
                     winRate: document.getElementById('eurusdWinRate').textContent,
                     totalPL: document.getElementById('eurusdTotalPL').textContent.replace('$', ''),
                     avgRR: document.getElementById('eurusdAvgRR').textContent,
+                    volatility: 'Medium',
                     exportDate: new Date().toISOString()
                 }
             };
@@ -2075,36 +1921,6 @@
             linkElement.click();
         }
 
-        // Local Storage Backup
-        function saveToLocalStorage() {
-            try {
-                localStorage.setItem('eurusdTradesBackup', JSON.stringify(eurusdTrades));
-                localStorage.setItem('eurusdTradeIdCounter', tradeIdCounter);
-            } catch (e) {
-                console.warn('Local storage save failed:', e);
-            }
-        }
-
-        function loadFromLocalStorage() {
-            try {
-                const backup = localStorage.getItem('eurusdTradesBackup');
-                const counter = localStorage.getItem('eurusdTradeIdCounter');
-                
-                if (backup) {
-                    eurusdTrades = JSON.parse(backup);
-                    tradeIdCounter = parseInt(counter) || eurusdTrades.length + 1;
-                    renderEURUSDStats();
-                    renderTrades();
-                    updateCharts();
-                    updateModelPerformance();
-                }
-                
-                updateSyncStatus('Loaded from backup', 'synced');
-            } catch (e) {
-                console.warn('Local storage load failed:', e);
-            }
-        }
-
         // Utility Functions
         function formatDate(dateString) {
             try {
@@ -2112,8 +1928,16 @@
                 if (isNaN(date.getTime())) {
                     return 'Invalid Date';
                 }
-                return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ' ' + 
-                       date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+                return date.toLocaleDateString('en-US', { 
+                    month: '2-digit', 
+                    day: '2-digit', 
+                    year: 'numeric' 
+                }) + ', ' + 
+                date.toLocaleTimeString('en-US', { 
+                    hour: '2-digit', 
+                    minute: '2-digit',
+                    hour12: true 
+                });
             } catch (e) {
                 return 'Invalid Date';
             }
@@ -2131,19 +1955,36 @@
             }
         }
 
+        function updateSyncStatus(message, status) {
+            const statusEl = document.getElementById('syncStatus');
+            if (statusEl) {
+                statusEl.textContent = message;
+                statusEl.className = 'sync-status ' + status;
+                
+                const icon = status === 'synced' ? 'fa-cloud' : 
+                            status === 'syncing' ? 'fa-sync fa-spin' : 
+                            'fa-cloud-slash';
+                statusEl.innerHTML = `<i class="fas ${icon}"></i> ${message}`;
+            }
+        }
+
         function openModal() {
             document.getElementById('addTradeModal').style.display = 'flex';
-            document.querySelector('.modal-title').textContent = '➕ Add EURUSD Trade';
-            document.getElementById('saveTrade').textContent = 'Save EURUSD Trade';
+            document.querySelector('.modal-title').textContent = '➕ Add New EURUSD Trade';
+            document.getElementById('saveTrade').textContent = 'Save EURUSD Trade to Cloud';
             document.getElementById('saveTrade').onclick = saveEURUSDTrade;
             
             // Set default date to now
             document.getElementById('tradeDate').value = new Date().toISOString().slice(0, 16);
             
             // Reset form
-            document.getElementById('entryPrice').value = '';
-            document.getElementById('exitPrice').value = '';
-            document.getElementById('pips').value = '';
+            document.getElementById('riskPercent').value = '1.0';
+            document.getElementById('profitPercent').value = '2.0';
+            document.getElementById('returnAmount').value = '25.00';
+            document.getElementById('accountSize').value = '10000';
+            document.getElementById('lotSize').value = '0.10';
+            document.getElementById('emotionBefore').value = '7';
+            document.getElementById('chartImageLink').value = '';
             document.getElementById('tradeNotes').value = '';
         }
 
@@ -2171,7 +2012,7 @@
             } else if (type === 'error') {
                 notification.style.backgroundColor = 'var(--notion-red)';
             } else {
-                notification.style.backgroundColor = 'var(--notion-blue)';
+                notification.style.backgroundColor = 'var(--eur-color)';
             }
             
             notification.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i> ${message}`;
