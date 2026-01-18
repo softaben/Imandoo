@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Psychology Review - Trading Journal</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <style>
+        :root {
+            --notion-bg: #ffffff;
+            --notion-gray: #f7f6f3;
+            --notion-gray-light: #fbfbfa;
+            --notion-gray-dark: #e9e9e7;
+            --notion-text: #37352f;
+            --notion-text-light: #70716e;
+            --notion-blue: #0c8ce9;
+            --notion-blue-light: #e3f2fd;
+            --notion-green: #0f7b6c;
+            --notion-green-light: #e8f5e9;
+            --notion-red: #d1453b;
+            --notion-red-light: #ffebee;
+            --notion-purple: #6940a5;
+            --notion-purple-light: #f3e5f5;
+            --notion-yellow: #ffc800;
+            --notion-yellow-light: #fff8e1;
+            --notion-pink: #e55ca2;
+            --notion-orange: #ff6b35;
+            --notion-orange-light: #fff3e0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        body {
+            background-color: var(--notion-bg);
+            color: var(--notion-text);
+            line-height: 1.5;
+        }
+
+        /* Header */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 45px;
+            background-color: var(--notion-bg);
+            border-bottom: 1px solid var(--notion-gray-dark);
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            z-index: 100;
+        }
+
+        .back-btn {
+            background: none;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+            color: var(--notion-text);
+            margin-right: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .header-title {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .header-actions {
+            margin-left: auto;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .sync-status {
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            margin-right: 8px;
+        }
+
+        .sync-status.syncing {
+            background-color: var(--notion-yellow-light);
+            color: var(--notion-yellow);
+        }
+
+        .sync-status.synced {
+            background-color: var(--notion-green-light);
+            color: var(--notion-green);
+        }
+
+        .sync-status.error {
+            background-color: var(--notion-red-light);
+            color: var(--notion-red);
+        }
+
+        /* Main Content */
+        .container {
+            margin-top: 45px;
+            padding: 24px;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .page-header {
+            margin-bottom: 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .page-title {
+            font-size: 40px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .toggle-view-btn {
+            padding: 8px 16px;
+            background-color: var(--notion-blue);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Callouts */
+        .callout {
+            background-color: var(--notion-blue-light);
+            border: 1px solid var(--notion-blue);
+            border-radius: 6px;
+            padding: 16px;
+            margin-bottom: 24px;
+            display: flex;
+            gap: 12px;
+        }
+
+        .callout-icon {
+            color: var(--notion-blue);
+            font-size: 20px;
+            margin-top: 2px;
+        }
+
+        .callout-content h3 {
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+
+        .callout-content p {
+            font-size: 14px;
+            color: var(--notion-text);
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--notion-gray-dark);
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            margin-top: 24px;
+            padding-top: 16px;
+            border-top: 1px solid var(--notion-gray-dark);
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 8px 16px;
+            border-radius: 4px;
+            border: 1px solid var(--notion-gray-dark);
+            background-color: white;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .btn.primary {
+            background-color: var(--notion-blue);
+            color: white;
+            border-color: var(--notion-blue);
+        }
+
+        /* Review List */
+        .reviews-list {
+            display: none;
+        }
+
+        .review-card {
+            background-color: white;
+            border: 1px solid var(--notion-gray-dark);
+            border-radius: 6px;
+            padding: 20px;
+            margin-bottom: 16px;
+            transition: transform 0.2s;
+        }
+
+        .review-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--notion-gray);
+        }
+
+        .review-date {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--notion-text);
+        }
+
+        .review-mental-state {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--notion-blue);
+        }
+
+        .review-section {
+            margin-bottom: 12px;
+        }
+
+        .review-section-title {
+            font-size: 13px;
+            color: var(--notion-text-light);
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .review-section-content {
+            font-size: 14px;
+            color: var(--notion-text);
+        }
+
+        .mistakes-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 4px;
+        }
+
+        .mistake-tag {
+            padding: 4px 10px;
+            background-color: var(--notion-gray);
+            border-radius: 4px;
+            font-size: 12px;
+            color: var(--notion-text-light);
+        }
+
+        .mistake-tag.active {
+            background-color: var(--notion-red-light);
+            color: var(--notion-red);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--notion-text-light);
+        }
+
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.3;
+        }
+
+        .empty-state h3 {
+            font-size: 18px;
+            margin-bottom: 8px;
+        }
+
+        /* Charts */
+        .chart-card {
+            background-color: white;
+            border: 1px solid var(--notion-gray-dark);
+            border-radius: 6px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .chart-title {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        /* Slider */
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .slider-value {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--notion-blue);
+            min-width: 40px;
+        }
+
+        input[type="range"] {
+            flex: 1;
+            height: 6px;
+            -webkit-appearance: none;
+            background: var(--notion-gray);
+            border-radius: 3px;
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            background: var(--notion-blue);
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
+            }
+            
+            .page-title {
+                font-size: 32px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <button class="back-btn" id="backBtn">
+            <i class="fas fa-arrow-left"></i>
+            Back to Journal
+        </button>
+        <div class="header-title">Psychology Review</div>
+        <div class="header-actions">
+            <div class="sync-status synced" id="syncStatus">
+                <i class="fas fa-cloud"></i> Synced
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- New Review Form (Default View) -->
+        <div id="newReviewView">
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">🧠 Psychology Review</h1>
+                    <p style="color: var(--notion-text-light);">Track your mental state and trading psychology</p>
+                </div>
+                <button class="toggle-view-btn" id="viewHistoryBtn">
+                    <i class="fas fa-history"></i> View History
+                </button>
+            </div>
+
+            <div class="callout">
+                <div class="callout-icon">
+                    <i class="fas fa-brain"></i>
+                </div>
+                <div class="callout-content">
+                    <h3>Mental Performance Tracking</h3>
+                    <p>Regular psychology reviews help identify patterns, improve emotional control, and increase trading consistency. Be honest with yourself for maximum benefit.</p>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Date of Review</label>
+                <input type="date" class="form-control" id="psychologyDate" value="">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Overall Mental State (1-10)</label>
+                <div class="slider-container">
+                    <span class="slider-value" id="mentalStateValue">7</span>
+                    <input type="range" min="1" max="10" value="7" class="form-control" id="mentalState">
+                    <div style="font-size: 13px; color: var(--notion-text-light);">
+                        <span>1 = Poor</span>
+                        <span style="margin-left: 20px;">10 = Excellent</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Emotional Control</label>
+                    <select class="form-control" id="emotionalControl">
+                        <option>Excellent (No emotional trades)</option>
+                        <option selected>Good (Minor emotional reactions)</option>
+                        <option>Average (Some revenge trading)</option>
+                        <option>Poor (Emotional decision making)</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Discipline Level</label>
+                    <select class="form-control" id="disciplineLevel">
+                        <option>Excellent (Strictly followed plan)</option>
+                        <option selected>Good (Minor deviations)</option>
+                        <option>Average (Several deviations)</option>
+                        <option>Poor (No discipline)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Common Psychological Mistakes</label>
+                <div class="mistakes-list">
+                    <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                        <input type="checkbox" id="mistake1">
+                        <span>Revenge Trading</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                        <input type="checkbox" id="mistake2">
+                        <span>Over-trading</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                        <input type="checkbox" id="mistake3" checked>
+                        <span>FOMO (Fear of Missing Out)</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                        <input type="checkbox" id="mistake4">
+                        <span>Hesitation to Take Valid Setups</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                        <input type="checkbox" id="mistake5">
+                        <span>Early Exit from Winners</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                        <input type="checkbox" id="mistake6">
+                        <span>Holding Losers Too Long</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 8px;">
+                        <input type="checkbox" id="mistake7">
+                        <span>Trading Without a Plan</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">What Worked Well Mentally</label>
+                <textarea class="form-control" id="workedWellMental" rows="4" placeholder="Describe your psychological strengths this week...">• Patience in waiting for proper setups
+• Good emotional control after a loss
+• Following the trading plan consistently
+• Taking breaks when needed</textarea>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Psychological Improvements Needed</label>
+                <textarea class="form-control" id="improvementsNeeded" rows="4" placeholder="What psychological aspects need work?">1. Wait for full confirmation before entries (reduce FOMO)
+2. Stick to maximum 3 trades per day (prevent over-trading)
+3. No trading after 2 consecutive losses (emotional control)
+4. Take breaks after 2 hours of screen time (mental fatigue)
+5. Review trading plan before each session (discipline)
+6. Practice mindfulness meditation for 10 min daily</textarea>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Affirmation/Mantra for Next Week</label>
+                <input type="text" class="form-control" id="tradingMantra" value="Trade the setup, not the P&L. Patience creates profit.">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Additional Notes</label>
+                <textarea class="form-control" id="additionalNotes" rows="3" placeholder="Any other observations about your trading psychology..."></textarea>
+            </div>
+
+            <div class="form-actions">
+                <button class="btn" id="saveDraftBtn">
+                    <i class="fas fa-save"></i> Save as Draft
+                </button>
+                <button class="btn primary" id="saveReviewBtn">
+                    <i class="fas fa-cloud-upload-alt"></i> Save to Database
+                </button>
+            </div>
+        </div>
+
+        <!-- Reviews History View -->
+        <div class="reviews-list" id="historyView">
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">📋 Psychology Review History</h1>
+                    <p style="color: var(--notion-text-light);">View all your previous psychology reviews</p>
+                </div>
+                <button class="toggle-view-btn" id="backToFormBtn">
+                    <i class="fas fa-plus"></i> New Review
+                </button>
+            </div>
+
+            <div class="callout">
+                <div class="callout-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="callout-content">
+                    <h3>Mental State Trends</h3>
+                    <p>Track your psychological progress over time. Look for patterns and improvements in your mental game.</p>
+                </div>
+            </div>
+
+            <!-- Mental State Chart -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div class="chart-title">Mental State Over Time</div>
+                </div>
+                <canvas id="mentalStateChart" height="200"></canvas>
+            </div>
+
+            <!-- Reviews List -->
+            <div id="reviewsContainer">
+                <div class="loading" id="loadingReviews">
+                    <i class="fas fa-spinner fa-spin"></i> Loading psychology reviews...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDuaP43jD8LWw5A8cIbcgS7-bqCZTXzEEg",
+            authDomain: "davily-feded.firebaseapp.com",
+            databaseURL: "https://davily-feded-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "davily-feded",
+            storageBucket: "davily-feded.firebasestorage.app",
+            messagingSenderId: "83255410493",
+            appId: "1:83255410493:web:927c5e859c5b20805c4f54",
+            measurementId: "G-LD4XHS6FGM"
+        };
+
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const psychologyRef = database.ref('psychologyReviews');
+
+        // Global Variables
+        let reviews = [];
+        let mentalStateChart = null;
+
+        // Initialize Application
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set default date to today
+            const now = new Date();
+            document.getElementById('psychologyDate').value = now.toISOString().split('T')[0];
+            
+            // Setup slider value display
+            document.getElementById('mentalState').addEventListener('input', function() {
+                document.getElementById('mentalStateValue').textContent = this.value;
+            });
+            
+            // Initialize Firebase
+            initFirebase();
+            
+            // Setup Event Listeners
+            setupEventListeners();
+        });
+
+        // Initialize Firebase and Load Data
+        function initFirebase() {
+            updateSyncStatus('Connecting to Firebase...', 'syncing');
+            
+            // Listen for psychology reviews
+            psychologyRef.on('value', (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    reviews = Object.keys(data).map(key => ({
+                        id: key,
+                        ...data[key]
+                    }));
+                    
+                    // Sort by date (newest first)
+                    reviews.sort((a, b) => new Date(b.date) - new Date(a.date));
+                    
+                    updateSyncStatus('Synced with Firebase', 'synced');
+                    
+                    // Update history view if it's visible
+                    if (document.getElementById('historyView').style.display !== 'none') {
+                        renderReviewsList();
+                        updateMentalStateChart();
+                    }
+                } else {
+                    reviews = [];
+                    updateSyncStatus('No reviews found', 'error');
+                }
+                
+                // Hide loading indicator
+                document.getElementById('loadingReviews')?.remove();
+            }, (error) => {
+                console.error('Firebase error:', error);
+                updateSyncStatus('Connection error', 'error');
+                
+                // Try to load from localStorage as fallback
+                loadFromLocalStorage();
+            });
+        }
+
+        // Setup Event Listeners
+        function setupEventListeners() {
+            // Back button
+            document.getElementById('backBtn').addEventListener('click', function() {
+                window.location.href = 'index.html';
+            });
+            
+            // Toggle between new review and history
+            document.getElementById('viewHistoryBtn').addEventListener('click', showHistoryView);
+            document.getElementById('backToFormBtn').addEventListener('click', showNewReviewView);
+            
+            // Save buttons
+            document.getElementById('saveReviewBtn').addEventListener('click', savePsychologyReview);
+            document.getElementById('saveDraftBtn').addEventListener('click', saveAsDraft);
+        }
+
+        // Update Sync Status
+        function updateSyncStatus(message, status) {
+            const statusEl = document.getElementById('syncStatus');
+            if (statusEl) {
+                statusEl.textContent = message;
+                statusEl.className = 'sync-status ' + status;
+                
+                const icon = status === 'synced' ? 'fa-cloud' : 
+                            status === 'syncing' ? 'fa-sync fa-spin' : 
+                            'fa-cloud-slash';
+                statusEl.innerHTML = `<i class="fas ${icon}"></i> ${message}`;
+            }
+        }
+
+        // Show History View
+        function showHistoryView() {
+            document.getElementById('newReviewView').style.display = 'none';
+            document.getElementById('historyView').style.display = 'block';
+            renderReviewsList();
+            updateMentalStateChart();
+        }
+
+        // Show New Review Form
+        function showNewReviewView() {
+            document.getElementById('newReviewView').style.display = 'block';
+            document.getElementById('historyView').style.display = 'none';
+        }
+
+        // Save Psychology Review to Firebase
+        function savePsychologyReview() {
+            const psychData = {
+                date: document.getElementById('psychologyDate').value || new Date().toISOString().split('T')[0],
+                mentalState: parseInt(document.getElementById('mentalState').value),
+                emotionalControl: document.getElementById('emotionalControl').value,
+                disciplineLevel: document.getElementById('disciplineLevel').value,
+                mistakes: {
+                    revengeTrading: document.getElementById('mistake1').checked,
+                    overTrading: document.getElementById('mistake2').checked,
+                    fomo: document.getElementById('mistake3').checked,
+                    hesitation: document.getElementById('mistake4').checked,
+                    earlyExit: document.getElementById('mistake5').checked,
+                    holdingLosers: document.getElementById('mistake6').checked,
+                    noPlan: document.getElementById('mistake7').checked
+                },
+                workedWell: document.getElementById('workedWellMental').value,
+                improvementsNeeded: document.getElementById('improvementsNeeded').value,
+                mantra: document.getElementById('tradingMantra').value,
+                additionalNotes: document.getElementById('additionalNotes').value,
+                createdAt: firebase.database.ServerValue.TIMESTAMP
+            };
+            
+            // Validate required fields
+            if (!psychData.date) {
+                alert('Please select a date for the review');
+                return;
+            }
+            
+            if (psychData.mentalState < 1 || psychData.mentalState > 10) {
+                alert('Please set a valid mental state score (1-10)');
+                return;
+            }
+            
+            updateSyncStatus('Saving psychology review...', 'syncing');
+            
+            // Save to Firebase
+            psychologyRef.push(psychData)
+                .then(() => {
+                    updateSyncStatus('Psychology review saved', 'synced');
+                    alert('Psychology review saved successfully!');
+                    
+                    // Clear form
+                    clearForm();
+                    
+                    // Show history view
+                    showHistoryView();
+                })
+                .catch(error => {
+                    console.error('Error saving psychology review:', error);
+                    updateSyncStatus('Save failed', 'error');
+                    alert('Failed to save psychology review. Please check your connection.');
+                });
+        }
+
+        // Save as Draft (Local Storage)
+        function saveAsDraft() {
+            const psychData = {
+                date: document.getElementById('psychologyDate').value,
+                mentalState: parseInt(document.getElementById('mentalState').value),
+                emotionalControl: document.getElementById('emotionalControl').value,
+                disciplineLevel: document.getElementById('disciplineLevel').value,
+                mistakes: {
+                    revengeTrading: document.getElementById('mistake1').checked,
+                    overTrading: document.getElementById('mistake2').checked,
+                    fomo: document.getElementById('mistake3').checked,
+                    hesitation: document.getElementById('mistake4').checked,
+                    earlyExit: document.getElementById('mistake5').checked,
+                    holdingLosers: document.getElementById('mistake6').checked,
+                    noPlan: document.getElementById('mistake7').checked
+                },
+                workedWell: document.getElementById('workedWellMental').value,
+                improvementsNeeded: document.getElementById('improvementsNeeded').value,
+                mantra: document.getElementById('tradingMantra').value,
+                additionalNotes: document.getElementById('additionalNotes').value,
+                savedAt: new Date().toISOString()
+            };
+            
+            try {
+                localStorage.setItem('psychologyDraft', JSON.stringify(psychData));
+                alert('Psychology review saved as draft locally');
+            } catch (e) {
+                console.error('Error saving draft:', e);
+                alert('Failed to save draft');
+            }
+        }
+
+        // Clear Form
+        function clearForm() {
+            document.getElementById('psychologyDate').value = new Date().toISOString().split('T')[0];
+            document.getElementById('mentalState').value = 7;
+            document.getElementById('mentalStateValue').textContent = '7';
+            document.getElementById('emotionalControl').value = 'Good (Minor emotional reactions)';
+            document.getElementById('disciplineLevel').value = 'Good (Minor deviations)';
+            document.getElementById('mistake1').checked = false;
+            document.getElementById('mistake2').checked = false;
+            document.getElementById('mistake3').checked = true;
+            document.getElementById('mistake4').checked = false;
+            document.getElementById('mistake5').checked = false;
+            document.getElementById('mistake6').checked = false;
+            document.getElementById('mistake7').checked = false;
+            document.getElementById('workedWellMental').value = '';
+            document.getElementById('improvementsNeeded').value = '1. Wait for full confirmation before entries (reduce FOMO)\n2. Stick to maximum 3 trades per day (prevent over-trading)\n3. No trading after 2 consecutive losses (emotional control)\n4. Take breaks after 2 hours of screen time (mental fatigue)\n5. Review trading plan before each session (discipline)\n6. Practice mindfulness meditation for 10 min daily';
+            document.getElementById('tradingMantra').value = 'Trade the setup, not the P&L. Patience creates profit.';
+            document.getElementById('additionalNotes').value = '';
+        }
+
+        // Render Reviews List
+        function renderReviewsList() {
+            const container = document.getElementById('reviewsContainer');
+            if (!container) return;
+            
+            container.innerHTML = '';
+            
+            if (reviews.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-brain"></i>
+                        <h3>No Psychology Reviews Yet</h3>
+                        <p>Start tracking your mental performance by creating your first review.</p>
+                        <button class="btn primary" style="margin-top: 16px;" onclick="showNewReviewView()">
+                            <i class="fas fa-plus"></i> Create First Review
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+            
+            reviews.forEach(review => {
+                const reviewCard = createReviewCard(review);
+                container.appendChild(reviewCard);
+            });
+        }
+
+        // Create Review Card HTML
+        function createReviewCard(review) {
+            const card = document.createElement('div');
+            card.className = 'review-card';
+            
+            // Get active mistakes
+            const activeMistakes = [];
+            if (review.mistakes?.revengeTrading) activeMistakes.push('Revenge Trading');
+            if (review.mistakes?.overTrading) activeMistakes.push('Over-trading');
+            if (review.mistakes?.fomo) activeMistakes.push('FOMO');
+            if (review.mistakes?.hesitation) activeMistakes.push('Hesitation');
+            if (review.mistakes?.earlyExit) activeMistakes.push('Early Exit');
+            if (review.mistakes?.holdingLosers) activeMistakes.push('Holding Losers');
+            if (review.mistakes?.noPlan) activeMistakes.push('No Plan');
+            
+            // Format date
+            const date = new Date(review.date);
+            const formattedDate = date.toLocaleDateString('en-US', { 
+                weekday: 'short', 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric' 
+            });
+            
+            card.innerHTML = `
+                <div class="review-header">
+                    <div class="review-date">${formattedDate}</div>
+                    <div class="review-mental-state">${review.mentalState}/10</div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="review-section">
+                        <div class="review-section-title">Emotional Control</div>
+                        <div class="review-section-content">${review.emotionalControl || 'Not specified'}</div>
+                    </div>
+                    
+                    <div class="review-section">
+                        <div class="review-section-title">Discipline Level</div>
+                        <div class="review-section-content">${review.disciplineLevel || 'Not specified'}</div>
+                    </div>
+                </div>
+                
+                ${activeMistakes.length > 0 ? `
+                <div class="review-section">
+                    <div class="review-section-title">Psychological Mistakes</div>
+                    <div class="mistakes-list">
+                        ${activeMistakes.map(mistake => `
+                            <span class="mistake-tag active">${mistake}</span>
+                        `).join('')}
+                    </div>
+                </div>
+                ` : ''}
+                
+                ${review.workedWell ? `
+                <div class="review-section">
+                    <div class="review-section-title">What Worked Well</div>
+                    <div class="review-section-content" style="white-space: pre-line;">${review.workedWell}</div>
+                </div>
+                ` : ''}
+                
+                ${review.improvementsNeeded ? `
+                <div class="review-section">
+                    <div class="review-section-title">Improvements Needed</div>
+                    <div class="review-section-content" style="white-space: pre-line;">${review.improvementsNeeded}</div>
+                </div>
+                ` : ''}
+                
+                ${review.mantra ? `
+                <div class="review-section">
+                    <div class="review-section-title">Trading Mantra</div>
+                    <div class="review-section-content" style="font-style: italic;">"${review.mantra}"</div>
+                </div>
+                ` : ''}
+                
+                ${review.additionalNotes ? `
+                <div class="review-section">
+                    <div class="review-section-title">Additional Notes</div>
+                    <div class="review-section-content" style="white-space: pre-line;">${review.additionalNotes}</div>
+                </div>
+                ` : ''}
+                
+                <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--notion-gray); text-align: right;">
+                    <button class="btn" onclick="deleteReview('${review.id}')" style="font-size: 12px; padding: 4px 8px;">
+                        <i class="fas fa-trash"></i> Delete
+                    </button>
+                </div>
+            `;
+            
+            return card;
+        }
+
+        // Delete Review
+        function deleteReview(reviewId) {
+            if (confirm('Are you sure you want to delete this psychology review? This action cannot be undone.')) {
+                updateSyncStatus('Deleting review...', 'syncing');
+                
+                psychologyRef.child(reviewId).remove()
+                    .then(() => {
+                        updateSyncStatus('Review deleted', 'synced');
+                    })
+                    .catch(error => {
+                        console.error('Error deleting review:', error);
+                        updateSyncStatus('Delete failed', 'error');
+                        alert('Failed to delete review. Please check your connection.');
+                    });
+            }
+        }
+
+        // Update Mental State Chart
+        function updateMentalStateChart() {
+            if (reviews.length === 0) return;
+            
+            // Sort by date ascending for chart
+            const sortedReviews = [...reviews].sort((a, b) => new Date(a.date) - new Date(b.date));
+            
+            // Get last 10 reviews for chart
+            const chartReviews = sortedReviews.slice(-10);
+            
+            const dates = chartReviews.map(r => {
+                const date = new Date(r.date);
+                return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            });
+            
+            const mentalStates = chartReviews.map(r => r.mentalState);
+            
+            const ctx = document.getElementById('mentalStateChart').getContext('2d');
+            
+            if (mentalStateChart) {
+                mentalStateChart.data.labels = dates;
+                mentalStateChart.data.datasets[0].data = mentalStates;
+                mentalStateChart.update();
+            } else {
+                mentalStateChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: dates,
+                        datasets: [{
+                            label: 'Mental State',
+                            data: mentalStates,
+                            borderColor: '#0c8ce9',
+                            backgroundColor: 'rgba(12, 140, 233, 0.1)',
+                            fill: true,
+                            tension: 0.4,
+                            pointBackgroundColor: '#0c8ce9',
+                            pointBorderColor: '#ffffff',
+                            pointBorderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: false,
+                                min: 1,
+                                max: 10,
+                                ticks: {
+                                    stepSize: 1
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        // Local Storage Backup
+        function loadFromLocalStorage() {
+            try {
+                const draft = localStorage.getItem('psychologyDraft');
+                if (draft) {
+                    const psychData = JSON.parse(draft);
+                    // Load draft into form
+                    document.getElementById('psychologyDate').value = psychData.date;
+                    document.getElementById('mentalState').value = psychData.mentalState;
+                    document.getElementById('mentalStateValue').textContent = psychData.mentalState;
+                    document.getElementById('emotionalControl').value = psychData.emotionalControl;
+                    document.getElementById('disciplineLevel').value = psychData.disciplineLevel;
+                    document.getElementById('mistake1').checked = psychData.mistakes?.revengeTrading || false;
+                    document.getElementById('mistake2').checked = psychData.mistakes?.overTrading || false;
+                    document.getElementById('mistake3').checked = psychData.mistakes?.fomo || false;
+                    document.getElementById('mistake4').checked = psychData.mistakes?.hesitation || false;
+                    document.getElementById('mistake5').checked = psychData.mistakes?.earlyExit || false;
+                    document.getElementById('mistake6').checked = psychData.mistakes?.holdingLosers || false;
+                    document.getElementById('mistake7').checked = psychData.mistakes?.noPlan || false;
+                    document.getElementById('workedWellMental').value = psychData.workedWell || '';
+                    document.getElementById('improvementsNeeded').value = psychData.improvementsNeeded || '';
+                    document.getElementById('tradingMantra').value = psychData.mantra || '';
+                    document.getElementById('additionalNotes').value = psychData.additionalNotes || '';
+                    
+                    updateSyncStatus('Loaded from draft', 'synced');
+                }
+                
+                // Load saved reviews from localStorage
+                const savedReviews = localStorage.getItem('psychologyReviews');
+                if (savedReviews) {
+                    reviews = JSON.parse(savedReviews);
+                    if (document.getElementById('historyView').style.display !== 'none') {
+                        renderReviewsList();
+                    }
+                }
+            } catch (e) {
+                console.warn('Local storage load failed:', e);
+            }
+        }
+
+        // Auto-save to localStorage
+        function saveToLocalStorage() {
+            try {
+                localStorage.setItem('psychologyReviews', JSON.stringify(reviews));
+            } catch (e) {
+                console.warn('Local storage save failed:', e);
+            }
+        }
+    </script>
+</body>
+</html>
