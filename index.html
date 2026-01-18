@@ -1000,7 +1000,7 @@
                 <a href="#" class="nav-item" data-page="trades">
                     <i class="fas fa-table"></i> All Trades
                 </a>
-                <a href="#" class="nav-item" data-page="analytics">
+                <a href="analytics.html" class="nav-item">
                     <i class="fas fa-chart-bar"></i> Analytics
                 </a>
                 <a href="#" class="nav-item" data-page="daily">
@@ -1681,12 +1681,28 @@ You can add multiple URLs separated by commas or new lines"></textarea>
             if (eventListenersSetup) return;
             eventListenersSetup = true;
             
-            // Navigation - only for internal pages (with data-page attribute)
-            document.querySelectorAll('.nav-item[data-page]').forEach(item => {
+            // Navigation - إصلاح التنقل للروابط الداخلية والخارجية
+            document.querySelectorAll('.nav-item').forEach(item => {
                 item.addEventListener('click', function(e) {
+                    // إذا كان الرابط يحتوي على href ولا يحتوي على data-page، فهو رابط خارجي
+                    if (this.hasAttribute('href') && !this.hasAttribute('data-page')) {
+                        // دع الرابط يعمل بشكل طبيعي
+                        return;
+                    }
+                    
                     e.preventDefault();
-                    const page = this.getAttribute('data-page');
-                    showPage(page + '-page');
+                    
+                    // إذا كان الرابط يحتوي على data-page، فهو صفحة داخلية
+                    if (this.hasAttribute('data-page')) {
+                        const page = this.getAttribute('data-page');
+                        showPage(page + '-page');
+                        
+                        // تحديث حالة التنشيط للروابط الداخلية فقط
+                        document.querySelectorAll('.nav-item[data-page]').forEach(nav => {
+                            nav.classList.remove('active');
+                        });
+                        this.classList.add('active');
+                    }
                 });
             });
 
@@ -2843,12 +2859,14 @@ You can add multiple URLs separated by commas or new lines"></textarea>
             });
             document.getElementById(pageId).style.display = 'block';
             
-            // Update active nav
-            document.querySelectorAll('.nav-item').forEach(item => {
+            // Update active nav only for internal pages
+            document.querySelectorAll('.nav-item[data-page]').forEach(item => {
                 item.classList.remove('active');
+                const pageName = pageId.replace('-page', '');
+                if (item.getAttribute('data-page') === pageName) {
+                    item.classList.add('active');
+                }
             });
-            const pageName = pageId.replace('-page', '');
-            document.querySelector(`[data-page="${pageName}"]`).classList.add('active');
             
             // Update charts when switching to dashboard
             if (pageId === 'dashboard-page' && trades.length > 0) {
