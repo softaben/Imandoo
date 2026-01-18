@@ -7,6 +7,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- TradingView Script -->
+    <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
@@ -116,6 +118,11 @@
 
         .header-btn.danger {
             background-color: var(--notion-red);
+            color: white;
+        }
+
+        .header-btn.tradingview {
+            background-color: #2962FF;
             color: white;
         }
 
@@ -320,6 +327,12 @@
             background-color: var(--notion-red);
             color: white;
             border-color: var(--notion-red);
+        }
+
+        .db-btn.tradingview {
+            background-color: #2962FF;
+            color: white;
+            border-color: #2962FF;
         }
 
         .database-views {
@@ -771,60 +784,102 @@
             letter-spacing: 0.5px;
         }
 
-        .quick-journal-form {
-            background-color: white;
-            border: 1px solid var(--notion-gray-dark);
-            border-radius: 8px;
-            padding: 16px;
-            margin-bottom: 24px;
+        /* TradingView Modal Styles */
+        .tradingview-modal {
+            max-width: 1200px;
+            max-height: 85vh;
         }
 
-        .quick-journal-header {
+        .tradingview-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .tradingview-pair {
+            background: white;
+            border: 1px solid var(--notion-gray-dark);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .tradingview-header {
+            padding: 12px 16px;
+            background-color: var(--notion-blue-light);
+            border-bottom: 1px solid var(--notion-gray-dark);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 16px;
         }
 
-        .quick-journal-title {
-            font-size: 18px;
+        .tradingview-title {
+            font-size: 16px;
             font-weight: 600;
+            color: var(--notion-blue);
         }
 
-        .form-section {
-            margin-bottom: 16px;
-            padding-bottom: 16px;
-            border-bottom: 1px solid var(--notion-gray-dark);
-        }
-
-        .form-section:last-child {
-            border-bottom: none;
-            margin-bottom: 0;
-            padding-bottom: 0;
-        }
-
-        .form-section-title {
-            font-size: 14px;
-            font-weight: 600;
-            margin-bottom: 12px;
-            color: var(--notion-text);
-        }
-
-        .quick-notes {
+        .tradingview-frame {
             width: 100%;
-            min-height: 80px;
-            padding: 8px;
-            border: 1px solid var(--notion-gray-dark);
-            border-radius: 4px;
-            font-size: 13px;
-            resize: vertical;
+            height: 500px;
+            border: none;
         }
 
-        .quick-actions {
+        .pair-selector {
             display: flex;
-            justify-content: flex-end;
-            gap: 8px;
-            margin-top: 16px;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .pair-btn {
+            padding: 8px 16px;
+            border: 1px solid var(--notion-gray-dark);
+            background: white;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .pair-btn:hover {
+            background-color: var(--notion-gray);
+        }
+
+        .pair-btn.active {
+            background-color: var(--notion-blue);
+            color: white;
+            border-color: var(--notion-blue);
+        }
+
+        /* TradingView Widget Container */
+        .tradingview-widget-container {
+            width: 100%;
+            height: 500px;
+        }
+
+        /* Responsive for TradingView */
+        @media (max-width: 1024px) {
+            .tradingview-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .tradingview-widget-container {
+                height: 400px;
+            }
+            
+            .tradingview-modal {
+                width: 95%;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .tradingview-widget-container {
+                height: 350px;
+            }
+            
+            .pair-selector {
+                flex-wrap: wrap;
+            }
         }
     </style>
 </head>
@@ -837,6 +892,9 @@
             <div class="sync-status synced" id="syncStatus">
                 <i class="fas fa-cloud"></i> Synced
             </div>
+            <button class="header-btn tradingview" id="tradingViewBtn">
+                <i class="fas fa-chart-line"></i> TradingView
+            </button>
             <button class="header-btn danger" id="resetDataBtn">
                 <i class="fas fa-trash"></i> Reset Data
             </button>
@@ -965,109 +1023,6 @@
                     </div>
                 </div>
 
-                <!-- Quick Journal Entry -->
-                <div class="quick-journal-form">
-                    <div class="quick-journal-header">
-                        <div class="quick-journal-title">📝 Quick Journal Entry</div>
-                        <button class="db-btn" id="clearQuickJournal">
-                            <i class="fas fa-eraser"></i> Clear
-                        </button>
-                    </div>
-                    
-                    <div class="form-section">
-                        <div class="form-section-title">Trade Details</div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label class="form-label">Date & Time</label>
-                                <input type="datetime-local" class="form-control" id="quickDate" value="">
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Session</label>
-                                <select class="form-control" id="quickSession">
-                                    <option value="London" selected>London Session</option>
-                                    <option value="New York">New York Session</option>
-                                    <option value="Asian">Asian Session</option>
-                                    <option value="Sydney">Sydney Session</option>
-                                    <option value="Overlap">Session Overlap</option>
-                                    <option value="Other">Other</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label class="form-label">Currency Pair</label>
-                                <select class="form-control" id="quickPair">
-                                    <option value="EURUSD">EURUSD</option>
-                                    <option value="GBPUSD">GBPUSD</option>
-                                    <option value="USDJPY">USDJPY</option>
-                                    <option value="AUDUSD">AUDUSD</option>
-                                    <option value="USDCAD">USDCAD</option>
-                                    <option value="NZDUSD">NZDUSD</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">ICT Model</label>
-                                <select class="form-control" id="quickModel">
-                                    <option value="FVG" selected>Fair Value Gap (FVG)</option>
-                                    <option value="Liquidity Sweep">Liquidity Sweep</option>
-                                    <option value="Order Block">Order Block</option>
-                                    <option value="Breaker">Breaker Block</option>
-                                    <option value="MIT">Market Structure Shift</option>
-                                    <option value="BOS">Break of Structure</option>
-                                    <option value="CHoCH">Change of Character</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="form-section">
-                        <div class="form-section-title">Risk & Reward</div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label class="form-label">Risk %</label>
-                                <input type="number" step="0.01" class="form-control" id="quickRisk" placeholder="1.0" value="1.0">
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Profit %</label>
-                                <input type="number" step="0.01" class="form-control" id="quickProfit" placeholder="2.0" value="2.0">
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label class="form-label">Result</label>
-                                <select class="form-control" id="quickResult">
-                                    <option value="Win" selected>Win</option>
-                                    <option value="Loss">Loss</option>
-                                    <option value="Break Even">Break Even</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Return ($)</label>
-                                <input type="number" step="0.01" class="form-control" id="quickReturn" placeholder="25.00">
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="form-section">
-                        <div class="form-section-title">Trade Notes</div>
-                        <div class="form-group">
-                            <textarea class="quick-notes" id="quickNotes" placeholder="What worked well? What could be improved? Key lessons learned...">Market Context: 
-Entry Signal: 
-Execution Quality: 
-Key Lesson: </textarea>
-                        </div>
-                    </div>
-                    
-                    <div class="quick-actions">
-                        <button class="db-btn" id="saveAsDraft">
-                            <i class="fas fa-save"></i> Save Draft
-                        </button>
-                        <button class="db-btn primary" id="saveQuickJournal">
-                            <i class="fas fa-cloud-upload-alt"></i> Save & Update Dashboard
-                        </button>
-                    </div>
-                </div>
-
                 <!-- Charts - UPDATED FOR SMALLER SIZE -->
                 <div class="charts-grid">
                     <div class="chart-card">
@@ -1109,6 +1064,9 @@ Key Lesson: </textarea>
                             </button>
                             <button class="db-btn primary" id="addQuickTrade">
                                 <i class="fas fa-plus"></i> Add Trade
+                            </button>
+                            <button class="db-btn tradingview" id="quickTradingView">
+                                <i class="fas fa-chart-line"></i> Charts
                             </button>
                         </div>
                     </div>
@@ -1152,6 +1110,9 @@ Key Lesson: </textarea>
                             All Trades <span id="tradeCount">(0 trades)</span>
                         </div>
                         <div class="database-actions">
+                            <button class="db-btn tradingview" id="tradingViewAll">
+                                <i class="fas fa-chart-line"></i> TradingView
+                            </button>
                             <button class="db-btn danger" id="resetAllData">
                                 <i class="fas fa-trash"></i> Reset All
                             </button>
@@ -1275,6 +1236,9 @@ Key Lesson: </textarea>
                 <div class="form-actions">
                     <button class="db-btn" id="saveDraft">Save as Draft</button>
                     <button class="db-btn primary" id="saveDaily">Save to Database</button>
+                    <button class="db-btn tradingview" id="dailyTradingView">
+                        <i class="fas fa-chart-line"></i> View Charts
+                    </button>
                 </div>
             </div>
         </div>
@@ -1400,6 +1364,75 @@ Key Lesson: </textarea>
         </div>
     </div>
 
+    <!-- TradingView Modal -->
+    <div class="modal-overlay" id="tradingViewModal">
+        <div class="modal tradingview-modal">
+            <div class="modal-header">
+                <div class="modal-title">
+                    <i class="fas fa-chart-line"></i> TradingView Charts - GBPUSD & EURUSD
+                </div>
+                <button class="modal-close" id="closeTradingViewModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="pair-selector">
+                    <button class="pair-btn active" data-pair="gbpusd">
+                        <i class="fas fa-pound-sign"></i> GBPUSD
+                    </button>
+                    <button class="pair-btn" data-pair="eurusd">
+                        <i class="fas fa-euro-sign"></i> EURUSD
+                    </button>
+                    <button class="pair-btn" data-pair="both">
+                        <i class="fas fa-exchange-alt"></i> Both Pairs
+                    </button>
+                </div>
+                
+                <div class="tradingview-container">
+                    <!-- GBPUSD Chart -->
+                    <div class="tradingview-pair" id="gbpusd-chart">
+                        <div class="tradingview-header">
+                            <div class="tradingview-title">
+                                <i class="fas fa-pound-sign"></i> GBPUSD - 1H Chart
+                            </div>
+                            <div style="font-size: 12px; color: var(--notion-text-light);">
+                                London Session Focus
+                            </div>
+                        </div>
+                        <!-- TradingView Widget -->
+                        <div class="tradingview-widget-container">
+                            <div id="tradingview_gbpusd"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- EURUSD Chart -->
+                    <div class="tradingview-pair" id="eurusd-chart">
+                        <div class="tradingview-header">
+                            <div class="tradingview-title">
+                                <i class="fas fa-euro-sign"></i> EURUSD - 1H Chart
+                            </div>
+                            <div style="font-size: 12px; color: var(--notion-text-light);">
+                                ICT Premium/Discount Zones
+                            </div>
+                        </div>
+                        <!-- TradingView Widget -->
+                        <div class="tradingview-widget-container">
+                            <div id="tradingview_eurusd"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 20px; padding: 15px; background-color: var(--notion-gray-light); border-radius: 6px; font-size: 14px;">
+                    <h4 style="margin-bottom: 10px; color: var(--notion-blue);">
+                        <i class="fas fa-lightbulb"></i> ICT Trading Notes
+                    </h4>
+                    <p>• Look for Fair Value Gaps (FVG) on 1H chart during London Kill Zone (07:00-08:00 GMT)</p>
+                    <p>• Identify Premium/Discount zones for optimal entry</p>
+                    <p>• Monitor Order Blocks and Liquidity Sweeps</p>
+                    <p>• Use 15-min chart for precise entry timing</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Firebase Configuration
         const firebaseConfig = {
@@ -1430,10 +1463,10 @@ Key Lesson: </textarea>
         let winLossChart = null;
         let currentView = 'all';
         let isOnline = navigator.onLine;
+        let tradingViewWidgetsLoaded = false;
         
         // متغيرات لمنع الحفظ المزدوج
         let isSavingTrade = false;
-        let isSavingQuickJournal = false;
         let eventListenersSetup = false;
 
         // Initialize Application
@@ -1450,7 +1483,6 @@ Key Lesson: </textarea>
             // Set default date in modals
             const nowString = now.toISOString().slice(0, 16);
             document.getElementById('tradeDate').value = nowString;
-            document.getElementById('quickDate').value = nowString;
             
             // Initialize Firebase
             initFirebase();
@@ -1580,10 +1612,125 @@ Key Lesson: </textarea>
                 alert('Daily journal saved as draft locally');
             };
 
-            // Quick Journal
-            document.getElementById('clearQuickJournal').onclick = clearQuickJournal;
-            document.getElementById('saveQuickJournal').onclick = saveQuickJournal;
-            document.getElementById('saveAsDraft').onclick = saveQuickJournalAsDraft;
+            // TradingView Buttons
+            document.getElementById('tradingViewBtn').onclick = openTradingViewModal;
+            document.getElementById('quickTradingView').onclick = openTradingViewModal;
+            document.getElementById('tradingViewAll').onclick = openTradingViewModal;
+            document.getElementById('dailyTradingView').onclick = openTradingViewModal;
+            document.getElementById('closeTradingViewModal').onclick = closeTradingViewModal;
+            
+            // Pair selector buttons
+            document.querySelectorAll('.pair-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    // Update active button
+                    document.querySelectorAll('.pair-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    const pair = this.getAttribute('data-pair');
+                    showTradingViewPair(pair);
+                });
+            });
+
+            // Close TradingView modal when clicking outside
+            document.getElementById('tradingViewModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeTradingViewModal();
+                }
+            });
+        }
+
+        // TradingView Functions
+        function openTradingViewModal() {
+            document.getElementById('tradingViewModal').style.display = 'flex';
+            
+            // Load TradingView widgets if not already loaded
+            if (!tradingViewWidgetsLoaded) {
+                setTimeout(() => {
+                    loadTradingViewWidgets();
+                    tradingViewWidgetsLoaded = true;
+                }, 100);
+            }
+        }
+
+        function closeTradingViewModal() {
+            document.getElementById('tradingViewModal').style.display = 'none';
+        }
+
+        function showTradingViewPair(pair) {
+            const gbpusdChart = document.getElementById('gbpusd-chart');
+            const eurusdChart = document.getElementById('eurusd-chart');
+            
+            switch(pair) {
+                case 'gbpusd':
+                    gbpusdChart.style.display = 'block';
+                    eurusdChart.style.display = 'none';
+                    // Update GBPUSD chart to full width
+                    document.querySelector('.tradingview-container').style.gridTemplateColumns = '1fr';
+                    break;
+                case 'eurusd':
+                    gbpusdChart.style.display = 'none';
+                    eurusdChart.style.display = 'block';
+                    // Update EURUSD chart to full width
+                    document.querySelector('.tradingview-container').style.gridTemplateColumns = '1fr';
+                    break;
+                case 'both':
+                default:
+                    gbpusdChart.style.display = 'block';
+                    eurusdChart.style.display = 'block';
+                    // Show both charts side by side
+                    document.querySelector('.tradingview-container').style.gridTemplateColumns = '1fr 1fr';
+                    break;
+            }
+        }
+
+        function loadTradingViewWidgets() {
+            // GBPUSD Chart Widget
+            if (document.getElementById('tradingview_gbpusd')) {
+                new TradingView.widget({
+                    "width": "100%",
+                    "height": "100%",
+                    "symbol": "FX:GBPUSD",
+                    "interval": "60",
+                    "timezone": "Etc/UTC",
+                    "theme": "light",
+                    "style": "1",
+                    "locale": "en",
+                    "toolbar_bg": "#f1f3f6",
+                    "enable_publishing": false,
+                    "allow_symbol_change": true,
+                    "container_id": "tradingview_gbpusd",
+                    "studies": [
+                        "Volume@tv-basicstudies"
+                    ],
+                    "show_popup_button": true,
+                    "popup_width": "1000",
+                    "popup_height": "650"
+                });
+            }
+
+            // EURUSD Chart Widget
+            if (document.getElementById('tradingview_eurusd')) {
+                new TradingView.widget({
+                    "width": "100%",
+                    "height": "100%",
+                    "symbol": "FX:EURUSD",
+                    "interval": "60",
+                    "timezone": "Etc/UTC",
+                    "theme": "light",
+                    "style": "1",
+                    "locale": "en",
+                    "toolbar_bg": "#f1f3f6",
+                    "enable_publishing": false,
+                    "allow_symbol_change": true,
+                    "container_id": "tradingview_eurusd",
+                    "studies": [
+                        "Volume@tv-basicstudies"
+                    ],
+                    "show_popup_button": true,
+                    "popup_width": "1000",
+                    "popup_height": "650"
+                });
+            }
         }
 
         // Update Sync Status
@@ -1784,19 +1931,8 @@ Key Lesson: </textarea>
         function viewTradeDetails(tradeId) {
             const trade = trades.find(t => t.id === tradeId);
             if (trade) {
-                // Populate quick journal form with trade data
-                document.getElementById('quickDate').value = trade.date.replace(' ', 'T');
-                document.getElementById('quickSession').value = trade.session || 'London';
-                document.getElementById('quickPair').value = trade.pair;
-                document.getElementById('quickModel').value = trade.model || 'FVG';
-                document.getElementById('quickRisk').value = trade.riskPercent || 1.0;
-                document.getElementById('quickProfit').value = trade.profitPercent || 2.0;
-                document.getElementById('quickResult').value = trade.result;
-                document.getElementById('quickReturn').value = trade.returnAmount || trade.pl || 0;
-                document.getElementById('quickNotes').value = trade.notes || '';
-                
-                // Scroll to quick journal form
-                document.querySelector('.quick-journal-form').scrollIntoView({ behavior: 'smooth' });
+                // For now, just open the edit modal
+                editTrade(tradeId);
             }
         }
 
@@ -1929,139 +2065,6 @@ Key Lesson: </textarea>
                     saveBtn.disabled = false;
                     saveBtn.innerHTML = originalText;
                 }
-            }
-        }
-
-        // Save Quick Journal Entry - معدل لمنع الحفظ المزدوج
-        async function saveQuickJournal() {
-            if (isSavingQuickJournal) {
-                console.log('Quick journal save already in progress');
-                return;
-            }
-            
-            isSavingQuickJournal = true;
-            
-            const saveBtn = document.getElementById('saveQuickJournal');
-            const originalText = saveBtn ? saveBtn.innerHTML : '';
-            
-            try {
-                if (saveBtn) {
-                    saveBtn.disabled = true;
-                    saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
-                }
-                
-                const riskPercent = parseFloat(document.getElementById('quickRisk').value);
-                const profitPercent = parseFloat(document.getElementById('quickProfit').value);
-                const returnAmount = parseFloat(document.getElementById('quickReturn').value);
-                const result = document.getElementById('quickResult').value;
-                const notes = document.getElementById('quickNotes').value;
-                const session = document.getElementById('quickSession').value;
-                
-                if (!notes.trim()) {
-                    alert('Please add some notes about the trade.');
-                    return;
-                }
-                
-                // Calculate R:R from percentages
-                const rrRatio = profitPercent / riskPercent;
-                const rrString = `1:${rrRatio.toFixed(2)}`;
-                
-                // Calculate P/L
-                let pl = returnAmount;
-                if (!pl && pl !== 0) {
-                    // Default calculation if return not specified
-                    const accountSize = 10000; // Default account size
-                    const riskAmount = (accountSize * riskPercent / 100);
-                    if (result === 'Win') {
-                        pl = riskAmount * rrRatio;
-                    } else if (result === 'Loss') {
-                        pl = -riskAmount;
-                    } else {
-                        pl = 0;
-                    }
-                }
-                
-                const tradeData = {
-                    date: document.getElementById('quickDate').value,
-                    session: session,
-                    pair: document.getElementById('quickPair').value,
-                    model: document.getElementById('quickModel').value,
-                    direction: result === 'Win' ? 'Buy' : 'Sell', // Simplified
-                    riskPercent: riskPercent,
-                    profitPercent: profitPercent,
-                    returnAmount: pl,
-                    result: result,
-                    rr: rrString,
-                    pl: pl,
-                    accountSize: 10000,
-                    emotionBefore: 5, // Default emotion
-                    notes: notes,
-                    createdAt: firebase.database.ServerValue.TIMESTAMP
-                };
-                
-                // Generate trade ID
-                const tradeId = tradeIdCounter.toString();
-                
-                updateSyncStatus('Saving journal entry...', 'syncing');
-                
-                // Save to Firebase
-                await tradesRef.child(tradeId).set(tradeData);
-                
-                updateSyncStatus('Journal entry saved', 'synced');
-                
-                // Clear form
-                clearQuickJournal();
-                
-                // Show success message
-                showNotification('Trade journal entry saved successfully!', 'success');
-                
-                tradeIdCounter++;
-                
-            } catch (error) {
-                console.error('Error saving journal entry:', error);
-                updateSyncStatus('Save failed', 'error');
-                showNotification('Failed to save journal entry.', 'error');
-            } finally {
-                isSavingQuickJournal = false;
-                if (saveBtn) {
-                    saveBtn.disabled = false;
-                    saveBtn.innerHTML = originalText;
-                }
-            }
-        }
-
-        // Save Quick Journal as Draft
-        function saveQuickJournalAsDraft() {
-            // Save to localStorage as draft
-            const draftData = {
-                date: document.getElementById('quickDate').value,
-                session: document.getElementById('quickSession').value,
-                pair: document.getElementById('quickPair').value,
-                model: document.getElementById('quickModel').value,
-                riskPercent: document.getElementById('quickRisk').value,
-                profitPercent: document.getElementById('quickProfit').value,
-                result: document.getElementById('quickResult').value,
-                returnAmount: document.getElementById('quickReturn').value,
-                notes: document.getElementById('quickNotes').value,
-                savedAt: new Date().toISOString()
-            };
-            
-            localStorage.setItem('tradeDraft', JSON.stringify(draftData));
-            showNotification('Draft saved locally', 'info');
-        }
-
-        // Clear Quick Journal
-        function clearQuickJournal() {
-            if (confirm('Clear the quick journal form?')) {
-                document.getElementById('quickDate').value = new Date().toISOString().slice(0, 16);
-                document.getElementById('quickSession').value = 'London';
-                document.getElementById('quickPair').value = 'EURUSD';
-                document.getElementById('quickModel').value = 'FVG';
-                document.getElementById('quickRisk').value = '1.0';
-                document.getElementById('quickProfit').value = '2.0';
-                document.getElementById('quickResult').value = 'Win';
-                document.getElementById('quickReturn').value = '';
-                document.getElementById('quickNotes').value = 'Market Context: \nEntry Signal: \nExecution Quality: \nKey Lesson: ';
             }
         }
 
@@ -2645,25 +2648,6 @@ Key Lesson: </textarea>
             // Update charts when switching to dashboard
             if (pageId === 'dashboard-page' && trades.length > 0) {
                 updateCharts();
-                
-                // Load draft if exists
-                const draft = localStorage.getItem('tradeDraft');
-                if (draft) {
-                    try {
-                        const draftData = JSON.parse(draft);
-                        document.getElementById('quickDate').value = draftData.date;
-                        document.getElementById('quickSession').value = draftData.session || 'London';
-                        document.getElementById('quickPair').value = draftData.pair;
-                        document.getElementById('quickModel').value = draftData.model;
-                        document.getElementById('quickRisk').value = draftData.riskPercent;
-                        document.getElementById('quickProfit').value = draftData.profitPercent;
-                        document.getElementById('quickResult').value = draftData.result;
-                        document.getElementById('quickReturn').value = draftData.returnAmount;
-                        document.getElementById('quickNotes').value = draftData.notes;
-                    } catch (e) {
-                        console.warn('Failed to load draft:', e);
-                    }
-                }
             }
         }
 
