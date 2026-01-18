@@ -1430,6 +1430,11 @@ Key Lesson: </textarea>
         let winLossChart = null;
         let currentView = 'all';
         let isOnline = navigator.onLine;
+        
+        // متغيرات لمنع الحفظ المزدوج
+        let isSavingTrade = false;
+        let isSavingQuickJournal = false;
+        let eventListenersSetup = false;
 
         // Initialize Application
         document.addEventListener('DOMContentLoaded', function() {
@@ -1518,6 +1523,10 @@ Key Lesson: </textarea>
 
         // Setup Event Listeners
         function setupEventListeners() {
+            // منع إعداد المستمعين مرتين
+            if (eventListenersSetup) return;
+            eventListenersSetup = true;
+            
             // Navigation - only for internal pages (with data-page attribute)
             document.querySelectorAll('.nav-item[data-page]').forEach(item => {
                 item.addEventListener('click', function(e) {
@@ -1537,37 +1546,44 @@ Key Lesson: </textarea>
                 });
             });
 
-            // Modal
-            document.getElementById('newTradeBtn').addEventListener('click', openModal);
-            document.getElementById('addQuickTrade').addEventListener('click', openModal);
-            document.getElementById('addTradeMain').addEventListener('click', openModal);
-            document.getElementById('closeModal').addEventListener('click', closeModal);
-            document.getElementById('cancelTrade').addEventListener('click', closeModal);
-            document.getElementById('saveTrade').addEventListener('click', saveTradeToFirebase);
+            // Modal - استخدام onclick بدلاً من addEventListener لمنع التراكم
+            const newTradeBtn = document.getElementById('newTradeBtn');
+            const addQuickTrade = document.getElementById('addQuickTrade');
+            const addTradeMain = document.getElementById('addTradeMain');
+            const closeModalBtn = document.getElementById('closeModal');
+            const cancelTradeBtn = document.getElementById('cancelTrade');
+            const saveTradeBtn = document.getElementById('saveTrade');
+            
+            if (newTradeBtn) newTradeBtn.onclick = openModal;
+            if (addQuickTrade) addQuickTrade.onclick = openModal;
+            if (addTradeMain) addTradeMain.onclick = openModal;
+            if (closeModalBtn) closeModalBtn.onclick = closeModal;
+            if (cancelTradeBtn) cancelTradeBtn.onclick = closeModal;
+            if (saveTradeBtn) saveTradeBtn.onclick = saveTradeToFirebase;
 
             // Export
-            document.getElementById('exportBtn').addEventListener('click', exportData);
+            document.getElementById('exportBtn').onclick = exportData;
 
             // Reset Data
-            document.getElementById('resetDataBtn').addEventListener('click', confirmResetData);
-            document.getElementById('resetAllData').addEventListener('click', confirmResetAllData);
+            document.getElementById('resetDataBtn').onclick = confirmResetData;
+            document.getElementById('resetAllData').onclick = confirmResetAllData;
 
             // View All Trades
-            document.getElementById('viewAllTrades').addEventListener('click', () => showPage('trades-page'));
+            document.getElementById('viewAllTrades').onclick = () => showPage('trades-page');
 
             // Chart period change
-            document.getElementById('chartPeriod').addEventListener('change', updateCharts);
+            document.getElementById('chartPeriod').onchange = updateCharts;
 
             // Daily Journal
-            document.getElementById('saveDaily').addEventListener('click', saveDailyJournal);
-            document.getElementById('saveDraft').addEventListener('click', () => {
+            document.getElementById('saveDaily').onclick = saveDailyJournal;
+            document.getElementById('saveDraft').onclick = () => {
                 alert('Daily journal saved as draft locally');
-            });
+            };
 
             // Quick Journal
-            document.getElementById('clearQuickJournal').addEventListener('click', clearQuickJournal);
-            document.getElementById('saveQuickJournal').addEventListener('click', saveQuickJournal);
-            document.getElementById('saveAsDraft').addEventListener('click', saveQuickJournalAsDraft);
+            document.getElementById('clearQuickJournal').onclick = clearQuickJournal;
+            document.getElementById('saveQuickJournal').onclick = saveQuickJournal;
+            document.getElementById('saveAsDraft').onclick = saveQuickJournalAsDraft;
         }
 
         // Update Sync Status
@@ -1820,150 +1836,198 @@ Key Lesson: </textarea>
                 });
         }
 
-        // Save Trade to Firebase
-        function saveTradeToFirebase() {
-            const riskPercent = parseFloat(document.getElementById('riskPercent').value);
-            const profitPercent = parseFloat(document.getElementById('profitPercent').value);
-            const returnAmount = parseFloat(document.getElementById('returnAmount').value);
-            const accountSize = parseFloat(document.getElementById('accountSize').value) || 10000;
-            const lotSize = parseFloat(document.getElementById('lotSize').value) || 0.1;
-            const result = document.getElementById('tradeResult').value;
-            const session = document.getElementById('tradeSession').value;
-            
-            // Calculate R:R from percentages
-            const rrRatio = profitPercent / riskPercent;
-            const rrString = `1:${rrRatio.toFixed(2)}`;
-            
-            // Calculate risk amount in dollars
-            const riskAmount = (accountSize * riskPercent / 100);
-            
-            // Use return amount if provided, otherwise calculate from result
-            let pl = returnAmount;
-            if (!pl && pl !== 0) {
-                if (result === 'Win') {
-                    pl = riskAmount * rrRatio;
-                } else if (result === 'Loss') {
-                    pl = -riskAmount;
-                } else {
-                    pl = 0; // Break even
-                }
-            }
-            
-            const tradeData = {
-                date: document.getElementById('tradeDate').value,
-                session: session,
-                pair: document.getElementById('tradePair').value,
-                direction: document.getElementById('tradeDirection').value,
-                model: document.getElementById('tradeModel').value,
-                riskPercent: riskPercent,
-                profitPercent: profitPercent,
-                returnAmount: pl,
-                result: result,
-                lotSize: lotSize,
-                rr: rrString,
-                pl: pl,
-                accountSize: accountSize,
-                emotionBefore: parseInt(document.getElementById('emotionBefore').value),
-                notes: document.getElementById('tradeNotes').value,
-                createdAt: firebase.database.ServerValue.TIMESTAMP
-            };
-            
-            // Generate trade ID
-            const tradeId = tradeIdCounter.toString();
-            
-            updateSyncStatus('Saving trade to cloud...', 'syncing');
-            
-            // Save to Firebase
-            tradesRef.child(tradeId).set(tradeData)
-                .then(() => {
-                    updateSyncStatus('Trade saved to cloud', 'synced');
-                    closeModal();
-                    tradeIdCounter++;
-                    
-                    // Also save to local storage as backup
-                    saveToLocalStorage();
-                })
-                .catch(error => {
-                    console.error('Error saving trade:', error);
-                    updateSyncStatus('Save failed', 'error');
-                    alert('Failed to save trade. Please check your connection.');
-                });
-        }
-
-        // Save Quick Journal Entry
-        function saveQuickJournal() {
-            const riskPercent = parseFloat(document.getElementById('quickRisk').value);
-            const profitPercent = parseFloat(document.getElementById('quickProfit').value);
-            const returnAmount = parseFloat(document.getElementById('quickReturn').value);
-            const result = document.getElementById('quickResult').value;
-            const notes = document.getElementById('quickNotes').value;
-            const session = document.getElementById('quickSession').value;
-            
-            if (!notes.trim()) {
-                alert('Please add some notes about the trade.');
+        // Save Trade to Firebase - معدل لمنع الحفظ المزدوج
+        async function saveTradeToFirebase() {
+            // منع حفظ مزدوج
+            if (isSavingTrade) {
+                console.log('Trade save already in progress');
                 return;
             }
             
-            // Calculate R:R from percentages
-            const rrRatio = profitPercent / riskPercent;
-            const rrString = `1:${rrRatio.toFixed(2)}`;
+            isSavingTrade = true;
             
-            // Calculate P/L
-            let pl = returnAmount;
-            if (!pl && pl !== 0) {
-                // Default calculation if return not specified
-                const accountSize = 10000; // Default account size
+            const saveBtn = document.getElementById('saveTrade');
+            const originalText = saveBtn ? saveBtn.innerHTML : '';
+            
+            try {
+                if (saveBtn) {
+                    saveBtn.disabled = true;
+                    saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+                }
+                
+                const riskPercent = parseFloat(document.getElementById('riskPercent').value);
+                const profitPercent = parseFloat(document.getElementById('profitPercent').value);
+                const returnAmount = parseFloat(document.getElementById('returnAmount').value);
+                const accountSize = parseFloat(document.getElementById('accountSize').value) || 10000;
+                const lotSize = parseFloat(document.getElementById('lotSize').value) || 0.1;
+                const result = document.getElementById('tradeResult').value;
+                const session = document.getElementById('tradeSession').value;
+                
+                // Calculate R:R from percentages
+                const rrRatio = profitPercent / riskPercent;
+                const rrString = `1:${rrRatio.toFixed(2)}`;
+                
+                // Calculate risk amount in dollars
                 const riskAmount = (accountSize * riskPercent / 100);
-                if (result === 'Win') {
-                    pl = riskAmount * rrRatio;
-                } else if (result === 'Loss') {
-                    pl = -riskAmount;
-                } else {
-                    pl = 0;
+                
+                // Use return amount if provided, otherwise calculate from result
+                let pl = returnAmount;
+                if (!pl && pl !== 0) {
+                    if (result === 'Win') {
+                        pl = riskAmount * rrRatio;
+                    } else if (result === 'Loss') {
+                        pl = -riskAmount;
+                    } else {
+                        pl = 0; // Break even
+                    }
+                }
+                
+                const tradeData = {
+                    date: document.getElementById('tradeDate').value,
+                    session: session,
+                    pair: document.getElementById('tradePair').value,
+                    direction: document.getElementById('tradeDirection').value,
+                    model: document.getElementById('tradeModel').value,
+                    riskPercent: riskPercent,
+                    profitPercent: profitPercent,
+                    returnAmount: pl,
+                    result: result,
+                    lotSize: lotSize,
+                    rr: rrString,
+                    pl: pl,
+                    accountSize: accountSize,
+                    emotionBefore: parseInt(document.getElementById('emotionBefore').value),
+                    notes: document.getElementById('tradeNotes').value,
+                    createdAt: firebase.database.ServerValue.TIMESTAMP
+                };
+                
+                // Generate trade ID
+                const tradeId = tradeIdCounter.toString();
+                
+                updateSyncStatus('Saving trade to cloud...', 'syncing');
+                
+                // Save to Firebase
+                await tradesRef.child(tradeId).set(tradeData);
+                
+                updateSyncStatus('Trade saved to cloud', 'synced');
+                closeModal();
+                tradeIdCounter++;
+                
+                // Also save to local storage as backup
+                saveToLocalStorage();
+                
+                // Show success notification
+                showNotification('Trade saved successfully!', 'success');
+                
+            } catch (error) {
+                console.error('Error saving trade:', error);
+                updateSyncStatus('Save failed', 'error');
+                showNotification('Failed to save trade. Please check your connection.', 'error');
+            } finally {
+                isSavingTrade = false;
+                if (saveBtn) {
+                    saveBtn.disabled = false;
+                    saveBtn.innerHTML = originalText;
                 }
             }
+        }
+
+        // Save Quick Journal Entry - معدل لمنع الحفظ المزدوج
+        async function saveQuickJournal() {
+            if (isSavingQuickJournal) {
+                console.log('Quick journal save already in progress');
+                return;
+            }
             
-            const tradeData = {
-                date: document.getElementById('quickDate').value,
-                session: session,
-                pair: document.getElementById('quickPair').value,
-                model: document.getElementById('quickModel').value,
-                direction: result === 'Win' ? 'Buy' : 'Sell', // Simplified
-                riskPercent: riskPercent,
-                profitPercent: profitPercent,
-                returnAmount: pl,
-                result: result,
-                rr: rrString,
-                pl: pl,
-                accountSize: 10000,
-                emotionBefore: 5, // Default emotion
-                notes: notes,
-                createdAt: firebase.database.ServerValue.TIMESTAMP
-            };
+            isSavingQuickJournal = true;
             
-            // Generate trade ID
-            const tradeId = tradeIdCounter.toString();
+            const saveBtn = document.getElementById('saveQuickJournal');
+            const originalText = saveBtn ? saveBtn.innerHTML : '';
             
-            updateSyncStatus('Saving journal entry...', 'syncing');
-            
-            // Save to Firebase
-            tradesRef.child(tradeId).set(tradeData)
-                .then(() => {
-                    updateSyncStatus('Journal entry saved', 'synced');
-                    
-                    // Clear form
-                    clearQuickJournal();
-                    
-                    // Show success message
-                    showNotification('Trade journal entry saved successfully!', 'success');
-                    
-                    tradeIdCounter++;
-                })
-                .catch(error => {
-                    console.error('Error saving journal entry:', error);
-                    updateSyncStatus('Save failed', 'error');
-                    alert('Failed to save journal entry.');
-                });
+            try {
+                if (saveBtn) {
+                    saveBtn.disabled = true;
+                    saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+                }
+                
+                const riskPercent = parseFloat(document.getElementById('quickRisk').value);
+                const profitPercent = parseFloat(document.getElementById('quickProfit').value);
+                const returnAmount = parseFloat(document.getElementById('quickReturn').value);
+                const result = document.getElementById('quickResult').value;
+                const notes = document.getElementById('quickNotes').value;
+                const session = document.getElementById('quickSession').value;
+                
+                if (!notes.trim()) {
+                    alert('Please add some notes about the trade.');
+                    return;
+                }
+                
+                // Calculate R:R from percentages
+                const rrRatio = profitPercent / riskPercent;
+                const rrString = `1:${rrRatio.toFixed(2)}`;
+                
+                // Calculate P/L
+                let pl = returnAmount;
+                if (!pl && pl !== 0) {
+                    // Default calculation if return not specified
+                    const accountSize = 10000; // Default account size
+                    const riskAmount = (accountSize * riskPercent / 100);
+                    if (result === 'Win') {
+                        pl = riskAmount * rrRatio;
+                    } else if (result === 'Loss') {
+                        pl = -riskAmount;
+                    } else {
+                        pl = 0;
+                    }
+                }
+                
+                const tradeData = {
+                    date: document.getElementById('quickDate').value,
+                    session: session,
+                    pair: document.getElementById('quickPair').value,
+                    model: document.getElementById('quickModel').value,
+                    direction: result === 'Win' ? 'Buy' : 'Sell', // Simplified
+                    riskPercent: riskPercent,
+                    profitPercent: profitPercent,
+                    returnAmount: pl,
+                    result: result,
+                    rr: rrString,
+                    pl: pl,
+                    accountSize: 10000,
+                    emotionBefore: 5, // Default emotion
+                    notes: notes,
+                    createdAt: firebase.database.ServerValue.TIMESTAMP
+                };
+                
+                // Generate trade ID
+                const tradeId = tradeIdCounter.toString();
+                
+                updateSyncStatus('Saving journal entry...', 'syncing');
+                
+                // Save to Firebase
+                await tradesRef.child(tradeId).set(tradeData);
+                
+                updateSyncStatus('Journal entry saved', 'synced');
+                
+                // Clear form
+                clearQuickJournal();
+                
+                // Show success message
+                showNotification('Trade journal entry saved successfully!', 'success');
+                
+                tradeIdCounter++;
+                
+            } catch (error) {
+                console.error('Error saving journal entry:', error);
+                updateSyncStatus('Save failed', 'error');
+                showNotification('Failed to save journal entry.', 'error');
+            } finally {
+                isSavingQuickJournal = false;
+                if (saveBtn) {
+                    saveBtn.disabled = false;
+                    saveBtn.innerHTML = originalText;
+                }
+            }
         }
 
         // Save Quick Journal as Draft
@@ -2026,58 +2090,72 @@ Key Lesson: </textarea>
                 // Change save button
                 const saveBtn = document.getElementById('saveTrade');
                 saveBtn.textContent = 'Update Trade';
-                saveBtn.onclick = () => {
-                    // Update trade data
-                    const updatedTrade = {
-                        date: document.getElementById('tradeDate').value,
-                        session: document.getElementById('tradeSession').value,
-                        pair: document.getElementById('tradePair').value,
-                        direction: document.getElementById('tradeDirection').value,
-                        model: document.getElementById('tradeModel').value,
-                        riskPercent: parseFloat(document.getElementById('riskPercent').value),
-                        profitPercent: parseFloat(document.getElementById('profitPercent').value),
-                        returnAmount: parseFloat(document.getElementById('returnAmount').value),
-                        accountSize: parseFloat(document.getElementById('accountSize').value),
-                        result: document.getElementById('tradeResult').value,
-                        lotSize: parseFloat(document.getElementById('lotSize').value) || 0.1,
-                        emotionBefore: parseInt(document.getElementById('emotionBefore').value),
-                        notes: document.getElementById('tradeNotes').value,
-                        updatedAt: firebase.database.ServerValue.TIMESTAMP
-                    };
+                saveBtn.onclick = async function() {
+                    if (isSavingTrade) return;
+                    isSavingTrade = true;
                     
-                    // Calculate R:R
-                    const rrRatio = updatedTrade.profitPercent / updatedTrade.riskPercent;
-                    updatedTrade.rr = `1:${rrRatio.toFixed(2)}`;
+                    const originalText = saveBtn.innerHTML;
+                    saveBtn.disabled = true;
+                    saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Updating...';
                     
-                    // Calculate P/L if not provided
-                    if (!updatedTrade.returnAmount && updatedTrade.returnAmount !== 0) {
-                        const riskAmount = (updatedTrade.accountSize * updatedTrade.riskPercent / 100);
-                        if (updatedTrade.result === 'Win') {
-                            updatedTrade.pl = riskAmount * rrRatio;
-                            updatedTrade.returnAmount = updatedTrade.pl;
-                        } else if (updatedTrade.result === 'Loss') {
-                            updatedTrade.pl = -riskAmount;
-                            updatedTrade.returnAmount = updatedTrade.pl;
+                    try {
+                        // Update trade data
+                        const updatedTrade = {
+                            date: document.getElementById('tradeDate').value,
+                            session: document.getElementById('tradeSession').value,
+                            pair: document.getElementById('tradePair').value,
+                            direction: document.getElementById('tradeDirection').value,
+                            model: document.getElementById('tradeModel').value,
+                            riskPercent: parseFloat(document.getElementById('riskPercent').value),
+                            profitPercent: parseFloat(document.getElementById('profitPercent').value),
+                            returnAmount: parseFloat(document.getElementById('returnAmount').value),
+                            accountSize: parseFloat(document.getElementById('accountSize').value),
+                            result: document.getElementById('tradeResult').value,
+                            lotSize: parseFloat(document.getElementById('lotSize').value) || 0.1,
+                            emotionBefore: parseInt(document.getElementById('emotionBefore').value),
+                            notes: document.getElementById('tradeNotes').value,
+                            updatedAt: firebase.database.ServerValue.TIMESTAMP
+                        };
+                        
+                        // Calculate R:R
+                        const rrRatio = updatedTrade.profitPercent / updatedTrade.riskPercent;
+                        updatedTrade.rr = `1:${rrRatio.toFixed(2)}`;
+                        
+                        // Calculate P/L if not provided
+                        if (!updatedTrade.returnAmount && updatedTrade.returnAmount !== 0) {
+                            const riskAmount = (updatedTrade.accountSize * updatedTrade.riskPercent / 100);
+                            if (updatedTrade.result === 'Win') {
+                                updatedTrade.pl = riskAmount * rrRatio;
+                                updatedTrade.returnAmount = updatedTrade.pl;
+                            } else if (updatedTrade.result === 'Loss') {
+                                updatedTrade.pl = -riskAmount;
+                                updatedTrade.returnAmount = updatedTrade.pl;
+                            } else {
+                                updatedTrade.pl = 0;
+                                updatedTrade.returnAmount = 0;
+                            }
                         } else {
-                            updatedTrade.pl = 0;
-                            updatedTrade.returnAmount = 0;
+                            updatedTrade.pl = updatedTrade.returnAmount;
                         }
-                    } else {
-                        updatedTrade.pl = updatedTrade.returnAmount;
+                        
+                        updateSyncStatus('Updating trade...', 'syncing');
+                        
+                        // Update in Firebase
+                        await tradesRef.child(tradeId).update(updatedTrade);
+                        
+                        updateSyncStatus('Trade updated', 'synced');
+                        showNotification('Trade updated successfully!', 'success');
+                        closeModal();
+                        
+                    } catch (error) {
+                        console.error('Error updating trade:', error);
+                        updateSyncStatus('Update failed', 'error');
+                        showNotification('Failed to update trade.', 'error');
+                    } finally {
+                        isSavingTrade = false;
+                        saveBtn.disabled = false;
+                        saveBtn.innerHTML = originalText;
                     }
-                    
-                    updateSyncStatus('Updating trade...', 'syncing');
-                    
-                    // Update in Firebase
-                    tradesRef.child(tradeId).update(updatedTrade)
-                        .then(() => {
-                            updateSyncStatus('Trade updated', 'synced');
-                            closeModal();
-                        })
-                        .catch(error => {
-                            console.error('Error updating trade:', error);
-                            updateSyncStatus('Update failed', 'error');
-                        });
                 };
                 
                 openModal();
@@ -2092,10 +2170,12 @@ Key Lesson: </textarea>
                 tradesRef.child(tradeId).remove()
                     .then(() => {
                         updateSyncStatus('Trade deleted', 'synced');
+                        showNotification('Trade deleted successfully!', 'success');
                     })
                     .catch(error => {
                         console.error('Error deleting trade:', error);
                         updateSyncStatus('Delete failed', 'error');
+                        showNotification('Failed to delete trade.', 'error');
                     });
             }
         }
@@ -2416,7 +2496,7 @@ Key Lesson: </textarea>
         }
 
         // Save Daily Journal to Firebase
-        function saveDailyJournal() {
+        async function saveDailyJournal() {
             const dailyData = {
                 date: new Date().toISOString().split('T')[0],
                 sessionBias: document.getElementById('sessionBias').value,
@@ -2434,18 +2514,18 @@ Key Lesson: </textarea>
             
             updateSyncStatus('Saving daily journal...', 'syncing');
             
-            // Save to Firebase with date as key
-            const dateKey = new Date().toISOString().split('T')[0];
-            dailyJournalRef.child(dateKey).set(dailyData)
-                .then(() => {
-                    updateSyncStatus('Daily journal saved', 'synced');
-                    alert('Daily journal saved successfully!');
-                })
-                .catch(error => {
-                    console.error('Error saving daily journal:', error);
-                    updateSyncStatus('Save failed', 'error');
-                    alert('Failed to save daily journal.');
-                });
+            try {
+                // Save to Firebase with date as key
+                const dateKey = new Date().toISOString().split('T')[0];
+                await dailyJournalRef.child(dateKey).set(dailyData);
+                
+                updateSyncStatus('Daily journal saved', 'synced');
+                showNotification('Daily journal saved successfully!', 'success');
+            } catch (error) {
+                console.error('Error saving daily journal:', error);
+                updateSyncStatus('Save failed', 'error');
+                showNotification('Failed to save daily journal.', 'error');
+            }
         }
 
         // Load Daily Journal from Firebase
