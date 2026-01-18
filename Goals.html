@@ -718,13 +718,13 @@
                 <a href="index.html" class="nav-item">
                     <i class="fas fa-tachometer-alt"></i> Dashboard
                 </a>
-                <a href="#" class="nav-item">
+                <a href="AllTrades.html" class="nav-item">
                     <i class="fas fa-book"></i> Trade Journal
                 </a>
-                <a href="#" class="nav-item">
+                <a href="analytics.html" class="nav-item">
                     <i class="fas fa-chart-bar"></i> Analytics
                 </a>
-                <a href="#" class="nav-item">
+                <a href="DailyJournal.html" class="nav-item">
                     <i class="fas fa-calendar-day"></i> Daily Journal
                 </a>
             </div>
@@ -737,32 +737,32 @@
                 <a href="#" class="nav-item active">
                     <i class="fas fa-bullseye"></i> Weekly Goals
                 </a>
-                <a href="#" class="nav-item">
+                <a href="Psychology.html" class="nav-item">
                     <i class="fas fa-brain"></i> Psychology Review
                 </a>
-                <a href="#" class="nav-item">
+                <a href="Performance.html" class="nav-item">
                     <i class="fas fa-chart-pie"></i> Performance
                 </a>
-                <a href="#" class="nav-item">
+                <a href="Settings.html" class="nav-item">
                     <i class="fas fa-cog"></i> Settings
                 </a>
             </div>
 
             <div class="nav-section">
                 <div class="nav-title">Databases</div>
-                <a href="#" class="nav-item">
+                <a href="AllTrades.html" class="nav-item">
                     <i class="fas fa-table"></i> All Trades
                 </a>
-                <a href="#" class="nav-item">
+                <a href="LondonSession.html" class="nav-item">
                     <i class="fas fa-filter"></i> London Session
                 </a>
-                <a href="#" class="nav-item">
+                <a href="EURUSD.html" class="nav-item">
                     <i class="fas fa-euro-sign"></i> EURUSD Only
                 </a>
-                <a href="#" class="nav-item">
+                <a href="GBPUSD.html" class="nav-item">
                     <i class="fas fa-pound-sign"></i> GBPUSD Only
                 </a>
-                <a href="#" class="nav-item">
+                <a href="WinningTrades.html" class="nav-item">
                     <i class="fas fa-trophy"></i> Winning Trades
                 </a>
             </div>
@@ -1193,6 +1193,40 @@
             document.getElementById('saveDraftBtn').addEventListener('click', function() {
                 alert('Weekly review saved as draft locally');
                 saveToLocalStorage();
+            });
+            
+            // Set up sidebar navigation
+            setupSidebarNavigation();
+        }
+
+        // Setup Sidebar Navigation
+        function setupSidebarNavigation() {
+            // Get all navigation items
+            const navItems = document.querySelectorAll('.nav-item');
+            
+            navItems.forEach(item => {
+                // Remove any existing click listeners
+                const newItem = item.cloneNode(true);
+                item.parentNode.replaceChild(newItem, item);
+                
+                // Add click listener to new item
+                newItem.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Remove active class from all items
+                    navItems.forEach(nav => nav.classList.remove('active'));
+                    
+                    // Add active class to clicked item
+                    this.classList.add('active');
+                    
+                    // Get the href attribute
+                    const href = this.getAttribute('href');
+                    
+                    // If href is not "#", navigate to the page
+                    if (href && href !== '#' && href !== 'index.html') {
+                        window.location.href = href;
+                    }
+                });
             });
         }
 
