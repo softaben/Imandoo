@@ -26,6 +26,8 @@
             --notion-yellow-light: #fff8e1;
             --notion-orange: #ff6b35;
             --notion-orange-light: #ffe8e0;
+            --notion-gray-blue: #6b778c;
+            --notion-gray-blue-light: #f1f5f9;
         }
 
         * {
@@ -119,6 +121,15 @@
 
         .btn-orange:hover {
             background-color: #e05a2b;
+        }
+
+        .btn-gray-blue {
+            background-color: var(--notion-gray-blue);
+            color: white;
+        }
+
+        .btn-gray-blue:hover {
+            background-color: #5a6579;
         }
 
         /* Plan Tags */
@@ -698,6 +709,9 @@
                 </div>
             </div>
             <div class="header-actions">
+                <button class="btn btn-gray-blue" onclick="goBackToIndex()">
+                    <i class="fas fa-arrow-left"></i> Back to Index
+                </button>
                 <button class="btn btn-secondary" onclick="toggleEditMode()" id="editModeBtn">
                     <i class="fas fa-edit"></i> Edit Mode
                 </button>
@@ -1058,6 +1072,32 @@
             const colors = ['blue', 'green', 'red', 'purple', 'yellow'];
             const hash = tag.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
             return colors[hash % colors.length];
+        }
+
+        // Go back to index.html
+        function goBackToIndex() {
+            // Check if there are unsaved changes
+            if (hasUnsavedChanges()) {
+                if (!confirm('You have unsaved changes. Are you sure you want to leave?')) {
+                    return;
+                }
+            }
+            
+            // Navigate back to index.html
+            window.location.href = 'index.html';
+        }
+
+        // Check for unsaved changes
+        function hasUnsavedChanges() {
+            // This is a simple implementation - you might want to make it more sophisticated
+            // For now, we'll just check if the plan hasn't been saved since the last change
+            const currentTitle = document.getElementById('planTitle').textContent;
+            const currentTags = Array.from(document.querySelectorAll('#planTags .tag')).map(tag => 
+                tag.textContent.trim().replace('A', '').trim()
+            );
+            
+            return currentTitle !== currentPlan.name || 
+                   JSON.stringify(currentTags) !== JSON.stringify(currentPlan.tags);
         }
 
         // View history
@@ -1521,6 +1561,15 @@
                 if ((e.ctrlKey || e.metaKey) && e.key === 's') {
                     e.preventDefault();
                     savePlan();
+                }
+            });
+            
+            // Warn before leaving with unsaved changes
+            window.addEventListener('beforeunload', function(e) {
+                if (hasUnsavedChanges()) {
+                    e.preventDefault();
+                    e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+                    return 'You have unsaved changes. Are you sure you want to leave?';
                 }
             });
         }
