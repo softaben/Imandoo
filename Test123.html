@@ -3,21 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Système de Gestion - Bon de Livraison</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Système de Gestion - Bon de Livraison Professionnel</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Arial', sans-serif;
         }
         
         body {
-            background-color: #f5f7fa;
-            color: #333;
-            line-height: 1.6;
+            background-color: #f0f2f5;
             padding: 20px;
+            color: #333;
         }
         
         .container {
@@ -25,55 +23,55 @@
             margin: 0 auto;
         }
         
-        header {
+        .header {
             text-align: center;
-            margin-bottom: 30px;
-            padding: 20px;
-            background-color: #2c3e50;
+            background: linear-gradient(135deg, #1a5f7a, #2c3e50);
             color: white;
+            padding: 25px;
             border-radius: 10px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
         
-        header h1 {
-            font-size: 2.2rem;
+        .header h1 {
+            font-size: 2.5rem;
             margin-bottom: 10px;
         }
         
-        header p {
-            font-size: 1.1rem;
+        .header p {
+            font-size: 1.2rem;
             opacity: 0.9;
         }
         
         .app-wrapper {
             display: flex;
-            flex-wrap: wrap;
             gap: 30px;
             margin-bottom: 30px;
+            flex-wrap: wrap;
         }
         
-        .inventory-section, .delivery-section {
+        .section {
             flex: 1;
-            min-width: 300px;
+            min-width: 350px;
             background-color: white;
             border-radius: 10px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
             padding: 25px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
         }
         
         .section-title {
-            font-size: 1.5rem;
-            color: #2c3e50;
-            margin-bottom: 20px;
+            color: #1a5f7a;
+            border-bottom: 2px solid #1a5f7a;
             padding-bottom: 10px;
-            border-bottom: 2px solid #3498db;
+            margin-bottom: 20px;
+            font-size: 1.4rem;
             display: flex;
             align-items: center;
         }
         
         .section-title i {
             margin-right: 10px;
-            color: #3498db;
+            color: #1a5f7a;
         }
         
         .form-group {
@@ -84,7 +82,7 @@
             display: block;
             margin-bottom: 8px;
             font-weight: 600;
-            color: #2c3e50;
+            color: #444;
         }
         
         input, select {
@@ -93,17 +91,17 @@
             border: 1px solid #ddd;
             border-radius: 6px;
             font-size: 1rem;
-            transition: border-color 0.3s;
+            transition: border 0.3s;
         }
         
         input:focus, select:focus {
-            border-color: #3498db;
+            border-color: #1a5f7a;
             outline: none;
-            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+            box-shadow: 0 0 0 3px rgba(26, 95, 122, 0.1);
         }
         
         .btn {
-            padding: 12px 24px;
+            padding: 12px 25px;
             border: none;
             border-radius: 6px;
             font-size: 1rem;
@@ -113,108 +111,136 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
+            margin-right: 10px;
+            margin-bottom: 10px;
         }
         
         .btn-primary {
-            background-color: #3498db;
+            background-color: #1a5f7a;
             color: white;
         }
         
         .btn-primary:hover {
-            background-color: #2980b9;
+            background-color: #154c63;
         }
         
         .btn-success {
-            background-color: #2ecc71;
+            background-color: #28a745;
             color: white;
         }
         
         .btn-success:hover {
-            background-color: #27ae60;
+            background-color: #218838;
         }
         
         .btn-danger {
-            background-color: #e74c3c;
+            background-color: #dc3545;
             color: white;
         }
         
         .btn-danger:hover {
-            background-color: #c0392b;
+            background-color: #c82333;
         }
         
         .btn i {
             margin-right: 8px;
         }
         
-        .inventory-table {
-            width: 100%;
-            border-collapse: collapse;
+        .table-container {
+            overflow-x: auto;
             margin-top: 20px;
         }
         
-        .inventory-table th, .inventory-table td {
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th, td {
             padding: 12px 15px;
             text-align: left;
             border-bottom: 1px solid #eee;
         }
         
-        .inventory-table th {
+        th {
             background-color: #f8f9fa;
             font-weight: 700;
-            color: #2c3e50;
+            color: #333;
         }
         
-        .inventory-table tr:hover {
+        tr:hover {
             background-color: #f8f9fa;
         }
         
-        .stock-low {
-            color: #e74c3c;
+        .status-low {
+            color: #dc3545;
             font-weight: 600;
         }
         
-        .stock-ok {
-            color: #2ecc71;
+        .status-ok {
+            color: #28a745;
             font-weight: 600;
         }
         
-        .delivery-note {
+        /* Styles pour le Bon de Livraison professionnel */
+        .delivery-note-container {
             background-color: white;
             border-radius: 10px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
             padding: 30px;
-            margin-top: 20px;
+            margin-top: 30px;
             position: relative;
-            overflow: hidden;
         }
         
-        .delivery-note::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 8px;
-            background-color: #3498db;
+        .delivery-note {
+            width: 210mm; /* Format A4 */
+            min-height: 297mm;
+            margin: 0 auto;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            position: relative;
+            padding: 20mm;
+            page-break-after: always;
         }
         
         .company-header {
             text-align: center;
+            border-bottom: 3px solid #1a5f7a;
+            padding-bottom: 15px;
             margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid #eee;
         }
         
         .company-name {
-            font-size: 1.8rem;
+            font-size: 28px;
             font-weight: 700;
-            color: #2c3e50;
+            color: #1a5f7a;
+            text-transform: uppercase;
+            letter-spacing: 1px;
             margin-bottom: 5px;
         }
         
-        .company-details {
-            color: #7f8c8d;
-            font-size: 0.95rem;
+        .company-address {
+            font-size: 16px;
+            color: #555;
+            margin-bottom: 5px;
+        }
+        
+        .company-phone {
+            font-size: 16px;
+            color: #555;
+            margin-bottom: 15px;
+        }
+        
+        .delivery-title {
+            text-align: center;
+            font-size: 24px;
+            font-weight: 700;
+            margin: 25px 0;
+            color: #333;
+            text-transform: uppercase;
+            border-top: 2px solid #ddd;
+            border-bottom: 2px solid #ddd;
+            padding: 10px 0;
         }
         
         .delivery-info {
@@ -224,46 +250,111 @@
             flex-wrap: wrap;
         }
         
-        .info-box {
+        .info-block {
             flex: 1;
             min-width: 200px;
+            margin-bottom: 15px;
         }
         
-        .info-title {
+        .info-label {
             font-weight: 700;
-            color: #2c3e50;
+            color: #1a5f7a;
             margin-bottom: 5px;
+            font-size: 16px;
+        }
+        
+        .info-value {
+            font-size: 16px;
+            color: #333;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
         }
         
         .delivery-table {
             width: 100%;
             border-collapse: collapse;
+            margin-top: 20px;
             margin-bottom: 30px;
         }
         
-        .delivery-table th, .delivery-table td {
-            padding: 15px;
-            text-align: left;
-            border-bottom: 1px solid #eee;
+        .delivery-table thead {
+            background-color: #1a5f7a;
+            color: white;
         }
         
         .delivery-table th {
-            background-color: #f8f9fa;
+            padding: 15px;
+            text-align: center;
             font-weight: 700;
-            color: #2c3e50;
+            font-size: 16px;
+            border: 1px solid #ddd;
         }
         
-        .delivery-table tfoot td {
-            font-weight: 700;
-            background-color: #f8f9fa;
+        .delivery-table td {
+            padding: 15px;
+            text-align: center;
+            border: 1px solid #ddd;
+            font-size: 16px;
         }
         
-        .delivery-actions {
+        .delivery-table tfoot {
+            background-color: #f8f9fa;
+            font-weight: 700;
+        }
+        
+        .total-row {
+            font-size: 18px;
+            background-color: #f1f1f1;
+        }
+        
+        .signature-area {
+            margin-top: 60px;
             display: flex;
             justify-content: space-between;
+            padding-top: 20px;
+            border-top: 2px solid #ddd;
+        }
+        
+        .signature-box {
+            width: 45%;
+            text-align: center;
+        }
+        
+        .signature-line {
+            height: 1px;
+            background-color: #333;
+            margin: 40px 0 10px;
+        }
+        
+        .stamp {
+            position: absolute;
+            right: 30px;
+            bottom: 30px;
+            width: 120px;
+            height: 120px;
+            border: 2px solid #dc3545;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transform: rotate(-15deg);
+            opacity: 0.8;
+        }
+        
+        .stamp-text {
+            font-weight: 700;
+            color: #dc3545;
+            font-size: 16px;
+            text-align: center;
+            text-transform: uppercase;
+        }
+        
+        .actions {
+            display: flex;
+            justify-content: center;
             margin-top: 30px;
             padding-top: 20px;
-            border-top: 1px dashed #ddd;
+            border-top: 1px solid #ddd;
         }
         
         .message {
@@ -274,7 +365,7 @@
         }
         
         .message.success {
-            background-color: #d5edda;
+            background-color: #d4edda;
             color: #155724;
             border: 1px solid #c3e6cb;
             display: block;
@@ -287,14 +378,45 @@
             display: block;
         }
         
+        /* Styles d'impression */
         @media print {
+            body * {
+                visibility: hidden;
+            }
+            
+            .delivery-note-container, .delivery-note-container * {
+                visibility: visible;
+            }
+            
+            .delivery-note-container {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                padding: 0;
+                margin: 0;
+                box-shadow: none;
+            }
+            
+            .delivery-note {
+                width: 100%;
+                min-height: 100%;
+                margin: 0;
+                padding: 15mm;
+                box-shadow: none;
+                page-break-inside: avoid;
+            }
+            
             .no-print {
                 display: none !important;
             }
             
+            .actions, .header, .app-wrapper {
+                display: none !important;
+            }
+            
             .delivery-note {
-                box-shadow: none;
-                padding: 0;
+                border: none;
             }
             
             body {
@@ -302,19 +424,34 @@
                 padding: 0;
             }
         }
+        
+        @media screen and (max-width: 768px) {
+            .app-wrapper {
+                flex-direction: column;
+            }
+            
+            .delivery-note {
+                width: 100%;
+                padding: 10mm;
+            }
+            
+            .delivery-info {
+                flex-direction: column;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <header>
-            <h1><i class="fas fa-boxes"></i> Système de Gestion des Stocks et Bon de Livraison</h1>
-            <p>Gérez votre inventaire et émettez des bons de livraison automatiquement</p>
-        </header>
+        <div class="header">
+            <h1><i class="fas fa-boxes"></i> Système de Gestion des Livraisons</h1>
+            <p>Gérez votre inventaire et générez des bons de livraison professionnels</p>
+        </div>
         
         <div class="app-wrapper">
-            <!-- Section Gestion d'Inventaire -->
-            <section class="inventory-section">
-                <h2 class="section-title"><i class="fas fa-warehouse"></i> Gestion d'Inventaire</h2>
+            <!-- Section Inventaire -->
+            <div class="section">
+                <h2 class="section-title"><i class="fas fa-warehouse"></i> Gestion des Stocks</h2>
                 
                 <div id="message" class="message"></div>
                 
@@ -334,7 +471,7 @@
                 </div>
                 
                 <div class="form-group">
-                    <label for="productUnit">Unité de Mesure</label>
+                    <label for="productUnit">Unité</label>
                     <select id="productUnit">
                         <option value="PIECE">Pièce</option>
                         <option value="KG">Kilogramme</option>
@@ -350,34 +487,41 @@
                         <i class="fas fa-plus-circle"></i> Ajouter au Stock
                     </button>
                     <button class="btn btn-danger" id="resetStock">
-                        <i class="fas fa-redo"></i> Réinitialiser Stock
+                        <i class="fas fa-redo"></i> Réinitialiser
                     </button>
                 </div>
                 
                 <h3 class="section-title"><i class="fas fa-list"></i> Inventaire Actuel</h3>
-                <table class="inventory-table">
-                    <thead>
-                        <tr>
-                            <th>Désignation</th>
-                            <th>Qté en Stock</th>
-                            <th>P. Unitaire</th>
-                            <th>Valeur Stock</th>
-                            <th>Statut</th>
-                        </tr>
-                    </thead>
-                    <tbody id="inventoryBody">
-                        <!-- Les produits seront ajoutés ici dynamiquement -->
-                    </tbody>
-                </table>
-            </section>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Produit</th>
+                                <th>Qté Stock</th>
+                                <th>Prix Unitaire</th>
+                                <th>Valeur</th>
+                                <th>Statut</th>
+                            </tr>
+                        </thead>
+                        <tbody id="inventoryBody">
+                            <!-- Les produits seront ajoutés ici -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
             
-            <!-- Section Bon de Livraison -->
-            <section class="delivery-section">
-                <h2 class="section-title"><i class="fas fa-file-invoice"></i> Créer Bon de Livraison</h2>
+            <!-- Section Livraison -->
+            <div class="section">
+                <h2 class="section-title"><i class="fas fa-truck"></i> Préparation Livraison</h2>
                 
                 <div class="form-group">
                     <label for="clientName">Nom du Client</label>
                     <input type="text" id="clientName" placeholder="Ex: EL MANSOURI">
+                </div>
+                
+                <div class="form-group">
+                    <label for="clientAddress">Adresse du Client</label>
+                    <input type="text" id="clientAddress" placeholder="Adresse complète">
                 </div>
                 
                 <div class="form-group">
@@ -400,143 +544,159 @@
                 
                 <div class="form-group">
                     <button class="btn btn-success" id="addToDelivery">
-                        <i class="fas fa-cart-plus"></i> Ajouter à la Livraison
+                        <i class="fas fa-cart-plus"></i> Ajouter
                     </button>
-                    <button class="btn btn-primary" id="generateDeliveryNote">
-                        <i class="fas fa-print"></i> Générer Bon de Livraison
+                    <button class="btn btn-primary" id="generateNote">
+                        <i class="fas fa-file-invoice"></i> Générer Bon
                     </button>
                 </div>
                 
-                <h3 class="section-title"><i class="fas fa-shopping-cart"></i> Articles à Livrer</h3>
-                <table class="inventory-table">
-                    <thead>
-                        <tr>
-                            <th>Désignation</th>
-                            <th>Qté</th>
-                            <th>P. Unitaire</th>
-                            <th>Montant</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="deliveryItems">
-                        <!-- Les articles de livraison seront ajoutés ici -->
-                    </tbody>
-                </table>
-            </section>
+                <h3 class="section-title"><i class="fas fa-clipboard-list"></i> Articles à Livrer</h3>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Produit</th>
+                                <th>Qté</th>
+                                <th>Prix Unitaire</th>
+                                <th>Montant</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="deliveryItems">
+                            <!-- Les articles de livraison seront ajoutés ici -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
         
-        <!-- Bon de Livraison à Imprimer -->
-        <div class="delivery-note no-print" id="deliveryNote">
-            <div class="company-header">
-                <div class="company-name">ETTIJARA ALAAMA SOUSS</div>
-                <div class="company-details">ZONE INDUSTRIEL AIT MELOUL AGADIR</div>
-                <div class="company-details">Tél: 0525265980</div>
+        <!-- Bon de Livraison Professionnel -->
+        <div class="delivery-note-container no-print" id="deliveryNoteContainer" style="display: none;">
+            <h2 class="section-title"><i class="fas fa-print"></i> Bon de Livraison</h2>
+            
+            <div class="delivery-note" id="deliveryNote">
+                <div class="company-header">
+                    <div class="company-name">ETTIJARA ALAAMA SOUSS</div>
+                    <div class="company-address">ZONE INDUSTRIEL AIT MELOUL AGADIR</div>
+                    <div class="company-phone">Téléphone: 0525265980</div>
+                </div>
+                
+                <div class="delivery-title">BON DE LIVRAISON</div>
+                
+                <div class="delivery-info">
+                    <div class="info-block">
+                        <div class="info-label">Livrer à:</div>
+                        <div class="info-value" id="clientInfo">EL MANSOURI</div>
+                    </div>
+                    
+                    <div class="info-block">
+                        <div class="info-label">N° de Bon:</div>
+                        <div class="info-value" id="deliveryNumber">01988</div>
+                    </div>
+                    
+                    <div class="info-block">
+                        <div class="info-label">Date:</div>
+                        <div class="info-value" id="deliveryDateDisplay">18:13 21-01-2026</div>
+                    </div>
+                </div>
+                
+                <table class="delivery-table">
+                    <thead>
+                        <tr>
+                            <th width="50%">Désignation</th>
+                            <th width="15%">Qté</th>
+                            <th width="15%">P.U (DH)</th>
+                            <th width="20%">Montant (DH)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="deliveryNoteItems">
+                        <!-- Les articles du bon seront ajoutés ici -->
+                    </tbody>
+                    <tfoot>
+                        <tr class="total-row">
+                            <td colspan="3" style="text-align: right; font-weight: bold;">Nombre d'articles:</td>
+                            <td id="itemsCount">0</td>
+                        </tr>
+                        <tr class="total-row">
+                            <td colspan="3" style="text-align: right; font-weight: bold;">Total:</td>
+                            <td id="totalAmount">0,00 DH</td>
+                        </tr>
+                        <tr class="total-row">
+                            <td colspan="3" style="text-align: right; font-weight: bold;">Payé:</td>
+                            <td id="paidAmount">0,00 DH</td>
+                        </tr>
+                        <tr class="total-row">
+                            <td colspan="3" style="text-align: right; font-weight: bold;">Reste à payer:</td>
+                            <td id="remainingAmount">0,00 DH</td>
+                        </tr>
+                    </tfoot>
+                </table>
+                
+                <div class="signature-area">
+                    <div class="signature-box">
+                        <div>Signature du Client</div>
+                        <div class="signature-line"></div>
+                        <div>Nom et cachet</div>
+                    </div>
+                    
+                    <div class="signature-box">
+                        <div>Signature du Livreur</div>
+                        <div class="signature-line"></div>
+                        <div>Nom et cachet</div>
+                    </div>
+                </div>
+                
+                <div class="stamp">
+                    <div class="stamp-text">Bon de<br>Livraison</div>
+                </div>
             </div>
             
-            <div class="delivery-info">
-                <div class="info-box">
-                    <div class="info-title">Livrer par:</div>
-                    <div id="deliveredBy">ETTIJARA ALAAMA SOUSS</div>
-                </div>
-                
-                <div class="info-box">
-                    <div class="info-title">Client:</div>
-                    <div id="clientNameDisplay">EL MANSOURI</div>
-                </div>
-                
-                <div class="info-box">
-                    <div class="info-title">N°:</div>
-                    <div id="deliveryNumber">01988</div>
-                </div>
-                
-                <div class="info-box">
-                    <div class="info-title">Date:</div>
-                    <div id="deliveryDateDisplay">18:13 21-01-2026</div>
-                </div>
-            </div>
-            
-            <table class="delivery-table">
-                <thead>
-                    <tr>
-                        <th>Désignation</th>
-                        <th>Qté</th>
-                        <th>P. Unitaire</th>
-                        <th>Montant</th>
-                    </tr>
-                </thead>
-                <tbody id="deliveryNoteItems">
-                    <!-- Les articles du bon de livraison seront ajoutés ici -->
-                </tbody>
-                <tfoot>
-                    <tr>
-                        <td colspan="3" style="text-align: right; font-weight: bold;">Nombre d'articles:</td>
-                        <td id="itemsCount">0</td>
-                    </tr>
-                    <tr>
-                        <td colspan="3" style="text-align: right; font-weight: bold;">Total:</td>
-                        <td id="totalAmount">0,00 DH</td>
-                    </tr>
-                    <tr>
-                        <td colspan="3" style="text-align: right; font-weight: bold;">Payé:</td>
-                        <td id="paidAmount">0,00 DH</td>
-                    </tr>
-                    <tr>
-                        <td colspan="3" style="text-align: right; font-weight: bold;">Reste à payer:</td>
-                        <td id="remainingAmount">0,00 DH</td>
-                    </tr>
-                </tfoot>
-            </table>
-            
-            <div class="delivery-actions no-print">
-                <div>
-                    <button class="btn btn-primary" id="printNote">
-                        <i class="fas fa-print"></i> Imprimer le Bon
-                    </button>
-                    <button class="btn btn-danger" id="clearNote">
-                        <i class="fas fa-trash"></i> Effacer
-                    </button>
-                </div>
-                <div>
-                    <button class="btn btn-success" id="confirmDelivery">
-                        <i class="fas fa-check-circle"></i> Confirmer la Livraison
-                    </button>
-                </div>
+            <div class="actions no-print">
+                <button class="btn btn-primary" id="printNote">
+                    <i class="fas fa-print"></i> Imprimer
+                </button>
+                <button class="btn btn-success" id="confirmDelivery">
+                    <i class="fas fa-check-circle"></i> Confirmer Livraison
+                </button>
+                <button class="btn btn-danger" id="clearNote">
+                    <i class="fas fa-trash"></i> Effacer
+                </button>
             </div>
         </div>
     </div>
 
     <script>
-        // Données initiales de l'inventaire
+        // Données initiales
         let inventory = [
             { id: 1, name: "DALAA MOUCHOIR 550", quantity: 50, price: 142.00, unit: "PIECE" }
         ];
         
-        // Données pour le bon de livraison
         let deliveryItems = [];
         let deliveryNoteCounter = 1988;
         
-        // Initialiser la page
+        // Initialisation
         document.addEventListener('DOMContentLoaded', function() {
-            // Initialiser la date
+            // Définir la date d'aujourd'hui
             const today = new Date();
             const formattedDate = today.toISOString().split('T')[0];
             document.getElementById('deliveryDate').value = formattedDate;
             
-            // Afficher l'inventaire initial
+            // Mettre à jour l'affichage
             updateInventoryDisplay();
             updateProductSelect();
             
-            // Écouteurs d'événements
+            // Événements
             document.getElementById('addProduct').addEventListener('click', addProductToInventory);
             document.getElementById('resetStock').addEventListener('click', resetInventory);
             document.getElementById('addToDelivery').addEventListener('click', addProductToDelivery);
-            document.getElementById('generateDeliveryNote').addEventListener('click', generateDeliveryNote);
+            document.getElementById('generateNote').addEventListener('click', generateDeliveryNote);
             document.getElementById('printNote').addEventListener('click', printDeliveryNote);
             document.getElementById('clearNote').addEventListener('click', clearDeliveryNote);
             document.getElementById('confirmDelivery').addEventListener('click', confirmDelivery);
             
-            // Afficher un message initial
-            showMessage("Système prêt. Commencez par ajouter des produits à l'inventaire.", "success");
+            // Message initial
+            showMessage("Système prêt. Ajoutez des produits à l'inventaire.", "success");
         });
         
         // Ajouter un produit à l'inventaire
@@ -547,30 +707,28 @@
             const unit = document.getElementById('productUnit').value;
             
             if (!name || isNaN(quantity) || quantity < 0 || isNaN(price) || price < 0) {
-                showMessage("Veuillez remplir tous les champs avec des valeurs valides.", "error");
+                showMessage("Veuillez remplir tous les champs correctement.", "error");
                 return;
             }
             
             // Vérifier si le produit existe déjà
-            const existingProduct = inventory.find(product => product.name === name && product.unit === unit);
+            const existingProduct = inventory.find(p => p.name === name && p.unit === unit);
             
             if (existingProduct) {
                 existingProduct.quantity += quantity;
-                existingProduct.price = price; // Mettre à jour le prix
-                showMessage(`Stock de "${name}" mis à jour. Nouvelle quantité: ${existingProduct.quantity}`, "success");
+                existingProduct.price = price;
+                showMessage(`Stock de "${name}" mis à jour.`, "success");
             } else {
-                const newProduct = {
+                inventory.push({
                     id: inventory.length + 1,
                     name: name,
                     quantity: quantity,
                     price: price,
                     unit: unit
-                };
-                inventory.push(newProduct);
-                showMessage(`Produit "${name}" ajouté à l'inventaire.`, "success");
+                });
+                showMessage(`Produit "${name}" ajouté.`, "success");
             }
             
-            // Mettre à jour l'affichage
             updateInventoryDisplay();
             updateProductSelect();
             
@@ -582,11 +740,11 @@
         
         // Réinitialiser l'inventaire
         function resetInventory() {
-            if (confirm("Êtes-vous sûr de vouloir réinitialiser tout l'inventaire? Cette action est irréversible.")) {
+            if (confirm("Réinitialiser tout l'inventaire?")) {
                 inventory = [];
                 updateInventoryDisplay();
                 updateProductSelect();
-                showMessage("Inventaire réinitialisé avec succès.", "success");
+                showMessage("Inventaire réinitialisé.", "success");
             }
         }
         
@@ -598,9 +756,8 @@
             if (inventory.length === 0) {
                 inventoryBody.innerHTML = `
                     <tr>
-                        <td colspan="5" style="text-align: center; color: #7f8c8d; padding: 30px;">
-                            <i class="fas fa-box-open" style="font-size: 2rem; margin-bottom: 10px; display: block;"></i>
-                            Aucun produit dans l'inventaire. Ajoutez des produits pour commencer.
+                        <td colspan="5" style="text-align: center; padding: 30px; color: #777;">
+                            Aucun produit dans l'inventaire.
                         </td>
                     </tr>
                 `;
@@ -609,8 +766,8 @@
             
             inventory.forEach(product => {
                 const stockValue = (product.quantity * product.price).toFixed(2);
-                const statusClass = product.quantity < 10 ? "stock-low" : "stock-ok";
-                const statusText = product.quantity < 10 ? "Stock faible" : "En stock";
+                const statusClass = product.quantity < 10 ? "status-low" : "status-ok";
+                const statusText = product.quantity < 10 ? "Faible" : "OK";
                 
                 const row = document.createElement('tr');
                 row.innerHTML = `
@@ -633,7 +790,7 @@
                 if (product.quantity > 0) {
                     const option = document.createElement('option');
                     option.value = product.id;
-                    option.textContent = `${product.name} (${product.quantity} ${getUnitText(product.unit)} disponible)`;
+                    option.textContent = `${product.name} (${product.quantity} disponible)`;
                     productSelect.appendChild(option);
                 }
             });
@@ -645,23 +802,23 @@
             const quantity = parseInt(document.getElementById('deliveryQuantity').value);
             
             if (!productId || isNaN(quantity) || quantity <= 0) {
-                showMessage("Veuillez sélectionner un produit et saisir une quantité valide.", "error");
+                showMessage("Veuillez sélectionner un produit et une quantité valide.", "error");
                 return;
             }
             
             const product = inventory.find(p => p.id === productId);
             
             if (!product) {
-                showMessage("Produit non trouvé dans l'inventaire.", "error");
+                showMessage("Produit non trouvé.", "error");
                 return;
             }
             
             if (quantity > product.quantity) {
-                showMessage(`Quantité insuffisante. Seulement ${product.quantity} ${getUnitText(product.unit)} disponible.`, "error");
+                showMessage(`Stock insuffisant. Disponible: ${product.quantity}`, "error");
                 return;
             }
             
-            // Vérifier si le produit est déjà dans la livraison
+            // Vérifier si déjà dans la livraison
             const existingItem = deliveryItems.find(item => item.productId === productId);
             
             if (existingItem) {
@@ -676,14 +833,13 @@
                 });
             }
             
-            // Mettre à jour l'affichage des articles de livraison
             updateDeliveryItemsDisplay();
             
-            // Réinitialiser la sélection
+            // Réinitialiser
             document.getElementById('deliveryQuantity').value = '';
             document.getElementById('selectedProduct').value = '';
             
-            showMessage(`Produit "${product.name}" ajouté à la livraison.`, "success");
+            showMessage(`Produit ajouté à la livraison.`, "success");
         }
         
         // Mettre à jour l'affichage des articles de livraison
@@ -694,8 +850,8 @@
             if (deliveryItems.length === 0) {
                 deliveryItemsBody.innerHTML = `
                     <tr>
-                        <td colspan="5" style="text-align: center; color: #7f8c8d; padding: 20px;">
-                            Aucun article ajouté à la livraison.
+                        <td colspan="5" style="text-align: center; padding: 20px; color: #777;">
+                            Aucun article ajouté.
                         </td>
                     </tr>
                 `;
@@ -712,7 +868,7 @@
                     <td>${item.price.toFixed(2)} DH</td>
                     <td>${amount} DH</td>
                     <td>
-                        <button class="btn btn-danger btn-sm" onclick="removeDeliveryItem(${index})">
+                        <button class="btn btn-danger btn-sm" onclick="removeDeliveryItem(${index})" style="padding: 5px 10px; font-size: 0.9rem;">
                             <i class="fas fa-trash"></i>
                         </button>
                     </td>
@@ -722,20 +878,21 @@
         }
         
         // Supprimer un article de la livraison
-        function removeDeliveryItem(index) {
+        window.removeDeliveryItem = function(index) {
             deliveryItems.splice(index, 1);
             updateDeliveryItemsDisplay();
-            showMessage("Article retiré de la livraison.", "success");
-        }
+            showMessage("Article retiré.", "success");
+        };
         
         // Générer le bon de livraison
         function generateDeliveryNote() {
             if (deliveryItems.length === 0) {
-                showMessage("Veuillez ajouter des articles à la livraison d'abord.", "error");
+                showMessage("Ajoutez d'abord des articles à la livraison.", "error");
                 return;
             }
             
             const clientName = document.getElementById('clientName').value.trim() || "EL MANSOURI";
+            const clientAddress = document.getElementById('clientAddress').value.trim() || "";
             const deliveryDate = document.getElementById('deliveryDate').value;
             
             if (!deliveryDate) {
@@ -747,15 +904,16 @@
             const dateObj = new Date(deliveryDate);
             const formattedDate = `18:13 ${dateObj.getDate().toString().padStart(2, '0')}-${(dateObj.getMonth()+1).toString().padStart(2, '0')}-${dateObj.getFullYear()}`;
             
-            // Mettre à jour les informations du bon de livraison
-            document.getElementById('clientNameDisplay').textContent = clientName;
+            // Mettre à jour les informations
+            const clientInfo = clientAddress ? `${clientName}<br>${clientAddress}` : clientName;
+            document.getElementById('clientInfo').innerHTML = clientInfo;
             document.getElementById('deliveryDateDisplay').textContent = formattedDate;
             
-            // Incrémenter le numéro de bon
+            // Numéro de bon
             deliveryNoteCounter++;
             document.getElementById('deliveryNumber').textContent = "0" + deliveryNoteCounter;
             
-            // Remplir les articles du bon de livraison
+            // Remplir les articles
             const deliveryNoteItems = document.getElementById('deliveryNoteItems');
             deliveryNoteItems.innerHTML = '';
             
@@ -781,38 +939,41 @@
             document.getElementById('paidAmount').textContent = totalAmount.toFixed(2) + " DH";
             document.getElementById('remainingAmount').textContent = "0,00 DH";
             
-            // Afficher le bon de livraison
-            document.getElementById('deliveryNote').style.display = 'block';
-            showMessage("Bon de livraison généré avec succès. Vous pouvez maintenant l'imprimer.", "success");
+            // Afficher le bon
+            document.getElementById('deliveryNoteContainer').style.display = 'block';
+            showMessage("Bon de livraison généré avec succès.", "success");
+            
+            // Faire défiler vers le bon
+            document.getElementById('deliveryNoteContainer').scrollIntoView({ behavior: 'smooth' });
         }
         
-        // Imprimer le bon de livraison
+        // Imprimer le bon
         function printDeliveryNote() {
             if (deliveryItems.length === 0) {
-                showMessage("Aucun bon de livraison à imprimer.", "error");
+                showMessage("Aucun bon à imprimer.", "error");
                 return;
             }
             
             window.print();
         }
         
-        // Effacer le bon de livraison
+        // Effacer le bon
         function clearDeliveryNote() {
             deliveryItems = [];
             updateDeliveryItemsDisplay();
-            document.getElementById('deliveryNote').style.display = 'none';
-            showMessage("Bon de livraison effacé.", "success");
+            document.getElementById('deliveryNoteContainer').style.display = 'none';
+            showMessage("Bon effacé.", "success");
         }
         
-        // Confirmer la livraison et mettre à jour l'inventaire
+        // Confirmer la livraison
         function confirmDelivery() {
             if (deliveryItems.length === 0) {
                 showMessage("Aucun article à livrer.", "error");
                 return;
             }
             
-            if (confirm("Confirmer la livraison? Cela mettra à jour les stocks de l'inventaire.")) {
-                // Mettre à jour les quantités dans l'inventaire
+            if (confirm("Confirmer cette livraison? Les stocks seront mis à jour.")) {
+                // Mettre à jour l'inventaire
                 deliveryItems.forEach(item => {
                     const product = inventory.find(p => p.id === item.productId);
                     if (product) {
@@ -820,28 +981,27 @@
                     }
                 });
                 
-                // Mettre à jour l'affichage de l'inventaire
                 updateInventoryDisplay();
                 updateProductSelect();
                 
-                // Réinitialiser la livraison
+                // Réinitialiser
                 deliveryItems = [];
                 updateDeliveryItemsDisplay();
-                document.getElementById('deliveryNote').style.display = 'none';
+                document.getElementById('deliveryNoteContainer').style.display = 'none';
                 
-                showMessage("Livraison confirmée. Les stocks ont été mis à jour.", "success");
+                showMessage("Livraison confirmée. Stocks mis à jour.", "success");
             }
         }
         
         // Obtenir le texte de l'unité
         function getUnitText(unitCode) {
             const units = {
-                "PIECE": "pièce(s)",
+                "PIECE": "pc",
                 "KG": "kg",
                 "M": "m",
-                "LITRE": "litre(s)",
-                "BOITE": "boîte(s)",
-                "CARTON": "carton(s)"
+                "LITRE": "L",
+                "BOITE": "bt",
+                "CARTON": "ct"
             };
             return units[unitCode] || unitCode;
         }
@@ -852,11 +1012,13 @@
             messageElement.textContent = text;
             messageElement.className = `message ${type}`;
             
-            // Masquer le message après 5 secondes
             setTimeout(() => {
                 messageElement.style.display = 'none';
             }, 5000);
         }
     </script>
+    
+    <!-- Font Awesome pour les icônes -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </body>
 </html>
